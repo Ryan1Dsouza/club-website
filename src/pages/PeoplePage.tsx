@@ -56,7 +56,7 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     window.scrollTo({ top: top + memberProgress(index, sorted.length) * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
     section.querySelector<HTMLSelectElement>('select')?.focus({ preventScroll: true });
   }
-  const vhMultiplier = typeof window !== 'undefined' && window.innerWidth <= 768 ? 60 : 90;
+  const vhMultiplier = typeof window !== 'undefined' && window.innerWidth <= 768 ? 130 : 145;
   return <section className="people-page" aria-labelledby="people-title" data-tower-status={status}>
     <h1 id="people-title" className="sr-only">The people behind Nucleus</h1>
     <div className="people-tower" ref={story} style={{ '--tower-length': `${sorted.length * vhMultiplier + 180}svh` } as CSSProperties}>
