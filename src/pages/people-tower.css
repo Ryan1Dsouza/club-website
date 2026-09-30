@@ -1,6 +1,6 @@
 .people-page { --mint: #c3e5c8; --mint-rgb: 195 229 200; --muted: #93ac97; --line: rgb(195 229 200 / .14); --line-strong: rgb(195 229 200 / .34); --surface: #080e09; --wash: rgb(195 229 200 / .05); --tower-ink: #c3e5c8; --tower-paper: #0d2b1f; color: var(--mint); background: var(--bg, #000); }
 .people-tower { position: relative; }
-.people-tower__stage { position: relative; height: calc(100vh - var(--header-height)); height: calc(100dvh - var(--header-height)); min-height: 280px; overflow: hidden; isolation: isolate; background: linear-gradient(#020d07, #030f08 72%, #040c07); }
+.people-tower__stage { position: relative; height: calc(100svh - var(--header-height)); min-height: 280px; overflow: hidden; isolation: isolate; background: linear-gradient(#020d07, #030f08 72%, #040c07); }
 @media (max-width: 768px) { 
   .people-tower__world > canvas { pointer-events: none !important; }
 }

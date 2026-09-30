@@ -1,4 +1,4 @@
-export const TOWER_INTRO = .01;
+export const TOWER_INTRO = .15;
 export const TOWER_OUTRO = .15;
 export const BLOCK_SIZE = [3.18, .71, 1.02] as const;
 export const LAYER_HEIGHT = BLOCK_SIZE[1] + .002;
@@ -22,8 +22,6 @@ export function sortTowerMembers<T extends { role: string; createdAt?: string }>
 }
 export const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 export function smooth(value: number) {
-  if (value <= 0) return 0;
-  if (value >= 1) return 1;
   const t = clamp01(value);
   return t * t * t * (t * (t * 6 - 15) + 10);
 }
