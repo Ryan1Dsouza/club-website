@@ -38,7 +38,7 @@
 .dp-panel__button:active { transform: translate(5px, 5px); box-shadow: none; }
 @media (max-width: 760px) {
   .dp-sticky { gap: 2rem; }
-  .dp-title { font-size: clamp(2rem, 7.5vw, 3.5rem); }
+  .dp-title { font-size: clamp(3rem, 12vw, 4rem); }
   .dp-panel { padding: 20px; }
   .dp-panel__inner { padding: 22px; box-shadow: 7px 7px 0 var(--card-shadow); }
   .dp-panel__head { gap: 12px; }

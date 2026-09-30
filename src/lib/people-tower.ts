@@ -1,4 +1,4 @@
-﻿import * as THREE from 'three';
+import * as THREE from 'three';
 import { CSS3DObject, CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import type { Member } from '../types';
 import { BLOCK_SIZE, LAYER_HEIGHT, clamp01, smooth, towerFrame, towerSlots } from './people-tower-motion.ts';
@@ -91,7 +91,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
   function render(state: ReturnType<typeof towerFrame>, transformsChanged: boolean, cameraMoved: boolean) {
     const changedProgress = renderedProgress !== progress;
     if (changedProgress) {
-      section.style.setProperty('--tower-intro', String(1 - smooth((progress * (members.length + 1.4) - .22) / .56)));
+      section.style.setProperty('--tower-intro', String(1 - smooth((progress * (members.length + 0.3)) / .15)));
       section.style.setProperty('--tower-progress', String(progress)); section.style.setProperty('--tower-outro', String(state.outro));
       host.dataset.activeMember = String(state.index);
     }

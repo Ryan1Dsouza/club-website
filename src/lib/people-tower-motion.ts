@@ -1,5 +1,5 @@
-export const TOWER_INTRO = .85;
-export const TOWER_OUTRO = .55;
+export const TOWER_INTRO = .15;
+export const TOWER_OUTRO = .15;
 export const BLOCK_SIZE = [3.18, .71, 1.02] as const;
 export const LAYER_HEIGHT = BLOCK_SIZE[1] + .002;
 

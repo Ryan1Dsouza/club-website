@@ -101,7 +101,7 @@ export default function EventExplorer({ events, onPublished }: { events: ClubEve
   const glimpses = useRef<RideGlimpsesHandle>(null);
   const minimap = useRef<RideMapHandle>(null);
   const [boosting, setBoosting] = useState(false);
-  const [mode, setMode] = useState<WorldMode>('overview');
+  const [mode, setMode] = useState<WorldMode>(typeof window !== 'undefined' && window.innerWidth <= 768 ? 'explore' : 'overview');
   const [ready, setReady] = useState(false), [failed, setFailed] = useState(false), [reduced, setReduced] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [adding, setAdding] = useState(false), [publishing, setPublishing] = useState(false), [listing, setListing] = useState(false);
