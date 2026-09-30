@@ -173,9 +173,13 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     if (next !== target) { lastInteraction = performance.now(); releasePointer(); }
     target = next; wake();
   }
+  let lastWidth = -1;
   function resize() {
     if (disposed) return;
-    width = Math.max(1, host.clientWidth); height = Math.max(1, host.clientHeight);
+    const newWidth = Math.max(1, host.clientWidth);
+    if (newWidth === lastWidth && newWidth <= 760) return;
+    lastWidth = newWidth;
+    width = newWidth; height = Math.max(1, host.clientHeight);
     const ratio = Math.min(devicePixelRatio || 1, width <= 760 ? 1.25 : 1.5, Math.sqrt(1_650_000 / (width * height)));
     renderer.setPixelRatio(ratio); renderer.setSize(width, height); css.setSize(width, height);
     camera.aspect = width / height; camera.updateProjectionMatrix();
