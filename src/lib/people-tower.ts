@@ -91,7 +91,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
   function render(state: ReturnType<typeof towerFrame>, transformsChanged: boolean, cameraMoved: boolean) {
     const changedProgress = renderedProgress !== progress;
     if (changedProgress) {
-      section.style.setProperty('--tower-intro', String(1 - smooth((progress * (members.length + 0.3)) / .15)));
+      section.style.setProperty('--tower-intro', String(1 - smooth((progress * (members.length + 0.16)) / .01)));
       section.style.setProperty('--tower-progress', String(progress)); section.style.setProperty('--tower-outro', String(state.outro));
       host.dataset.activeMember = String(state.index);
     }
