@@ -156,8 +156,8 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
             // Clear the whole plank before tumbling, then arc above the stack.
             pulled.copy(source).addScaledVector(direction, BLOCK_SIZE[0] + .35); block.position.lerp(pulled, pull);
             if (t > .14) {
-              control1.copy(pulled);
-              control2.copy(destination);
+              control1.copy(pulled).addScaledVector(direction, 2).addScaledVector(up, 1.5);
+              control2.copy(destination).addScaledVector(right, slot.direction * targetScale.x * .45).addScaledVector(up, -.9);
               curve.v0.copy(pulled); curve.v1.copy(control1); curve.v2.copy(control2); curve.v3.copy(destination);
               curve.getPoint(flight, block.position);
               tumbleQuaternion.setFromEuler(euler.set(.85 * slot.spin, slot.yaw + .6 * slot.direction, 1.3 * slot.direction));
