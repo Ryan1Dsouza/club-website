@@ -82,8 +82,8 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
   const distantRailMaterial = new THREE.LineBasicMaterial({ color: new THREE.Color('#9acba7').multiplyScalar(1.8) });
   const facade = new THREE.MeshLambertMaterial({ color: '#718b76', vertexColors: true });
   const foliage = new THREE.MeshLambertMaterial({ color: '#294e36' });
-  const windowMaterial = new THREE.MeshBasicMaterial({ color: '#cab78d' });
-  const upperWindowMaterial = new THREE.MeshBasicMaterial({ color: '#6e7561' });
+  // const windowMaterial = new THREE.MeshBasicMaterial({ color: '#cab78d' });
+  // const upperWindowMaterial = new THREE.MeshBasicMaterial({ color: '#6e7561' });
   const box = new THREE.BoxGeometry(1, 1, 1), dummy = new THREE.Object3D(), basis = new THREE.Matrix4();
   const matrix = (x: number, y: number, z: number, w: number, h: number, d: number) => {
     dummy.position.set(x, y, z); dummy.quaternion.identity(); dummy.scale.set(w, h, d); dummy.updateMatrix(); return dummy.matrix.clone();
@@ -142,7 +142,7 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
 
   const skyline = new THREE.Group(), landscape = new THREE.Group(), gates = new THREE.Group(); scene.add(skyline, landscape, gates);
   const detailBatches: THREE.InstancedMesh[] = [];
-  const buildings: THREE.Matrix4[] = [], podiums: THREE.Matrix4[] = [], windows: THREE.Matrix4[] = [], upperWindows: THREE.Matrix4[] = [], roofs: THREE.Matrix4[] = [];
+  const buildings: THREE.Matrix4[] = [], podiums: THREE.Matrix4[] = [], roofs: THREE.Matrix4[] = [];
   let seed = 8932;
   const random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
   CITY_BLOCKS.forEach(b => {
@@ -155,7 +155,7 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
     for (let floor = 0; floor < Math.floor(b.height / 3); floor++) for (const side of [-1, 1]) {
       const heightRatio = floor / Math.floor(b.height / 3);
       for (let column = 0; column < Math.floor(b.width / 2.4); column++) if (random() < .7 - heightRatio * .5)
-        (heightRatio > .6 ? upperWindows : windows).push(matrix(b.x - b.width / 2 + 1.3 + column * 2.4, 6 + floor * 2.6, b.z + side * (b.depth / 2 + .04), 1.05, 1.35, .06));
+        // windows removed
     }
   });
   const facadeBox = box.clone(), facadeColors = new Float32Array(facadeBox.attributes.position.count * 3);
@@ -165,8 +165,8 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
   const roofShape = new THREE.Shape().moveTo(-.46, -.46).lineTo(.46, -.46).lineTo(.46, .46).lineTo(-.46, .46).closePath();
   const roofGeometry = new THREE.ExtrudeGeometry(roofShape, { depth: .6, steps: 1, bevelEnabled: true, bevelThickness: .2, bevelSize: .04, bevelSegments: 1 }).rotateX(-Math.PI / 2);
   batchInstances(skyline, facadeBox, facade, buildings, 60); batchInstances(skyline, roofGeometry, dark, roofs, 60); batchInstances(skyline, box, dark, podiums, 60);
-  detailBatches.push(...batchInstances(skyline, box, windowMaterial, windows, 60));
-  detailBatches.push(...batchInstances(skyline, box, upperWindowMaterial, upperWindows, 60));
+  // detailBatches.push(...batchInstances(skyline, box, windowMaterial, windows, 60));
+  // detailBatches.push(...batchInstances(skyline, box, upperWindowMaterial, upperWindows, 60));
   const trunks: THREE.Matrix4[] = [], crowns: THREE.Matrix4[] = [], conifers: THREE.Matrix4[] = [], treePoints: THREE.Vector3[] = [];
   const landscapeRailSamples = frames.filter((_, i) => i % 4 === 0);
   for (let attempt = 0; attempt < 900 && trunks.length < 70; attempt++) {
