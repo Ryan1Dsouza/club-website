@@ -39,7 +39,7 @@ export function cinematicCamera(speed: number, acceleration: number, slope: numb
   const focus = reduced ? 0 : clamp(boostFocus) * smooth(pace);
   return {
     // Widen gradually with actual speed; cap the phone lens to avoid distortion.
-    fov: (compact ? 82 : 68) + (reduced ? 0 : pace * (compact ? 4 : 6) + Math.max(0, -slope * Math.sign(speed)) * pace * (compact ? 2 : 3)) + focus * (compact ? 3 : 8),
+    fov: (compact ? 72 : 68) + (reduced ? 0 : pace * (compact ? 4 : 6) + Math.max(0, -slope * Math.sign(speed)) * pace * (compact ? 2 : 3)) + focus * (compact ? 3 : 8),
     pullback: focus * (compact ? .4 : .7),
     lift: reduced ? 0 : Math.max(-.1, Math.min(.1, -acceleration * .006)),
     pitch: reduced ? 0 : Math.max(-.025, Math.min(.025, acceleration * -.0018)) * (compact ? .6 : 1),

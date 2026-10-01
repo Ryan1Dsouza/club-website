@@ -277,7 +277,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       camera.position.copy(desiredPosition);
       // Exponential smoothing stays consistent at 30/60/120 Hz; rotation settles
       // 90% in 128 ms instead of 288 ms, without lagging behind the cart position.
-      camera.quaternion.slerp(desiredRotation, props.reduced ? 1 : 1 - Math.exp(-18 * dt));
+      camera.quaternion.slerp(desiredRotation, props.reduced ? 1 : 1 - Math.exp(-35 * dt));
       camera.fov = props.reduced ? rideFov : THREE.MathUtils.damp(camera.fov, rideFov, 8, dt);
     } else {
       camera.fov = 44;

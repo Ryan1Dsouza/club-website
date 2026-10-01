@@ -82,7 +82,7 @@ export default function App({ initialData = seed }: { initialData?: SiteData }) 
     const abort = new AbortController();
     let disposed = false, finished = false, finishTimer = 0;
     const started = performance.now();
-    const minimum = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1600;
+    const minimum = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 3200;
     setLoadingStage('loading');
     const dismiss = () => {
       if (disposed || finished) return;

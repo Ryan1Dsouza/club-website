@@ -34,8 +34,8 @@ function shape(outline: number[][], holes: number[][][] = []) {
 export function createVerticalLogo() {
   const bevel = .16;
   const pieces = WORLD.walls.map(wall => new THREE.ExtrudeGeometry(shape(wall.outline, wall.holes), {
-    depth: LOGO_DEPTH - bevel * 2, steps: 1, curveSegments: 2,
-    bevelEnabled: true, bevelSegments: 2, bevelThickness: bevel,
+    depth: LOGO_DEPTH - bevel * 2, steps: 1, curveSegments: 12,
+    bevelEnabled: true, bevelSegments: 3, bevelThickness: bevel,
     bevelSize: .055, bevelOffset: -.055,
   }).translate(0, 0, bevel));
   const geometry = mergeGeometries(pieces)!; pieces.forEach(piece => piece.dispose());
@@ -152,11 +152,11 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
     buildings.push(matrix(b.x, (b.height + 5) / 2, b.z, b.width, b.height - 5, b.depth));
     roofs.push(matrix(b.x, b.height, b.z, b.width + .8, 2.2, b.depth + .8));
     buildings.push(matrix(b.x, b.height + 2.3, b.z, b.width * .54, 3, b.depth * .52));
-    for (let floor = 0; floor < Math.floor(b.height / 3); floor++) for (const side of [-1, 1]) {
-      const heightRatio = floor / Math.floor(b.height / 3);
-      for (let column = 0; column < Math.floor(b.width / 2.4); column++) if (random() < .7 - heightRatio * .5)
+    // for (let floor = 0; floor < Math.floor(b.height / 3); floor++) for (const side of [-1, 1]) {
+      // const heightRatio = floor / Math.floor(b.height / 3);
+      // for (let column = 0; column < Math.floor(b.width / 2.4); column++) if (random() < .7 - heightRatio * .5)
         // windows removed
-    }
+    // }
   });
   const facadeBox = box.clone(), facadeColors = new Float32Array(facadeBox.attributes.position.count * 3);
   const baseTint = new THREE.Color('#55705c'), crownTint = new THREE.Color('#c5d7bc');

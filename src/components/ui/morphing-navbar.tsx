@@ -14,7 +14,6 @@ type Props = {
   onApply: () => void;
 };
 
-// Explicit opening keyframes replay the full sweep, including after an interrupted close.
 const sweepEase = [.16, 1, .3, 1] as const;
 
 export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }: Props) {
@@ -94,7 +93,7 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
         aria-hidden={!open}
         inert={!open}
         initial={false}
-        animate={{ x: open ? ['100%', '0%'] : '100%' }}
+        animate={{ x: open ? '0%' : '100%' }}
         transition={{ duration: reducedMotion ? 0 : 1, delay: reducedMotion || open ? 0 : .25, ease: sweepEase }}
       >
         <div className="morph-nav__bands" aria-hidden="true">
@@ -102,7 +101,7 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
             key={index}
             className="morph-nav__band"
             initial={false}
-            animate={{ x: open ? ['100%', '0%'] : '100%' }}
+            animate={{ x: open ? '0%' : '100%' }}
             transition={{ duration: reducedMotion ? 0 : open ? 1 : .5, delay: reducedMotion || !open ? 0 : index * .075, ease: sweepEase }}
           />)}
         </div>
@@ -112,7 +111,7 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
               {items.map((item, index) => <motion.li
                 key={item.href}
                 initial={false}
-                animate={{ opacity: open ? [0, 1] : 0, x: open ? [160, 0] : 160 }}
+                animate={{ opacity: open ? 1 : 0, x: open ? 0 : 160 }}
                 transition={textTransition(.5 + index * .1)}
               >
                 <NavLink className="morph-nav__link" to={item.href} end aria-label={item.title} onClick={closeForNavigation}>
@@ -131,7 +130,7 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
               {socials.map((item, index) => <motion.li
                 key={item.title}
                 initial={false}
-                animate={{ opacity: open ? [0, 1] : 0, x: open ? [160, 0] : 160 }}
+                animate={{ opacity: open ? 1 : 0, x: open ? 0 : 160 }}
                 transition={textTransition(.75 + index * .1)}
               >
                 <a href={item.href} target={item.title === 'Email' ? undefined : '_blank'} rel={item.title === 'Email' ? undefined : 'noreferrer'}>{item.title}<ArrowUpRight size={14} aria-hidden="true" /></a>
@@ -139,11 +138,11 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
             </ul>
           </div>
           <div className="morph-nav__footer">
-            <motion.div initial={false} animate={{ opacity: open ? [0, 1] : 0, y: open ? [100, 0] : 100 }} transition={textTransition(.75)}>
+            <motion.div initial={false} animate={{ opacity: open ? 1 : 0, y: open ? 0 : 100 }} transition={textTransition(.75)}>
               <span className="morph-nav__caption">Made of many minds</span>
               <span>© {new Date().getFullYear()} Nucleus SJEC</span>
             </motion.div>
-            <motion.div initial={false} animate={{ opacity: open ? [0, 1] : 0, y: open ? [100, 0] : 100 }} transition={textTransition(.9)}>
+            <motion.div initial={false} animate={{ opacity: open ? 1 : 0, y: open ? 0 : 100 }} transition={textTransition(.9)}>
               <span className="morph-nav__caption">The community</span>
               <button className="morph-nav__join" onClick={() => { onOpenChange(false); toggle.current?.focus({ preventScroll: true }); onApply(); }}>
                 {settings.recruitmentOpen ? 'Join Nucleus' : 'Stay connected'}<ArrowUpRight size={16} aria-hidden="true" />
