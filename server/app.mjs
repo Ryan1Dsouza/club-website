@@ -10,6 +10,7 @@ import { getSite, hashPassword, verifyPassword } from './db.mjs';
 import { createCoasterTrack } from '../src/lib/event-coaster.ts';
 import { createStationPlanner } from '../src/lib/event-layout.ts';
 import { createExperienceStations } from '../src/lib/experience-stations.ts';
+import { pageMeta } from '../shared/page-meta.ts';
 
 const safeUrl = z.union([z.literal(''), z.url().refine(value => ['https:', 'http:'].includes(new URL(value).protocol), 'Use an https:// URL')]);
 const isoDate = z.union([z.literal(''), z.iso.datetime({ offset: true })]);
@@ -158,15 +159,22 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
     console.error('Request failed:', error.message); res.status(500).json({ error: 'Something went wrong. Please try again.' });
   });
   if (existsSync(resolve(dist, 'index.html'))) {
+    const template = readFileSync(resolve(dist, 'index.html'), 'utf8');
     app.use('/assets', express.static(resolve(dist, 'assets'), { immutable: true, maxAge: '1y' }));
     app.use(express.static(dist, { index: false, maxAge: '1h' }));
     app.use((req, res, next) => {
       if (req.method !== 'GET' && req.method !== 'HEAD') return next();
       if (req.path.startsWith('/api') || req.path.startsWith('/assets')) return next();
-      if (!['/', '/about', '/events', '/events-test', '/projects', '/team', '/recruitment'].includes(req.path.replace(/\/$/, '') || '/') && !/^\/admin(?:\/|$)/.test(req.path)) return next();
-      let html = readFileSync(resolve(dist, 'index.html'), 'utf8');
-      if (req.path.startsWith('/admin')) html = html.replace('</head>', '<meta name="robots" content="noindex,nofollow"></head>').replace('Nucleus — Where curious minds connect | SJEC', 'Control room | Nucleus');
-      else if (render) {
+      const meta = pageMeta(req.path);
+      const admin = /^\/admin(?:\/|$)/.test(req.path);
+      if (meta.robots.startsWith('noindex') && !admin) return next();
+      const escape = value => value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+      let html = template.replace(/<title>[^<]*<\/title>/, () => `<title>${escape(meta.title)}</title>`)
+        .replace(/(<link rel="canonical" href=")[^"]*("\s*\/?>)/, (_match, start, end) => start + escape(meta.canonical) + end)
+        .replace(/(<meta (?:name|property)="(description|og:title|og:description|og:url|twitter:title|twitter:description)" content=")[^"]*("\s*\/?>)/g,
+          (_match, start, name, end) => start + escape(name.endsWith('title') ? meta.title : name === 'og:url' ? meta.canonical : meta.description) + end)
+        .replace('</head>', `<meta name="robots" content="${meta.robots}"></head>`);
+      if (!admin && render) {
         const data = getSite(db);
         const safeData = JSON.stringify(data).replace(/</g, '\\u003c');
         html = html.replace('<div id="root"></div>', () => `<div id="root">${render(data, req.originalUrl)}</div><script id="nucleus-data" type="application/json">${safeData}</script>`);

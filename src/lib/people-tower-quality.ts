@@ -7,11 +7,18 @@ export function towerQuality(width: number, height: number, devicePixelRatio: nu
     || (device.memory !== undefined && device.memory > 0 && device.memory <= 4);
   const mobile = device.coarsePointer || width <= 768;
   const simplified = mobile || lowEnd;
-  const maxPixels = lowEnd ? 650_000 : mobile ? 950_000 : 1_650_000;
-  const maxRatio = lowEnd ? 1 : mobile ? 1.25 : 1.5;
+  // Spend the budget on legible edges first. Lighting and idle motion are cheaper
+  // to simplify than stretching a sub-resolution canvas across the screen.
+  const maxPixels = lowEnd ? (mobile ? 900_000 : 2_100_000) : mobile ? 1_400_000 : 3_600_000;
+  const maxRatio = lowEnd ? 1.25 : mobile ? 1.75 : 2;
   return {
     simplified,
     pixelRatio: Math.min(devicePixelRatio || 1, maxRatio, Math.sqrt(maxPixels / Math.max(1, width * height))),
-    maxTextureSize: lowEnd ? 1024 : simplified ? 2048 : 4096,
+    maxTextureSize: lowEnd ? 2048 : 4096,
   };
+}
+
+/** Adaptive rendering must not soften a scene that already fits at CSS resolution. */
+export function towerPixelRatio(baseRatio: number, resolutionScale: number) {
+  return Math.max(Math.min(1, baseRatio), baseRatio * resolutionScale);
 }

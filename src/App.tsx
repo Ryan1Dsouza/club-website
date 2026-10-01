@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, BrainCircuit, Code2, Network, Github, Instagram, Linkedin, Mail, Check, LoaderCircle } from 'lucide-react';
 import { MorphingNavbar } from './components/ui/morphing-navbar';
@@ -18,6 +18,7 @@ import CommunityCTA from './components/home/CommunityCTA';
 import Recruitment from './pages/Recruitment';
 import { useReveal } from './components/ui/reveal';
 import { useCinematicScroll } from './lib/use-cinematic-scroll';
+import { pageMeta } from '../shared/page-meta';
 
 const domains = [
   { id: 'aiml', num: '01', title: 'Artificial Intelligence', subtitle: '& Machine Learning', icon: BrainCircuit, whatsappUrl: 'https://chat.whatsapp.com/F2sg6LBCwibIKWJu2nhnvI', tags: ['Intelligence', 'Research', 'Possibility'], description: 'Explore machine learning, build models, and turn new questions into experiments.', detail: 'Explore model building, machine learning foundations, research papers, and practical AI applications. Bring your curiosity; build your understanding through collaborative experiments.' },
@@ -67,7 +68,7 @@ function SiteFooter({ settings }: { settings: SiteSettings }) {
   </footer>;
 }
 
-export default function App({ initialData = seed }: { initialData?: SiteData }) {
+export default function App({ initialData = seed, serverRendered = false }: { initialData?: SiteData; serverRendered?: boolean }) {
   const [data, setData] = useState<SiteData>(initialData), [online, setOnline] = useState(true);
   const [applyOpen, setApplyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -82,12 +83,14 @@ export default function App({ initialData = seed }: { initialData?: SiteData }) 
     const abort = new AbortController();
     let disposed = false, finished = false, finishTimer = 0;
     const started = performance.now();
-    const minimum = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1600;
-    setLoadingStage('loading');
+    const minimum = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 450;
+    // Production HTML already contains the current data. Refresh in the background
+    // instead of covering usable server content with another loading sequence.
+    setLoadingStage(serverRendered ? 'done' : 'loading');
     const dismiss = () => {
       if (disposed || finished) return;
       finished = true; window.clearTimeout(deadline); window.clearTimeout(finishTimer);
-      setLoadingStage('exiting');
+      if (!serverRendered) setLoadingStage('exiting');
     };
     // The existing seed/SSR data stays available if startup requests stall.
     const deadline = window.setTimeout(dismiss, 8000);
@@ -102,13 +105,26 @@ export default function App({ initialData = seed }: { initialData?: SiteData }) 
       disposed = true; abort.abort(); window.clearTimeout(deadline); window.clearTimeout(finishTimer);
       window.removeEventListener('focus', refresh);
     };
-  }, []);
+  }, [serverRendered]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
     setApplyOpen(false); setDomain(null); setMenuOpen(false);
-    const titles: Record<string, string> = { '/': 'Nucleus SJEC — A connection worth making', '/projects': 'Our work — Nucleus SJEC', '/team': 'The people — Nucleus SJEC', '/events': 'Experiences — Nucleus SJEC', '/about': 'Our domains — Nucleus SJEC', '/recruitment': 'Join the community — Nucleus SJEC' };
-    document.title = titles[location.pathname] || 'Page not found — Nucleus SJEC';
+    const meta = pageMeta(location.pathname);
+    document.title = meta.title;
+    const setMeta = (attribute: 'name' | 'property', name: string, content: string) => {
+      let element = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${name}"]`);
+      if (!element) { element = document.createElement('meta'); element.setAttribute(attribute, name); document.head.append(element); }
+      element.content = content;
+    };
+    setMeta('name', 'description', meta.description); setMeta('name', 'robots', meta.robots);
+    for (const prefix of ['og', 'twitter']) {
+      const attribute = prefix === 'og' ? 'property' : 'name';
+      setMeta(attribute, `${prefix}:title`, meta.title); setMeta(attribute, `${prefix}:description`, meta.description);
+    }
+    setMeta('property', 'og:url', meta.canonical);
+    const canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (canonical) canonical.href = meta.canonical;
   }, [location.pathname]);
 
   const settings = data.settings;
@@ -124,7 +140,7 @@ export default function App({ initialData = seed }: { initialData?: SiteData }) 
 
   return <>
     <LoadingScreen active={loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
-    <div className="site-shell" inert={loading} aria-busy={loading}>
+    <div className="site-shell" inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
     <a href="#main-content" className="skip-link">Skip to content</a>
     <header className={`site-header${location.pathname === '/' ? ' site-header--home' : ''}`}>
       <MorphingNavbar items={navItems} settings={settings} open={menuOpen} onOpenChange={setMenuOpen} onApply={() => setApplyOpen(true)} />

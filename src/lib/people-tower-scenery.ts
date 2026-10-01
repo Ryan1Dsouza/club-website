@@ -44,7 +44,7 @@ export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeig
   const backdrop = new THREE.Color(theme.getPropertyValue('--surface').trim() || '#080b08');
   group.add(new THREE.AmbientLight(mint, .25));
   group.add(new THREE.HemisphereLight(mint.clone().lerp(new THREE.Color(0xffffff), .18), 0x183224, .85));
-  const key = new THREE.DirectionalLight(mint, 2.15); key.position.set(-5, towerHeight + 5, 6);
+  const key = new THREE.DirectionalLight(0xfff2df, 2.4); key.position.set(-5, towerHeight + 5, 6);
   key.castShadow = !simplified; key.shadow.mapSize.setScalar(1024);
   const extent = Math.max(5.5, towerHeight * .7);
   Object.assign(key.shadow.camera, { left: -extent, right: extent, top: extent, bottom: -extent, near: .5, far: towerHeight * 2 + 22 });
@@ -84,7 +84,8 @@ export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeig
 
   // Match the page's dark green surface and blend the tabletop into it.
   scene.background = backdrop;
-  scene.fog = new THREE.Fog(backdrop, 13, 34);
+  // Keep the tower out of the haze, including the more distant portrait camera.
+  scene.fog = new THREE.Fog(backdrop, 24, 52);
 
   let currentSimplified: boolean | undefined;
   function setSimplified(value: boolean) {
@@ -95,7 +96,7 @@ export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeig
       const surface = object.material as THREE.MeshStandardMaterial;
       surface.bumpMap = value ? null : texture; surface.needsUpdate = true;
     }
-    wood.anisotropy = value ? 1 : 4; wood.needsUpdate = true;
+    wood.anisotropy = value ? 2 : 4; wood.needsUpdate = true;
   }
   setSimplified(simplified);
   function dispose() {

@@ -30,10 +30,10 @@ export default function DomainParallax({ domains }: { domains: DomainItem[] }) {
         const compact = context.conditions.compact;
         const surfaces = Array.from(section.querySelectorAll<HTMLElement>('.dp-panel__inner'));
         surfaces.forEach(surface => {
-          // Give the pop a longer scroll range and a soft settle in both directions.
+          // Finish the entrance near the bottom edge so reading never waits on a scrub.
           gsap.fromTo(surface, { y: compact ? 20 : 38, scale: .94, opacity: 0 }, {
             y: 0, scale: 1, opacity: 1, ease: 'none',
-            scrollTrigger: { trigger: surface.parentElement, start: 'top 96%', end: 'top 42%', scrub: compact ? .35 : .65 },
+            scrollTrigger: { trigger: surface.parentElement, start: 'top 100%', end: 'top 86%', scrub: true },
           });
         });
         ScrollTrigger.refresh(true);

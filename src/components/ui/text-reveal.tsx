@@ -29,17 +29,17 @@ function RevealUnit({ children, progress, start, end, blur, y, enabled }: {
   return <motion.span className="text-reveal__unit" style={enabled ? { opacity, filter, y: translateY } : undefined}>{children}</motion.span>;
 }
 
-/** The supplied blur/stagger effect, driven by scroll rather than a one-shot timer. */
+/** Staggered blur, fade, and lift that retrace the same reveal on reverse scroll. */
 export function TextReveal({
-  text, mode = 'letter', as = 'span', delay = .05, stagger = .025,
-  duration = .5, blur = '6px', y = 10, once = false, className, ...props
+  text, mode = 'letter', as = 'span', delay = .1, stagger = .025,
+  duration = .5, blur = '8px', y = 10, once = false, className, ...props
 }: TextRevealProps) {
   const ref = useRef<HTMLElement>(null);
   const [enabled, setEnabled] = useState(false);
   const held = useRef(0);
-  // A longer travel gives each letter time to resolve, then retraces the same
-  // opacity, blur, and lift when the reader scrolls back toward the start.
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.94', 'start 0.46'] });
+  // Keep the restored entrance at the bottom edge. Every letter is fully sharp
+  // before the reading area, including when scrolling back up the page.
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.99', 'start 0.86'] });
   const progress = useTransform(scrollYProgress, value => {
     held.current = once ? Math.max(held.current, value) : value;
     return held.current;

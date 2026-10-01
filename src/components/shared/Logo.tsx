@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import logoUrl from '../../../NucleusLogo_transparent.png';
+import logoUrl from '../../assets/nucleus-logo.webp';
 
 export function Logo({ className = '' }: { className?: string }) {
   return (

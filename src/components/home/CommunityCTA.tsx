@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 import { TextReveal } from '../ui/text-reveal';
 

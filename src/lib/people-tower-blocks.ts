@@ -35,10 +35,10 @@ function woodTexture() {
 }
 
 /** Two instanced draws: rounded timber and inset identity plates on all four sides. */
-export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxTextureSize: number, simplified = false) {
+export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxTextureSize: number, simplified = false, maxAnisotropy = 4) {
   const columns = Math.max(1, Math.ceil(Math.sqrt(members.length * 3 / 16)));
   const rows = Math.max(1, Math.ceil(members.length / columns));
-  const tileWidth = Math.min(simplified ? 384 : 768, Math.floor(maxTextureSize / columns), Math.floor(maxTextureSize / rows) * 16 / 3);
+  const tileWidth = Math.floor(Math.min(simplified ? 768 : 1024, Math.floor(maxTextureSize / columns), Math.floor(maxTextureSize / rows) * 16 / 3));
   const tileHeight = Math.floor(tileWidth * 3 / 16);
   const canvas = document.createElement('canvas');
   canvas.width = columns * tileWidth; canvas.height = rows * tileHeight;
@@ -70,7 +70,7 @@ export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxText
   const geometry = new RoundedBoxGeometry(...BLOCK_SIZE, 2, .055);
   geometry.scale(1 / BLOCK_SIZE[0], 1 / BLOCK_SIZE[1], 1 / BLOCK_SIZE[2]); geometry.clearGroups();
   const grain = woodTexture();
-  const material = new THREE.MeshStandardMaterial({ map: grain, bumpMap: grain, bumpScale: .008, roughness: .57, metalness: .02 });
+  const material = new THREE.MeshStandardMaterial({ map: grain, bumpMap: grain, bumpScale: .012, roughness: .62, metalness: 0 });
   const blocks = new THREE.InstancedMesh(geometry, material, members.length);
   blocks.instanceMatrix.setUsage(THREE.DynamicDrawUsage); blocks.castShadow = true; blocks.receiveShadow = true;
   blocks.frustumCulled = false;
@@ -91,7 +91,7 @@ export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxText
   const labelGeometry = mergeGeometries(faces); faces.forEach(face => face.dispose());
   labelGeometry.setAttribute('atlasOffset', new THREE.InstancedBufferAttribute(offsets, 2));
   const labelMaterial = new THREE.MeshStandardMaterial({
-    map: atlas, roughness: .68, metalness: .04, emissiveMap: atlas, emissive: 0xffffff, emissiveIntensity: .16,
+    map: atlas, roughness: .68, metalness: 0, emissiveMap: atlas, emissive: 0xffffff, emissiveIntensity: .08,
   });
   labelMaterial.onBeforeCompile = shader => {
     shader.uniforms.atlasScale = { value: new THREE.Vector2(1 / columns, 1 / rows) };
@@ -117,7 +117,9 @@ export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxText
     if (currentSimplified === value) return;
     currentSimplified = value;
     material.bumpMap = value ? null : grain; material.needsUpdate = true;
-    for (const texture of [grain, atlas]) { texture.anisotropy = value ? 1 : 4; texture.needsUpdate = true; }
+    for (const texture of [grain, atlas]) {
+      texture.anisotropy = Math.min(maxAnisotropy, value ? 4 : 8); texture.needsUpdate = true;
+    }
   }
   setSimplified(simplified);
   function dispose() {

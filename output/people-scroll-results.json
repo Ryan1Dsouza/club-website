@@ -1,0 +1,514 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/browser/people-tower-collisions.spec.mjs",
+      "tests/browser/people-tower-performance.spec.mjs",
+      "tests/browser/people-tower.spec.mjs",
+      "--reporter=line,json"
+    ],
+    "configFile": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\playwright.config.mjs",
+    "rootDir": "C:/Users/ryan1/OneDrive/Documents/club-website/tests/browser",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/ryan1/OneDrive/Documents/club-website/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/ryan1/OneDrive/Documents/club-website/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npx vite --host 127.0.0.1 --port 3010 --strictPort",
+      "url": "http://127.0.0.1:3010",
+      "reuseExistingServer": false
+    }
+  },
+  "suites": [
+    {
+      "title": "people-tower-collisions.spec.mjs",
+      "file": "people-tower-collisions.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "desktop tower",
+          "file": "people-tower-collisions.spec.mjs",
+          "line": 8,
+          "column": 8,
+          "specs": [
+            {
+              "title": "scroll poses collide, reverse cleanly and settle without continuous work",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 33013,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-01T12:11:26.084Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "scroll-metrics",
+                          "contentType": "application/json",
+                          "body": "ewogICJ2aW9sYXRpb25zIjogW10sCiAgImZyYW1lcyI6IDY3LAogICJtZW1iZXJzIjogMTUsCiAgImRyYXdzIjogNSwKICAiZ3B1IjogIkFOR0xFIChHb29nbGUsIFZ1bGthbiAxLjMuMCAoU3dpZnRTaGFkZXIgRGV2aWNlIChTdWJ6ZXJvKSAoMHgwMDAwQzBERSkpLCBTd2lmdFNoYWRlciBkcml2ZXIpIiwKICAicmVuZGVyTWVkaWFuTXMiOiAwLjcwMDAwMDAwMjk4MDIzMjIsCiAgInJlbmRlclA5NU1zIjogMi44OTk5OTk5OTg1MDk4ODQsCiAgImZyYW1lTWVkaWFuTXMiOiA0MTguNjAwMDAwMDAxNDkwMSwKICAiZnJhbWVQOTVNcyI6IDUxNS41Cn0="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "ab6f5374781e74a02217-8f55e7f74201d03d6da5",
+              "file": "people-tower-collisions.spec.mjs",
+              "line": 12,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "touch tower",
+          "file": "people-tower-collisions.spec.mjs",
+          "line": 8,
+          "column": 8,
+          "specs": [
+            {
+              "title": "scroll poses collide, reverse cleanly and settle without continuous work",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 28130,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-01T12:11:59.335Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "scroll-metrics",
+                          "contentType": "application/json",
+                          "body": "ewogICJ2aW9sYXRpb25zIjogW10sCiAgImZyYW1lcyI6IDM1MywKICAibWVtYmVycyI6IDE1LAogICJkcmF3cyI6IDUsCiAgImdwdSI6ICJBTkdMRSAoR29vZ2xlLCBWdWxrYW4gMS4zLjAgKFN3aWZ0U2hhZGVyIERldmljZSAoU3ViemVybykgKDB4MDAwMEMwREUpKSwgU3dpZnRTaGFkZXIgZHJpdmVyKSIsCiAgInJlbmRlck1lZGlhbk1zIjogMC4yMDAwMDAwMDI5ODAyMzIyNCwKICAicmVuZGVyUDk1TXMiOiAwLjg5OTk5OTk5ODUwOTg4MzksCiAgImZyYW1lTWVkaWFuTXMiOiA0Mi42MDAwMDAwMDE0OTAxMTYsCiAgImZyYW1lUDk1TXMiOiAxNTUuNzk5OTk5OTk3MDE5NzcKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "ab6f5374781e74a02217-8973e325ccd260d805d9",
+              "file": "people-tower-collisions.spec.mjs",
+              "line": 12,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "people-tower-performance.spec.mjs",
+      "file": "people-tower-performance.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "rendered blocks and DOM profiles reach zero together, including reverse seeks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16788,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-01T12:12:27.498Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "012ebbc8d989448f58b0-1362a26e45d993c85077",
+          "file": "people-tower-performance.spec.mjs",
+          "line": 37,
+          "column": 1
+        },
+        {
+          "title": "a failure partway through mounting removes the scene and releases its resources",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1524,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-01T12:12:52.948Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "012ebbc8d989448f58b0-075b8f400d78a586043d",
+          "file": "people-tower-performance.spec.mjs",
+          "line": 123,
+          "column": 1
+        }
+      ],
+      "suites": [
+        {
+          "title": "low-end touch devices",
+          "file": "people-tower-performance.spec.mjs",
+          "line": 74,
+          "column": 6,
+          "specs": [
+            {
+              "title": "cap resolution, sleep while idle, resize and release GPU resources on context loss",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8566,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-01T12:12:44.322Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "012ebbc8d989448f58b0-c22a0d49b9765524a95e",
+              "file": "people-tower-performance.spec.mjs",
+              "line": 76,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "people-tower.spec.mjs",
+      "file": "people-tower.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "tower opens into full-size identities, reverses, skips to the roster and cleans up",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 30665,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-01T12:12:54.542Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cd81b965ef36b9b105c7-5fa3a1ec67f9eecc7f90",
+          "file": "people-tower.spec.mjs",
+          "line": 16,
+          "column": 1
+        },
+        {
+          "title": "member cards and canvas fit 390×844",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3762,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-01T12:13:25.238Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cd81b965ef36b9b105c7-c4d1a554e34285a227bb",
+          "file": "people-tower.spec.mjs",
+          "line": 51,
+          "column": 3
+        },
+        {
+          "title": "member cards and canvas fit 844×390",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5479,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-01T12:13:29.023Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cd81b965ef36b9b105c7-8917b9e4571f8e91e1af",
+          "file": "people-tower.spec.mjs",
+          "line": 51,
+          "column": 3
+        },
+        {
+          "title": "WebGL failure and an empty team retain readable content without a long scroll region",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1935,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-01T12:13:34.524Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cd81b965ef36b9b105c7-97f92a8be9b9ae69a157",
+          "file": "people-tower.spec.mjs",
+          "line": 78,
+          "column": 1
+        },
+        {
+          "title": "physics interaction, idle orbit, batching, rebuild and GPU cleanup work together",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6633,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0.02\u001b[39m\nReceived:   \u001b[31m0\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0.02\u001b[39m\nReceived:   \u001b[31m0\u001b[39m\n    at C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\tests\\browser\\people-tower.spec.mjs:132:88",
+                    "location": {
+                      "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\tests\\browser\\people-tower.spec.mjs",
+                      "column": 88,
+                      "line": 132
+                    },
+                    "snippet": "  130 |   expect(initial.instances).toEqual([15, 15]); expect(initial.calls).toBeLessThanOrEqual(8); expect(initial.triangles).toBeLessThan(5500);\n  131 |   await page.waitForTimeout(600);\n> 132 |   const orbit = await metrics(); expect(Math.abs(initial.camera[0] - orbit.camera[0])).toBeGreaterThan(.02);\n      |                                                                                        ^\n  133 |   expect(await page.evaluate(() => scrollY)).toBe(0);\n  134 |   await page.screenshot({ path: info.outputPath('physics-tower-intro.png') });\n  135 |   await page.mouse.move(orbit.point.x, orbit.point.y); await page.mouse.down();"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\tests\\browser\\people-tower.spec.mjs",
+                        "column": 88,
+                        "line": 132
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0.02\u001b[39m\nReceived:   \u001b[31m0\u001b[39m\n\n  130 |   expect(initial.instances).toEqual([15, 15]); expect(initial.calls).toBeLessThanOrEqual(8); expect(initial.triangles).toBeLessThan(5500);\n  131 |   await page.waitForTimeout(600);\n> 132 |   const orbit = await metrics(); expect(Math.abs(initial.camera[0] - orbit.camera[0])).toBeGreaterThan(.02);\n      |                                                                                        ^\n  133 |   expect(await page.evaluate(() => scrollY)).toBe(0);\n  134 |   await page.screenshot({ path: info.outputPath('physics-tower-intro.png') });\n  135 |   await page.mouse.move(orbit.point.x, orbit.point.y); await page.mouse.down();\n    at C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\tests\\browser\\people-tower.spec.mjs:132:88"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-01T12:13:36.475Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\test-results\\people-tower-physics-inter-7df0a-d-GPU-cleanup-work-together\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\tests\\browser\\people-tower.spec.mjs",
+                    "column": 88,
+                    "line": 132
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "cd81b965ef36b9b105c7-8d9a70d49f4fd1a0e5ef",
+          "file": "people-tower.spec.mjs",
+          "line": 97,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-01T12:11:23.558Z",
+    "duration": 141741.138,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

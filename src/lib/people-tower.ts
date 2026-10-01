@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { CSS3DObject, CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import type { Member } from '../types';
 import { BLOCK_SIZE, LAYER_HEIGHT, advanceTowerScroll, clamp01, smooth, towerExit, towerFrame, towerSlots } from './people-tower-motion.ts';
-import { towerQuality } from './people-tower-quality';
+import { towerPixelRatio, towerQuality } from './people-tower-quality';
 import { createTowerScenery } from './people-tower-scenery';
 import { createTowerBlocks, TOWER_PALETTES } from './people-tower-blocks';
 import { createTowerPhysics } from './people-tower-physics';
@@ -32,11 +32,11 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     const device = { coarsePointer: coarsePointer.matches, cores: navigator.hardwareConcurrency,
       memory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory };
     let quality = towerQuality(host.clientWidth, host.clientHeight, window.devicePixelRatio, device);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false,
+    const renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true,
       powerPreference: quality.simplified ? 'low-power' : 'high-performance' });
     cleanups.push(() => { renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = quality.simplified ? THREE.LinearToneMapping : THREE.ACESFilmicToneMapping;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = .95;
     renderer.shadowMap.enabled = !quality.simplified; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.shadowMap.autoUpdate = false;
@@ -48,7 +48,8 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     const slots = towerSlots(members.map(member => member.id)), layers = Math.ceil(members.length / 3);
     const physics = createTowerPhysics(slots);
     cleanups.push(physics.dispose);
-    const batch = createTowerBlocks(scene, members, Math.min(quality.maxTextureSize, renderer.capabilities.maxTextureSize), quality.simplified);
+    const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    const batch = createTowerBlocks(scene, members, Math.min(quality.maxTextureSize, renderer.capabilities.maxTextureSize), quality.simplified, anisotropy);
     cleanups.push(batch.dispose);
     const scenery = createTowerScenery(scene, physics.floorY, layers * LAYER_HEIGHT, quality.simplified);
     cleanups.push(scenery.dispose);
@@ -63,9 +64,9 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     let width = 1, height = 1, profileWidth = 1, profileHeight = 1;
     let start = 0, range = 1, target = 0, progress = 0, frame = 0, previousTime = 0;
     let active = -2, storyRemoved = 0, visible = true, idleAngle = 0, lastInteraction = -Infinity;
-    let matricesDirty = true, renderedProgress = -1;
+    let matricesDirty = true, renderedProgress = -1, lastRenderTime = 0;
     let layoutDirty = true, scrollDirty = true, initialized = false;
-    let resolutionScale = 1, averageFrameTime = 1 / 60, slowTime = 0;
+    let resolutionScale = 1, averageFrameTime = 1 / 60, slowTime = 0, effectsReduced = false;
     const scrollMotion = { value: 0, velocity: 0 };
     const right = new THREE.Vector3(), up = new THREE.Vector3(), forward = new THREE.Vector3();
     const source = new THREE.Vector3(), pulled = new THREE.Vector3(), activeSource = new THREE.Vector3();
@@ -101,19 +102,21 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     }
 
     function syncStory(state: ReturnType<typeof towerFrame>) {
-      const desiredRemoved = state.completed + (state.index >= 0 ? 1 : 0);
+      const desiredRemoved = state.completed;
       if (active === state.index && storyRemoved === desiredRemoved) return;
       releasePointer();
       // Reverse seeking explicitly rebuilds supports. Forward motion never resets
       // surviving bodies, so a falling or tilted block keeps its physical pose.
-      if (state.completed < storyRemoved) { physics.reset(state.completed); storyRemoved = state.completed; }
+      if (state.completed < storyRemoved || (state.index < 0 && state.completed === 0 && active >= 0)) {
+        physics.reset(state.completed); storyRemoved = state.completed;
+      }
       for (let i = storyRemoved; i < state.completed; i++) physics.remove(i);
       storyRemoved = state.completed;
       active = state.index;
       if (active >= 0) {
         const body = physics.bodies[active];
         activeSource.copy(body.position); activeQuaternion.copy(body.quaternion);
-        physics.remove(active); storyRemoved = active + 1; setProfile(active);
+        physics.beginStory(active); setProfile(active);
       }
       callbacks.onMember(active); matricesDirty = true;
     }
@@ -145,14 +148,15 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
         physics.bodies.forEach((body, index) => {
           if (index < state.completed || state.outro > 0) { batch.update(index, false); return; }
           const slot = slots[index];
-          block.position.copy(body.position); block.quaternion.copy(body.quaternion); block.scale.copy(plankScale);
+          block.position.copy(body.interpolatedPosition); block.quaternion.copy(body.interpolatedQuaternion); block.scale.copy(plankScale);
           if (index === state.index) {
             source.copy(activeSource); block.position.copy(source); block.quaternion.copy(activeQuaternion);
             const t = state.local, pull = smooth(t / .14), flight = smooth((t - .14) / .29), unfold = smooth((t - .2) / .23);
             direction.set(slot.direction, 0, 0).applyQuaternion(activeQuaternion);
-            pulled.copy(source).addScaledVector(direction, 1.7); block.position.lerp(pulled, pull);
+            // Clear the whole plank before tumbling, then arc above the stack.
+            pulled.copy(source).addScaledVector(direction, BLOCK_SIZE[0] + .35); block.position.lerp(pulled, pull);
             if (t > .14) {
-              control1.copy(pulled).addScaledVector(direction, 2).addScaledVector(up, -2.8);
+              control1.copy(pulled).addScaledVector(direction, 2).addScaledVector(up, 1.5);
               control2.copy(destination).addScaledVector(right, slot.direction * targetScale.x * .45).addScaledVector(up, -.9);
               curve.v0.copy(pulled); curve.v1.copy(control1); curve.v2.copy(control2); curve.v3.copy(destination);
               curve.getPoint(flight, block.position);
@@ -169,6 +173,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
               block.quaternion.multiply(exitQuaternion);
             }
             block.scale.multiplyScalar(exitState.scale);
+            physics.placeStory(block.position, block.quaternion, block.scale);
             profile.style.opacity = String(exitState.opacity);
             faceOffset.set(0, 0, block.scale.z / 2 + .008).applyQuaternion(block.quaternion);
             profileObject.position.copy(block.position).add(faceOffset); profileObject.quaternion.copy(block.quaternion);
@@ -193,16 +198,20 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       if (elapsed > 0) {
         const sample = Math.min(.1, elapsed);
         averageFrameTime += (sample - averageFrameTime) * .05;
-        slowTime = averageFrameTime > 1 / 40 ? slowTime + sample : 0;
-        if (slowTime > 1.5 && resolutionScale > .6) {
-          resolutionScale = Math.max(.6, resolutionScale - .15); slowTime = 0; layoutDirty = true;
+        slowTime = averageFrameTime > 1 / 40 ? slowTime + Math.min(.25, elapsed) : 0;
+        if (slowTime > 2 && (!effectsReduced || resolutionScale > .6)) {
+          // Shed shadows and continuous orbit before reducing supersampling.
+          if (!effectsReduced) effectsReduced = true;
+          else resolutionScale = Math.max(.6, resolutionScale - .1);
+          slowTime = 0; layoutDirty = true;
         }
       }
       try {
         if (layoutDirty) measure();
         if (scrollDirty) sampleScroll();
         if (!initialized) { scrollMotion.value = target; initialized = true; }
-        progress = advanceTowerScroll(scrollMotion, target, dt, quality.simplified ? 14 : 18);
+        // Input response is independent of rendering quality and pointer type.
+        progress = advanceTowerScroll(scrollMotion, target, elapsed);
         const state = towerFrame(progress, members.length);
         // The desktop intro orbits; readable profiles and settled mobile scenes rest.
         const idleOrbit = !quality.simplified && state.index < 0 && state.completed === 0 && state.outro === 0;
@@ -210,7 +219,11 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
         if (orbiting) idleAngle = (idleAngle + dt * .16) % (Math.PI * 2);
         syncStory(state);
         const transformsChanged = physics.step(dt);
-        if (transformsChanged || matricesDirty || progress !== renderedProgress || orbiting) render(state, transformsChanged, orbiting);
+        // The decorative idle orbit needs only 30 paints/sec; scrolling and direct
+        // interaction still render on every changed frame, including 120 Hz screens.
+        if (transformsChanged || matricesDirty || progress !== renderedProgress || (orbiting && time - lastRenderTime >= 1000 / 30)) {
+          render(state, transformsChanged, orbiting); lastRenderTime = time;
+        }
         if (idleOrbit || physics.moving() || progress !== target || layoutDirty || scrollDirty) frame = requestAnimationFrame(draw);
         else slowTime = 0;
       } catch { dispose(); callbacks.onError(); }
@@ -239,8 +252,8 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       start = section.getBoundingClientRect().top + scrollY - header; range = Math.max(1, section.offsetHeight - stage.offsetHeight);
       device.coarsePointer = coarsePointer.matches;
       quality = towerQuality(nextWidth, nextHeight, window.devicePixelRatio, device);
-      quality.simplified ||= resolutionScale < 1;
-      const ratio = quality.pixelRatio * resolutionScale;
+      quality.simplified ||= effectsReduced;
+      const ratio = towerPixelRatio(quality.pixelRatio, resolutionScale);
       const sizeChanged = width !== nextWidth || height !== nextHeight;
       if (sizeChanged || renderer.getPixelRatio() !== ratio) {
         renderer.setDrawingBufferSize(nextWidth, nextHeight, ratio); matricesDirty = true;
@@ -255,7 +268,6 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       }
       if (renderer.shadowMap.enabled === quality.simplified) matricesDirty = true;
       renderer.shadowMap.enabled = !quality.simplified;
-      renderer.toneMapping = quality.simplified ? THREE.LinearToneMapping : THREE.ACESFilmicToneMapping;
       batch.setSimplified(quality.simplified); scenery.setSimplified(quality.simplified);
       scrollDirty = true;
     }

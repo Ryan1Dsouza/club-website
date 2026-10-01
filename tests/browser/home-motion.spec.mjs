@@ -19,6 +19,7 @@ test('community actions reveal immediately for keyboard users and motion changes
   page.on('pageerror', error => errors.push(error.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('.logo-landing')).toHaveAttribute('data-status', 'still');
   const original = await content(page);
 
@@ -57,6 +58,7 @@ test('hero buffers stay bounded across resizing, pause offscreen, and clean up o
     }
   });
   await page.goto('/');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('.logo-landing')).toHaveAttribute('data-status', 'ready');
   const canvas = page.locator('.logo-landing__scene canvas');
   for (const viewport of [{ width: 1920, height: 1080 }, { width: 390, height: 844 }, { width: 1440, height: 900 }]) {
@@ -91,6 +93,7 @@ test('hero buffers stay bounded across resizing, pause offscreen, and clean up o
 
 test('text waits for the logo to form, then morphs and pauses offscreen in order', async ({ page }) => {
   await page.goto('/');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   const hero = page.locator('.logo-landing');
   const text = page.locator('.mu-morph-wrap');
   const word = page.locator('.mu-layer').first();
@@ -122,6 +125,7 @@ test('text waits for the logo to form, then morphs and pauses offscreen in order
 test('desktop wheel is gentler across idle and repeated input, pauses for dialogs, and resets on other routes', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('html')).toHaveClass(/lenis/);
   await expect(page.locator('.dp-section')).toHaveAttribute('data-motion', 'true');
   await page.mouse.move(20, 450);
@@ -195,30 +199,39 @@ async function placeAt(locator, ratio) {
   }, ratio);
 }
 
-test('every requested text block blurs and reveals in both scroll directions', async ({ page }) => {
+test('text entrances stay at the viewport edge and the reading area stays sharp in both directions', async ({ page }) => {
   test.setTimeout(90_000);
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   const blocks = page.locator('.dp-section [data-text-reveal], .community-section [data-text-reveal], .vm-title');
   await expect(blocks).toHaveCount(25);
   await expect(blocks.first()).toHaveAttribute('data-reveal-ready', 'true');
   await page.evaluate(() => document.fonts.ready);
+  const heading = page.locator('.dp-line-1');
+  const letters = heading.locator('.text-reveal__unit');
+  expect(await letters.allTextContents()).toEqual(Array.from('THREEPATHS.'));
+  await placeAt(heading, .93);
+  await expect.poll(() => letters.evaluateAll(units =>
+    Number(getComputedStyle(units[0]).opacity) - Number(getComputedStyle(units.at(-1)).opacity)
+  )).toBeGreaterThan(.3);
   for (const block of await blocks.all()) {
-    await placeAt(block, .95);
+    await placeAt(block, 1.01);
     await expect.poll(() => revealState(block).then(state => state.opacity)).toBeLessThan(.01);
-    await placeAt(block, .70);
+    await placeAt(block, .93);
     await expect.poll(() => revealState(block).then(state => state.opacity)).toBeGreaterThan(.1);
     const midway = await revealState(block);
     expect(midway.opacity).toBeLessThan(.99);
     expect(midway.blur).toBeGreaterThan(0);
-    await placeAt(block, .42);
+    await placeAt(block, .78);
     await expect.poll(() => revealState(block).then(state => state.opacity)).toBeGreaterThan(.99);
     await expect.poll(() => revealState(block).then(state => state.blur)).toBeLessThan(.01);
-    await placeAt(block, .70);
+    await placeAt(block, .93);
     await expect.poll(() => revealState(block).then(state => Math.abs(state.opacity - midway.opacity))).toBeLessThan(.02);
-    await placeAt(block, .95);
+    await expect.poll(() => revealState(block).then(state => Math.abs(state.blur - midway.blur))).toBeLessThan(.05);
+    await placeAt(block, 1.01);
     await expect.poll(() => revealState(block).then(state => state.opacity)).toBeLessThan(.01);
   }
   expect(errors).toEqual([]);
@@ -227,6 +240,7 @@ test('every requested text block blurs and reveals in both scroll directions', a
 test('gentle wheel movement crosses all home sections without pinning or nested scroll traps', async ({ page }) => {
   test.setTimeout(90_000);
   await page.goto('/');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('html')).toHaveClass(/lenis/);
   for (const viewport of [{ width: 1440, height: 900 }, { width: 844, height: 390 }, { width: 320, height: 740 }]) {
     await page.setViewportSize(viewport);
@@ -248,6 +262,7 @@ test('gentle wheel movement crosses all home sections without pinning or nested 
 test('domain cards pop in gradually and reverse, with the correct WhatsApp communities', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('.dp-section')).toHaveAttribute('data-motion', 'true');
   const invites = [
     'https://chat.whatsapp.com/F2sg6LBCwibIKWJu2nhnvI',
@@ -263,17 +278,26 @@ test('domain cards pop in gradually and reverse, with the correct WhatsApp commu
     await expect(whatsapp).toHaveAttribute('href', invites[index]);
     await expect(whatsapp).toHaveAttribute('target', '_blank');
     await expect(whatsapp).toHaveAttribute('rel', 'noopener noreferrer');
-    await placeAt(panel, .98);
+    await placeAt(panel, 1.01);
     await expect.poll(opacity).toBeLessThan(.01);
-    await placeAt(panel, .70);
-    await expect.poll(opacity).toBeGreaterThan(.4);
-    expect(await opacity()).toBeLessThan(.6);
+    await placeAt(panel, .93);
+    await expect.poll(() => opacity().then(value => Math.abs(value - .5))).toBeLessThan(.02);
+    const transform = () => surface.evaluate(element => {
+      const matrix = new DOMMatrixReadOnly(getComputedStyle(element).transform);
+      return { scale: matrix.a, y: matrix.m42 };
+    });
+    await expect.poll(() => transform().then(value => value.scale)).toBeGreaterThan(.96);
+    expect((await transform()).scale).toBeLessThan(.98);
+    expect((await transform()).y).toBeGreaterThan(0);
     await placeAt(panel, .40);
     await expect.poll(opacity).toBeGreaterThan(.99);
-    await placeAt(panel, .70);
-    await expect.poll(opacity).toBeLessThan(.6);
-    expect(await opacity()).toBeGreaterThan(.4);
-    await placeAt(panel, .98);
+    await expect.poll(() => transform().then(value => value.scale)).toBe(1);
+    await expect.poll(() => transform().then(value => value.y)).toBe(0);
+    await placeAt(panel, .93);
+    await expect.poll(() => opacity().then(value => Math.abs(value - .5))).toBeLessThan(.02);
+    await expect.poll(() => transform().then(value => value.scale)).toBeLessThan(.98);
+    expect((await transform()).scale).toBeGreaterThan(.96);
+    await placeAt(panel, 1.01);
     await expect.poll(opacity).toBeLessThan(.01);
     await whatsapp.evaluate(element => element.focus({ preventScroll: true }));
     await expect(surface).toHaveCSS('opacity', '1');
@@ -284,6 +308,7 @@ test('domain cards pop in gradually and reverse, with the correct WhatsApp commu
 
 test('reduced motion and keyboard navigation take over from desktop wheel momentum', async ({ page }) => {
   await page.goto('/');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('html')).toHaveClass(/lenis/);
   await page.mouse.move(20, 450);
   await page.mouse.wheel(0, 1200);
@@ -308,11 +333,22 @@ test('touch scrolling is native and reduced motion keeps all text readable', asy
   const page = await context.newPage();
   await page.route('**/api/site', route => route.fulfill({ json: site }));
   await page.goto('/');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('html')).not.toHaveClass(/lenis/);
   const heading = page.locator('.dp-line-1');
   await expect(heading).toHaveAttribute('data-reveal-ready', 'true');
-  await placeAt(heading, .95);
+  await placeAt(heading, 1.01);
   await expect.poll(() => revealState(heading).then(state => state.opacity)).toBeLessThan(.01);
+  await placeAt(heading, .93);
+  await expect.poll(() => revealState(heading).then(state => state.opacity)).toBeGreaterThan(.1);
+  const midway = await revealState(heading);
+  expect(midway.opacity).toBeLessThan(.99);
+  expect(midway.blur).toBeGreaterThan(0);
+  await placeAt(heading, .78);
+  await expect.poll(() => revealState(heading)).toEqual({ opacity: 1, blur: 0 });
+  await placeAt(heading, .93);
+  await expect.poll(() => revealState(heading).then(state => Math.abs(state.opacity - midway.opacity))).toBeLessThan(.02);
+  await expect.poll(() => revealState(heading).then(state => Math.abs(state.blur - midway.blur))).toBeLessThan(.05);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(heading).toHaveAttribute('data-reveal-ready', 'false');
   await expect.poll(() => revealState(heading)).toEqual({ opacity: 1, blur: 0 });
@@ -320,8 +356,10 @@ test('touch scrolling is native and reduced motion keeps all text readable', asy
   await expect(page.locator('.logo-landing__scene canvas')).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await expect(heading).toHaveAttribute('data-reveal-ready', 'true');
-  await placeAt(heading, .78);
+  await placeAt(heading, .93);
   await expect.poll(() => revealState(heading).then(state => state.blur)).toBeGreaterThan(0);
+  await placeAt(heading, .78);
+  await expect.poll(() => revealState(heading)).toEqual({ opacity: 1, blur: 0 });
   await expect(page.locator('html')).not.toHaveClass(/lenis/);
   await context.close();
 });

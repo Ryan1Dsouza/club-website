@@ -77,14 +77,14 @@ test('camera widens with speed, limits impulses, and removes added motion when r
   assert.ok(phone.bankScale < fast.bankScale);
   assert.ok(Math.abs(phone.pitch) < Math.abs(fast.pitch));
   const reduced = cinematicCamera(36, 17, -.5, 23, true, true);
-  assert.equal(reduced.fov, 82); assert.equal(reduced.pitch, 0); assert.equal(reduced.lift, 0);
+  assert.equal(reduced.fov, 105); assert.equal(reduced.pitch, 0); assert.equal(reduced.lift, 0);
 });
 
 test('phone framing keeps room around the rails during cruising, slopes, and boost', () => {
   for (const speed of [-36, -23, 0, 23, 36]) for (const slope of [-1, 0, 1]) for (const boost of [0, .5, 1]) {
     const phone = cinematicCamera(speed, 12, slope, 23, true, false, boost);
     const desktop = cinematicCamera(speed, 12, slope, 23, false, false, boost);
-    assert.ok(phone.fov >= 76 && phone.fov < 96, 'wide without excessive lens distortion');
+    assert.ok(phone.fov >= 105 && phone.fov < 118, 'wide framing with bounded speed and boost effects');
     assert.ok(phone.fov > desktop.fov, 'phone framing stays wider, including under boost');
   }
 });

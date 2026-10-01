@@ -31,7 +31,10 @@ export type TowerScroll = { value: number; velocity: number };
  * the rendered pose. Retaining velocity filters uneven touch/wheel samples. */
 export function advanceTowerScroll(scroll: TowerScroll, target: number, delta: number, response = 16) {
   target = clamp01(target);
-  const dt = Math.max(0, Math.min(.05, delta));
+  // This analytic filter has no solver to destabilize. Use elapsed time even
+  // on slow frames, instead of making scrolling run in slow motion below 20 Hz.
+  // Visibility changes reset the renderer clock; cap only exceptional stalls.
+  const dt = Math.max(0, Math.min(.25, delta));
   if (!dt) return scroll.value;
   const offset = scroll.value - target;
   if (!offset) { scroll.velocity = 0; return scroll.value; }

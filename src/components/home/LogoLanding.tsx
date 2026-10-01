@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import logoUrl from '../../../NucleusLogo_transparent.png';
+import logoUrl from '../../assets/nucleus-logo.webp';
 import { MorphingText } from '../magicui/morphing-text';
 import './logo-landing.css';
 
@@ -27,7 +27,7 @@ export default function LogoLanding() {
           .to(host.current, { yPercent: context.conditions.compact ? 6 : 12, scale: .94, opacity: .12 }, 0)
           .to(section.querySelector('.logo-landing__text'), { yPercent: -28, opacity: 0 }, 0);
       }, sectionRef);
-    });
+    }).catch(() => { /* The static hero remains usable when motion cannot load. */ });
     return () => { disposed = true; cleanup?.(); };
   }, []);
 

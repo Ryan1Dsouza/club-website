@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { openDatabase, hashPassword, verifyPassword, getSite } from '../server/db.mjs';
 import { createApp } from '../server/app.mjs';
+import { pageMeta } from '../shared/page-meta.ts';
 
 async function fixture(fn, options = {}) {
   const db = openDatabase(':memory:');
@@ -177,7 +178,7 @@ test('production renders the animated home and club pages, escapes data, and hid
     const response = await fetch(base); const html = await response.text();
     assert.equal(response.status, 200);
     const home = html.match(/<div id="root">([\s\S]*?)<script id="nucleus-data"/)?.[1];
-    assert.ok(home); assert.match(home, /class="logo-landing"/); assert.match(home, /NucleusLogo_transparent[^" ]*\.png/);
+    assert.ok(home); assert.match(home, /class="logo-landing"/); assert.match(home, /nucleus-logo[^" ]*\.webp/);
     assert.match(home, /aria-label="Main navigation"/); assert.match(home, /class="dp-section"/);
     assert.match(home, /class="mu-morph-wrap/); assert.match(home, /community-section--reveal/);
     assert.doesNotMatch(home, /class="home-links/);
@@ -189,6 +190,15 @@ test('production renders the animated home and club pages, escapes data, and hid
     assert.match(work, /work-feature/); assert.match(work, /i Laundroid/);
     const team = await fetch(`${base}/team`).then(r => r.text());
     for (const member of getSite(db).team) assert.ok(team.includes(member.name));
+    for (const path of ['/', '/about', '/projects', '/team', '/events', '/recruitment']) {
+      const response = await fetch(`${base}${path}?source=test`);
+      const document = await response.text(), meta = pageMeta(path);
+      assert.equal(response.status, 200);
+      assert.ok(document.includes(`<title>${meta.title}</title>`));
+      assert.ok(document.includes(`<link rel="canonical" href="${meta.canonical}"`));
+      assert.ok(document.includes(`<meta name="description" content="${meta.description}"`));
+      assert.ok(document.includes(`<meta property="og:url" content="${meta.canonical}"`));
+    }
     const recruitment = await fetch(`${base}/recruitment`);
     assert.equal(recruitment.status, 200); assert.match(await recruitment.text(), /recruitment-page/);
     assert.ok(!html.includes('</script><script>alert(1)</script>')); assert.match(html, /id="nucleus-data"/);

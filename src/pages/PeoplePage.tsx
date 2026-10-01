@@ -66,7 +66,6 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     <h1 id="people-title" className="sr-only">The people behind Nucleus</h1>
     <div className="people-tower" ref={story} style={{
       '--tower-length': `${sorted.length * 90 + 180}svh`,
-      '--tower-length-mobile': `${sorted.length * 60 + 180}svh`,
     } as CSSProperties}>
       <div className="people-tower__stage">
         <div className="people-tower__world" ref={host} aria-hidden="true" />

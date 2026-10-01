@@ -63,6 +63,7 @@
 }
 
 .vm-marquee-wrapper:hover .vm-marquee-content,
+.vm-container[data-paused='true'] .vm-marquee-content,
 .vm-marquee-wrapper:focus-within .vm-marquee-content {
   animation-play-state: paused;
 }
@@ -104,6 +105,11 @@
 }
 
 .vm-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: var(--wash);
+  color: var(--mint);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -147,15 +153,20 @@
   line-height: 1.6;
   color: var(--mint);
   margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+}
+
+.vm-pause { margin-top: 20px; }
+/* Touch readers control the cards directly, with no duplicated or faded text. */
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .vm-marquee-wrapper { overflow-x: auto; user-select: text; }
+  .vm-marquee-content { animation: none; }
+  .vm-marquee-content[aria-hidden='true'], .vm-pause { display: none; }
 }
 
 /* Gradient fades on the edges */
 .vm-fade-left,
 .vm-fade-right {
+  display: none;
   pointer-events: none;
   position: absolute;
   top: 0;

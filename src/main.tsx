@@ -9,6 +9,6 @@ const root = document.getElementById('root')!;
 const initial = document.getElementById('nucleus-data');
 const element = <React.StrictMode>{window.location.pathname.startsWith('/admin')
   ? <Suspense fallback={<div className="page-loading">Opening the control room…</div>}><Admin /></Suspense>
-  : <BrowserRouter><App initialData={initial ? JSON.parse(initial.textContent || '{}') : undefined} /></BrowserRouter>}</React.StrictMode>;
+  : <BrowserRouter><App initialData={initial ? JSON.parse(initial.textContent || '{}') : undefined} serverRendered={Boolean(initial)} /></BrowserRouter>}</React.StrictMode>;
 if (root.hasChildNodes()) hydrateRoot(root, element);
 else createRoot(root).render(element);

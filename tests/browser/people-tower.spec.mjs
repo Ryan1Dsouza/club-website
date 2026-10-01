@@ -17,6 +17,7 @@ test('tower opens into full-size identities, reverses, skips to the roster and c
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/team');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'ready');
   await expect(page.locator('.people-tower__world canvas')).toHaveCount(1);
   await page.waitForTimeout(300);
@@ -50,6 +51,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
   test(`member cards and canvas fit ${viewport.width}×${viewport.height}`, async ({ page }, info) => {
     await page.setViewportSize(viewport);
     await page.goto('/team');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
     await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'ready');
     await page.waitForTimeout(200);
     await page.screenshot({ path: info.outputPath('mobile-tower.png') });
@@ -82,6 +84,7 @@ test('WebGL failure and an empty team retain readable content without a long scr
     };
   });
   await page.goto('/team');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'fallback');
   await expect(page.locator('.people-roster__member')).toHaveCount(15);
   expect((await page.locator('.people-tower').boundingBox()).height).toBeLessThan(1000);
@@ -107,6 +110,7 @@ test('physics interaction, idle orbit, batching, rebuild and GPU cleanup work to
   });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/team');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'ready');
   await expect.poll(() => page.evaluate(() => Boolean(window.__towerView))).toBe(true);
   const metrics = () => page.evaluate(() => {
@@ -116,7 +120,7 @@ test('physics interaction, idle orbit, batching, rebuild and GPU cleanup work to
     const center = blocks.position.clone().setFromMatrixPosition(matrix);
     const face = blocks.position.clone().set(0, 0, .501).applyMatrix4(matrix).project(camera);
     const rect = renderer.domElement.getBoundingClientRect();
-    return { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, frame: renderer.info.render.frame,
+    return { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, frame: renderer.info.render.frame, shadows: renderer.shadowMap.enabled,
       instances: scene.children.filter(object => object.isInstancedMesh).map(object => object.count),
       camera: camera.position.toArray(), position: center.toArray(),
       point: { x: rect.left + (face.x + 1) * rect.width / 2, y: rect.top + (1 - face.y) * rect.height / 2 } };
@@ -125,7 +129,15 @@ test('physics interaction, idle orbit, batching, rebuild and GPU cleanup work to
   const initial = await metrics();
   expect(initial.instances).toEqual([15, 15]); expect(initial.calls).toBeLessThanOrEqual(8); expect(initial.triangles).toBeLessThan(5500);
   await page.waitForTimeout(600);
-  const orbit = await metrics(); expect(Math.abs(initial.camera[0] - orbit.camera[0])).toBeGreaterThan(.02);
+  const orbit = await metrics();
+  if (orbit.shadows) expect(Math.abs(initial.camera[0] - orbit.camera[0])).toBeGreaterThan(.02);
+  else {
+    // Slow GPUs deliberately stop decorative orbiting before reducing detail.
+    await expect.poll(async () => {
+      const before = (await metrics()).frame; await page.waitForTimeout(200);
+      return (await metrics()).frame === before;
+    }).toBe(true);
+  }
   expect(await page.evaluate(() => scrollY)).toBe(0);
   await page.screenshot({ path: info.outputPath('physics-tower-intro.png') });
   await page.mouse.move(orbit.point.x, orbit.point.y); await page.mouse.down();

@@ -1,6 +1,6 @@
-import { useEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { useEffect, useRef, type HTMLAttributes, type ReactNode, type RefObject } from 'react';
 
-type RevealProps = {
+type RevealProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
   className?: string;
   delay?: number;
@@ -67,8 +67,8 @@ export function useReveal(ref: RefObject<HTMLElement | null>, { delay = 0, varia
 }
 
 // Content is visible in SSR; only the enhanced client prepares an entrance.
-export function Reveal({ children, className = '', delay = 0, variant = 'rise', stagger = 0 }: RevealProps) {
+export function Reveal({ children, className = '', delay = 0, variant = 'rise', stagger = 0, ...props }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
   useReveal(ref, { delay, variant, stagger });
-  return <div ref={ref} className={className}>{children}</div>;
+  return <div {...props} ref={ref} className={className}>{children}</div>;
 }

@@ -1,20 +1,18 @@
 "use client";
 
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function MorphingText({ texts, className = '', active = true }: { texts: string[]; className?: string; active?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const first = useRef<HTMLSpanElement>(null);
   const second = useRef<HTMLSpanElement>(null);
-  const filterId = useId().replace(/:/g, '');
   const key = texts.join('\u0000');
   useEffect(() => {
     const words = key.split('\u0000');
     const a = first.current!, b = second.current!;
     const layers = a.parentElement!;
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const compact = window.matchMedia('(max-width: 760px)');
-    const hold = 2.6, morph = .95, cycle = hold + morph;
+    const hold = 2.6, morph = .45, cycle = hold + morph;
     let frame = 0, timer = 0, elapsed = 0, visible = true;
     let startedAt: number | null = null;
     let lastIndex = -1, lastFraction = -1;
@@ -25,7 +23,7 @@ export function MorphingText({ texts, className = '', active = true }: { texts: 
         lastIndex = index;
       }
       lastFraction = fraction;
-      // Keep the signature morph brief and bounded; held words need no filter or DOM writes.
+      // Held words need no animation loop or DOM writes.
       if (fraction === 0) {
         layers.style.filter = 'none';
         a.style.filter = b.style.filter = 'none';
@@ -34,18 +32,11 @@ export function MorphingText({ texts, className = '', active = true }: { texts: 
         layers.style.willChange = 'auto';
         return;
       }
-      // Magic UI's threshold morph, with a small directional hand-off. Keep
-      // the liquid interval short and the held words completely crisp.
-      layers.style.filter = `url(#${filterId})`;
-      layers.style.willChange = 'filter';
-      const blur = compact.matches ? 5 : 8;
-      b.style.filter = `blur(${Math.min(2.5 / Math.max(fraction, .001) - 2.5, blur)}px)`;
-      b.style.opacity = String(Math.pow(fraction, .4));
-      const inverse = 1 - fraction;
-      a.style.filter = `blur(${Math.min(2.5 / Math.max(inverse, .001) - 2.5, blur)}px)`;
-      a.style.opacity = String(Math.pow(inverse, .4));
-      a.style.transform = `translateY(${-fraction * 8}px) scale(${1 + fraction * .035})`;
-      b.style.transform = `translateY(${inverse * 10}px) scale(${.965 + fraction * .035})`;
+      // A sharp hand-off keeps letters distinct instead of blurring two words together.
+      a.style.opacity = String(Math.max(0, 1 - fraction * 2));
+      b.style.opacity = String(Math.max(0, fraction * 2 - 1));
+      a.style.transform = `translateY(${Math.round(-fraction * 8)}px)`;
+      b.style.transform = `translateY(${Math.round((1 - fraction) * 8)}px)`;
     };
     const animate = (now: number) => {
       if (startedAt === null) return;
@@ -72,9 +63,8 @@ export function MorphingText({ texts, className = '', active = true }: { texts: 
     if (ref.current) observer.observe(ref.current);
     sync(); media.addEventListener('change', sync); document.addEventListener('visibilitychange', sync);
     return () => { cancelAnimationFrame(frame); clearTimeout(timer); startedAt = null; observer.disconnect(); media.removeEventListener('change', sync); document.removeEventListener('visibilitychange', sync); };
-  }, [key, filterId, active]);
-  return <div ref={ref} className={`mu-morph-wrap ${className}`} aria-label={texts.join('. ')}>
+  }, [key, active]);
+  return <div ref={ref} className={`mu-morph-wrap ${className}`} role="group" aria-label={texts.join('. ')}>
     <div className="mu-morph-layers" aria-hidden="true"><span className="mu-layer" ref={first}>{texts[0]}</span><span className="mu-layer" ref={second} style={{ opacity: 0 }}>{texts[1]}</span></div>
-    <svg style={{ position: 'absolute', height: 0, width: 0 }} aria-hidden="true"><defs><filter id={filterId} x="-10%" y="-20%" width="120%" height="140%" colorInterpolationFilters="sRGB"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 32 -15" /></filter></defs></svg>
   </div>;
 }
