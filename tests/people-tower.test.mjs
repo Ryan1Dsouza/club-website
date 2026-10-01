@@ -1,7 +1,64 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { towerSlots, towerFrame, memberProgress, sortTowerMembers, BLOCK_SIZE, TOWER_INTRO, TOWER_OUTRO } from '../src/lib/people-tower-motion.ts';
+import { advanceTowerScroll, towerExit, towerSlots, towerFrame, memberProgress, sortTowerMembers, BLOCK_SIZE, TOWER_INTRO, TOWER_OUTRO } from '../src/lib/people-tower-motion.ts';
+import { towerQuality } from '../src/lib/people-tower-quality.ts';
 import { createTowerPhysics } from '../src/lib/people-tower-physics.ts';
+
+test('scroll smoothing is frame-rate independent, settles exactly and handles noisy reversals without overshoot', () => {
+  const samples = [30, 60, 120].map(fps => {
+    const scroll = { value: 0, velocity: 0 };
+    for (let i = 0; i < fps / 2; i++) advanceTowerScroll(scroll, .8, 1 / fps);
+    return scroll.value;
+  });
+  samples.forEach(value => assert.ok(Math.abs(value - samples[0]) < 1e-12));
+  const scroll = { value: 0, velocity: 0 };
+  for (const target of [.2, .21, .19, .5, .48, 1, 0, .6]) {
+    for (const dt of [.008, .033, .012, .045]) {
+      const before = scroll.value;
+      advanceTowerScroll(scroll, target, dt);
+      assert.ok(scroll.value >= Math.min(before, target) && scroll.value <= Math.max(before, target));
+    }
+  }
+  for (let i = 0; i < 240; i++) advanceTowerScroll(scroll, .6, 1 / 60);
+  assert.deepEqual(scroll, { value: .6, velocity: 0 });
+  scroll.velocity = .1; advanceTowerScroll(scroll, .6, 1 / 60);
+  assert.deepEqual(scroll, { value: .6, velocity: 0 }, 'a target at the current position stops residual velocity');
+  const paused = { value: 0, velocity: 0 }, normal = { ...paused };
+  advanceTowerScroll(paused, 1, 30); advanceTowerScroll(normal, 1, .05);
+  assert.deepEqual(paused, normal, 'a background pause does not jump through the story');
+});
+
+test('exits shrink and fade continuously to zero before the shared profile changes members', () => {
+  let previous = towerExit(.76);
+  assert.equal(previous.scale, 1); assert.equal(previous.opacity, 1);
+  for (const local of [.8, .85, .9, .95, .975, .98, .999, 1]) {
+    const exit = towerExit(local);
+    assert.ok(exit.scale >= 0 && exit.scale <= previous.scale);
+    assert.equal(exit.opacity, exit.scale);
+    previous = exit;
+  }
+  assert.equal(previous.scale, 0); assert.equal(towerExit(.98).opacity, 0);
+  assert.ok(towerExit(.979).scale < .00001, 'visibility changes only after the projected size is negligible');
+  assert.equal(towerExit(.25).opacity, 0);
+  assert.equal(towerExit(.59).opacity, 1, 'the member picker still lands in a fully readable hold');
+});
+
+test('render budgets cover desktop, touch landscape, missing hardware hints and low-end PCs', () => {
+  const desktop = towerQuality(1440, 1000, 3, { coarsePointer: false, cores: 12, memory: 8 });
+  assert.equal(desktop.simplified, false);
+  assert.ok(1440 * 1000 * desktop.pixelRatio ** 2 <= 1_650_001);
+  for (const [width, height] of [[390, 844], [844, 390]]) {
+    const mobile = towerQuality(width, height, 3, { coarsePointer: true });
+    assert.equal(mobile.simplified, true); assert.ok(mobile.pixelRatio <= 1.25);
+    assert.ok(width * height * mobile.pixelRatio ** 2 <= 950_001);
+  }
+  assert.equal(towerQuality(390, 844, 3, { coarsePointer: false }).simplified, true);
+  for (const device of [{ cores: 2 }, { memory: 2 }]) {
+    const low = towerQuality(1920, 1080, 2, { coarsePointer: false, ...device });
+    assert.equal(low.simplified, true); assert.ok(low.pixelRatio <= 1);
+    assert.ok(1920 * 1080 * low.pixelRatio ** 2 <= 650_001);
+  }
+});
 
 test('every member occupies a unique block with repeatable, varied extraction paths', () => {
   const ids = Array.from({ length: 15 }, (_, i) => `member-${i}`);

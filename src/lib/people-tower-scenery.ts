@@ -33,7 +33,7 @@ function surfaceTextures() {
 }
 
 /** A quiet timber tabletop and felt-lined board, using three scenery draws. */
-export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeight: number, compact: boolean) {
+export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeight: number, simplified: boolean) {
   const group = new THREE.Group(); group.name = 'people-tower-scenery'; scene.add(group);
   const materials: THREE.Material[] = [], geometries: THREE.BufferGeometry[] = [];
   const { wood, felt } = surfaceTextures();
@@ -45,7 +45,7 @@ export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeig
   group.add(new THREE.AmbientLight(mint, .25));
   group.add(new THREE.HemisphereLight(mint.clone().lerp(new THREE.Color(0xffffff), .18), 0x183224, .85));
   const key = new THREE.DirectionalLight(mint, 2.15); key.position.set(-5, towerHeight + 5, 6);
-  key.castShadow = true; key.shadow.mapSize.setScalar(compact ? 512 : 1024);
+  key.castShadow = !simplified; key.shadow.mapSize.setScalar(1024);
   const extent = Math.max(5.5, towerHeight * .7);
   Object.assign(key.shadow.camera, { left: -extent, right: extent, top: extent, bottom: -extent, near: .5, far: towerHeight * 2 + 22 });
   key.shadow.normalBias = .025; key.shadow.bias = -.0002; group.add(key);
@@ -69,13 +69,13 @@ export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeig
   }), floorY - .28);
   floor.rotation.x = -Math.PI / 2;
 
-  mesh('wooden-board', new THREE.CylinderGeometry(2.6, 2.75, .28, 64), material({
+  const board = mesh('wooden-board', new THREE.CylinderGeometry(2.6, 2.75, .28, simplified ? 32 : 64), material({
     color: 0xa58e6b, map: wood, bumpMap: wood, bumpScale: .004, roughness: .63, metalness: 0,
   }), floorY - .14);
 
   // A narrow timber border frames the green playing surface. The weave only
   // changes the normal; it adds no polygons or lighting passes.
-  const inset = new THREE.CircleGeometry(2.48, 64), insetUV = inset.getAttribute('uv');
+  const inset = new THREE.CircleGeometry(2.48, simplified ? 32 : 64), insetUV = inset.getAttribute('uv');
   for (let i = 0; i < insetUV.count; i++) insetUV.setXY(i, insetUV.getX(i) * 18, insetUV.getY(i) * 18);
   const mat = mesh('green-felt-inset', inset, material({
     color: 0x1c382b, bumpMap: felt, bumpScale: .003, roughness: 1, metalness: 0,
@@ -86,10 +86,23 @@ export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeig
   scene.background = backdrop;
   scene.fog = new THREE.Fog(backdrop, 13, 34);
 
-  return () => {
+  let currentSimplified: boolean | undefined;
+  function setSimplified(value: boolean) {
+    if (currentSimplified === value) return;
+    currentSimplified = value; key.castShadow = !value;
+    if (value) { key.shadow.dispose(); key.shadow.map = null; }
+    for (const [object, texture] of [[board, wood], [mat, felt]] as const) {
+      const surface = object.material as THREE.MeshStandardMaterial;
+      surface.bumpMap = value ? null : texture; surface.needsUpdate = true;
+    }
+    wood.anisotropy = value ? 1 : 4; wood.needsUpdate = true;
+  }
+  setSimplified(simplified);
+  function dispose() {
     group.removeFromParent(); geometries.forEach(geometry => geometry.dispose());
     materials.forEach(surface => surface.dispose()); wood.dispose(); felt.dispose(); key.shadow.dispose();
     scene.background = null; scene.fog = null;
-  };
+  }
+  return { setSimplified, dispose };
 }
 

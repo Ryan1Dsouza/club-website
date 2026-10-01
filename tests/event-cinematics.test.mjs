@@ -77,16 +77,38 @@ test('camera widens with speed, limits impulses, and removes added motion when r
   assert.ok(phone.bankScale < fast.bankScale);
   assert.ok(Math.abs(phone.pitch) < Math.abs(fast.pitch));
   const reduced = cinematicCamera(36, 17, -.5, 23, true, true);
-  assert.equal(reduced.fov, 77); assert.equal(reduced.pitch, 0); assert.equal(reduced.lift, 0);
+  assert.equal(reduced.fov, 82); assert.equal(reduced.pitch, 0); assert.equal(reduced.lift, 0);
 });
 
-test('boost focuses the view and steadies banking without changing reduced-motion framing', () => {
+test('phone framing keeps room around the rails during cruising, slopes, and boost', () => {
+  for (const speed of [-36, -23, 0, 23, 36]) for (const slope of [-1, 0, 1]) for (const boost of [0, .5, 1]) {
+    const phone = cinematicCamera(speed, 12, slope, 23, true, false, boost);
+    const desktop = cinematicCamera(speed, 12, slope, 23, false, false, boost);
+    assert.ok(phone.fov >= 76 && phone.fov < 96, 'wide without excessive lens distortion');
+    assert.ok(phone.fov > desktop.fov, 'phone framing stays wider, including under boost');
+  }
+});
+
+test('boost widens the view and pulls back with speed without changing reduced-motion framing', () => {
   for (const compact of [false, true]) {
     const normal = cinematicCamera(36, 8, -.2, 23, compact, false);
     const focused = cinematicCamera(36, 8, -.2, 23, compact, false, 1);
     const halfway = cinematicCamera(36, 8, -.2, 23, compact, false, .5);
-    assert.ok(focused.fov < halfway.fov && halfway.fov < normal.fov);
+    assert.ok(focused.fov > halfway.fov && halfway.fov > normal.fov);
+    assert.ok(focused.pullback > halfway.pullback && halfway.pullback > normal.pullback);
+    assert.ok(focused.pullback <= .7);
     assert.ok(focused.bankScale < normal.bankScale);
+    assert.equal(cinematicCamera(0, 0, 0, 23, compact, false, 1).pullback, 0);
     assert.deepEqual(cinematicCamera(36, 8, -.2, 23, compact, true, 1), cinematicCamera(36, 8, -.2, 23, compact, true));
+  }
+});
+
+test('warp remains bounded when riding backwards and relaxes as speed falls', () => {
+  for (const compact of [false, true]) {
+    const fast = cinematicCamera(36, 0, 0, 23, compact, false, 1);
+    const slow = cinematicCamera(8, 0, 0, 23, compact, false, 1);
+    assert.ok(fast.fov > slow.fov && fast.pullback > slow.pullback);
+    assert.deepEqual(cinematicCamera(-36, 0, 0, 23, compact, false, 1), fast);
+    assert.equal(cinematicCamera(36, 0, 0, 23, compact, true, 1).pullback, 0);
   }
 });

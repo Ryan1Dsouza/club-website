@@ -25,6 +25,34 @@ export function smooth(value: number) {
   const t = clamp01(value);
   return t * t * t * (t * (t * 6 - 15) + 10);
 }
+export type TowerScroll = { value: number; velocity: number };
+
+/** Exact critically damped response: scroll events change the destination, not
+ * the rendered pose. Retaining velocity filters uneven touch/wheel samples. */
+export function advanceTowerScroll(scroll: TowerScroll, target: number, delta: number, response = 16) {
+  target = clamp01(target);
+  const dt = Math.max(0, Math.min(.05, delta));
+  if (!dt) return scroll.value;
+  const offset = scroll.value - target;
+  if (!offset) { scroll.velocity = 0; return scroll.value; }
+  // A direction change should respond immediately, without drifting backwards.
+  if (scroll.velocity * offset > 0) scroll.velocity = 0;
+  const decay = Math.exp(-response * dt), impulse = (scroll.velocity + response * offset) * dt;
+  const next = target + (offset + impulse) * decay;
+  scroll.velocity = (scroll.velocity - response * impulse) * decay;
+  scroll.value = clamp01(next);
+  if ((next - target) * offset < 0 || (Math.abs(next - target) < 1e-6 && Math.abs(scroll.velocity) < 1e-5)) {
+    scroll.value = target; scroll.velocity = 0;
+  }
+  return scroll.value;
+}
+
+/** Finish disappearing before the next member owns the shared DOM profile.
+ * The short zero-size tail also tolerates rounding at timeline boundaries. */
+export function towerExit(local: number) {
+  const progress = local >= .98 ? 1 : clamp01(smooth((local - .76) / .22));
+  return { progress, scale: 1 - progress, opacity: smooth((local - .25) / .13) * (1 - progress) };
+}
 function hash(value: string) {
   let result = 2166136261;
   for (let i = 0; i < value.length; i++) result = Math.imul(result ^ value.charCodeAt(i), 16777619);

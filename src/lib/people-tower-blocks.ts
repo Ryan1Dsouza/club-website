@@ -35,10 +35,10 @@ function woodTexture() {
 }
 
 /** Two instanced draws: rounded timber and inset identity plates on all four sides. */
-export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxTextureSize: number) {
+export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxTextureSize: number, simplified = false) {
   const columns = Math.max(1, Math.ceil(Math.sqrt(members.length * 3 / 16)));
   const rows = Math.max(1, Math.ceil(members.length / columns));
-  const tileWidth = Math.min(768, Math.floor(maxTextureSize / columns), Math.floor(maxTextureSize / rows) * 16 / 3);
+  const tileWidth = Math.min(simplified ? 384 : 768, Math.floor(maxTextureSize / columns), Math.floor(maxTextureSize / rows) * 16 / 3);
   const tileHeight = Math.floor(tileWidth * 3 / 16);
   const canvas = document.createElement('canvas');
   canvas.width = columns * tileWidth; canvas.height = rows * tileHeight;
@@ -109,12 +109,21 @@ export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxText
   }
   function commit() {
     blocks.instanceMatrix.needsUpdate = true; labels.instanceMatrix.needsUpdate = true;
-    blocks.computeBoundingSphere();
+    // Frustum culling is disabled; only an actual pointer raycast needs bounds.
+    blocks.boundingSphere = null;
   }
+  let currentSimplified: boolean | undefined;
+  function setSimplified(value: boolean) {
+    if (currentSimplified === value) return;
+    currentSimplified = value;
+    material.bumpMap = value ? null : grain; material.needsUpdate = true;
+    for (const texture of [grain, atlas]) { texture.anisotropy = value ? 1 : 4; texture.needsUpdate = true; }
+  }
+  setSimplified(simplified);
   function dispose() {
     blocks.removeFromParent(); labels.removeFromParent(); blocks.dispose(); labels.dispose();
     geometry.dispose(); labelGeometry.dispose(); material.dispose(); labelMaterial.dispose(); atlas.dispose(); grain.dispose();
   }
-  return { blocks, pose, update, commit, dispose };
+  return { blocks, pose, update, commit, setSimplified, dispose };
 }
 

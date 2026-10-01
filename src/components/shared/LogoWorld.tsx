@@ -4,6 +4,7 @@ import { createEventWorld } from '../../lib/event-world';
 import type { RideGlimpsesHandle } from './RideGlimpses';
 import type { RideMapHandle } from './RideMap';
 import type { RideMapLayout } from '../../lib/event-minimap';
+import type { RideAudio } from '../../lib/event-audio';
 
 export interface LogoWorldProps {
   stations: Station[];
@@ -12,6 +13,7 @@ export interface LogoWorldProps {
   reduced: boolean;
   input: RefObject<MoveInput>;
   boostInput: RefObject<boolean>;
+  audio: RefObject<RideAudio | null>;
   glimpses: RefObject<RideGlimpsesHandle | null>;
   minimap: RefObject<RideMapHandle | null>;
   onTravelChange: (station: number | null) => void;

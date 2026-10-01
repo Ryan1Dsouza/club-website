@@ -36,9 +36,11 @@ export function glimpseFrame(elapsed: number, slot: number, remaining: number) {
 /** Small, bounded camera impulses; phone framing has gentler lateral motion. */
 export function cinematicCamera(speed: number, acceleration: number, slope: number, cruise: number, compact: boolean, reduced: boolean, boostFocus = 0) {
   const pace = Math.min(1.6, Math.abs(speed) / cruise);
-  const focus = reduced ? 0 : clamp(boostFocus);
+  const focus = reduced ? 0 : clamp(boostFocus) * smooth(pace);
   return {
-    fov: (compact ? 77 : 68) + (reduced ? 0 : pace * 9 + Math.max(0, -slope * Math.sign(speed)) * pace * 3) - focus * (compact ? 11 : 14),
+    // Widen gradually with actual speed; cap the phone lens to avoid distortion.
+    fov: (compact ? 82 : 68) + (reduced ? 0 : pace * (compact ? 4 : 6) + Math.max(0, -slope * Math.sign(speed)) * pace * (compact ? 2 : 3)) + focus * (compact ? 3 : 8),
+    pullback: focus * (compact ? .4 : .7),
     lift: reduced ? 0 : Math.max(-.1, Math.min(.1, -acceleration * .006)),
     pitch: reduced ? 0 : Math.max(-.025, Math.min(.025, acceleration * -.0018)) * (compact ? .6 : 1),
     bankScale: (compact ? .55 : .85) * (1 - focus * .3),

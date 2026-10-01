@@ -20,9 +20,15 @@ async function connect(page) {
   });
   await page.goto('/events');
 }
-async function ready(page) { await expect(page.getByRole('button', { name: 'Return to ride' })).toBeEnabled({ timeout: 20_000 }); }
+async function ready(page) {
+  await expect(page.locator('.nx-map-button')).toBeEnabled({ timeout: 30_000 });
+  await expect(page.locator('[data-loading-screen]')).toHaveCount(0);
+}
 
-test('boost focuses the ride and an abrupt stop fades the existing photos', async ({ page }, info) => {
+test('boost widens and pulls back the camera and opening events fades the existing photos', async ({ page }, info) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await page.setViewportSize({ width: 1440, height: 900 });
   await connect(page); await ready(page);
   const world = page.locator('.nx-world'), cards = page.locator('.nx-glimpses'), focus = page.locator('.nx-boost-focus');
@@ -35,14 +41,16 @@ test('boost focuses the ride and an abrupt stop fades the existing photos', asyn
   await page.keyboard.down('Shift');
   await expect(world).toHaveAttribute('data-boost', 'true');
   await expect.poll(() => focus.evaluate(el => Number(getComputedStyle(el).opacity))).toBeGreaterThan(.9);
-  await expect.poll(() => world.getAttribute('data-fov').then(Number)).toBeLessThan(cruisingFov - 3);
+  await expect.poll(() => world.getAttribute('data-fov').then(Number)).toBeGreaterThan(cruisingFov + 3);
+  await expect.poll(() => world.getAttribute('data-camera-pullback').then(Number)).toBeGreaterThan(.3);
   await page.screenshot({ path: info.outputPath('boost-focus.png') });
   await page.keyboard.up('Shift'); await page.keyboard.up('w');
-  // Record the real DOM through a restart, including the fading frames before unmount.
+  await expect.poll(() => world.getAttribute('data-camera-pullback').then(Number)).toBeLessThan(.02);
+  // Opening the event list pauses the ride and fades the photos before unmount.
   const fade = await page.evaluate(() => new Promise(resolve => {
     const panel = document.querySelector('.nx-glimpses'), samples = [];
     const start = performance.now();
-    document.querySelector('.nx-restart-button').click();
+    document.querySelector('.nx-event-actions button').click();
     const sample = () => {
       samples.push({ opacity: Number(getComputedStyle(panel).opacity), hidden: panel.hidden, fading: panel.dataset.fading });
       if (panel.hidden || performance.now() - start > 3000) resolve(samples); else requestAnimationFrame(sample);
@@ -51,9 +59,43 @@ test('boost focuses the ride and an abrupt stop fades the existing photos', asyn
   }));
   expect(fade.some(sample => sample.fading === 'true' && !sample.hidden && sample.opacity > .1 && sample.opacity < .9)).toBe(true);
   expect(fade.at(-1).hidden).toBe(true);
+  await expect(page.getByRole('button', { name: /restart|reset ride/i })).toHaveCount(0);
   await expect.poll(() => focus.evaluate(el => Number(getComputedStyle(el).opacity))).toBeLessThan(.05);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(focus).toBeHidden();
+  await expect(world).toHaveAttribute('data-postprocessing', 'false');
+  expect(errors).toEqual([]);
+});
+
+test('wind is opt-in, follows motion, suspends for dialogs, and closes on navigation', async ({ page }) => {
+  await page.addInitScript(() => {
+    const Original = window.AudioContext;
+    window.rideAudioContexts = [];
+    window.AudioContext = class extends Original {
+      constructor(...args) { super(...args); window.rideAudioContexts.push(this); }
+    };
+  });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await connect(page); await ready(page);
+  const sound = page.getByRole('button', { name: 'Wind sound' }), world = page.locator('.nx-world');
+  await expect(sound).toHaveAttribute('aria-pressed', 'false');
+  expect(await page.evaluate(() => window.rideAudioContexts.length)).toBe(0);
+  await expect(page.locator('.nx-minimap')).toHaveCSS('backdrop-filter', 'blur(10px)');
+  await page.getByRole('button', { name: 'Return to ride' }).click();
+  await expect(world).toHaveAttribute('data-drive-ready', 'true');
+  await sound.click();
+  await expect(sound).toHaveAttribute('aria-pressed', 'true');
+  await world.focus(); await page.keyboard.down('w');
+  await expect.poll(() => world.getAttribute('data-audio-gain').then(Number)).toBeGreaterThan(.002);
+  await page.keyboard.up('w');
+  await page.getByRole('button', { name: 'Events 3', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.rideAudioContexts[0].state)).toBe('suspended');
+  await page.getByRole('button', { name: 'Close event', exact: true }).click();
+  await sound.click(); await expect(sound).toHaveAttribute('aria-pressed', 'false');
+  await expect.poll(() => world.getAttribute('data-audio-gain').then(Number)).toBe(0);
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Home', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.rideAudioContexts[0].state)).toBe('closed');
 });
 
 test('station-only travel repeats event photos, departs Station 01, and rides to another checkpoint', async ({ page }, info) => {
@@ -159,20 +201,67 @@ test('desktop publishes a photo folder without replacing the canvas, and another
   expect(errors).toEqual([]); await visitor.close();
 });
 
-for (const viewport of [{ width: 390, height: 844 }, { width: 1024, height: 1366 }]) {
-  test(`touch controls and map fit ${viewport.width}px`, async ({ browser }, info) => {
-    const context = await browser.newContext({ baseURL: 'http://127.0.0.1:3010', viewport, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
-    const page = await context.newPage(); await connect(page); await ready(page);
-    await expect(page.locator('.nx-joystick')).toBeVisible();
-    await page.waitForTimeout(1800);
-    await expect(page.locator('.nx-joystick')).toBeDisabled();
-    const dimensions = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth, pixelWidth: document.querySelector('.nx-world canvas').width, cssWidth: document.querySelector('.nx-world').clientWidth }));
-    expect(dimensions.scroll).toBe(dimensions.width); expect(dimensions.pixelWidth / dimensions.cssWidth).toBeLessThanOrEqual(1.26);
-    await page.screenshot({ path: info.outputPath(`touch-${viewport.width}.png`) });
-    await page.getByRole('button', { name: 'Return to ride' }).click();
-    await expect(page.locator('.nx-joystick')).toBeEnabled();
-    await page.getByRole('button', { name: 'Add Event', exact: true }).click(); await expect(page.getByLabel('Email', { exact: true })).toBeVisible();
-    await context.close();
+for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 844, height: 390 }, { width: 1024, height: 1366 }]) {
+  test(`compact ride controls and camera fit ${viewport.width}x${viewport.height}`, async ({ browser }, info) => {
+    const compact = viewport.width <= 768 || viewport.height <= 500;
+    const context = await browser.newContext({ baseURL: info.project.use.baseURL, viewport, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
+    const page = await context.newPage(), errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    try {
+      await connect(page); await ready(page);
+      const world = page.locator('.nx-world');
+      if (await page.getByRole('button', { name: 'Return to ride' }).isVisible()) await page.getByRole('button', { name: 'Return to ride' }).click();
+      await world.focus();
+      await expect(world).toHaveAttribute('data-drive-ready', 'true');
+      await expect(world).toHaveAttribute('data-antialias', 'true');
+      await expect(page.locator('.nx-joystick')).toBeEnabled();
+      await expect(page.getByRole('button', { name: /restart|reset ride/i })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'Events 3', exact: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Add Event', exact: true })).toBeVisible();
+      if (compact) { await expect(page.locator('.nx-minimap')).toHaveCount(0); await expect(page.locator('.nx-glimpses')).toHaveCount(0); }
+      const layout = await page.evaluate(() => {
+        const rect = selector => document.querySelector(selector).getBoundingClientRect().toJSON();
+        return { width: innerWidth, scroll: document.documentElement.scrollWidth, pixelWidth: document.querySelector('.nx-world canvas').width,
+          world: rect('.nx-world'), controls: rect('.nx-controls'), joystick: rect('.nx-joystick'), boost: rect('.nx-boost-button'), map: rect('.nx-map-button'), top: rect('.nx-topbar') };
+      });
+      expect(layout.scroll).toBe(layout.width); expect(layout.pixelWidth / layout.world.width).toBeLessThanOrEqual(1.26);
+      expect(layout.controls.height).toBeLessThanOrEqual(72);
+      expect(layout.controls.y - layout.top.bottom).toBeGreaterThan(layout.world.height * .45);
+      for (const control of [layout.joystick, layout.boost, layout.map]) {
+        expect(control.width).toBeGreaterThanOrEqual(44); expect(control.height).toBeGreaterThanOrEqual(44);
+        expect(control.x).toBeGreaterThanOrEqual(12); expect(control.right).toBeLessThanOrEqual(viewport.width - 12);
+        expect(control.bottom).toBeLessThanOrEqual(layout.world.bottom - 10);
+      }
+      expect(layout.joystick.right + 8).toBeLessThanOrEqual(layout.boost.x);
+      expect(layout.boost.right + 7).toBeLessThanOrEqual(layout.map.x);
+      expect(Math.abs(layout.boost.y - layout.map.y)).toBeLessThan(1);
+      await page.screenshot({ path: info.outputPath('mobile-ride.png') });
+      await page.mouse.move(layout.boost.x + layout.boost.width / 2, layout.boost.y + layout.boost.height / 2); await page.mouse.down();
+      await expect(world).toHaveAttribute('data-boost', 'true');
+      await expect.poll(() => world.getAttribute('data-speed').then(Number), { timeout: 15_000 }).toBeGreaterThan(15);
+      const sample = await page.evaluate(() => new Promise(resolve => {
+        const timings = []; let previous = performance.now();
+        function frame(now) {
+          timings.push(now - previous); previous = now;
+          if (timings.length < 60) requestAnimationFrame(frame);
+          else { timings.sort((a, b) => a - b); resolve({ medianMs: timings[30], p95Ms: timings[57], ...document.querySelector('.nx-world').dataset }); }
+        }
+        requestAnimationFrame(frame);
+      }));
+      console.log(`Ride frame sample ${viewport.width}x${viewport.height}:`, JSON.stringify(sample));
+      expect(Number(sample.cameraLag)).toBeLessThan(.16);
+      expect(Number(sample.fov)).toBeGreaterThanOrEqual(76);
+      await page.mouse.up(); await expect(world).toHaveAttribute('data-boost', 'false');
+      await page.getByRole('button', { name: 'Open holographic map' }).click();
+      await expect(page.locator('.nx-joystick')).toHaveCount(0); await expect(page.locator('.nx-boost-button')).toHaveCount(0);
+      await expect(world).toHaveAttribute('data-orbit', 'true');
+      await page.screenshot({ path: info.outputPath('mobile-map.png') });
+      await page.locator('[data-stop-kind=event]').first().click();
+      await expect(page.getByRole('dialog', { name: 'The first connection' })).toBeVisible();
+      await page.getByRole('button', { name: 'Close event', exact: true }).click();
+      await page.getByRole('button', { name: 'Add Event', exact: true }).click(); await expect(page.getByLabel('Email', { exact: true })).toBeVisible();
+      expect(errors).toEqual([]);
+    } finally { await context.close(); }
   });
 }
 
@@ -246,7 +335,7 @@ test('a photo-free event has category artwork and both links after publishing', 
   await page.screenshot({ path: info.outputPath('photo-free-event.png') });
 });
 
-for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }, { width: 844, height: 390 }]) {
+for (const viewport of [{ width: 1440, height: 900 }, { width: 1024, height: 1366 }]) {
   test(`cinematic glimpses and map gestures fit ${viewport.width}x${viewport.height}`, async ({ browser }, info) => {
     const touch = viewport.width !== 1440;
     const context = await browser.newContext({ baseURL: info.project.use.baseURL, viewport, deviceScaleFactor: touch ? 3 : 1, isMobile: touch, hasTouch: touch });

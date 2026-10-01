@@ -8,23 +8,27 @@ import { createQualityController, qualityPixelRatio } from './event-quality';
 import { disposeObject } from './event-batching';
 import { cinematicCamera, GLIMPSE_EXIT } from './event-cinematics';
 import { createRideMap } from './event-minimap';
+import { createRidePostprocessing } from './event-postprocessing';
 
 export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps) {
   const coarse = window.matchMedia('(pointer: coarse)').matches;
-  const renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: false, powerPreference: 'high-performance' });
+  // Keep edges antialiased on phones too; adaptive resolution still bounds GPU cost.
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
   const quality = createQualityController(coarse || navigator.hardwareConcurrency <= 4 ? 1 : 2);
-  renderer.setClearColor('#000000');
+  renderer.setClearColor('#010604');
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
+  renderer.info.autoReset = false;
   renderer.domElement.setAttribute('aria-hidden', 'true');
   host.prepend(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2('#000000', .0045);
+  scene.fog = new THREE.FogExp2('#010604', .0042);
   const camera = new THREE.PerspectiveCamera(70, 1, .15, 1800);
+  const postprocessing = createRidePostprocessing(renderer);
   const orbit = new OrbitControls(camera, renderer.domElement);
-  orbit.enabled = false; orbit.enablePan = true; orbit.screenSpacePanning = true; orbit.enableDamping = true; orbit.dampingFactor = .055;
+  orbit.enabled = false; orbit.enablePan = true; orbit.screenSpacePanning = true; orbit.enableDamping = true; orbit.dampingFactor = .09;
   orbit.minPolarAngle = .15; orbit.maxPolarAngle = Math.PI * .8;
   orbit.rotateSpeed = .5; orbit.zoomSpeed = .6; orbit.autoRotateSpeed = .45;
   const mapCenter = new THREE.Vector3(0, LOGO_CENTER_Y - 5, 35);
@@ -58,7 +62,8 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
   let gazeX = 0, gazeY = 0, bank = 0, mapBlend = mode === 'overview' ? 1 : 0;
   let transition = 1, initialized = false, notified: number | null = null;
   let dilation = 1, lastAnticipation = 0;
-  let mapInteracted = false, cameraLift = 0, cameraPitch = 0, lastDiagnostics = 0;
+  let mapInteracted = false, cameraLift = 0, cameraPitch = 0, cameraPullback = 0, lastDiagnostics = 0;
+  let reduced = get().reduced;
   let rendered = false, width = 1, height = 1, lastMarkerUpdate = 0;
   let renderDirty = true, drewLastFrame = false, renderedFov = 0;
   const renderedPosition = new THREE.Vector3(), renderedRotation = new THREE.Quaternion();
@@ -106,7 +111,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     get().onTravelChange(index);
   }
   function setBoost(active: boolean) { if (boosting !== active) { boosting = active; get().onBoostChange(active); } }
-  function resetInput() { keys.clear(); dragging = null; get().input.current = { x: 0, y: 0 }; get().boostInput.current = false; setBoost(false); }
+  function resetInput() { keys.clear(); dragging = null; get().input.current = { x: 0, y: 0 }; get().boostInput.current = false; get().audio.current?.quiet(); setBoost(false); }
   function focus() { host.focus({ preventScroll: true }); }
   function mapCamera() {
     // Fit the longer loop, including the foreground garden, on narrow displays.
@@ -136,6 +141,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     width = Math.max(host.clientWidth, 1); height = Math.max(host.clientHeight, 1);
     renderer.setPixelRatio(qualityPixelRatio(quality.level, width, height, window.devicePixelRatio, coarse));
     renderer.setSize(width, height, false); scenery.setQuality(quality.level);
+    postprocessing.resize(renderer.domElement.width, renderer.domElement.height, quality.level, get().reduced);
     camera.aspect = width / height; camera.updateProjectionMatrix(); mapCamera();
     if (resetCamera && mode === 'overview' && transition >= 1) { camera.position.copy(mapPosition); camera.quaternion.copy(mapRotation); orbit.update(); }
   }
@@ -173,7 +179,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     dragging.x = event.clientX; dragging.y = event.clientY;
   };
   const pointerUp = () => { dragging = null; };
-  const contextLost = (event: Event) => { event.preventDefault(); failed = true; cancelAnimationFrame(frame); get().onError(); };
+  const contextLost = (event: Event) => { event.preventDefault(); failed = true; cancelAnimationFrame(frame); get().audio.current?.quiet(); get().onError(); };
   function visibility() {
     heldKeys.clear(); resetInput(); last = 0; quality.reset(); cancelAnimationFrame(frame);
     if (!document.hidden && visible && !disposed && !failed) frame = requestAnimationFrame(animate);
@@ -183,6 +189,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     const rawDelta = last ? (now - last) / 1000 : 0;
     const dt = Math.min(rawDelta, .05); last = now;
     const props = get();
+    if (reduced !== props.reduced) { reduced = props.reduced; size(false); }
     let resumeKey: string | undefined;
     if (stationProps !== props.stations) syncStations(props);
     if (!props.paused) elapsed += dt;
@@ -201,7 +208,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       }
       else if (props.command.resume) journey = departCoasterStation(journey);
       else { journey = initialCoasterJourney(destination === null || !Number.isFinite(stops[destination]) ? 0 : stops[destination]); journey.dismissed = destination; }
-      motion = journey.motion; notified = null; bank = 0; dilation = 1; cameraLift = cameraPitch = 0; resetInput();
+      motion = journey.motion; notified = null; bank = 0; dilation = 1; cameraLift = cameraPitch = cameraPullback = 0; resetInput();
       resumeKey = props.command.driveKey;
       if (mode === 'explore') focus();
     }
@@ -227,6 +234,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       if (journey.phase === 'stopped' && journey.station !== null && notified !== journey.station) { setTravel(null); openStation(journey.station); }
     }
     setBoost(driveOptions.boost && (journey.phase === 'riding' || journey.phase === 'approaching'));
+    props.audio.current?.update(motion.speed / COASTER_SPEED, active && document.hasFocus() && Math.abs(motion.speed) > .1);
     boostFocus = props.reduced ? 0 : THREE.MathUtils.damp(boostFocus, boosting ? 1 : 0, boosting ? 3.8 : 4.5, dt);
     controlsRoot.style.setProperty('--nx-boost-focus', boostFocus.toFixed(3));
     if (now - lastAnticipation >= 250) {
@@ -240,17 +248,19 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     props.glimpses.current?.update(showGlimpse && nextEvent.index !== null ? worldStations[nextEvent.index] : null, nextEvent.remaining, dt);
     const f = sampleTrack(track, motion.distance, length, rideFrame);
     props.minimap.current?.update(minimap.project(f.point));
-    const cinematic = cinematicCamera(motion.speed, motion.acceleration, f.tangent.y, COASTER_SPEED, coarse || camera.aspect < .8, props.reduced, boostFocus);
-    bank = props.reduced ? 0 : THREE.MathUtils.damp(bank, cameraBank(f.curvature, motion.speed, false) * cinematic.bankScale, 4.5, dt);
-    cameraLift = props.reduced ? 0 : THREE.MathUtils.damp(cameraLift, cinematic.lift, 4, dt);
-    cameraPitch = props.reduced ? 0 : THREE.MathUtils.damp(cameraPitch, cinematic.pitch, 4, dt);
-    if (!dragging) { gazeX = THREE.MathUtils.damp(gazeX, 0, 1.6 + boostFocus * 5, dt); gazeY = THREE.MathUtils.damp(gazeY, 0, 1.6 + boostFocus * 5, dt); }
+    const compactCamera = coarse || width <= 768 || height <= 500;
+    const cinematic = cinematicCamera(motion.speed, motion.acceleration, f.tangent.y, COASTER_SPEED, compactCamera, props.reduced, boostFocus);
+    bank = props.reduced ? 0 : THREE.MathUtils.damp(bank, cameraBank(f.curvature, motion.speed, false) * cinematic.bankScale, 9, dt);
+    cameraLift = props.reduced ? 0 : THREE.MathUtils.damp(cameraLift, cinematic.lift, 9, dt);
+    cameraPitch = props.reduced ? 0 : THREE.MathUtils.damp(cameraPitch, cinematic.pitch, 9, dt);
+    cameraPullback = props.reduced ? 0 : THREE.MathUtils.damp(cameraPullback, cinematic.pullback, 6, dt);
+    if (!dragging) { gazeX = THREE.MathUtils.damp(gazeX, 0, 3.4 + boostFocus * 5, dt); gazeY = THREE.MathUtils.damp(gazeY, 0, 3.4 + boostFocus * 5, dt); }
     target.copy(f.point).add(f.tangent);
     basis.lookAt(f.point, target, f.up); desiredRotation.setFromRotationMatrix(basis);
     look.setFromEuler(euler.set(0, 0, bank)); desiredRotation.multiply(look);
     scenery.cart.position.copy(f.point); scenery.cart.quaternion.copy(desiredRotation);
     scenery.player.position.copy(f.point).addScaledVector(f.up, 1);
-    desiredPosition.copy(f.point).addScaledVector(f.up, 1.48 + cameraLift);
+    desiredPosition.copy(f.point).addScaledVector(f.up, (compactCamera ? 1.68 : 1.48) + cameraLift).addScaledVector(f.tangent, -cameraPullback);
     look.setFromEuler(euler.set(gazeY + cameraPitch, gazeX, 0)); desiredRotation.multiply(look);
     const rideFov = cinematic.fov - (props.reduced ? 0 : (1 - dilation) * 5);
     if (!initialized) {
@@ -258,15 +268,17 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       if (mode === 'overview') { camera.position.copy(mapPosition); camera.quaternion.copy(mapRotation); camera.fov = 44; }
     }
     if (transition < 1) {
-      transition = Math.min(1, transition + dt / 1.35);
+      transition = Math.min(1, transition + dt);
       const t = THREE.MathUtils.smootherstep(transition, 0, 1);
       camera.position.lerpVectors(fromPosition, mode === 'overview' ? mapPosition : desiredPosition, t);
       camera.quaternion.slerpQuaternions(fromRotation, mode === 'overview' ? mapRotation : desiredRotation, t);
       camera.fov = THREE.MathUtils.lerp(fromFov, mode === 'overview' ? 44 : rideFov, t);
     } else if (mode === 'explore') {
       camera.position.copy(desiredPosition);
-      camera.quaternion.slerp(desiredRotation, props.reduced ? 1 : 1 - Math.exp(-8 * dt));
-      camera.fov = THREE.MathUtils.damp(camera.fov, rideFov, 3, dt);
+      // Exponential smoothing stays consistent at 30/60/120 Hz; rotation settles
+      // 90% in 128 ms instead of 288 ms, without lagging behind the cart position.
+      camera.quaternion.slerp(desiredRotation, props.reduced ? 1 : 1 - Math.exp(-18 * dt));
+      camera.fov = props.reduced ? rideFov : THREE.MathUtils.damp(camera.fov, rideFov, 8, dt);
     } else {
       camera.fov = 44;
       orbit.enabled = !paused;
@@ -280,7 +292,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     frameMapView(); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
     mapBlend = props.reduced ? (mode === 'overview' ? 1 : 0) : THREE.MathUtils.damp(mapBlend, mode === 'overview' ? 1 : 0, 3, dt);
     scenery.update(elapsed, props.reduced, mapBlend, camera);
-    (scene.fog as THREE.FogExp2).density = THREE.MathUtils.lerp(.0045, .0008, mapBlend);
+    (scene.fog as THREE.FogExp2).density = THREE.MathUtils.lerp(.0042, .0008, mapBlend);
     if (mode === 'overview' && now - lastMarkerUpdate > 50) { lastMarkerUpdate = now;
       markers = Array.from(host.querySelectorAll<HTMLButtonElement>('[data-world-station]'));
       const depths = stopPoints.map((point, i) => ({ i, distance: point?.distanceTo(camera.position) ?? Infinity })).sort((a, b) => b.distance - a.distance);
@@ -300,8 +312,8 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     // wake rendering without restarting the motor, transition, or orbit.
     const cameraChanged = renderedPosition.distanceToSquared(camera.position) > .000001 || renderedRotation.angleTo(camera.quaternion) > .0001 || Math.abs(renderedFov - camera.fov) > .001;
     drewLastFrame = !rendered || renderDirty || cameraChanged || transition < 1;
-    try { if (drewLastFrame) { renderer.render(scene, camera); renderDirty = false; renderedPosition.copy(camera.position); renderedRotation.copy(camera.quaternion); renderedFov = camera.fov; } }
-    catch (error) { failed = true; console.error('Unable to render the Nucleus ride:', error); props.onError(); return; }
+    try { if (drewLastFrame) { renderer.info.reset(); postprocessing.render(scene, camera, mapBlend, compactCamera, motion.speed); renderDirty = false; renderedPosition.copy(camera.position); renderedRotation.copy(camera.quaternion); renderedFov = camera.fov; } }
+    catch (error) { failed = true; props.audio.current?.quiet(); console.error('Unable to render the Nucleus ride:', error); props.onError(); return; }
     if (!rendered) { rendered = true; props.onReady(); }
     if (import.meta.env.DEV && now - lastDiagnostics > 200) {
       lastDiagnostics = now;
@@ -314,6 +326,11 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       host.dataset.driveReady = String(active);
       host.dataset.pan = orbit.target.toArray().map(n => n.toFixed(1)).join(',');
       host.dataset.orbit = String(orbit.autoRotate); host.dataset.fov = camera.fov.toFixed(2);
+      host.dataset.cameraLag = camera.quaternion.angleTo(desiredRotation).toFixed(4);
+      host.dataset.cameraPullback = cameraPullback.toFixed(3);
+      host.dataset.postprocessing = String(postprocessing.enabled); host.dataset.depthOfField = String(postprocessing.depthOfField);
+      host.dataset.audioRunning = String(props.audio.current?.running ?? false); host.dataset.audioGain = (props.audio.current?.gain ?? 0).toFixed(4);
+      host.dataset.antialias = String(renderer.getContext().getContextAttributes()?.antialias);
     }
     frame = requestAnimationFrame(animate);
   }
@@ -336,6 +353,6 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     renderer.domElement.removeEventListener('pointerdown', pointerDown); renderer.domElement.removeEventListener('pointermove', pointerMove);
     renderer.domElement.removeEventListener('pointerup', pointerUp); renderer.domElement.removeEventListener('pointercancel', pointerUp);
     renderer.domElement.removeEventListener('lostpointercapture', pointerUp); renderer.domElement.removeEventListener('webglcontextlost', contextLost);
-    disposeObject(scene); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();
+    postprocessing.dispose(); disposeObject(scene); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();
   };
 }

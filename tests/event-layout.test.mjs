@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { createCoasterTrack, sampleTrack, createTrackFrame } from '../src/lib/event-coaster.ts';
+import { createCoasterTrack, sampleTrack, createTrackFrame, LOGO_DEPTH } from '../src/lib/event-coaster.ts';
 import { createStationPlanner, logoClearance, BUILDING_BOUNDS, maxStopGap, fillWaypoints } from '../src/lib/event-layout.ts';
 import { createExperienceStations } from '../src/lib/experience-stations.ts';
 import { createQualityController, qualityPixelRatio, shouldShowJoystick } from '../src/lib/event-quality.ts';
@@ -20,6 +20,41 @@ test('rail, cart, and rider envelopes clear the solid logo over the entire route
   assert.ok(logo.isMesh); assert.equal(logo.children.length, 0);
   assert.equal(logo.material.transparent, false); assert.equal(logo.material.wireframe, false);
   logo.geometry.dispose(); logo.material.dispose();
+});
+
+test('logo has smoothly shaded bevels within the original depth and a bounded mesh budget', () => {
+  const logo = createVerticalLogo(), geometry = logo.geometry;
+  geometry.computeBoundingBox();
+  assert.ok(Math.abs(geometry.boundingBox.min.z) < 1e-6);
+  assert.ok(Math.abs(geometry.boundingBox.max.z - LOGO_DEPTH) < 1e-6);
+  assert.equal(logo.material.flatShading, false);
+  const normals = geometry.getAttribute('normal'), a = new THREE.Vector3(), b = new THREE.Vector3();
+  const positions = geometry.getAttribute('position');
+  for (let i = 0; i < positions.count; i++) {
+    if (Math.abs(positions.getZ(i)) < 1e-6) assert.equal(normals.getZ(i), -1);
+    if (Math.abs(positions.getZ(i) - LOGO_DEPTH) < 1e-6) assert.equal(normals.getZ(i), 1);
+  }
+  let smoothTriangles = 0;
+  for (let i = 0; i < normals.count; i += 3) {
+    a.fromBufferAttribute(normals, i); b.fromBufferAttribute(normals, i + 1);
+    assert.ok(Number.isFinite(a.lengthSq()));
+    if (a.dot(b) < .999 && a.lengthSq() > .99 && b.lengthSq() > .99) smoothTriangles++;
+  }
+  assert.ok(smoothTriangles > 100, 'curved surfaces interpolate normals instead of showing individual facets');
+  assert.ok(geometry.getAttribute('position').count / 3 < 50_000, 'logo stays inexpensive enough for phones');
+  // Check the actual rendered mesh, not just the original polygon clearance mask.
+  logo.updateMatrixWorld(true);
+  const ray = new THREE.Raycaster(), frame = createTrackFrame();
+  for (let i = 0; i <= 2000; i++) {
+    const f = sampleTrack(track, i / 2000 * length, length, frame);
+    for (const point of [f.point, f.point.clone().addScaledVector(f.up, 1.68)]) {
+      for (const direction of [f.side, f.up]) {
+        ray.set(point.clone().addScaledVector(direction, -1.5), direction); ray.far = 3;
+        assert.equal(ray.intersectObject(logo).length, 0, 'rounded edges must leave room for the rider and cart');
+      }
+    }
+  }
+  geometry.dispose(); logo.material.dispose();
 });
 
 test('three evenly spaced default stations and subsequent stations avoid structures and each other', () => {

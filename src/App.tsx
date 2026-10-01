@@ -4,6 +4,7 @@ import { ArrowUpRight, ArrowRight, BrainCircuit, Code2, Network, Github, Instagr
 import { MorphingNavbar } from './components/ui/morphing-navbar';
 import { Logo } from './components/shared/Logo';
 import Modal from './components/shared/Modal';
+import LoadingScreen from './components/shared/LoadingScreen';
 import { api } from './api';
 import type { SiteData, SiteSettings } from './types';
 import seed from '../shared/public-data.json';
@@ -71,15 +72,36 @@ export default function App({ initialData = seed }: { initialData?: SiteData }) 
   const [applyOpen, setApplyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [domain, setDomain] = useState<number | null>(null);
+  // Start after hydration so server-rendered content remains usable without JS.
+  const [loadingStage, setLoadingStage] = useState<'idle' | 'loading' | 'exiting' | 'done'>('idle');
+  const loading = loadingStage === 'loading' || loadingStage === 'exiting';
   const location = useLocation();
-  useCinematicScroll(location.pathname === '/' && !applyOpen && !menuOpen && domain === null);
+  useCinematicScroll(location.pathname === '/' && !loading && !applyOpen && !menuOpen && domain === null);
 
   useEffect(() => {
     const abort = new AbortController();
-    const refresh = () => api<SiteData>('/site', { signal: abort.signal }).then(site => { setData(site); setOnline(true); }).catch(error => { if (error.name !== 'AbortError') setOnline(false); });
-    void refresh();
+    let disposed = false, finished = false, finishTimer = 0;
+    const started = performance.now();
+    const minimum = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1600;
+    setLoadingStage('loading');
+    const dismiss = () => {
+      if (disposed || finished) return;
+      finished = true; window.clearTimeout(deadline); window.clearTimeout(finishTimer);
+      setLoadingStage('exiting');
+    };
+    // The existing seed/SSR data stays available if startup requests stall.
+    const deadline = window.setTimeout(dismiss, 8000);
+    const refresh = () => api<SiteData>('/site', { signal: abort.signal }).then(site => {
+      if (!disposed) { setData(site); setOnline(true); }
+    }).catch(error => { if (!disposed && error.name !== 'AbortError') setOnline(false); });
+    void Promise.allSettled([refresh(), document.fonts.ready]).then(() => {
+      if (!disposed && !finished) finishTimer = window.setTimeout(dismiss, Math.max(0, minimum - (performance.now() - started)));
+    });
     window.addEventListener('focus', refresh);
-    return () => { abort.abort(); window.removeEventListener('focus', refresh); };
+    return () => {
+      disposed = true; abort.abort(); window.clearTimeout(deadline); window.clearTimeout(finishTimer);
+      window.removeEventListener('focus', refresh);
+    };
   }, []);
 
   useEffect(() => {
@@ -101,6 +123,8 @@ export default function App({ initialData = seed }: { initialData?: SiteData }) 
 
 
   return <>
+    <LoadingScreen active={loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
+    <div className="site-shell" inert={loading} aria-busy={loading}>
     <a href="#main-content" className="skip-link">Skip to content</a>
     <header className={`site-header${location.pathname === '/' ? ' site-header--home' : ''}`}>
       <MorphingNavbar items={navItems} settings={settings} open={menuOpen} onOpenChange={setMenuOpen} onApply={() => setApplyOpen(true)} />
@@ -119,5 +143,6 @@ export default function App({ initialData = seed }: { initialData?: SiteData }) 
     {location.pathname === '/' && <SiteFooter settings={settings} />}
     {applyOpen && <ApplyForm settings={settings} online={online} onClose={() => setApplyOpen(false)} />}
     {domain !== null && <Modal title={`${domains[domain].title} ${domains[domain].subtitle}`} onClose={() => setDomain(null)}><p className="modal-lead">{domains[domain].detail}</p><div className="domain-tags">{domains[domain].tags.map(tag => <span key={tag}>{tag}</span>)}</div><button className="button primary" onClick={() => { setDomain(null); setApplyOpen(true); }}>Get involved <ArrowUpRight size={17} /></button></Modal>}
+    </div>
   </>;
 }

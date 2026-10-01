@@ -6,9 +6,12 @@
 }
 [data-tower-status='ready'] .people-tower { height: var(--tower-length); }
 [data-tower-status='ready'] .people-tower__stage { position: sticky; top: var(--header-height); }
+@media (max-width: 768px) {
+  [data-tower-status='ready'] .people-tower { height: var(--tower-length-mobile); }
+}
 .people-tower__world { position: absolute; inset: 0; }
 .people-tower__world > canvas, .people-tower__labels { position: absolute; inset: 0; display: block; pointer-events: none; }
-.people-tower__world > canvas { pointer-events: auto; touch-action: pan-y; cursor: grab; }
+.people-tower__world > canvas { width: 100%; height: 100%; pointer-events: auto; touch-action: pan-y; cursor: grab; }
 .people-tower__world[data-dragging] > canvas { cursor: grabbing; }
 .people-tower__hint { position: absolute; inset: auto var(--gutter) 82px; z-index: 2; max-width: 420px; font: 11px/1.6 var(--mono); color: #d4eadc; opacity: var(--tower-intro, 1); pointer-events: none; }
 .people-tower__hint[hidden] { display: none; }

@@ -62,6 +62,44 @@ test('reference layout keeps a centered pill and reveals a full-screen menu in f
   expect(errors).toEqual([]);
 });
 
+test('reopening replays the stagger after completed and interrupted closes', async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await expect(page.locator('.logo-landing')).toHaveAttribute('data-text-ready', 'true', { timeout: 15000 });
+
+  for (const closeDelay of [null, 2000, 75, 300]) {
+    if (closeDelay !== null) {
+      await toggle(page).dispatchEvent('click');
+      await page.waitForTimeout(closeDelay);
+    }
+    await page.evaluate(() => {
+      window.reopenFrames = [];
+      const sample = () => {
+        const bands = [...document.querySelectorAll('.morph-nav__band')].map(band => band.getBoundingClientRect().x);
+        window.reopenFrames.push({
+          bands,
+          lastBandOffset: bands[4] - document.querySelector('.morph-nav__overlay').getBoundingClientRect().x,
+          text: Number(getComputedStyle(document.querySelector('.morph-nav__links li')).opacity),
+        });
+        window.reopenFrameId = requestAnimationFrame(sample);
+      };
+      window.reopenFrameId = requestAnimationFrame(sample);
+    });
+    await toggle(page).dispatchEvent('click');
+    await settledOpen(page);
+    const frames = await page.evaluate(() => {
+      cancelAnimationFrame(window.reopenFrameId);
+      return window.reopenFrames;
+    });
+    await testInfo.attach(`sweep-after-${closeDelay ?? 'initial'}-close`, { body: JSON.stringify(frames), contentType: 'application/json' });
+    expect(frames.some(frame => frame.bands[0] > 10 && frame.bands[0] < 1300 &&
+      frame.bands[4] > frame.bands[0] + 100 && frame.lastBandOffset > 1439 && frame.text < .1),
+    closeDelay === null ? 'Expected a visible band stagger on first open' :
+      `Expected a visible band stagger after a ${closeDelay} ms close`).toBe(true);
+  }
+});
+
 test('keyboard focus stays in the full-screen menu and Escape restores the page', async ({ page }) => {
   await page.goto('/recruitment');
   await toggle(page).focus();

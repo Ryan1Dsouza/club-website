@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { mergeGeometries, toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { WORLD } from './event-navigation.ts';
 import { LOGO_SCALE, LOGO_CENTER_Y, LOGO_DEPTH, sampleTrack, type CoasterTrack } from './event-coaster.ts';
 import { CITY_BLOCKS, BUILDING_BOUNDS, logoClearance, type StationPlacement } from './event-layout.ts';
@@ -8,20 +8,55 @@ import type { QualityLevel } from './event-quality.ts';
 import { createTrackSupports } from './event-supports.ts';
 
 const MINT = '#c3e5c8';
+function roundedContour<T extends THREE.Path>(path: T, outline: number[][]): T {
+  const points = outline.map(([x, z]) => new THREE.Vector2(x, -z));
+  points.forEach((point, index) => {
+    const previous = points[(index + points.length - 1) % points.length], next = points[(index + 1) % points.length];
+    // Round only the traced pixel corners; short edges and passage widths survive.
+    const before = point.distanceTo(previous), after = point.distanceTo(next);
+    const radius = Math.min(.12, before * .2, after * .2);
+    const entry = point.clone().lerp(previous, before ? radius / before : 0);
+    const exit = point.clone().lerp(next, after ? radius / after : 0);
+    if (index === 0) path.moveTo(entry.x, entry.y); else path.lineTo(entry.x, entry.y);
+    path.quadraticCurveTo(point.x, point.y, exit.x, exit.y);
+  });
+  path.closePath();
+  return path;
+}
+
 function shape(outline: number[][], holes: number[][][] = []) {
-  const result = new THREE.Shape(outline.map(([x, z]) => new THREE.Vector2(x, -z)));
-  result.holes = holes.map(hole => new THREE.Path(hole.map(([x, z]) => new THREE.Vector2(x, -z))));
+  const result = roundedContour(new THREE.Shape(), outline);
+  result.holes = holes.map(hole => roundedContour(new THREE.Path(), hole));
   return result;
 }
 
-/** One opaque surface. The old coplanar scanline overlay caused the white bands. */
+/** One opaque, softly beveled surface, built once and shared by all quality levels. */
 export function createVerticalLogo() {
-  const pieces = WORLD.walls.map(wall => new THREE.ExtrudeGeometry(shape(wall.outline, wall.holes), { depth: LOGO_DEPTH, steps: 1, bevelEnabled: false }));
+  const bevel = .16;
+  const pieces = WORLD.walls.map(wall => new THREE.ExtrudeGeometry(shape(wall.outline, wall.holes), {
+    depth: LOGO_DEPTH - bevel * 2, steps: 1, curveSegments: 2,
+    bevelEnabled: true, bevelSegments: 2, bevelThickness: bevel,
+    bevelSize: .055, bevelOffset: -.055,
+  }).translate(0, 0, bevel));
   const geometry = mergeGeometries(pieces)!; pieces.forEach(piece => piece.dispose());
-  const material = new THREE.MeshStandardMaterial({ color: '#79a787', metalness: .18, roughness: .55, emissive: '#709b7e', emissiveIntensity: .24 });
+  // Extrusions duplicate vertices at face boundaries, so computeVertexNormals()
+  // alone cannot smooth them. Include the traced right-angle pixel corners in
+  // the averaging so long sides do not break into vertical lighting stripes.
+  geometry.scale(LOGO_SCALE, LOGO_SCALE, 1);
+  toCreasedNormals(geometry, Math.PI / 2 + .001);
+  // Keep the broad caps planar: averaging their normals with bevels can draw
+  // false diagonal shading across the extrusion's large triangulated faces.
+  const positions = geometry.getAttribute('position'), normals = geometry.getAttribute('normal');
+  for (let i = 0; i < positions.count; i++) {
+    const z = positions.getZ(i);
+    if (Math.abs(z) < 1e-6) normals.setXYZ(i, 0, 0, -1);
+    else if (Math.abs(z - LOGO_DEPTH) < 1e-6) normals.setXYZ(i, 0, 0, 1);
+  }
+  geometry.normalizeNormals(); geometry.computeBoundingSphere();
+  const material = new THREE.MeshStandardMaterial({ color: '#79a787', metalness: .22, roughness: .46, emissive: '#709b7e', emissiveIntensity: .24, flatShading: false });
   const logo = new THREE.Mesh(geometry, material);
   logo.name = 'Solid Nucleus sculpture'; logo.userData.logoObstacle = true;
-  logo.position.set(0, LOGO_CENTER_Y, -LOGO_DEPTH / 2); logo.scale.set(LOGO_SCALE, LOGO_SCALE, 1);
+  logo.position.set(0, LOGO_CENTER_Y, -LOGO_DEPTH / 2);
   return logo;
 }
 
@@ -43,8 +78,8 @@ function railGeometry(frames: ReturnType<typeof sampleTrack>[], offset: number, 
 export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: boolean) {
   const length = track.getLength();
   const dark = new THREE.MeshStandardMaterial({ color: '#173426', metalness: .3, roughness: .6 });
-  const railMaterial = new THREE.MeshBasicMaterial({ color: MINT });
-  const distantRailMaterial = new THREE.LineBasicMaterial({ color: '#9acba7' });
+  const railMaterial = new THREE.MeshBasicMaterial({ color: new THREE.Color(MINT).multiplyScalar(1.8) });
+  const distantRailMaterial = new THREE.LineBasicMaterial({ color: new THREE.Color('#9acba7').multiplyScalar(1.8) });
   const facade = new THREE.MeshLambertMaterial({ color: '#718b76', vertexColors: true });
   const foliage = new THREE.MeshLambertMaterial({ color: '#294e36' });
   const windowMaterial = new THREE.MeshBasicMaterial({ color: '#cab78d' });
@@ -157,7 +192,7 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
   const particleCount = coarse ? 220 : 500, positions = new Float32Array(particleCount * 3);
   for (let i = 0; i < positions.length; i += 3) positions.set([(random() - .5) * 250, random() * 120, (random() - .5) * 250], i);
   const particleGeometry = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(positions, 3)); particleGeometry.computeBoundingSphere();
-  const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({ color: '#719b7d', size: .16, sizeAttenuation: true })); scene.add(particles);
+  const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({ color: new THREE.Color('#a2d3b3').multiplyScalar(1.65), size: .18, sizeAttenuation: true })); scene.add(particles);
 
   const cart = new THREE.Group(), player = new THREE.Group(); scene.add(cart, player);
   const body = new THREE.Mesh(box, dark); body.scale.set(1.36, .3, 1.7); body.position.set(0, .14, -.2); cart.add(body);

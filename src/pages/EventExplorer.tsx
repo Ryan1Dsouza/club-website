@@ -1,10 +1,11 @@
 import { Component, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode, type RefObject } from 'react';
-import { ArrowDown, ArrowRight, ArrowUp, CalendarDays, Layers3, MapPin, Plus, RotateCcw, Route, X, Zap } from 'lucide-react';
+import { ArrowDown, ArrowRight, ArrowUp, CalendarDays, Layers3, MapPin, Plus, Route, Volume2, VolumeX, X, Zap } from 'lucide-react';
 import { type MoveInput, type WorldMode } from '../lib/event-navigation';
 import type { LogoWorldProps } from '../components/shared/LogoWorld';
 import type { RideMapLayout } from '../lib/event-minimap';
 import { createExperienceStations } from '../lib/experience-stations';
 import { shouldShowJoystick } from '../lib/event-quality';
+import { createRideAudio, type RideAudio } from '../lib/event-audio';
 import type { ClubEvent } from '../types';
 import RideGlimpses, { type RideGlimpsesHandle } from '../components/shared/RideGlimpses';
 import RideMap, { type RideMapHandle } from '../components/shared/RideMap';
@@ -98,6 +99,8 @@ export default function EventExplorer({ events, onPublished }: { events: ClubEve
   const wrapper = useRef<HTMLElement>(null);
   const input = useRef<MoveInput>({ x: 0, y: 0 });
   const boostInput = useRef(false);
+  const audio = useRef<RideAudio | null>(null);
+  const [soundOn, setSoundOn] = useState(false), [soundBusy, setSoundBusy] = useState(false);
   const glimpses = useRef<RideGlimpsesHandle>(null);
   const minimap = useRef<RideMapHandle>(null);
   const [boosting, setBoosting] = useState(false);
@@ -106,6 +109,7 @@ export default function EventExplorer({ events, onPublished }: { events: ClubEve
   const [selected, setSelected] = useState<number | null>(null);
   const [adding, setAdding] = useState(false), [publishing, setPublishing] = useState(false), [listing, setListing] = useState(false);
   const [touchControls, setTouchControls] = useState(false), [notice, setNotice] = useState('');
+  const [compactView, setCompactView] = useState(false);
   const [available, setAvailable] = useState<boolean[]>([]);
   const [anticipation, setAnticipation] = useState<{ index: number; seconds: number; distance: number } | null>(null);
   const onAnticipate = useCallback((index: number | null, seconds: number, distance: number) => setAnticipation(value => index === null ? value === null ? value : null : { index, seconds, distance }), []);
@@ -114,6 +118,8 @@ export default function EventExplorer({ events, onPublished }: { events: ClubEve
   const [command, setCommand] = useState<LogoWorldProps['command']>({ serial: 0, station: null });
   const station = selected === null ? null : stations[selected];
   const upcoming = anticipation === null ? null : stations[anticipation.index];
+  useEffect(() => () => { audio.current?.dispose(); audio.current = null; }, []);
+  useEffect(() => { if (paused || failed || mode === 'overview') audio.current?.quiet(); }, [paused, failed, mode]);
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const update = () => setReduced(media.matches);
@@ -122,11 +128,24 @@ export default function EventExplorer({ events, onPublished }: { events: ClubEve
   }, []);
   useEffect(() => {
     const pointer = window.matchMedia('(pointer: coarse)');
-    const update = () => setTouchControls(shouldShowJoystick('ontouchstart' in window || navigator.maxTouchPoints > 0, pointer.matches, window.innerWidth));
+    const compact = window.matchMedia('(max-width: 768px), (max-height: 500px)');
+    const update = () => {
+      setTouchControls(shouldShowJoystick('ontouchstart' in window || navigator.maxTouchPoints > 0, pointer.matches, window.innerWidth));
+      setCompactView(compact.matches);
+    };
     update(); pointer.addEventListener('change', update); window.addEventListener('resize', update, { passive: true });
     return () => { pointer.removeEventListener('change', update); window.removeEventListener('resize', update); };
   }, []);
   const focusWorld = () => wrapper.current?.querySelector<HTMLElement>('.nx-world')?.focus({ preventScroll: true });
+  async function toggleSound() {
+    setSoundBusy(true);
+    try {
+      const sound = audio.current ??= createRideAudio();
+      await sound.setEnabled(!soundOn); setSoundOn(!soundOn);
+      if (mode === 'explore') focusWorld();
+    } catch { setSoundOn(false); setNotice('Sound is unavailable in this browser.'); }
+    finally { setSoundBusy(false); }
+  }
   const selectStation = (index: number) => { input.current = { x: 0, y: 0 }; setSelected(index); };
   const toggleMap = () => { input.current = { x: 0, y: 0 }; setSelected(null); setAnticipation(null); setMode(value => value === 'explore' ? 'overview' : 'explore'); };
   const boardStation = (index: number) => {
@@ -155,18 +174,22 @@ export default function EventExplorer({ events, onPublished }: { events: ClubEve
   }, [selected, continueRide]);
   return <section className={`nx-experience nx-${mode}`} ref={wrapper} aria-label="Nucleus roller coaster" data-reduced-motion={reduced} data-touch-controls={touchControls}>
     <h1 className="nx-sr-only">Inside Nucleus</h1>
-    <p id="nx-control-summary" className="nx-sr-only">Hold W or D to accelerate. S or A brakes and reverses. Hold Shift or the Boost button to speed up; release to return to cruising speed. Drag the scene to look around. Use the joystick on touchscreens. The track loops back to the start. The cart automatically stops at event stations, including while boosting. Close the event or press a drive key to continue. Click a checkpoint in the top-right route map to travel to that station automatically; a drive control takes over. On the full map, drag to orbit, right-drag or use two fingers to pan, and scroll or pinch to zoom.</p>
+    <p id="nx-control-summary" className="nx-sr-only">Hold W or D to accelerate. S or A brakes and reverses. Hold Shift or the Boost button to speed up; release to return to cruising speed. Drag the scene to look around. Use the joystick on touchscreens. The track loops back to the start. The cart automatically stops at event stations, including while boosting. Close the event or press a drive key to continue. {!compactView && 'Click a checkpoint in the top-right route map to travel to that station automatically; a drive control takes over. '}Open Map to select a station. On the full map, drag to orbit, right-drag or use two fingers to pan, and scroll or pinch to zoom.</p>
     {!failed && <WorldBoundary onError={() => setFailed(true)}><Suspense fallback={null}>
-      <LogoWorld stations={stations} mode={mode} paused={paused} reduced={reduced} input={input} boostInput={boostInput} glimpses={glimpses} minimap={minimap} onTravelChange={setTraveling} onBoostChange={setBoosting} command={command} onLayout={onLayout} onAnticipate={onAnticipate}
+      <LogoWorld stations={stations} mode={mode} paused={paused} reduced={reduced} input={input} boostInput={boostInput} audio={audio} glimpses={glimpses} minimap={minimap} onTravelChange={setTraveling} onBoostChange={setBoosting} command={command} onLayout={onLayout} onAnticipate={onAnticipate}
         onReady={() => setReady(true)} onError={() => setFailed(true)} onArrive={selectStation} onBoard={boardStation} />
     </Suspense></WorldBoundary>}
     <div className="nx-vignette" aria-hidden="true" />
     <div className="nx-boost-focus" aria-hidden="true"><svg viewBox="0 0 1000 700" preserveAspectRatio="none"><path d="M-80 10 280 240 M60-40 330 220 M-70 220 250 290 M-60 540 280 420 M70 740 330 450 M250 760 400 480 M1080 10 720 240 M940-40 670 220 M1070 220 750 290 M1060 540 720 420 M930 740 670 450 M750 760 600 480" /></svg></div>
-    <RideGlimpses ref={glimpses} />
+    {!compactView && <RideGlimpses ref={glimpses} />}
     <div className="nx-topbar"><div className="nx-ride-caption"><span>THE LOGO LOOP</span><small>Six passages. One endless journey.</small></div>
-    <div className="nx-event-actions"><button onClick={() => { input.current = { x: 0, y: 0 }; setListing(true); }}>Events <span>{stations.length}</span></button><button onClick={() => { input.current = { x: 0, y: 0 }; setAdding(true); }}><Plus size={15} />Add Event</button></div>
+    <div className="nx-event-actions"><button onClick={() => { input.current = { x: 0, y: 0 }; setListing(true); }}>Events <span>{stations.length}</span></button><button onClick={() => { input.current = { x: 0, y: 0 }; setAdding(true); }}><Plus size={15} />Add Event</button>
+      {!failed && <button className="nx-sound-button" type="button" aria-label="Wind sound" aria-pressed={soundOn} title={soundOn ? 'Mute wind sound' : 'Enable wind sound'} disabled={!ready || soundBusy} onClick={toggleSound}>
+        {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}<span>Sound</span>
+      </button>}
     </div>
-    {!failed && <RideMap ref={minimap} layout={mapLayout} stations={stations} ready={ready} traveling={traveling} onTravel={travelToStation} />}
+    </div>
+    {!failed && !compactView && <RideMap ref={minimap} layout={mapLayout} stations={stations} ready={ready} traveling={traveling} onTravel={travelToStation} />}
 
     {!reduced && !paused && mode === 'explore' && upcoming && anticipation && <aside className="nx-teaser" aria-live="polite" aria-atomic="true" style={{ opacity: Math.min(1, (90 - anticipation.distance) / 12, (anticipation.distance - 15) / 10) }}>
       <svg className="nx-approach-arc" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" /><circle cx="22" cy="22" r="19" pathLength="1" strokeDasharray="1" strokeDashoffset={1 - (90 - anticipation.distance) / 75} /></svg>
@@ -178,10 +201,9 @@ export default function EventExplorer({ events, onPublished }: { events: ClubEve
     {notice && <p className="nx-publish-notice" role="status">{notice}<button aria-label="Dismiss notification" onClick={() => setNotice('')}><X size={14} /></button></p>}
     {!ready && !failed && <div className="nx-loading" role="status"><span /><span className="nx-sr-only">Loading the ride</span></div>}
     {!failed && <div className="nx-controls" aria-label="Ride controls">
-      {touchControls && <Joystick input={input} disabled={!ready || mode === 'overview' || paused} onFocus={focusWorld} />}
+      {touchControls && mode === 'explore' && <Joystick input={input} disabled={!ready || paused} onFocus={focusWorld} />}
       {!touchControls && <p className="nx-keyboard-hint">{mode === 'overview' ? 'Your journey starts at any checkpoint' : 'W / D forward · S / A reverse'}<br /><span>{mode === 'overview' ? 'Select a station, then drive at your own pace' : 'Drag to look · Release to coast'}</span></p>}
-      <div className="nx-ride-actions"><BoostControl input={boostInput} active={boosting} disabled={!ready || mode === 'overview' || paused} touch={touchControls} onFocus={focusWorld} />
-      <button className="nx-restart-button" disabled={!ready} aria-label="Restart the roller coaster" title="Restart ride" onClick={() => { setSelected(null); setCommand(value => ({ serial: value.serial + 1, station: null })); setMode('explore'); }}><RotateCcw size={18} /></button>
+      <div className="nx-ride-actions">{mode === 'explore' && <BoostControl input={boostInput} active={boosting} disabled={!ready || paused} touch={touchControls} onFocus={focusWorld} />}
       <button className="nx-map-button" onClick={toggleMap} disabled={!ready} aria-pressed={mode === 'overview'} aria-label={mode === 'overview' ? 'Return to ride' : 'Open holographic map'}>
         {mode === 'overview' ? <Route size={17} /> : <Layers3 size={17} />}<span>{mode === 'overview' ? 'Ride' : 'Map'}</span>
       </button>
