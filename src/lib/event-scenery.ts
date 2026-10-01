@@ -189,11 +189,6 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
     basis.makeBasis(f.side, f.up, f.tangent.clone().negate()); mesh.quaternion.setFromRotationMatrix(basis);
     gates.add(mesh); gateRecords.push({ mesh, distance });
   }
-  const particleCount = coarse ? 220 : 500, positions = new Float32Array(particleCount * 3);
-  for (let i = 0; i < positions.length; i += 3) positions.set([(random() - .5) * 250, random() * 120, (random() - .5) * 250], i);
-  const particleGeometry = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(positions, 3)); particleGeometry.computeBoundingSphere();
-  const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({ color: new THREE.Color('#a2d3b3').multiplyScalar(1.65), size: .18, sizeAttenuation: true })); scene.add(particles);
-
   const cart = new THREE.Group(), player = new THREE.Group(); scene.add(cart, player);
   const body = new THREE.Mesh(box, dark); body.scale.set(1.36, .3, 1.7); body.position.set(0, .14, -.2); cart.add(body);
   const nose = new THREE.Mesh(box, dark); nose.scale.set(1.36, .36, .35); nose.position.set(0, .45, -1.42); cart.add(nose);
@@ -244,12 +239,12 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
     cart, player, addStation,
     removeStation(id: string) { const beacon = beacons.get(id); if (beacon) { disposeObject(beacon, retained); beacons.delete(id); beaconDistances.delete(id); syncGates(); } },
     setQuality(value: QualityLevel) {
-      level = value; particleGeometry.setDrawRange(0, Math.floor(particleCount * [0, .45, 1][value]));
+      level = value;
       railLevels.forEach(lod => { lod.levels[1].distance = [40, 65, 100][value]; });
     },
     update(_elapsed: number, _reduced: boolean, mapBlend: number, camera: THREE.Camera) {
       skyline.visible = mapBlend < .85; landscape.visible = level > 0 && mapBlend < .85; gates.visible = level > 0 && mapBlend < .85;
-      particles.visible = level > 0 && mapBlend < .85; cart.visible = mapBlend < .15; player.visible = mapBlend > .5;
+      cart.visible = mapBlend < .15; player.visible = mapBlend > .5;
       for (const batch of sleeperBatches) batch.visible = mapBlend < .85 && batch.boundingSphere!.center.distanceToSquared(camera.position) < (level === 2 ? 100 : 55) ** 2;
       for (const batch of detailBatches) batch.visible = level > 0 && batch.boundingSphere!.center.distanceToSquared(camera.position) < (level === 2 ? 190 : 120) ** 2;
     },
