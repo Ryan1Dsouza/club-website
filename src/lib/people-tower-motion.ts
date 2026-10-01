@@ -62,7 +62,27 @@ function hash(value: string) {
   return result >>> 0;
 }
 /** Fill every foundation layer before the next, with story leaders at the top. */
-export function towerSlots(ids: readonly string[]) {\n  const layers = Math.ceil(ids.length / 3);\n  const ranks = Array.from({ length: ids.length }, (_, i) => i);\n  for (let i = ranks.length - 1; i > 0; i--) {\n    const j = Math.floor(Math.abs(Math.sin(i * 12.9898 + 78.233)) * 100000) % (i + 1);\n    const temp = ranks[i]; ranks[i] = ranks[j]; ranks[j] = temp;\n  }\n  return ids.map((id, index) => {\n    const rank = ranks[index];\n    const layer = Math.floor(rank / 3), count = Math.min(3, ids.length - layer * 3);\n    const lane = rank % 3 - (count - 1) / 2, turned = layer % 2 === 1;\n    const seed = hash(id);\n    return {\n      rank, layer, yaw: turned ? Math.PI / 2 : 0,\n      position: [turned ? lane * 1.055 : 0, (layer - (layers - 1) / 2) * LAYER_HEIGHT, turned ? 0 : lane * 1.055] as const,\n      direction: seed % 2 ? 1 : -1,\n      spin: (seed % 3 - 1) * .35 + .8,\n    };\n  });\n}\nexport function towerFrame(progress: number, count: number) {
+export function towerSlots(ids: readonly string[]) {
+  const layers = Math.ceil(ids.length / 3);
+  const ranks = Array.from({ length: ids.length }, (_, i) => i);
+  for (let i = ranks.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.abs(Math.sin(i * 12.9898 + 78.233)) * 100000) % (i + 1);
+    const temp = ranks[i]; ranks[i] = ranks[j]; ranks[j] = temp;
+  }
+  return ids.map((id, index) => {
+    const rank = ranks[index];
+    const layer = Math.floor(rank / 3), count = Math.min(3, ids.length - layer * 3);
+    const lane = rank % 3 - (count - 1) / 2, turned = layer % 2 === 1;
+    const seed = hash(id);
+    return {
+      rank, layer, yaw: turned ? Math.PI / 2 : 0,
+      position: [turned ? lane * 1.055 : 0, (layer - (layers - 1) / 2) * LAYER_HEIGHT, turned ? 0 : lane * 1.055] as const,
+      direction: seed % 2 ? 1 : -1,
+      spin: (seed % 3 - 1) * .35 + .8,
+    };
+  });
+}
+export function towerFrame(progress: number, count: number) {
   const duration = TOWER_INTRO + Math.max(0, count) + TOWER_OUTRO;
   const time = clamp01(progress) * duration, memberTime = time - TOWER_INTRO;
   const index = count < 1 || memberTime < 0 || memberTime >= count ? -1 : Math.floor(memberTime);
