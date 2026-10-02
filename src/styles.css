@@ -18,7 +18,8 @@
   color-scheme: dark;
 }
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-height) + 16px); scrollbar-color: var(--muted) var(--bg); }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-height) + 16px); scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
 html.lenis, html.lenis body { height: auto; }
 html.cinematic-page, html.lenis-smooth { scroll-behavior: auto !important; }
 dialog.modal { overscroll-behavior: contain; }

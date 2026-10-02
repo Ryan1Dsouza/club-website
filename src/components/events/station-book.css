@@ -1,69 +1,660 @@
-.nx-dialog.nx-book-dialog { --book-ink:#17281f; --book-paper:#f2eedf; width:min(1080px,calc(100% - 36px)); height:min(770px,calc(100dvh - 36px)); max-height:none; padding:0; overflow:hidden; border:2px solid #15231b; border-radius:5px 14px 14px 5px; background:var(--book-paper); color:var(--book-ink); box-shadow:5px 5px 0 #c1baa4,9px 9px 0 #263b2d,0 30px 100px #000b; }
-.nx-book-dialog::backdrop { background:#020905c9; backdrop-filter:blur(6px); }
-.nx-book-dialog .nx-close { top:13px; right:15px; width:34px; height:34px; color:var(--book-ink); background:transparent; border:1px solid #17281f55; }
-.nx-book-dialog :is(button,a,[tabindex]):focus-visible { outline:2px solid #285b3f; outline-offset:3px; }
-.station-book { height:100%; display:grid; grid-template-rows:auto minmax(0,1fr) auto; font-family:'Space Grotesk',Inter,sans-serif; }
-.station-book__masthead { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:23px 68px 20px 29px; border-bottom:2px solid var(--book-ink); font:10px var(--mono); letter-spacing:.1em; }
-.station-book__masthead b { margin-left:12px; padding-left:12px; border-left:1px solid; font-weight:400; }
-.station-book__surface { position:relative; min-height:0; perspective:1400px; overflow:hidden; isolation:isolate; background:repeating-linear-gradient(0deg,transparent 0 3px,#867c6510 3px 4px); }
-.station-book__surface::after { content:''; position:absolute; inset:0 auto 0 50%; width:24px; transform:translateX(-50%); background:linear-gradient(90deg,transparent,#322e1e1c 44%,#fff8 53%,transparent); pointer-events:none; z-index:2; }
-.station-book__spread { height:100%; display:grid; grid-template-columns:1fr 1fr; min-height:0; background:var(--book-paper); transform-origin:left center; animation:book-turn-forward .45s cubic-bezier(.2,.7,.2,1) both; }
-.station-book__spread[data-direction='-1'] { transform-origin:right center; animation-name:book-turn-back; }
-@keyframes book-turn-forward { from { transform:rotateY(-18deg); opacity:.45; } to { transform:rotateY(0); opacity:1; } }
-@keyframes book-turn-back { from { transform:rotateY(18deg); opacity:.45; } to { transform:rotateY(0); opacity:1; } }
-.station-book__story { display:flex; flex-direction:column; min-height:0; min-width:0; padding:clamp(22px,3.2vw,42px); overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:#7c8c74 transparent; }
-.station-book__story>* { flex-shrink:0; }
-.station-book__eyebrow { align-self:flex-start; padding:6px 9px; background:#d7e9b2; border:1px solid var(--book-ink); font:10px var(--mono); text-transform:uppercase; transform:rotate(-2deg); }
-.station-book__title { margin:27px 0 20px; font:400 clamp(38px,4.6vw,66px)/.95 'Bebas Neue',Impact,sans-serif; text-transform:uppercase; letter-spacing:-.02em; overflow-wrap:anywhere; }
-.station-book__copy { padding:1px 10px 6px 1px; }
-.nx-book-dialog .station-book__copy p { color:#35463a; font-size:13px; line-height:1.8; }
-.station-book__details { display:grid; gap:10px; margin-top:24px; font-size:10px; line-height:1.6; }
-.station-book__details>span { display:flex; gap:9px; align-items:flex-start; }.station-book__details svg { flex:none; margin-top:1px; }
-.station-book__byline { margin-top:auto; padding-top:22px; font:9px var(--mono); letter-spacing:.06em; text-transform:uppercase; }
-.station-book__cover-art { position:relative; margin:25px 27px 25px 22px; overflow:hidden; min-height:0; border:3px solid var(--book-ink); background:#b8d3a7; border-radius:1px; box-shadow:5px 5px 0 var(--book-ink); }
-.station-book__cover-art>img { width:100%; height:100%; object-fit:cover; }
-.station-book__cover-art.nx-event-artwork { background:radial-gradient(circle,#1b3d251f 1px,transparent 1px) 0 0/6px 6px,#bed6ad; }
-.station-book__cover-art>.event-sculpture { position:absolute; width:112%; height:100%; left:-6%; top:0; filter:drop-shadow(12px 10px 0 #142c1b22); }
-.station-book__issue { position:absolute; left:15px; top:15px; display:flex; gap:5px; align-items:baseline; padding:8px 10px; border:2px solid var(--book-ink); background:#f3edda; font:italic 12px var(--serif); transform:rotate(-4deg); }
-.station-book__issue strong { font:32px/1 'Bebas Neue',Impact,sans-serif; }
-.station-book__sticker { position:absolute; right:15px; bottom:60px; max-width:90%; padding:14px 18px; border:2px solid var(--book-ink); background:#f0d480; font:400 clamp(24px,3vw,40px)/.95 'Bebas Neue',Impact,sans-serif; text-transform:uppercase; white-space:pre-line; transform:rotate(-5deg); box-shadow:3px 4px 0 var(--book-ink); }
-.station-book__cover-note { position:absolute; bottom:0; left:0; right:0; padding:14px 13px; color:#f1eddc; background:var(--book-ink); font:9px var(--mono); text-transform:uppercase; }
-.station-book__photos { gap:25px; padding:30px; }
-.station-book__panel { position:relative; min-height:0; min-width:0; margin:0; border:3px solid var(--book-ink); background:#d7decc; box-shadow:4px 5px 0 var(--book-ink); transform:rotate(-1deg); display:grid; grid-template-rows:minmax(0,1fr) auto; }
-.station-book__panel:nth-child(2) { transform:rotate(1deg); }.station-book__panel[data-single=true] { grid-column:1/-1; transform:none; }
-.station-book__panel a { display:block; min-height:0; overflow:hidden; background:radial-gradient(circle,#89988050 1px,transparent 1px) 0 0/5px 5px; }
-.station-book__panel img { width:100%; height:100%; display:block; object-fit:contain; }
-.station-book__panel figcaption { padding:13px 15px; border-top:2px solid var(--book-ink); background:#f2eedf; font-size:12px; font-weight:600; line-height:1.5; overflow-wrap:anywhere; max-height:80px; overflow:auto; }
-.station-book__frame { position:absolute; top:13px; left:-9px; padding:7px 12px; background:#f0d480; border:2px solid var(--book-ink); transform:rotate(-4deg); font:10px var(--mono); pointer-events:none; }
-.station-book__footer { padding:13px 24px 17px; border-top:2px solid var(--book-ink); background:#e7e5d4; }
-.station-book__navigation { display:flex; align-items:center; gap:12px; }
-.station-book__navigation button { display:grid; place-items:center; height:36px; width:38px; padding:0; background:transparent; color:var(--book-ink); border:1px solid #17281f88; border-radius:2px; }
-.nx-book-dialog .station-book__navigation button:disabled { cursor:default; opacity:.3; }
-.station-book__navigation>span { font:10px var(--mono); min-width:80px; text-align:center; }
-.nx-book-dialog .station-book__navigation p { display:flex; align-items:center; gap:7px; margin-left:auto; color:#52604e; font-size:10px; white-space:normal; }
-.station-book__actions { display:flex; align-items:center; gap:16px; margin-top:12px; }
-.station-book__links { display:flex; flex-wrap:wrap; gap:8px 18px; margin-right:auto; }
-.station-book__links a { display:flex; align-items:center; gap:6px; color:var(--book-ink); font-size:10px; text-underline-offset:3px; }
-.station-book .nx-continue { width:auto; min-width:165px; margin:0; padding:12px 17px; border:2px solid var(--book-ink); border-radius:2px; background:var(--book-ink); color:#ecedda; box-shadow:3px 3px 0 #9fa88d; }
-.nx-book-dialog .station-book__capacity { margin-top:10px; font-size:10px; color:#52604e; }
+.nx-dialog.nx-book-dialog {
+  --book-ink: #17281f;
+  --book-paper: #f2eedf;
+  width: min(1080px, calc(100% - 36px));
+  height: min(770px, calc(100dvh - 36px));
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid #15231b;
+  border-radius: 5px 14px 14px 5px;
+  background: var(--book-paper);
+  color: var(--book-ink);
+  box-shadow: 5px 5px 0 #c1baa4, 9px 9px 0 #263b2d, 0 30px 100px #000b;
+}
+
+.nx-book-dialog::backdrop {
+  background: #020905c9;
+  backdrop-filter: blur(6px);
+}
+
+.nx-book-dialog .nx-close {
+  top: 13px;
+  right: 15px;
+  width: 34px;
+  height: 34px;
+  color: var(--book-ink);
+  background: transparent;
+  border: 1px solid #17281f55;
+}
+
+.nx-book-dialog :is(button, a, [tabindex]):focus-visible {
+  outline: 2px solid #285b3f;
+  outline-offset: 3px;
+}
+
+.station-book {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  font-family: 'Space Grotesk', Inter, sans-serif;
+}
+
+.station-book__masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 23px 68px 20px 29px;
+  border-bottom: 2px solid var(--book-ink);
+  font: 10px var(--mono);
+  letter-spacing: .1em;
+}
+
+.station-book__masthead b {
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid;
+  font-weight: 400;
+}
+
+.station-book__surface {
+  position: relative;
+  min-height: 0;
+  perspective: 1400px;
+  overflow: hidden;
+  isolation: isolate;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #867c6510 3px 4px);
+}
+
+.station-book__surface::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 24px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, #322e1e1c 44%, #fff8 53%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.station-book__spread {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
+  background: var(--book-paper);
+  transform-origin: left center;
+  animation: book-turn-forward .45s cubic-bezier(.2, .7, .2, 1) both;
+}
+
+.station-book__spread[data-direction='-1'] {
+  transform-origin: right center;
+  animation-name: book-turn-back;
+}
+
+@keyframes book-turn-forward {
+  from {
+    transform: rotateY(-18deg);
+    opacity: .45;
+  }
+
+  to {
+    transform: rotateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes book-turn-back {
+  from {
+    transform: rotateY(18deg);
+    opacity: .45;
+  }
+
+  to {
+    transform: rotateY(0);
+    opacity: 1;
+  }
+}
+
+.station-book__story {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  padding: clamp(22px, 3.2vw, 42px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  scrollbar-color: #7c8c74 transparent;
+}
+
+.station-book__story>* {
+  flex-shrink: 0;
+}
+
+.station-book__eyebrow {
+  align-self: flex-start;
+  padding: 6px 9px;
+  background: #d7e9b2;
+  border: 1px solid var(--book-ink);
+  font: 10px var(--mono);
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+}
+
+.station-book__title {
+  margin: 27px 0 20px;
+  font: 400 clamp(38px, 4.6vw, 66px)/.95 'Bebas Neue', Impact, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: -.02em;
+  overflow-wrap: anywhere;
+}
+
+.station-book__copy {
+  padding: 1px 10px 6px 1px;
+}
+
+.nx-book-dialog .station-book__copy p {
+  color: #35463a;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.station-book__details {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.station-book__details>span {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+}
+
+.station-book__details svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.station-book__byline {
+  margin-top: auto;
+  padding-top: 22px;
+  font: 9px var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.station-book__cover-art {
+  position: relative;
+  margin: 25px 27px 25px 22px;
+  overflow: hidden;
+  min-height: 0;
+  border: 3px solid var(--book-ink);
+  background: #b8d3a7;
+  border-radius: 1px;
+  box-shadow: 5px 5px 0 var(--book-ink);
+}
+
+.station-book__cover-art>img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.station-book__cover-art.nx-event-artwork {
+  background: radial-gradient(circle, #1b3d251f 1px, transparent 1px) 0 0/6px 6px, #bed6ad;
+}
+
+.station-book__cover-art>.event-sculpture {
+  position: absolute;
+  width: 112%;
+  height: 100%;
+  left: -6%;
+  top: 0;
+  filter: drop-shadow(12px 10px 0 #142c1b22);
+}
+
+.station-book__issue {
+  position: absolute;
+  left: 15px;
+  top: 15px;
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+  padding: 8px 10px;
+  border: 2px solid var(--book-ink);
+  background: #f3edda;
+  font: italic 12px var(--serif);
+  transform: rotate(-4deg);
+}
+
+.station-book__issue strong {
+  font: 32px/1 'Bebas Neue', Impact, sans-serif;
+}
+
+.station-book__sticker {
+  position: absolute;
+  right: 15px;
+  bottom: 60px;
+  max-width: 90%;
+  padding: 14px 18px;
+  border: 2px solid var(--book-ink);
+  background: #f0d480;
+  font: 400 clamp(24px, 3vw, 40px)/.95 'Bebas Neue', Impact, sans-serif;
+  text-transform: uppercase;
+  white-space: pre-line;
+  transform: rotate(-5deg);
+  box-shadow: 3px 4px 0 var(--book-ink);
+}
+
+.station-book__cover-note {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 13px;
+  color: #f1eddc;
+  background: var(--book-ink);
+  font: 9px var(--mono);
+  text-transform: uppercase;
+}
+
+.station-book__photos {
+  gap: 25px;
+  padding: 30px;
+}
+
+.station-book__panel {
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  margin: 0;
+  border: 3px solid var(--book-ink);
+  background: #d7decc;
+  box-shadow: 4px 5px 0 var(--book-ink);
+  transform: rotate(-1deg);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.station-book__panel:nth-child(2) {
+  transform: rotate(1deg);
+}
+
+.station-book__panel[data-single=true] {
+  grid-column: 1/-1;
+  transform: none;
+}
+
+.station-book__panel a {
+  display: block;
+  min-height: 0;
+  overflow: hidden;
+  background: radial-gradient(circle, #89988050 1px, transparent 1px) 0 0/5px 5px;
+}
+
+.station-book__panel img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.station-book__panel figcaption {
+  padding: 13px 15px;
+  border-top: 2px solid var(--book-ink);
+  background: #f2eedf;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  max-height: 80px;
+  overflow: auto;
+}
+
+.station-book__frame {
+  position: absolute;
+  top: 13px;
+  left: -9px;
+  padding: 7px 12px;
+  background: #f0d480;
+  border: 2px solid var(--book-ink);
+  transform: rotate(-4deg);
+  font: 10px var(--mono);
+  pointer-events: none;
+}
+
+.station-book__footer {
+  padding: 13px 24px 17px;
+  border-top: 2px solid var(--book-ink);
+  background: #e7e5d4;
+}
+
+.station-book__navigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.station-book__navigation button {
+  display: grid;
+  place-items: center;
+  height: 36px;
+  width: 38px;
+  padding: 0;
+  background: transparent;
+  color: var(--book-ink);
+  border: 1px solid #17281f88;
+  border-radius: 2px;
+}
+
+.nx-book-dialog .station-book__navigation button:disabled {
+  cursor: default;
+  opacity: .3;
+}
+
+.station-book__navigation>span {
+  font: 10px var(--mono);
+  min-width: 80px;
+  text-align: center;
+}
+
+.nx-book-dialog .station-book__navigation p {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: #52604e;
+  font-size: 10px;
+  white-space: normal;
+}
+
+.station-book__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.station-book__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-right: auto;
+}
+
+.station-book__links a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--book-ink);
+  font-size: 10px;
+  text-underline-offset: 3px;
+}
+
+.station-book .nx-continue {
+  width: auto;
+  min-width: 165px;
+  margin: 0;
+  padding: 12px 17px;
+  border: 2px solid var(--book-ink);
+  border-radius: 2px;
+  background: var(--book-ink);
+  color: #ecedda;
+  box-shadow: 3px 3px 0 #9fa88d;
+}
+
+.nx-book-dialog .station-book__capacity {
+  margin-top: 10px;
+  font-size: 10px;
+  color: #52604e;
+}
+
 @media(max-width:620px) and (min-height:501px) {
-  .nx-dialog.nx-book-dialog { width:calc(100% - 24px); height:calc(100dvh - 32px); }
-  .station-book__masthead { padding:22px 57px 19px 16px; font-size:8px; gap:8px; }.station-book__masthead b { display:none; }
-  .station-book__spread { grid-template-columns:1fr; grid-template-rows:minmax(0,1.1fr) minmax(0,1fr); }
-  .station-book__story { padding:20px 22px 12px; }.station-book__eyebrow { font-size:9px; }.station-book__title { font-size:39px; margin:17px 0 12px; }
-  .nx-book-dialog .station-book__copy p { font-size:12px; line-height:1.7; }.station-book__details { margin-top:16px; }.station-book__byline { padding-top:12px; font-size:8px; }
-  .station-book__surface::after { inset:50% 0 auto; width:auto; height:12px; transform:translateY(-50%); background:linear-gradient(transparent,#322e1e14,transparent); }
-  .station-book__cover-art { margin:4px 22px 19px; }.station-book__sticker { font-size:26px; padding:9px 13px; bottom:45px; }.station-book__cover-note { font-size:8px; padding:10px; }.station-book__issue { left:10px; top:10px; }.station-book__issue strong { font-size:25px; }
-  .station-book__photos { padding:20px 23px; gap:21px; grid-template-rows:repeat(2,minmax(0,1fr)); }.station-book__panel[data-single=true] { grid-row:1/-1; }.station-book__panel figcaption { padding:8px 10px; font-size:10px; max-height:50px; }
-  .station-book__footer { padding:10px 15px 14px; }.station-book__navigation { gap:7px; flex-wrap:wrap; justify-content:center; }.station-book__navigation>span { min-width:73px; }
-  .nx-book-dialog .station-book__navigation p { flex-basis:100%; margin:0; justify-content:center; font-size:9px; }
-  .station-book__actions { gap:8px; margin-top:9px; }.station-book .nx-continue { min-width:140px; padding:10px 12px; font-size:11px!important; }.station-book__links { gap:7px; }.station-book__links a { font-size:9px; }
+  .nx-dialog.nx-book-dialog {
+    width: calc(100% - 24px);
+    height: calc(100dvh - 32px);
+  }
+
+  .station-book__masthead {
+    padding: 22px 57px 19px 16px;
+    font-size: 8px;
+    gap: 8px;
+  }
+
+  .station-book__masthead b {
+    display: none;
+  }
+
+  .station-book__spread {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+
+  .station-book__story {
+    padding: 20px 22px 12px;
+  }
+
+  .station-book__eyebrow {
+    font-size: 9px;
+  }
+
+  .station-book__title {
+    font-size: 39px;
+    margin: 17px 0 12px;
+  }
+
+  .nx-book-dialog .station-book__copy p {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .station-book__details {
+    margin-top: 16px;
+  }
+
+  .station-book__byline {
+    padding-top: 12px;
+    font-size: 8px;
+  }
+
+  .station-book__surface::after {
+    inset: 50% 0 auto;
+    width: auto;
+    height: 12px;
+    transform: translateY(-50%);
+    background: linear-gradient(transparent, #322e1e14, transparent);
+  }
+
+  .station-book__cover-art {
+    margin: 4px 22px 19px;
+  }
+
+  .station-book__sticker {
+    font-size: 26px;
+    padding: 9px 13px;
+    bottom: 45px;
+  }
+
+  .station-book__cover-note {
+    font-size: 8px;
+    padding: 10px;
+  }
+
+  .station-book__issue {
+    left: 10px;
+    top: 10px;
+  }
+
+  .station-book__issue strong {
+    font-size: 25px;
+  }
+
+  .station-book__photos {
+    padding: 20px 23px;
+    gap: 21px;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+
+  .station-book__panel[data-single=true] {
+    grid-row: 1/-1;
+  }
+
+  .station-book__panel figcaption {
+    padding: 8px 10px;
+    font-size: 10px;
+    max-height: 50px;
+  }
+
+  .station-book__footer {
+    padding: 10px 15px 14px;
+  }
+
+  .station-book__navigation {
+    gap: 7px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .station-book__navigation>span {
+    min-width: 73px;
+  }
+
+  .nx-book-dialog .station-book__navigation p {
+    flex-basis: 100%;
+    margin: 0;
+    justify-content: center;
+    font-size: 9px;
+  }
+
+  .station-book__actions {
+    gap: 8px;
+    margin-top: 9px;
+  }
+
+  .station-book .nx-continue {
+    min-width: 140px;
+    padding: 10px 12px;
+    font-size: 11px !important;
+  }
+
+  .station-book__links {
+    gap: 7px;
+  }
+
+  .station-book__links a {
+    font-size: 9px;
+  }
 }
+
 @media(max-height:500px) {
-  .nx-dialog.nx-book-dialog { width:calc(100% - 28px); height:calc(100dvh - 20px); }
-  .station-book__masthead { padding:14px 60px 12px 20px; font-size:8px; }.nx-book-dialog .nx-close { top:5px; }
-  .station-book__story { padding:14px 20px; }.station-book__eyebrow { font-size:8px; padding:3px 6px; }.station-book__title { font-size:30px; margin:12px 0; }.station-book__byline { display:none; }.nx-book-dialog .station-book__copy p { font-size:11px; }
-  .station-book__cover-art { margin:12px 20px 15px; }.station-book__issue { top:8px; left:8px; padding:4px 6px; }.station-book__issue strong { font-size:22px; }.station-book__sticker { bottom:38px; font-size:24px; padding:8px 12px; }.station-book__cover-note { padding:8px; font-size:8px; }
-  .station-book__footer { display:flex; align-items:center; gap:12px; padding:9px 16px; }.station-book__navigation { gap:7px; }.station-book__navigation>span { min-width:65px; }.nx-book-dialog .station-book__navigation p { display:none; }.station-book__actions { flex:1; margin:0; }.station-book .nx-continue { min-width:130px; padding:9px 12px; }.station-book__photos { padding:15px 22px; gap:22px; }.station-book__panel figcaption { padding:6px 9px; font-size:10px; }
+  .nx-dialog.nx-book-dialog {
+    width: calc(100% - 28px);
+    height: calc(100dvh - 20px);
+  }
+
+  .station-book__masthead {
+    padding: 14px 60px 12px 20px;
+    font-size: 8px;
+  }
+
+  .nx-book-dialog .nx-close {
+    top: 5px;
+  }
+
+  .station-book__story {
+    padding: 14px 20px;
+  }
+
+  .station-book__eyebrow {
+    font-size: 8px;
+    padding: 3px 6px;
+  }
+
+  .station-book__title {
+    font-size: 30px;
+    margin: 12px 0;
+  }
+
+  .station-book__byline {
+    display: none;
+  }
+
+  .nx-book-dialog .station-book__copy p {
+    font-size: 11px;
+  }
+
+  .station-book__cover-art {
+    margin: 12px 20px 15px;
+  }
+
+  .station-book__issue {
+    top: 8px;
+    left: 8px;
+    padding: 4px 6px;
+  }
+
+  .station-book__issue strong {
+    font-size: 22px;
+  }
+
+  .station-book__sticker {
+    bottom: 38px;
+    font-size: 24px;
+    padding: 8px 12px;
+  }
+
+  .station-book__cover-note {
+    padding: 8px;
+    font-size: 8px;
+  }
+
+  .station-book__footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 16px;
+  }
+
+  .station-book__navigation {
+    gap: 7px;
+  }
+
+  .station-book__navigation>span {
+    min-width: 65px;
+  }
+
+  .nx-book-dialog .station-book__navigation p {
+    display: none;
+  }
+
+  .station-book__actions {
+    flex: 1;
+    margin: 0;
+  }
+
+  .station-book .nx-continue {
+    min-width: 130px;
+    padding: 9px 12px;
+  }
+
+  .station-book__photos {
+    padding: 15px 22px;
+    gap: 22px;
+  }
+
+  .station-book__panel figcaption {
+    padding: 6px 9px;
+    font-size: 10px;
+  }
 }
-@media(prefers-reduced-motion:reduce) { .station-book__spread { animation:none; } }
+
+@media(prefers-reduced-motion:reduce) {
+  .station-book__spread {
+    animation: none;
+  }
+}
