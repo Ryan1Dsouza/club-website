@@ -96,48 +96,49 @@ export function createTowerPhysics(slots: Slots) {
     const half = storyShape.halfExtents;
     const x = Math.max(.00001, size.x / 2), y = Math.max(.00001, size.y / 2), z = Math.max(.00001, size.z / 2);
     if (half.x !== x || half.y !== y || half.z !== z) {
-      half.set(x, y, z); storyShape.updateConvexPolyhedronRepresentation();
+      half.set(x, y, z);
+      // Box shapes only need their bounding sphere updated, NOT the expensive
+      // convex polyhedron rebuild which was causing lag spikes every frame
+      // during the scale-up transition.
       storyShape.updateBoundingSphereRadius(); body.updateBoundingRadius();
     }
     body.collisionFilterMask = size.x > 0 ? -1 : 0;
     body.position.set(position.x, position.y, position.z);
     body.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w); body.updateAABB();
     const bounds = body.aabb, margin = .001;
-    const overlapsXZ = (other: Body['aabb']) => bounds.lowerBound.x < other.upperBound.x - margin
-      && bounds.upperBound.x > other.lowerBound.x + margin && bounds.lowerBound.z < other.upperBound.z - margin
-      && bounds.upperBound.z > other.lowerBound.z + margin;
-    // World bounds include rotation AND the unfolding card's current dimensions.
-    // Conservative box contacts are cheap and keep every rendered corner clear;
-    // unlike a solver-only correction, they also handle an instantaneous seek.
-    if (plinth.aabbNeedsUpdate) plinth.updateAABB();
-    bodies.forEach((other, index) => {
-      if (other === body || !other.world) return;
-      if (other.aabbNeedsUpdate) other.updateAABB();
-      const contact = contactBounds[index];
-      contact.copy(other.aabb);
-      if (other.sleepState !== Body.SLEEPING) {
-        // After playing with the stack, protect both the solver pose and its
-        // interpolated render pose so scrolling cannot clip a falling neighbour.
-        other.shapes[0].calculateWorldAABB(other.interpolatedPosition, other.interpolatedQuaternion, contact.lowerBound, contact.upperBound);
-        contact.extend(other.aabb);
-      }
-    });
-    let lift = Math.max(0, (overlapsXZ(plinth.aabb) ? floorY : floorY - .28) + margin - bounds.lowerBound.y);
+    // Only run the collision sweep during the actual flight phase (isFlying).
+    // Once the block is settling into the UI panel position it's far from the
+    // tower and doesn't need expensive per-body AABB checks.
     if (isFlying) {
-      for (let pass = 0; pass < bodies.length; pass++) {
-      const before = lift;
-      for (let index = 0; index < bodies.length; index++) {
-        const other = bodies[index], contact = contactBounds[index];
-        if (other === body || !other.world || !other.collisionFilterMask) continue;
-        if (overlapsXZ(contact) && bounds.lowerBound.y + lift < contact.upperBound.y - margin
-          && bounds.upperBound.y + lift > contact.lowerBound.y + margin) {
-          lift = contact.upperBound.y + margin - bounds.lowerBound.y;
+      const overlapsXZ = (other: Body['aabb']) => bounds.lowerBound.x < other.upperBound.x - margin
+        && bounds.upperBound.x > other.lowerBound.x + margin && bounds.lowerBound.z < other.upperBound.z - margin
+        && bounds.upperBound.z > other.lowerBound.z + margin;
+      if (plinth.aabbNeedsUpdate) plinth.updateAABB();
+      bodies.forEach((other, index) => {
+        if (other === body || !other.world) return;
+        if (other.aabbNeedsUpdate) other.updateAABB();
+        const contact = contactBounds[index];
+        contact.copy(other.aabb);
+        if (other.sleepState !== Body.SLEEPING) {
+          other.shapes[0].calculateWorldAABB(other.interpolatedPosition, other.interpolatedQuaternion, contact.lowerBound, contact.upperBound);
+          contact.extend(other.aabb);
         }
+      });
+      let lift = Math.max(0, (overlapsXZ(plinth.aabb) ? floorY : floorY - .28) + margin - bounds.lowerBound.y);
+      for (let pass = 0; pass < bodies.length; pass++) {
+        const before = lift;
+        for (let index = 0; index < bodies.length; index++) {
+          const other = bodies[index], contact = contactBounds[index];
+          if (other === body || !other.world || !other.collisionFilterMask) continue;
+          if (overlapsXZ(contact) && bounds.lowerBound.y + lift < contact.upperBound.y - margin
+            && bounds.upperBound.y + lift > contact.lowerBound.y + margin) {
+            lift = contact.upperBound.y + margin - bounds.lowerBound.y;
+          }
+        }
+        if (before === lift) break;
       }
-      if (before === lift) break;
-      }
+      body.position.y += lift;
     }
-    body.position.y += lift;
     body.previousPosition.copy(body.position); body.interpolatedPosition.copy(body.position);
     body.previousQuaternion.copy(body.quaternion); body.interpolatedQuaternion.copy(body.quaternion);
     body.aabbNeedsUpdate = true; world.broadphase.dirty = true;
@@ -169,6 +170,34 @@ export function createTowerPhysics(slots: Slots) {
         (body as any).transition = null;
       }
     });
+    world.broadphase.dirty = true;
+  }
+  /** Return a single body to its tower slot with a smooth transition. */
+  function returnBody(index: number) {
+    const body = bodies[index];
+    if (!body) return;
+    const slot = slots[index];
+    const oldPos = body.interpolatedPosition.clone();
+    const oldQuat = body.interpolatedQuaternion.clone();
+
+    if (story === index) story = -1;
+    body.type = Body.DYNAMIC; body.mass = .36; body.collisionFilterMask = -1;
+    if (body.shapes[0] !== shape) { body.removeShape(storyShape); body.addShape(shape); }
+    body.position.set(...slot.position); body.quaternion.setFromEuler(0, slot.yaw, 0);
+    body.updateMassProperties();
+    body.previousPosition.copy(body.position); body.interpolatedPosition.copy(body.position);
+    body.previousQuaternion.copy(body.quaternion); body.interpolatedQuaternion.copy(body.quaternion);
+    body.velocity.setZero(); body.angularVelocity.setZero(); body.force.setZero(); body.torque.setZero();
+    body.aabbNeedsUpdate = true;
+    if (!body.world) world.addBody(body);
+    body.sleep();
+
+    const dist = oldPos.distanceTo(new Vec3(...slot.position));
+    if (dist > 0.01) {
+      (body as any).transition = { time: 0, fromPos: oldPos, fromQuat: oldQuat };
+    } else {
+      (body as any).transition = null;
+    }
     world.broadphase.dirty = true;
   }
   const moving = () => held >= 0 || bodies.some(body => (body.world && body.type === Body.DYNAMIC && body.sleepState !== Body.SLEEPING) || (body as any).transition);
@@ -219,5 +248,5 @@ export function createTowerPhysics(slots: Slots) {
     [...world.bodies].forEach(body => world.removeBody(body));
     world.contacts.length = 0; world.frictionEquations.length = 0;
   }
-  return { world, bodies, floorY, step, moving, grab, move, release, pull, remove, beginStory, placeStory, reset, dispose };
+  return { world, bodies, floorY, step, moving, grab, move, release, pull, remove, beginStory, placeStory, reset, returnBody, dispose };
 }

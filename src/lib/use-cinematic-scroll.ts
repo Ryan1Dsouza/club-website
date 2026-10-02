@@ -59,7 +59,15 @@ export function useCinematicScroll(enabled: boolean) {
     const sync = () => {
       destroy();
       if (!preference.matches) return;
-      lenis = new Lenis({ smoothWheel: true, syncTouch: false, wheelMultiplier: .6, lerp: .085 });
+      // Duration mode uses time-based easing instead of frame-rate-dependent lerp,
+      // eliminating micro-stutters caused by WebGL frame drops on the team page.
+      lenis = new Lenis({
+        smoothWheel: true,
+        syncTouch: false,
+        wheelMultiplier: 0.7,
+        duration: 1.2,
+        easing: (t: number) => 1 - Math.pow(1 - t, 4), // ease-out quartic
+      });
       animationTime = 0;
       wake();
     };

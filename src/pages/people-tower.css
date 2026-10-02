@@ -35,6 +35,19 @@
 .tower-profile::after { content: ''; position: absolute; width: 61%; aspect-ratio: 1; right: -8%; top: 8%; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 50%; box-shadow: 0 0 0 50px color-mix(in srgb, currentColor 4%, transparent), 0 0 0 100px color-mix(in srgb, currentColor 3%, transparent); }
 .tower-profile__meta { position: absolute; z-index: 2; inset: 27px 32px auto; display: flex; justify-content: space-between; gap: 20px; font: 11px/1.4 var(--mono); letter-spacing: .12em; }
 .tower-profile__monogram { position: absolute; top: 9%; right: 5%; font: italic 400 var(--profile-monogram)/1 var(--serif); letter-spacing: -.11em; opacity: .17; }
+.tower-profile__photo { 
+  position: absolute; 
+  right: 0; 
+  top: 0; 
+  height: 100%; 
+  width: 55%; 
+  z-index: 0; 
+  object-fit: cover; 
+  object-position: center 20%;
+  mask-image: linear-gradient(to right, transparent, black 45%);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 45%);
+}
+
 .tower-profile__cross { position: absolute; top: 24%; left: 4%; font: 50px/1 var(--mono); font-weight: 400; opacity: .45; }
 .tower-profile__copy { position: absolute; z-index: 2; bottom: 11%; left: 5%; right: 5%; }
 .tower-profile__role { display: flex; align-items: center; gap: 12px; margin-bottom: 23px; font: 12px/1.5 var(--mono); text-transform: uppercase; letter-spacing: .15em; }
@@ -64,6 +77,7 @@
   .tower-profile__copy { bottom: 13%; left: 7%; right: 7%; }
   .tower-profile__role { font-size: 10px; letter-spacing: .09em; margin-bottom: 20px; }
   .tower-profile__monogram { top: 17%; right: 9%; }
+
   .tower-profile__cross { top: 21%; left: 7%; font-size: 35px; }
   .tower-profile__footer { font-size: 8px; inset-inline: 7%; }
   .people-roster__heading { align-items: flex-start; flex-direction: column; gap: 20px; }

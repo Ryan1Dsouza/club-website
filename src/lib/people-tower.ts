@@ -13,7 +13,7 @@ function makeProfile() {
   const element = document.createElement('div');
   element.className = 'tower-profile';
   // Member values are always assigned with textContent.
-  element.innerHTML = '<div class="tower-profile__meta"><span>NUCLEUS / SJEC</span><span data-profile-index></span></div><div class="tower-profile__monogram"></div><span class="tower-profile__cross">+</span><div class="tower-profile__copy"><p class="tower-profile__role"></p><div class="tower-profile__name"><span></span><span></span></div></div><div class="tower-profile__footer"><span>The people / Nucleus</span><span>Keep scrolling ↗</span></div>';
+  element.innerHTML = '<div class="tower-profile__meta"><span>NUCLEUS / SJEC</span><span data-profile-index></span></div><div class="tower-profile__monogram"></div><img class="tower-profile__photo" src="" alt="" /><span class="tower-profile__cross">+</span><div class="tower-profile__copy"><p class="tower-profile__role"></p><div class="tower-profile__name"><span></span><span></span></div></div><div class="tower-profile__footer"><span>The people / Nucleus</span><span>Keep scrolling ↗</span></div>';
   return element;
 }
 
@@ -59,6 +59,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     const firstName = profileName.children[0], lastName = profileName.children[1];
     const profileRole = profile.querySelector('.tower-profile__role')!;
     const monogram = profile.querySelector('.tower-profile__monogram')!;
+    const photo = profile.querySelector('.tower-profile__photo') as HTMLImageElement;
     const profileIndex = profile.querySelector('[data-profile-index]')!;
     const stage = host.parentElement!;
     let width = 1, height = 1, profileWidth = 1, profileHeight = 1;
@@ -89,6 +90,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       profile.style.setProperty('--tower-paper', palette.paper); profile.style.setProperty('--tower-ink', palette.ink);
       firstName.textContent = parts[0]; lastName.textContent = parts.slice(1).join(' ');
       profileRole.textContent = member.role; monogram.textContent = member.initials;
+      if (member.image) { photo.src = member.image; photo.style.display = "block"; } else { photo.style.display = "none"; }
       profileIndex.textContent = `${String(index + 1).padStart(2, '0')} / ${String(members.length).padStart(2, '0')}`;
       const longest = Math.max(parts[0].length, parts.slice(1).join(' ').length);
       const fontSize = Math.min(profileHeight * .225, profileWidth * .83 / (Math.max(5, longest) * .49));
@@ -105,10 +107,18 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       const desiredRemoved = state.completed;
       if (active === state.index && storyRemoved === desiredRemoved) return;
       releasePointer();
-      // Reverse seeking explicitly rebuilds supports. Forward motion never resets
-      // surviving bodies, so a falling or tilted block keeps its physical pose.
+      // Reverse seeking returns only the pieces that need to come back,
+      // leaving the rest of the tower untouched in their current poses.
       if (state.completed < storyRemoved || (state.index < 0 && state.completed === 0 && active >= 0)) {
-        physics.reset(state.completed); storyRemoved = state.completed;
+        // Return pieces one-by-one from the most recently removed back to the new completed count
+        for (let i = storyRemoved - 1; i >= state.completed; i--) {
+          physics.returnBody(i);
+        }
+        // Also return the active story piece if we're scrolling all the way back
+        if (active >= 0 && state.index < 0) {
+          physics.returnBody(active);
+        }
+        storyRemoved = state.completed;
       }
       for (let i = storyRemoved; i < state.completed; i++) physics.remove(i);
       storyRemoved = state.completed;
@@ -162,15 +172,18 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
               control2.copy(destination).addScaledVector(right, slot.direction * targetScale.x * .45).addScaledVector(up, -0.4);
               curve.v0.copy(pulled); curve.v1.copy(control1); curve.v2.copy(control2); curve.v3.copy(destination);
               curve.getPoint(flight, block.position);
-              // Aggressively pull the Y-coordinate to the center of the screen early in the flight.
-              // This guarantees that cards starting at the top of the tower don't hover at the topmost 
-              // edge of the screen if the user stops scrolling mid-animation to read them.
-              block.position.y = THREE.MathUtils.lerp(pulled.y, destination.y, smooth(Math.min(1, flight * 1.6)));
+              
               tumbleQuaternion.setFromEuler(euler.set(.85 * slot.spin, slot.yaw + .6 * slot.direction, 1.3 * slot.direction));
-              block.quaternion.slerp(tumbleQuaternion, smooth((t - .10) / .1));
+              // Delay the tumble slightly so the block's tail clears the tower before rotating
+              block.quaternion.slerp(tumbleQuaternion, smooth(Math.max(0, t - .14) / .1));
               block.quaternion.slerp(camera.quaternion, smooth((t - .23) / .2));
             }
             block.scale.lerp(targetScale, unfold);
+            
+            // Ensure the visual mesh never dips below the floor level, preventing it from clipping 
+            // through the table when pulling out blocks from the bottom row of the tower.
+            block.position.y = Math.max(block.position.y, physics.floorY + 0.3);
+
             const exit = exitState.progress;
             if (exit > 0) {
               block.position.addScaledVector(right, slot.direction * targetScale.x * 1.55 * exit)
@@ -214,10 +227,11 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       }
       try {
         if (layoutDirty) measure();
-        if (scrollDirty) sampleScroll();
+        sampleScroll();
         if (!initialized) { scrollMotion.value = target; initialized = true; }
-        // Input response is independent of rendering quality and pointer type.
-        progress = advanceTowerScroll(scrollMotion, target, elapsed, 26);
+        // Lenis handles all scroll smoothing. Response 200 makes the tower
+        // track its output near-instantly with zero perceptible lag.
+        progress = advanceTowerScroll(scrollMotion, target, elapsed, 200);
         const state = towerFrame(progress, members.length);
         // The desktop intro orbits; readable profiles and settled mobile scenes rest.
         const idleOrbit = !quality.simplified && state.index < 0 && state.completed === 0 && state.outro === 0;
@@ -230,7 +244,10 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
         if (transformsChanged || matricesDirty || progress !== renderedProgress || (orbiting && time - lastRenderTime >= 1000 / 30)) {
           render(state, transformsChanged, orbiting); lastRenderTime = time;
         }
-        if (idleOrbit || physics.moving() || progress !== target || layoutDirty || scrollDirty) frame = requestAnimationFrame(draw);
+        // Keep the loop alive for 200ms after the last scroll input so the spring
+        // interpolates smoothly across the gaps between discrete wheel ticks.
+        const scrollSettling = time - lastInteraction < 200;
+        if (idleOrbit || physics.moving() || progress !== target || layoutDirty || scrollDirty || scrollSettling) frame = requestAnimationFrame(draw);
         else slowTime = 0;
       } catch { dispose(); callbacks.onError(); }
     }
@@ -238,7 +255,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       if (!frame && !disposed && visible && !document.hidden) { previousTime = performance.now(); frame = requestAnimationFrame(draw); }
     }
     function scroll() {
-      scrollDirty = true; wake();
+      scrollDirty = true; lastInteraction = performance.now(); wake();
     }
     function sampleScroll() {
       scrollDirty = false;
