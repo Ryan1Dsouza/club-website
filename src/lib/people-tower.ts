@@ -13,12 +13,12 @@ function makeProfile() {
   const element = document.createElement('div');
   element.className = 'tower-profile';
   // Member values are always assigned with textContent.
-  element.innerHTML = '<div class="tower-profile__meta"><span>NUCLEUS / SJEC</span><span data-profile-index></span></div><div class="tower-profile__monogram"></div><img class="tower-profile__photo" src="" alt="" /><span class="tower-profile__cross">+</span><div class="tower-profile__copy"><p class="tower-profile__role"></p><div class="tower-profile__name"><span></span><span></span></div></div><div class="tower-profile__footer"><span>The people / Nucleus</span><span>Keep scrolling ↗</span></div>';
+  element.innerHTML = '<div class="tower-profile__meta"><span>NUCLEUS / SJEC</span><span data-profile-index></span></div><div class="tower-profile__monogram"></div><img class="tower-profile__photo" loading="lazy" src="" alt="" /><div class="tower-profile__photo-fade"></div><span class="tower-profile__cross">+</span><div class="tower-profile__copy"><p class="tower-profile__role"></p><div class="tower-profile__name"><span></span><span></span></div></div><div class="tower-profile__footer"><span>The people / Nucleus</span><span>Keep scrolling ↗</span></div>';
   return element;
 }
 
 /** A sleeping rigid-body tower, two instanced draws, and one crisp DOM profile. */
-export function createPeopleTower(host: HTMLElement, section: HTMLElement, members: Member[], callbacks: Callbacks) {
+export async function createPeopleTower(host: HTMLElement, section: HTMLElement, members: Member[], callbacks: Callbacks) {
   const cleanups: (() => void)[] = [];
   let disposed = false;
   function dispose() {
@@ -42,7 +42,6 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     renderer.shadowMap.autoUpdate = false;
     const css = new CSS3DRenderer(); css.domElement.className = 'people-tower__labels';
     cleanups.push(() => css.domElement.remove());
-    host.append(renderer.domElement, css.domElement);
     const scene = new THREE.Scene(), labels = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, 1, .1, 150);
     const slots = towerSlots(members.map(member => member.id)), layers = Math.ceil(members.length / 3);
@@ -53,14 +52,40 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     cleanups.push(batch.dispose);
     const scenery = createTowerScenery(scene, physics.floorY, layers * LAYER_HEIGHT, quality.simplified);
     cleanups.push(scenery.dispose);
-    const profile = makeProfile(), profileObject = new CSS3DObject(profile); labels.add(profileObject);
-    cleanups.push(() => profileObject.removeFromParent());
-    const profileName = profile.querySelector('.tower-profile__name')!;
-    const firstName = profileName.children[0], lastName = profileName.children[1];
-    const profileRole = profile.querySelector('.tower-profile__role')!;
-    const monogram = profile.querySelector('.tower-profile__monogram')!;
-    const photo = profile.querySelector('.tower-profile__photo') as HTMLImageElement;
-    const profileIndex = profile.querySelector('[data-profile-index]')!;
+    const profiles = members.map((member, index) => {
+      const profile = makeProfile(), profileObject = new CSS3DObject(profile);
+      profileObject.visible = true; labels.add(profileObject);
+      
+      const parts = member.name.split(' ');
+      const palette = TOWER_PALETTES[index % TOWER_PALETTES.length];
+      profile.style.setProperty('--tower-paper', palette.paper); profile.style.setProperty('--tower-ink', palette.ink);
+      
+      const profileName = profile.querySelector('.tower-profile__name')!;
+      profileName.children[0].textContent = parts[0]; 
+      profileName.children[1].textContent = parts.slice(1).join(' ');
+      
+      profile.querySelector('.tower-profile__role')!.textContent = member.role; 
+      profile.querySelector('.tower-profile__monogram')!.textContent = member.initials;
+      
+      const photo = profile.querySelector('.tower-profile__photo') as HTMLImageElement;
+      if (member.image) { 
+        photo.dataset.loaded = 'false';
+        photo.onload = () => { photo.dataset.loaded = 'true'; };
+        photo.src = member.image; 
+      } else { 
+        photo.dataset.loaded = 'false';
+      }
+      
+      profile.querySelector('[data-profile-index]')!.textContent = `${String(index + 1).padStart(2, '0')} / ${String(members.length).padStart(2, '0')}`;
+      const longest = Math.max(parts[0].length, parts.slice(1).join(' ').length);
+      const fontSize = Math.min(100 * .225, 100 * .83 / (Math.max(5, longest) * .49)); // Initial font size calculation
+      profile.style.setProperty('--profile-name', `${fontSize}px`);
+      
+      return { profile, profileObject, photo };
+    });
+    
+    cleanups.push(() => profiles.forEach(p => p.profileObject.removeFromParent()));
+
     const stage = host.parentElement!;
     let width = 1, height = 1, profileWidth = 1, profileHeight = 1;
     let start = 0, range = 1, target = 0, progress = 0, frame = 0, previousTime = 0;
@@ -85,19 +110,6 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       section.style.removeProperty('--tower-intro'); section.style.removeProperty('--tower-progress'); section.style.removeProperty('--tower-outro');
       delete host.dataset.activeMember; delete host.dataset.dragging;
     });
-
-    function setProfile(index: number) {
-      const member = members[index], parts = member.name.split(' ');
-      const palette = TOWER_PALETTES[index % TOWER_PALETTES.length];
-      profile.style.setProperty('--tower-paper', palette.paper); profile.style.setProperty('--tower-ink', palette.ink);
-      firstName.textContent = parts[0]; lastName.textContent = parts.slice(1).join(' ');
-      profileRole.textContent = member.role; monogram.textContent = member.initials;
-      if (member.image) { photo.src = member.image; photo.style.display = "block"; } else { photo.style.display = "none"; }
-      profileIndex.textContent = `${String(index + 1).padStart(2, '0')} / ${String(members.length).padStart(2, '0')}`;
-      const longest = Math.max(parts[0].length, parts.slice(1).join(' ').length);
-      const fontSize = Math.min(profileHeight * .225, profileWidth * .83 / (Math.max(5, longest) * .49));
-      profile.style.setProperty('--profile-name', `${fontSize}px`);
-    }
 
     function releasePointer() {
       const id = pointerId; pointerId = -1; draggedIndex = -1; physics.release();
@@ -130,7 +142,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       storyRemoved = state.completed;
       active = state.index;
       if (active >= 0) {
-        physics.beginStory(active); setProfile(active);
+        physics.beginStory(active);
         const body = physics.bodies[active];
         activeSource.copy(body.position); activeQuaternion.copy(body.quaternion);
       }
@@ -157,14 +169,33 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       destination.copy(camera.position).addScaledVector(forward, distance + .08).addScaledVector(up, -0.1);
       const exitState = towerExit(state.local);
       const profileVisible = state.index >= 0 && exitState.opacity > 0 && exitState.scale > 0;
-      const labelsChanged = profileObject.visible !== profileVisible || matricesDirty || changedProgress || cameraMoved;
-      profileObject.visible = profileVisible;
+      const labelsChanged = matricesDirty || changedProgress || cameraMoved;
+      // We do not use display:none or visibility:hidden because toggling them causes 
+      // 1-frame transform flashes in Chromium. We rely purely on opacity.
+      
       if (transformsChanged || matricesDirty || changedProgress || (cameraMoved && state.index >= 0)) {
         const block = batch.pose;
         physics.bodies.forEach((body, index) => {
-          if ((index < state.completed || state.outro > 0 || physics.isPending(index)) && index !== state.index) { batch.update(index, false); return; }
           const slot = slots[index];
+          const profileData = profiles[index];
+          
+          if ((index < state.completed || state.outro > 0 || physics.isPending(index)) && index !== state.index) { 
+            batch.update(index, false);
+            profileData.profile.style.opacity = '0';
+            profileData.photo.style.opacity = '0';
+            // Strictly track the resting tower position to avoid matrix jump flashes
+            faceOffset.set(0, 0, plankScale.z / 2 + .008).applyQuaternion(body.interpolatedQuaternion);
+            profileData.profileObject.position.copy(body.interpolatedPosition).add(faceOffset); 
+            profileData.profileObject.quaternion.copy(body.interpolatedQuaternion);
+            profileData.profileObject.scale.set(plankScale.x / profileWidth, plankScale.y / profileHeight, 1);
+            return; 
+          }
+          
           block.position.copy(body.interpolatedPosition); block.quaternion.copy(body.interpolatedQuaternion); block.scale.copy(plankScale);
+          
+          let currentOpacity = 0;
+          let currentPhotoOpacity = 0;
+          
           if (index === state.index) {
             source.copy(activeSource); block.position.copy(source); block.quaternion.copy(activeQuaternion);
             const t = state.local, pull = smooth(t / .10), flight = smooth((t - .10) / .24), unfold = smooth((t - .2) / .23);
@@ -186,8 +217,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
             }
             block.scale.lerp(targetScale, unfold);
             
-            // Ensure the visual mesh never dips below the floor level, preventing it from clipping 
-            // through the table when pulling out blocks from the bottom row of the tower.
+            // Ensure the visual mesh never dips below the floor level
             block.position.y = Math.max(block.position.y, physics.floorY + 0.3);
 
             const exit = exitState.progress;
@@ -199,11 +229,24 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
             }
             block.scale.multiplyScalar(exitState.scale);
             physics.placeStory(block.position, block.quaternion, block.scale, t > 0.10 && t < 0.35);
-            profile.style.opacity = String(exitState.opacity);
-            faceOffset.set(0, 0, block.scale.z / 2 + .008).applyQuaternion(block.quaternion);
-            profileObject.position.copy(block.position).add(faceOffset); profileObject.quaternion.copy(block.quaternion);
-            profileObject.scale.set(block.scale.x / profileWidth, block.scale.y / profileHeight, 1);
+            
+            currentOpacity = exitState.opacity;
+            currentPhotoOpacity = smooth(Math.max(0, unfold - 0.2) / 0.8) * exitState.scale;
           }
+          
+          // Apply to the specific profile object for this block
+          profileData.profile.style.opacity = String(currentOpacity);
+          
+          // Because each profile is bound to one block, it NEVER teleports between pieces.
+          // By strictly tracking the block's position at all times (even when invisible), 
+          // the WebKit compositor never lags, and opacity: 0 perfectly hides the element.
+          faceOffset.set(0, 0, block.scale.z / 2 + .008).applyQuaternion(block.quaternion);
+          profileData.profileObject.position.copy(block.position).add(faceOffset); 
+          profileData.profileObject.quaternion.copy(block.quaternion);
+          profileData.profileObject.scale.set(block.scale.x / profileWidth, block.scale.y / profileHeight, 1);
+          
+          profileData.photo.style.opacity = String(currentPhotoOpacity);
+          
           batch.update(index);
         });
         batch.commit(); renderer.shadowMap.needsUpdate = renderer.shadowMap.enabled; matricesDirty = false;
@@ -311,9 +354,17 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
         width = nextWidth; height = nextHeight;
         css.setSize(width, height); camera.aspect = width / height; camera.updateProjectionMatrix();
         profileWidth = width * .93; profileHeight = height * .79;
-        profile.style.width = `${profileWidth}px`; profile.style.height = `${profileHeight}px`;
-        profile.style.setProperty('--profile-monogram', `${Math.min(profileHeight * .57, profileWidth * .6)}px`);
-        if (active >= 0) setProfile(active);
+        const monogramSize = Math.min(profileHeight * .57, profileWidth * .6);
+        profiles.forEach((p, i) => {
+          p.profile.style.width = `${profileWidth}px`; 
+          p.profile.style.height = `${profileHeight}px`;
+          p.profile.style.setProperty('--profile-monogram', `${monogramSize}px`);
+          
+          const parts = members[i].name.split(' ');
+          const longest = Math.max(parts[0].length, parts.slice(1).join(' ').length);
+          const fontSize = Math.min(profileHeight * .225, profileWidth * .83 / (Math.max(5, longest) * .49));
+          p.profile.style.setProperty('--profile-name', `${fontSize}px`);
+        });
       }
       if (renderer.shadowMap.enabled === quality.simplified) matricesDirty = true;
       renderer.shadowMap.enabled = !quality.simplified;
@@ -384,6 +435,8 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     renderer.domElement.addEventListener('lostpointercapture', pointerUp);
     window.addEventListener('scroll', scroll, { passive: true }); window.addEventListener('resize', resize, { passive: true });
     document.addEventListener('visibilitychange', visibility);
+    host.append(renderer.domElement, css.domElement);
+    await renderer.compileAsync(scene, camera);
     resize();
     return { dispose, rebuild };
   } catch (error) {

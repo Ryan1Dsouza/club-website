@@ -44,8 +44,16 @@
   z-index: 0; 
   object-fit: cover; 
   object-position: center 20%;
-  mask-image: linear-gradient(to right, transparent, black 45%);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 45%);
+}
+.tower-profile__photo-fade {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 55%;
+  z-index: 1;
+  background: linear-gradient(to right, var(--tower-paper) 5%, transparent 45%);
+  pointer-events: none;
 }
 
 .tower-profile__cross { position: absolute; top: 24%; left: 4%; font: 50px/1 var(--mono); font-weight: 400; opacity: .45; }

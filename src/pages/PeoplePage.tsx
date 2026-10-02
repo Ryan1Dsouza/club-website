@@ -34,7 +34,7 @@ export default function PeoplePage({ members }: { members: Member[] }) {
       try {
         const { createPeopleTower } = await import('../lib/people-tower');
         if (disposed || current !== generation) return;
-        const tower = createPeopleTower(element!, section!, sorted, {
+        const tower = await createPeopleTower(element!, section!, sorted, {
           onMember: index => { if (!disposed && current === generation) setActive(index); },
           onError: () => {
             if (!disposed && current === generation) {
