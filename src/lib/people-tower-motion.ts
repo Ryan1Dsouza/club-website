@@ -1,12 +1,12 @@
 export const TOWER_INTRO = .15;
-export const TOWER_OUTRO = .15;
+export const TOWER_OUTRO = 1.4;
 export const BLOCK_SIZE = [3.18, .71, 1.02] as const;
 export const LAYER_HEIGHT = BLOCK_SIZE[1] + .002;
 
 const ROLE_RANK: Record<string, number> = {
   president: 0, 'vice president': 1, vp: 1, secretary: 2, treasurer: 3,
   'plan & strategy lead': 4, 'technical lead': 5, 'tech lead': 5,
-  'ai & ml lead': 6, 'development lead': 7, 'dsa lead': 8,
+  'ai & ml lead': 6, 'aiml lead': 6, 'development lead': 7, 'dsa lead': 8,
   'event lead': 9, 'media lead': 10, 'discipline head': 11,
 };
 function roleRank(role: string) {
@@ -64,15 +64,11 @@ function hash(value: string) {
 /** Fill every foundation layer before the next, with story leaders at the top. */
 export function towerSlots(ids: readonly string[]) {
   const layers = Math.ceil(ids.length / 3);
-  const ranks = Array.from({ length: ids.length }, (_, i) => i);
-  for (let i = ranks.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.abs(Math.sin(i * 12.9898 + 78.233)) * 100000) % (i + 1);
-    const temp = ranks[i]; ranks[i] = ranks[j]; ranks[j] = temp;
-  }
   return ids.map((id, index) => {
-    const rank = ranks[index];
+    const rank = ids.length - 1 - index;
     const layer = Math.floor(rank / 3), count = Math.min(3, ids.length - layer * 3);
-    const lane = rank % 3 - (count - 1) / 2, turned = layer % 2 === 1;
+    const posInLayer = rank % 3;
+    const lane = posInLayer - (count - 1) / 2, turned = layer % 2 === 1;
     const seed = hash(id);
     return {
       rank, layer, yaw: turned ? Math.PI / 2 : 0,
@@ -88,7 +84,8 @@ export function towerFrame(progress: number, count: number) {
   const index = count < 1 || memberTime < 0 || memberTime >= count ? -1 : Math.floor(memberTime);
   return {
     index, local: index < 0 ? 0 : memberTime - index,
-    intro: smooth(time / TOWER_INTRO), outro: smooth((memberTime - count) / TOWER_OUTRO),
+    // Reserve the last quarter of the outro for the centered directory cards.
+    intro: smooth(time / TOWER_INTRO), outro: smooth((memberTime - count) / (TOWER_OUTRO * .75)),
     completed: Math.max(0, Math.min(count, Math.floor(memberTime))),
   };
 }

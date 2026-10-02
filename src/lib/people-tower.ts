@@ -7,13 +7,26 @@ import { createTowerScenery } from './people-tower-scenery';
 import { createTowerBlocks, TOWER_PALETTES } from './people-tower-blocks';
 import { createTowerPhysics } from './people-tower-physics';
 
-type Callbacks = { onMember: (index: number) => void; onError: () => void };
+type Callbacks = { onMember: (index: number) => void; onOutro: (progress: number) => void; onError: () => void };
 
 function makeProfile() {
   const element = document.createElement('div');
   element.className = 'tower-profile';
   // Member values are always assigned with textContent.
-  element.innerHTML = '<div class="tower-profile__meta"><span>NUCLEUS / SJEC</span><span data-profile-index></span></div><div class="tower-profile__monogram"></div><span class="tower-profile__cross">+</span><div class="tower-profile__copy"><p class="tower-profile__role"></p><div class="tower-profile__name"><span></span><span></span></div></div><div class="tower-profile__footer"><span>The people / Nucleus</span><span>Keep scrolling ↗</span></div>';
+  element.innerHTML = `
+    <div class="tower-profile__meta"><span>NUCLEUS / SJEC</span><span data-profile-index></span></div>
+    <div class="tower-profile__body">
+      <div class="tower-profile__copy">
+        <p class="tower-profile__role"></p>
+        <div class="tower-profile__name"><span></span><span></span></div>
+        <p class="tower-profile__tagline"></p>
+      </div>
+      <div class="tower-profile__portrait">
+        <span class="tower-profile__monogram"></span>
+        <img alt="" decoding="async" />
+      </div>
+    </div>
+    <div class="tower-profile__footer"><span>The people / Nucleus</span><span>Keep scrolling ↗</span></div>`;
   return element;
 }
 
@@ -60,6 +73,17 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     const profileRole = profile.querySelector('.tower-profile__role')!;
     const monogram = profile.querySelector('.tower-profile__monogram')!;
     const profileIndex = profile.querySelector('[data-profile-index]')!;
+    const portrait = profile.querySelector<HTMLElement>('.tower-profile__portrait')!;
+    const portraitImg = portrait.querySelector('img')!;
+    const profileTagline = profile.querySelector<HTMLElement>('.tower-profile__tagline')!;
+    const showPortrait = () => { portrait.dataset.loaded = 'true'; };
+    const hidePortrait = () => { portrait.dataset.loaded = 'false'; };
+    portraitImg.addEventListener('load', showPortrait);
+    portraitImg.addEventListener('error', hidePortrait);
+    cleanups.push(() => {
+      portraitImg.removeEventListener('load', showPortrait);
+      portraitImg.removeEventListener('error', hidePortrait);
+    });
     const stage = host.parentElement!;
     let width = 1, height = 1, profileWidth = 1, profileHeight = 1;
     let start = 0, range = 1, target = 0, progress = 0, frame = 0, previousTime = 0;
@@ -90,8 +114,24 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       firstName.textContent = parts[0]; lastName.textContent = parts.slice(1).join(' ');
       profileRole.textContent = member.role; monogram.textContent = member.initials;
       profileIndex.textContent = `${String(index + 1).padStart(2, '0')} / ${String(members.length).padStart(2, '0')}`;
+      profile.dataset.portraitSide = index % 2 === 0 ? 'right' : 'left';
+      portraitImg.alt = member.name;
+      if (member.image) {
+        if (portraitImg.getAttribute('src') !== member.image) {
+          hidePortrait();
+          portraitImg.src = member.image;
+        }
+        if (portraitImg.complete && portraitImg.naturalWidth > 0) showPortrait();
+      } else {
+        hidePortrait();
+        portraitImg.removeAttribute('src');
+      }
+      profileTagline.textContent = member.tagline ? `“${member.tagline}”` : '';
+      profileTagline.hidden = !member.tagline;
+
       const longest = Math.max(parts[0].length, parts.slice(1).join(' ').length);
-      const fontSize = Math.min(profileHeight * .225, profileWidth * .83 / (Math.max(5, longest) * .49));
+      // Leave the other half of the existing card for the portrait.
+      const fontSize = Math.min(profileHeight * .2, profileWidth * .43 / (Math.max(5, longest) * .49));
       profile.style.setProperty('--profile-name', `${fontSize}px`);
     }
 
@@ -126,6 +166,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       if (changedProgress) {
         section.style.setProperty('--tower-intro', String(1 - state.intro));
         section.style.setProperty('--tower-progress', String(progress)); section.style.setProperty('--tower-outro', String(state.outro));
+        callbacks.onOutro(state.outro);
         host.dataset.activeMember = String(state.index);
       }
       const halfFov = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));

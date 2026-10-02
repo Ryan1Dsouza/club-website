@@ -16,7 +16,7 @@ const safeUrl = z.union([z.literal(''), z.url().refine(value => ['https:', 'http
 const isoDate = z.union([z.literal(''), z.iso.datetime({ offset: true })]);
 const eventSchema = z.object({ title: z.string().trim().min(2).max(120), description: z.string().trim().min(20).max(1600), startsAt: z.iso.datetime({ offset: true }), endsAt: isoDate, location: z.string().trim().min(2).max(200), category: z.string().trim().min(2).max(60), registrationUrl: safeUrl, albumUrl: safeUrl.optional(), published: z.boolean() }).refine(e => !e.endsAt || new Date(e.endsAt) >= new Date(e.startsAt), 'End date must follow the start date');
 const projectSchema = z.object({ title: z.string().trim().min(2).max(120), description: z.string().trim().min(20).max(1600), domain: z.string().trim().min(2).max(60), status: z.string().trim().min(2).max(60), url: safeUrl, repositoryUrl: safeUrl, published: z.boolean() });
-const memberSchema = z.object({ name: z.string().trim().min(2).max(100), role: z.string().trim().min(2).max(100), initials: z.string().trim().min(1).max(4) });
+const memberSchema = z.object({ name: z.string().trim().min(2).max(100), role: z.string().trim().min(2).max(100), initials: z.string().trim().min(1).max(4), image: z.string().trim().optional(), tagline: z.string().trim().optional(), socials: z.record(z.string(), z.string()).optional() });
 const settingsSchema = z.object({ recruitmentOpen: z.boolean(), recruitmentMessage: z.string().trim().min(10).max(600), recruitmentDeadline: isoDate, cycle: z.string().trim().min(1).max(50), contactEmail: z.email().max(254), instagramUrl: safeUrl, githubUrl: safeUrl, linkedinUrl: safeUrl });
 const applicationSchema = z.object({ name: z.string().trim().min(2).max(100), email: z.email().max(254).transform(e => e.toLowerCase()), year: z.enum(['1', '2', '3', '4']), domain: z.enum(['aiml', 'web', 'dsa']), motivation: z.string().trim().min(30).max(1600), portfolio: safeUrl, consent: z.literal(true), website: z.literal('').optional() });
 const hashToken = token => createHash('sha256').update(token).digest('hex');
@@ -160,6 +160,8 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
   });
   if (existsSync(resolve(dist, 'index.html'))) {
     const template = readFileSync(resolve(dist, 'index.html'), 'utf8');
+    app.use('/team_images', express.static(resolve('public/team_images'), { maxAge: '1d' }));
+    app.use('/team', express.static(resolve('public/team_images/core'), { maxAge: '1d' }));
     app.use('/assets', express.static(resolve(dist, 'assets'), { immutable: true, maxAge: '1y' }));
     app.use(express.static(dist, { index: false, maxAge: '1h' }));
     app.use((req, res, next) => {

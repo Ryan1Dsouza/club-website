@@ -1,4 +1,6 @@
 const pages: Record<string, { title: string; description: string }> = {
+  '/members': { title: 'Members — Nucleus SJEC', description: 'Meet the members of Nucleus at St. Joseph Engineering College, Mangaluru. Explore their roles, interests, and profiles.' },
+  '/alumni': { title: 'Alumni — Nucleus SJEC', description: 'Meet the alumni of Nucleus SJEC and the people who helped build our student community.' },
   '/': { title: 'Nucleus SJEC — A connection worth making', description: 'The student innovation community at St. Joseph Engineering College, Mangaluru. Explore AI, build for the web, and master algorithms with Nucleus.' },
   '/about': { title: 'Our domains — Nucleus SJEC', description: 'Explore AI and machine learning, web development, and data structures and algorithms. Learn and build with the Nucleus student community at SJEC.' },
   '/events': { title: 'Experiences — Nucleus SJEC', description: 'Discover Nucleus SJEC workshops, community events, and hands-on learning experiences. Find upcoming events and explore past highlights.' },

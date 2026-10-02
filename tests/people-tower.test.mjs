@@ -255,6 +255,19 @@ test('high-refresh frames interpolate moving bodies between bounded fixed steps'
   } finally { physics.dispose(); }
 });
 
+test('directory reveal follows the final profile and leaves a centered hold at the end', () => {
+  for (const count of [1, 15, 40]) {
+    const duration = TOWER_INTRO + count + TOWER_OUTRO;
+    const atOutro = fraction => towerFrame((TOWER_INTRO + count + TOWER_OUTRO * fraction) / duration, count);
+    assert.equal(towerFrame(memberProgress(count - 1, count), count).outro, 0);
+    assert.equal(atOutro(0).outro, 0);
+    assert.ok(Math.abs(atOutro(.375).outro - .5) < 1e-10);
+    assert.equal(atOutro(.8).outro, 1);
+    assert.equal(atOutro(1).outro, 1);
+    assert.equal(atOutro(.375).index, -1);
+  }
+});
+
 test('forward and reverse seeking visits every member and handles empty and changing team sizes', () => {
   for (const count of [0, 1, 2, 15, 40]) {
     assert.equal(towerSlots(Array.from({ length: count }, (_, i) => String(i))).length, count);

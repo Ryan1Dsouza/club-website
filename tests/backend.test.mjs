@@ -190,7 +190,12 @@ test('production renders the animated home and club pages, escapes data, and hid
     assert.match(work, /work-feature/); assert.match(work, /i Laundroid/);
     const team = await fetch(`${base}/team`).then(r => r.text());
     for (const member of getSite(db).team) assert.ok(team.includes(member.name));
-    for (const path of ['/', '/about', '/projects', '/team', '/events', '/recruitment']) {
+    assert.doesNotMatch(team, /class="people-roster__member"/);
+    const members = await fetch(`${base}/members`).then(r => r.text());
+    assert.match(members, /class="people-roster__member"/);
+    const alumni = await fetch(`${base}/alumni`).then(r => r.text());
+    assert.match(alumni, /Alumni profiles will be added soon/);
+    for (const path of ['/', '/about', '/projects', '/team', '/members', '/alumni', '/events', '/recruitment']) {
       const response = await fetch(`${base}${path}?source=test`);
       const document = await response.text(), meta = pageMeta(path);
       assert.equal(response.status, 200);

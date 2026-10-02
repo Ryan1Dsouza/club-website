@@ -129,5 +129,7 @@ test('a failure partway through mounting removes the scene and releases its reso
   await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'fallback');
   await expect(page.locator('.people-tower__world canvas, .people-tower__labels')).toHaveCount(0);
   expect(await page.evaluate(() => window.__towerDisposed)).toEqual({ geometries: 0, textures: 0 });
-  await expect(page.locator('.people-roster__member')).toHaveCount(site.team.length);
+  await expect(page.locator('.people-roster__member')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Members', exact: true })).toBeInViewport();
+  await expect(page.getByRole('link', { name: 'Alumni', exact: true })).toBeInViewport();
 });

@@ -13,7 +13,7 @@ async function seek(page, progress) {
   }, progress);
 }
 
-test('tower opens into full-size identities, reverses, skips to the roster and cleans up', async ({ page }, info) => {
+test('tower ends in two centered directory cards, reverses, and opens both pages', async ({ page }, info) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/team');
@@ -36,14 +36,43 @@ test('tower opens into full-size identities, reverses, skips to the roster and c
   }
   await page.getByLabel('Jump to a member').selectOption(String(ordered.findIndex(member => member.id === 'nishanth')));
   await expect(page.locator('.tower-profile__name')).toHaveText('NishanthUday Naik');
-  await page.getByRole('link', { name: 'View all members' }).click();
-  await expect(page.locator('.people-roster__heading')).toBeInViewport();
+  await expect(page.locator('.people-roster__member')).toHaveCount(0);
+  await seek(page, memberProgress(site.team.length - 1, site.team.length));
+  await expect(page.locator('.tower-profile')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.people-directory')).toBeHidden();
+  const middle = (TOWER_INTRO + site.team.length + TOWER_OUTRO * .375) / duration;
+  await seek(page, middle);
+  await expect.poll(() => page.locator('.people-directory__cards').evaluate(el => Number(getComputedStyle(el).opacity))).toBeGreaterThan(.45);
+  const entering = await page.locator('.people-directory__cards').boundingBox();
+  expect(entering.y + entering.height / 2).toBeGreaterThan(600);
+  await seek(page, 1);
+  await expect(page.locator('.people-directory__cards')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.people-directory__card')).toHaveCount(2);
+  const centered = await page.locator('.people-directory__cards').boundingBox();
+  expect(centered.x + centered.width / 2).toBeCloseTo(720, 0);
+  expect(centered.y + centered.height / 2).toBeCloseTo(500, 0);
+  expect(await page.locator('.people-directory').evaluate(el => getComputedStyle(el, '::before').backdropFilter)).toBe('blur(30px)');
+  await page.screenshot({ path: info.outputPath('directory-desktop.png') });
+  await page.mouse.wheel(0, -1800);
+  await expect(page.locator('.people-directory')).toBeHidden();
+  await expect(page.locator('.site-header')).not.toHaveAttribute('inert');
+  await page.getByRole('button', { name: 'Members & Alumni' }).click();
+  await expect(page.locator('.people-directory__cards')).toHaveCSS('opacity', '1');
+  await expect(page.getByRole('link', { name: 'Members', exact: true })).toBeFocused();
+  await page.getByRole('link', { name: 'Members', exact: true }).click();
+  await expect(page).toHaveURL(/\/members$/);
+  await expect(page.getByRole('heading', { name: 'Members', exact: true })).toBeVisible();
   await expect(page.locator('.people-roster__member')).toHaveCount(15);
-  await page.getByRole('button', { name: 'Show Poorvik Kuthyala in the tower', exact: true }).click();
-  await expect(page.locator('.tower-profile__role')).toHaveText('President');
-  await page.getByRole('button', { name: 'Open menu', exact: true }).click();
-  await page.getByRole('link', { name: 'Our work', exact: true }).click();
   await expect(page.locator('.people-tower__world canvas')).toHaveCount(0);
+  await expect(page.locator('.site-header')).not.toHaveAttribute('inert');
+  await page.locator('.people-directory-page__nav').getByRole('link', { name: 'The people', exact: true }).click();
+  await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'ready');
+  await page.getByRole('button', { name: 'Members & Alumni' }).click();
+  await expect(page.locator('.people-directory__cards')).toHaveCSS('opacity', '1');
+  await page.getByRole('link', { name: 'Alumni', exact: true }).click();
+  await expect(page).toHaveURL(/\/alumni$/);
+  await expect(page.getByRole('heading', { name: 'Alumni', exact: true })).toBeVisible();
+  await expect(page.getByText('Alumni profiles will be added soon.')).toBeVisible();
   expect(errors).toEqual([]);
 });
 
@@ -68,14 +97,28 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
     const pixels = await page.locator('.people-tower__world canvas').evaluate(el => el.width * el.height);
     expect(pixels).toBeLessThanOrEqual(2_200_000);
     await page.screenshot({ path: info.outputPath('mobile-profile.png') });
+    await seek(page, 1);
+    await expect(page.locator('.people-directory__cards')).toHaveCSS('opacity', '1');
+    const cards = await page.locator('.people-directory__cards').boundingBox();
+    expect(cards.x).toBeGreaterThanOrEqual(0);
+    expect(cards.y).toBeGreaterThanOrEqual(0);
+    expect(cards.x + cards.width).toBeLessThanOrEqual(viewport.width);
+    expect(cards.y + cards.height).toBeLessThanOrEqual(viewport.height);
+    expect(cards.y + cards.height / 2).toBeCloseTo(viewport.height / 2, 0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
+    await page.screenshot({ path: info.outputPath('directory-mobile.png') });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'still');
     await expect(page.locator('.people-tower__world canvas')).toHaveCount(0);
-    await expect(page.locator('.people-roster__member')).toHaveCount(15);
+    await expect(page.locator('.people-roster__member')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Members', exact: true })).toBeInViewport();
+    await expect(page.getByRole('link', { name: 'Alumni', exact: true })).toBeInViewport();
+    await page.getByRole('link', { name: 'Alumni', exact: true }).click();
+    await expect(page).toHaveURL(/\/alumni$/);
   });
 }
 
-test('WebGL failure and an empty team retain readable content without a long scroll region', async ({ page }) => {
+test('WebGL failure and missing API team data retain both directories without a long scroll region', async ({ page }) => {
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function (type, ...args) {
@@ -86,12 +129,16 @@ test('WebGL failure and an empty team retain readable content without a long scr
   await page.goto('/team');
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'fallback');
-  await expect(page.locator('.people-roster__member')).toHaveCount(15);
-  expect((await page.locator('.people-tower').boundingBox()).height).toBeLessThan(1000);
+  await expect(page.getByRole('link', { name: 'Members', exact: true })).toBeInViewport();
+  await expect(page.getByRole('link', { name: 'Alumni', exact: true })).toBeInViewport();
+  await expect(page.locator('.people-tower')).toBeHidden();
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(1000);
   await page.route('**/api/site', route => route.fulfill({ json: { ...site, team: [] } }));
   await page.reload();
-  await expect(page.locator('.empty-state')).toHaveText('The team will be announced here soon.');
-  await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'still');
+  await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'fallback');
+  await page.getByRole('link', { name: 'Members', exact: true }).click();
+  await expect(page).toHaveURL(/\/members$/);
+  await expect(page.locator('.people-roster__member')).toHaveCount(15);
 });
 
 test('physics interaction, idle orbit, batching, rebuild and GPU cleanup work together', async ({ page }, info) => {
@@ -167,10 +214,9 @@ test('physics interaction, idle orbit, batching, rebuild and GPU cleanup work to
   await page.locator('.people-tower__world canvas').dispatchEvent('pointercancel', { pointerId: 1 });
   await page.mouse.up();
   await expect(page.locator('.people-tower__world')).not.toHaveAttribute('data-dragging');
-  await page.getByRole('link', { name: 'View all members' }).click();
-  await expect(page.locator('.people-roster__heading')).toBeInViewport();
-  await page.locator('.people-roster__member').last().scrollIntoViewIfNeeded();
-  await expect(page.locator('.people-tower__world')).not.toBeInViewport();
+  await page.getByRole('button', { name: 'Members & Alumni' }).click();
+  await expect(page.locator('.people-directory__cards')).toHaveCSS('opacity', '1');
+  await expect.poll(() => page.locator('.people-tower').evaluate(element => element.style.getPropertyValue('--tower-progress'))).toBe('1');
   await page.waitForTimeout(300);
   const pausedFrame = (await metrics()).frame; await page.waitForTimeout(300);
   expect((await metrics()).frame).toBe(pausedFrame);

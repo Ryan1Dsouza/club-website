@@ -13,6 +13,7 @@ import EventExplorer from './pages/EventExplorer';
 import DomainParallax from './components/home/DomainParallax';
 import WorkPage from './pages/WorkPage';
 import PeoplePage from './pages/PeoplePage';
+import PeopleDirectoryPage from './pages/PeopleDirectoryPage';
 import VoicesMarquee from './components/home/VoicesMarquee';
 import CommunityCTA from './components/home/CommunityCTA';
 import Recruitment from './pages/Recruitment';
@@ -153,6 +154,8 @@ export default function App({ initialData = seed, serverRendered = false }: { in
         <Route path="/events" element={<EventExplorer events={data.events} onPublished={event => setData(current => ({ ...current, events: [...current.events.filter(item => item.id !== event.id), event] }))} />} />
         <Route path="/projects" element={<WorkPage projects={data.projects} settings={settings} />} />
         <Route path="/team" element={<PeoplePage members={data.team} />} />
+        <Route path="/members" element={<PeopleDirectoryPage kind="members" members={data.team} />} />
+        <Route path="/alumni" element={<PeopleDirectoryPage kind="alumni" />} />
         <Route path="*" element={<section className="recruitment-page section-wrap"><span className="eyebrow">404</span><h1>Lost the<br /><em>connection?</em></h1><Link className="button primary" to="/">Back to Nucleus <ArrowRight size={17} /></Link></section>} />
       </Routes>
     </main>

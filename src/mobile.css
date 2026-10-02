@@ -1,0 +1,93 @@
+/* Layout refinements only; component styles continue to own visual treatments and motion. */
+@media (max-width: 760px) {
+  :root {
+    --gutter: max(20px, 5vw, env(safe-area-inset-left), env(safe-area-inset-right));
+    --header-height: calc(64px + max(8px, env(safe-area-inset-top)));
+  }
+
+  .dp-sticky { gap: 24px; padding-block: 56px 24px; }
+  .dp-header { width: 100%; padding-inline: var(--gutter); }
+  .dp-panel { padding: 16px var(--gutter) 20px; }
+  .dp-panel__inner { min-width: 0; padding: clamp(16px, 5vw, 22px); }
+  .dp-panel__heading { flex: 1; }
+  .dp-panel__actions { gap: 12px; margin-top: 20px; }
+
+  .community-section--reveal {
+    min-height: 0;
+    padding: clamp(80px, 16svh, 140px) var(--gutter);
+  }
+  .community-section--reveal > .eyebrow { margin-bottom: 24px; }
+  .community-section--reveal h2 {
+    width: 100%;
+    font-size: clamp(28px, calc((100vw - var(--gutter) * 2) / 8), 90px);
+  }
+  /* Include the existing nonbreaking spaces when fitting the two animated lines. */
+  .community-section--reveal h2 > .text-reveal { white-space: nowrap; }
+  .community-section--reveal p { margin-top: 24px; }
+  .community-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(100%, 360px);
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .community-actions .button { min-width: 0; padding-inline: 12px; gap: 10px; }
+
+  .vm-header { width: 100%; padding-inline: var(--gutter); margin-bottom: 32px; }
+  .vm-marquee-wrapper { padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); }
+  .vm-card { width: min(320px, calc(100vw - var(--gutter) * 2)); }
+
+  .people-tower__topline { gap: 12px; }
+  .people-tower__hud {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 12px;
+    bottom: max(17px, env(safe-area-inset-bottom));
+  }
+  .people-tower__hud[hidden] { display: none; }
+  .people-tower__picker { min-width: 0; }
+  .people-tower__picker select { width: 100%; max-width: none; min-height: 44px; margin: 0; }
+  .people-tower__counter, .people-tower__rebuild { white-space: nowrap; }
+  .people-tower__hint { bottom: calc(max(17px, env(safe-area-inset-bottom)) + 62px); }
+}
+
+@media (max-width: 600px) {
+  .site-footer { padding-top: 32px; }
+  .footer-top { flex-direction: column; align-items: flex-start; gap: 24px; }
+
+  .modal {
+    max-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom)));
+    padding: 56px 20px 24px;
+  }
+  .modal h2 { padding-right: 0; overflow-wrap: anywhere; }
+  .modal > .button { max-width: 100%; margin-right: 0; }
+  .modal p, .modal .text-link { overflow-wrap: anywhere; }
+  .form-grid > * { min-width: 0; }
+  .nx-dialog > .nx-event-category { display: block; padding-right: 40px; }
+  .nx-dialog h2, .nx-dialog p, .nx-event-details > span { overflow-wrap: anywhere; }
+  .nx-station-list button > span:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+
+  /* Short portrait screens still need one readable column and reachable cards. */
+  .people-directory {
+    padding-block: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-bottom));
+    align-items: safe center;
+    overflow-y: auto;
+  }
+  .people-directory__cards { width: min(400px, 100%); grid-template-columns: minmax(0, 1fr); }
+  .people-directory-page__nav { flex-wrap: wrap; gap: 8px 16px; }
+  .people-directory-page__heading { padding-block: 32px; }
+  .people-roster__member h2, .people-roster__role, .people-roster__tagline { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 380px) {
+  .people-tower__hud { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; }
+  .people-tower__picker { grid-column: 1 / -1; grid-row: 1; }
+  .people-tower__counter { grid-column: 1; grid-row: 2; }
+  .people-tower__rebuild { grid-column: 2; grid-row: 2; }
+  .people-tower__hint { bottom: calc(max(17px, env(safe-area-inset-bottom)) + 114px); }
+}
+
+@media (max-width: 600px) and (max-height: 560px) {
+  .people-directory__card { min-height: 190px; }
+  .people-directory__copy { padding-block: 12px; }
+}
