@@ -1,0 +1,673 @@
+:root {
+  --team-header-height: 72px;
+  --theme-bg-dark: #080a09;
+  --theme-bg-surface: #0f1a18;
+  --theme-border: #345b4dbf;
+  --theme-emerald-accent: #b6efd3;
+  --theme-line: rgba(255, 255, 255, 0.1);
+  --theme-text-muted: #8e9b94;
+}
+
+/* Hide horizontal and vertical scrollbars everywhere on Members Page */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+html, body, .members-page-fullscreen, .fullscreen-profile-content, .fullscreen-profile-surface {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* 1. Full-Screen Fixed Viewport Container */
+.members-page-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--theme-bg-dark);
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.meta-tag {
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--theme-emerald-accent);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #4ade80;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* Members Page Introduction Header */
+.members-hero-intro {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 110px 32px 10px 32px;
+  box-sizing: border-box;
+  text-align: center;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.hero-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.hero-heading {
+  font-family: 'Space Grotesk', sans-serif, system-ui;
+  font-size: clamp(32px, 4.5vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0 0 8px 0;
+  line-height: 1.1;
+  color: #ffffff;
+}
+
+.hero-subtext {
+  font-size: clamp(14px, 1.4vw, 17px);
+  color: var(--theme-text-muted);
+  max-width: 54ch;
+  line-height: 1.45;
+  margin: 0 auto;
+}
+
+/* Top-Right Action Controls (Dropdown & Prev/Next) */
+.deck-top-right-bar {
+  position: absolute;
+  top: 110px;
+  right: 40px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.member-select-label {
+  display: flex;
+  align-items: center;
+}
+
+.member-select-dropdown {
+  background: rgba(15, 26, 24, 0.85);
+  border: 1px solid rgba(182, 239, 211, 0.35);
+  color: #b6efd3;
+  padding: 8px 36px 8px 16px;
+  border-radius: 20px;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  outline: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b6efd3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  max-width: 220px;
+}
+
+.member-select-dropdown:hover,
+.member-select-dropdown:focus {
+  border-color: #b6efd3;
+  background-color: rgba(15, 26, 24, 0.95);
+  box-shadow: 0 0 15px rgba(182, 239, 211, 0.2);
+}
+
+.member-select-dropdown option {
+  background: #0b1411;
+  color: #ffffff;
+  padding: 10px;
+}
+
+.deck-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.deck-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.deck-nav-btn:hover:not(:disabled) {
+  background: rgba(182, 239, 211, 0.2);
+  border-color: var(--theme-emerald-accent);
+}
+
+.deck-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.deck-scroll-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-family: monospace;
+  color: var(--theme-text-muted);
+}
+
+/* 2. Static Presentation Stage & Centered Member Deck */
+.member-deck-section {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.member-deck-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 850px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(182, 239, 211, 0.16) 0%, rgba(8, 10, 9, 0) 70%);
+  pointer-events: none;
+  filter: blur(70px);
+}
+
+.member-deck-viewport {
+  position: relative;
+  width: 100%;
+  height: clamp(500px, 66vh, 650px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Increased Card Size */
+.deck-card-wrapper {
+  position: absolute;
+  width: clamp(330px, 30vw, 460px);
+  height: clamp(480px, 64vh, 620px);
+  transform-origin: center bottom;
+  will-change: transform, opacity;
+}
+
+/* 3. Card Visual Styling — Large Portrait Card with Bottom Info Overlay */
+.member-card-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: var(--theme-bg-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: 24px;
+  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  box-sizing: border-box;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.member-card-surface:hover {
+  transform: translateY(-6px);
+  border-color: var(--theme-emerald-accent);
+  box-shadow: 0 35px 80px -15px rgba(0, 0, 0, 0.95);
+}
+
+/* Full-bleed portrait photograph */
+.member-card-photo-area {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.member-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 0.3s ease;
+}
+
+.member-card-surface:hover .member-photo {
+  transform: scale(1.03);
+}
+
+.member-photo-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  font-weight: 700;
+  color: var(--theme-emerald-accent);
+  background: #050706;
+}
+
+.member-card-photo-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(5, 10, 8, 0.96) 0%, rgba(5, 10, 8, 0.65) 48%, rgba(5, 10, 8, 0.1) 82%);
+}
+
+.member-card-topbar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 2;
+}
+
+.member-card-badge {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--theme-emerald-accent);
+  background: #080d12b8;
+  border: 1px solid #b6efd340;
+  padding: 6px 14px;
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+}
+
+.member-card-arrow {
+  color: #ffffff;
+  opacity: 0.65;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.member-card-surface:hover .member-card-arrow {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
+/* Info overlay positioned ON TOP of the image at the BOTTOM location */
+.member-card-bottom-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 28px 24px 24px 24px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.member-card-kicker {
+  font-size: 12px;
+  font-family: monospace;
+  letter-spacing: 0.1em;
+  color: var(--theme-emerald-accent);
+  display: flex;
+  align-items: center;
+}
+
+.member-card-name {
+  font-family: 'Space Grotesk', sans-serif, system-ui;
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 700;
+  color: #ffffff;
+  margin: 2px 0 0 0;
+  line-height: 1.15;
+}
+
+.member-card-domain {
+  font-size: 13px;
+  color: var(--theme-text-muted);
+}
+
+.member-card-bio {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #d0d7d3;
+  margin-top: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-style: italic;
+}
+
+.member-card-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.member-card-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--theme-emerald-accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* 4. Full-Screen Profile Overlay Dialog */
+dialog.fullscreen-profile-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  border: none;
+  background: #030709e0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+dialog.fullscreen-profile-dialog::backdrop {
+  background: transparent;
+}
+
+.fullscreen-profile-surface {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #070e0b;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  overflow: hidden;
+}
+
+.fullscreen-profile-topbar {
+  position: absolute;
+  top: 28px;
+  left: 40px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 20;
+}
+
+.fullscreen-profile-close {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.fullscreen-profile-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--theme-emerald-accent);
+}
+
+.fullscreen-profile-portrait {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: #050706;
+}
+
+.fullscreen-profile-portrait .member-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.fullscreen-portrait-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #070e0b 0%, transparent 50%), linear-gradient(0deg, rgba(7, 14, 11, 0.9) 0%, transparent 50%);
+}
+
+.fullscreen-profile-content {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  padding: 100px 60px 60px 60px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 2;
+  overflow-y: auto;
+}
+
+.fullscreen-profile-watermark {
+  position: absolute;
+  bottom: 0;
+  right: 40px;
+  font-size: 240px;
+  font-weight: 900;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.03);
+  pointer-events: none;
+  line-height: 0.8;
+  user-select: none;
+}
+
+.fullscreen-profile-body {
+  position: relative;
+  z-index: 3;
+  max-width: 580px;
+}
+
+.profile-kicker {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.fullscreen-profile-name {
+  font-family: 'Space Grotesk', sans-serif, system-ui;
+  font-size: clamp(36px, 4.5vw, 64px);
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.fullscreen-profile-role {
+  font-size: 20px;
+  color: var(--theme-emerald-accent);
+  font-weight: 500;
+  margin: 0 0 12px 0;
+}
+
+.fullscreen-profile-domain {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--theme-text-muted);
+  margin-bottom: 24px;
+}
+
+.fullscreen-profile-bio {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #d0d7d3;
+  font-style: italic;
+  margin-bottom: 32px;
+}
+
+.fullscreen-profile-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.fullscreen-profile-socials a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.fullscreen-profile-socials a:hover {
+  background: rgba(182, 239, 211, 0.15);
+  border-color: var(--theme-emerald-accent);
+  transform: translateY(-2px);
+}
+
+.fullscreen-profile-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  color: var(--theme-emerald-accent);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.fullscreen-profile-back:hover {
+  opacity: 0.8;
+}
+
+/* Reduced Motion Deck */
+.member-deck-reduced {
+  padding: 60px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.deck-header-reduced {
+  margin-bottom: 40px;
+}
+
+.deck-list-reduced {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  list-style: none;
+  padding: 0;
+}
+
+.deck-list-reduced .member-card-surface {
+  height: 460px;
+}
+
+/* Responsive Behavior for Mobile and Tablets */
+@media (max-width: 900px) {
+  .deck-top-right-bar {
+    top: 110px;
+    right: 20px;
+    gap: 8px;
+  }
+
+  .member-select-dropdown {
+    max-width: 150px;
+    font-size: 11px;
+    padding-left: 10px;
+  }
+
+  .deck-card-wrapper {
+    width: clamp(280px, 82vw, 380px);
+    height: clamp(420px, 60vh, 520px);
+  }
+
+  .fullscreen-profile-surface {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .fullscreen-profile-portrait {
+    height: 40vh;
+    min-height: 280px;
+  }
+
+  .fullscreen-profile-content {
+    height: auto;
+    padding: 36px 28px 48px 28px;
+  }
+
+  .fullscreen-profile-topbar {
+    top: 20px;
+    left: 20px;
+    right: 20px;
+  }
+
+  .fullscreen-profile-watermark {
+    font-size: 140px;
+    right: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .members-hero-intro {
+    padding: 100px 20px 0 20px;
+  }
+
+  .deck-card-wrapper {
+    width: 88vw;
+  }
+}

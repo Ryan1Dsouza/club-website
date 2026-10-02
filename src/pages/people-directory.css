@@ -17,32 +17,10 @@
 .people-directory__card:focus-visible { outline: 2px solid #c3e5c8; outline-offset: 6px; }
 [data-tower-status='still'] .people-tower, [data-tower-status='fallback'] .people-tower { display: none; }
 [data-tower-status='still'] .people-directory, [data-tower-status='fallback'] .people-directory { --directory-progress: 1 !important; position: relative; min-height: calc(100svh - var(--header-height)); z-index: 1; }
-.people-directory-page { min-height: calc(100svh - var(--header-height)); padding-block: 20px 80px; }
-.people-directory-page__nav { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-.people-directory-page__heading { padding-block: 50px; }
-.people-directory-page__heading h1 { margin-block: 20px; }
-.people-directory-page__heading > p { color: var(--muted); font-size: 14px; }
-.people-directory-page .people-roster__member h2 { font: 600 18px/1.3 Inter, sans-serif; letter-spacing: -.02em; color: #fff; margin-bottom: 4px; }
-.people-directory-page__empty { padding: 45px 24px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); text-align: center; }
+
+.people-directory-wrapper { position: relative; width: 100%; min-height: 100vh; background: #080a09; }
+.people-directory-page__nav { position: absolute; top: 86px; left: 40px; right: 40px; z-index: 40; display: flex; align-items: center; justify-content: space-between; pointer-events: auto; }
+
 @media (max-width: 600px) {
-  .people-directory__cards { width: min(400px, 100%); grid-template-columns: 1fr; gap: 16px; }
-  .people-directory__card { min-height: 220px; padding: 22px; }
-  .people-directory__copy { padding-block: 24px; }
-  .people-directory__copy h2 { font-size: 42px; }
-  .people-directory__copy p { margin-top: 8px; font-size: 12px; }
-  .people-directory__footer { padding-top: 12px; }
-}
-@media (max-height: 560px) {
-  .people-directory { padding-block: 16px; }
-  .people-directory__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); width: min(880px, 100%); gap: 16px; }
-  .people-directory__card { min-height: 220px; padding: 20px; }
-  .people-directory__copy { padding-block: 24px; }
-  .people-directory__copy h2 { font-size: 36px; }
-  .people-directory__copy p { margin-top: 8px; font-size: 12px; }
-  .people-directory__meta { font-size: 9px; letter-spacing: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .people-directory__cards { transform: none; }
-  .people-directory__card { transition: none; }
-  .people-directory__card:hover { transform: none; }
+  .people-directory-page__nav { top: 76px; left: 20px; right: 20px; }
 }

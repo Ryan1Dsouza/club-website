@@ -12,7 +12,7 @@ import type { SiteData, SiteSettings } from './types';
 import seed from '../shared/public-data.json';
 import LogoLanding from './components/home/LogoLanding';
 import DomainParallax from './components/home/DomainParallax';
-import { EventsPage, WorkPage, PeoplePage, Recruitment } from './route-pages';
+import { EventsPage, WorkPage, PeoplePage, PeopleDirectoryPage, Recruitment } from './route-pages';
 import VoicesMarquee from './components/home/VoicesMarquee';
 import CommunityCTA from './components/home/CommunityCTA';
 import HomeParticles from './components/home/HomeParticles';
@@ -160,7 +160,7 @@ export default function App({ initialData = seed, serverRendered = false }: { in
     <LoadingScreen active={loadingStage === 'idle' || loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
     <div className={`site-shell${location.pathname === '/' ? ' site-shell--home' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
     <a href="#main-content" className="skip-link">Skip to content</a>
-    <header className={`site-header${['/', '/team', '/events'].includes(location.pathname) ? ' site-header--home' : ''}`}>
+    <header className={`site-header${['/', '/team', '/events', '/members', '/alumni'].includes(location.pathname) ? ' site-header--home' : ''}`}>
       <MorphingNavbar items={navItems} settings={settings} open={menuOpen} onOpenChange={setMenuOpen} onApply={() => setApplyOpen(true)} />
     </header>
     <main id="main-content" tabIndex={-1} inert={menuOpen}>

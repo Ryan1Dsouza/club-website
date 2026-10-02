@@ -12,7 +12,8 @@ function deferredPage<Props extends object>(load: () => Promise<{ default: Compo
 export const EventsPage = deferredPage(() => import('./pages/EventsPage'));
 export const WorkPage = deferredPage(() => import('./pages/WorkPage'));
 export const PeoplePage = deferredPage(() => import('./pages/PeoplePage'));
+export const PeopleDirectoryPage = deferredPage(() => import('./pages/PeopleDirectoryPage'));
 export const Recruitment = deferredPage(() => import('./pages/Recruitment'));
 
-const pages = { '/events': EventsPage, '/projects': WorkPage, '/team': PeoplePage, '/recruitment': Recruitment };
+const pages = { '/events': EventsPage, '/projects': WorkPage, '/team': PeoplePage, '/members': PeopleDirectoryPage, '/alumni': PeopleDirectoryPage, '/recruitment': Recruitment };
 export const preloadPage = (path: string) => pages[path.replace(/\/$/, '') as keyof typeof pages]?.preload() ?? Promise.resolve();
