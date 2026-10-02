@@ -48,7 +48,9 @@ export default function PeoplePage({ members }: { members: Member[] }) {
         if (!disposed && current === generation) { stop(); setStatus('fallback'); setActive(-1); }
       }
     }
-    void start(); media.addEventListener('change', start);
+    if (typeof requestIdleCallback !== 'undefined') requestIdleCallback(() => start(), { timeout: 2000 });
+    else window.setTimeout(() => start(), 100);
+    media.addEventListener('change', start);
     return () => { disposed = true; generation++; media.removeEventListener('change', start); stop(); };
     // Equivalent API refreshes should preserve the current scene.
   }, [memberKey]);

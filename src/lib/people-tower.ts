@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS3DObject, CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import type { Member } from '../types';
-import { BLOCK_SIZE, LAYER_HEIGHT, advanceTowerScroll, clamp01, smooth, towerExit, towerFrame, towerSlots } from './people-tower-motion.ts';
+import { BLOCK_SIZE, LAYER_HEIGHT, TOWER_INTRO, TOWER_OUTRO, advanceTowerScroll, clamp01, smooth, towerExit, towerFrame, towerSlots } from './people-tower-motion.ts';
 import { towerPixelRatio, towerQuality } from './people-tower-quality';
 import { createTowerScenery } from './people-tower-scenery';
 import { createTowerBlocks, TOWER_PALETTES } from './people-tower-blocks';
@@ -46,7 +46,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     const scene = new THREE.Scene(), labels = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, 1, .1, 150);
     const slots = towerSlots(members.map(member => member.id)), layers = Math.ceil(members.length / 3);
-    const physics = createTowerPhysics(slots);
+    const physics = createTowerPhysics(slots, quality.simplified);
     cleanups.push(physics.dispose);
     const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const batch = createTowerBlocks(scene, members, Math.min(quality.maxTextureSize, renderer.capabilities.maxTextureSize), quality.simplified, anisotropy);
@@ -68,6 +68,8 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     let matricesDirty = true, renderedProgress = -1, lastRenderTime = 0;
     let layoutDirty = true, scrollDirty = true, initialized = false;
     let resolutionScale = 1, averageFrameTime = 1 / 60, slowTime = 0, effectsReduced = false;
+    // When true, target is being nudged forward to finish an in-flight animation.
+    let autoAdvancing = false;
     const scrollMotion = { value: 0, velocity: 0 };
     const right = new THREE.Vector3(), up = new THREE.Vector3(), forward = new THREE.Vector3();
     const source = new THREE.Vector3(), pulled = new THREE.Vector3(), activeSource = new THREE.Vector3();
@@ -107,16 +109,20 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       const desiredRemoved = state.completed;
       if (active === state.index && storyRemoved === desiredRemoved) return;
       releasePointer();
-      // Reverse seeking returns only the pieces that need to come back,
-      // leaving the rest of the tower untouched in their current poses.
+      // When scrolling all the way back to the start, do a full reset so the
+      // tower looks exactly as it did originally (all blocks in perfect position).
+      // For partial reverse, return only the needed pieces individually.
       if (state.completed < storyRemoved || (state.index < 0 && state.completed === 0 && active >= 0)) {
-        // Return pieces one-by-one from the most recently removed back to the new completed count
-        for (let i = storyRemoved - 1; i >= state.completed; i--) {
-          physics.returnBody(i);
-        }
-        // Also return the active story piece if we're scrolling all the way back
-        if (active >= 0 && state.index < 0) {
-          physics.returnBody(active);
+        if (state.index < 0 && state.completed === 0) {
+          // Full rewind — restore every block to its pristine grid position
+          physics.reset(0);
+        } else {
+          // Partial rewind — return pieces that need to come back.
+          // Each block's stagger delay is based on slot.layer so the tower
+          // always builds bottom-up (foundation first) regardless of scroll speed.
+          for (let i = storyRemoved - 1; i >= state.completed; i--) {
+            physics.returnBody(i);
+          }
         }
         storyRemoved = state.completed;
       }
@@ -124,9 +130,9 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       storyRemoved = state.completed;
       active = state.index;
       if (active >= 0) {
+        physics.beginStory(active); setProfile(active);
         const body = physics.bodies[active];
         activeSource.copy(body.position); activeQuaternion.copy(body.quaternion);
-        physics.beginStory(active); setProfile(active);
       }
       callbacks.onMember(active); matricesDirty = true;
     }
@@ -156,7 +162,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       if (transformsChanged || matricesDirty || changedProgress || (cameraMoved && state.index >= 0)) {
         const block = batch.pose;
         physics.bodies.forEach((body, index) => {
-          if (index < state.completed || state.outro > 0) { batch.update(index, false); return; }
+          if ((index < state.completed || state.outro > 0 || physics.isPending(index)) && index !== state.index) { batch.update(index, false); return; }
           const slot = slots[index];
           block.position.copy(body.interpolatedPosition); block.quaternion.copy(body.interpolatedQuaternion); block.scale.copy(plankScale);
           if (index === state.index) {
@@ -192,7 +198,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
               block.quaternion.multiply(exitQuaternion);
             }
             block.scale.multiplyScalar(exitState.scale);
-            physics.placeStory(block.position, block.quaternion, block.scale, t > 0.10);
+            physics.placeStory(block.position, block.quaternion, block.scale, t > 0.10 && t < 0.35);
             profile.style.opacity = String(exitState.opacity);
             faceOffset.set(0, 0, block.scale.z / 2 + .008).applyQuaternion(block.quaternion);
             profileObject.position.copy(block.position).add(faceOffset); profileObject.quaternion.copy(block.quaternion);
@@ -229,6 +235,26 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
         if (layoutDirty) measure();
         sampleScroll();
         if (!initialized) { scrollMotion.value = target; initialized = true; }
+
+        // If a block is mid-flight (left the tower but hasn't fully landed yet),
+        // auto-advance target to the fully-landed position so it never hangs
+        // frozen in front of the camera. This also handles mobile touch momentum
+        // that stops between discrete scroll positions.
+        if (!autoAdvancing) {
+          const checkState = towerFrame(target, members.length);
+          if (checkState.index >= 0 && checkState.local > 0.10 && checkState.local < 0.43) {
+            // Push target to the fully-landed point for this member (local = 0.43)
+            const duration = TOWER_INTRO + members.length + TOWER_OUTRO;
+            const landedTime = TOWER_INTRO + checkState.index + 0.43;
+            target = Math.min(1, landedTime / duration);
+            autoAdvancing = true;
+          }
+        } else {
+          // Keep advancing until the block has fully landed
+          const checkState = towerFrame(target, members.length);
+          if (checkState.index < 0 || checkState.local >= 0.43) autoAdvancing = false;
+        }
+
         // Lenis handles all scroll smoothing. Response 200 makes the tower
         // track its output near-instantly with zero perceptible lag.
         progress = advanceTowerScroll(scrollMotion, target, elapsed, 200);

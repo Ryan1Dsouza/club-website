@@ -1,5 +1,5 @@
 // Keep a brief intro without waiting for a complete artwork loop.
-export const LOADER_MINIMUM_MS = 400;
+export const LOADER_MINIMUM_MS = 1400;
 export const LOADER_MAXIMUM_MS = 1500;
 
 const assets = import.meta.glob<string>('../../assets/loading/frame-*.webp', {

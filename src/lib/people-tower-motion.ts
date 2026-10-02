@@ -64,11 +64,10 @@ function hash(value: string) {
 /** Fill every foundation layer before the next, with story leaders at the top. */
 export function towerSlots(ids: readonly string[]) {
   const layers = Math.ceil(ids.length / 3);
-  const ranks = Array.from({ length: ids.length }, (_, i) => i);
-  for (let i = ranks.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.abs(Math.sin(i * 12.9898 + 78.233)) * 100000) % (i + 1);
-    const temp = ranks[i]; ranks[i] = ranks[j]; ranks[j] = temp;
-  }
+  // Map the presentation index directly to the tower rank (top to bottom).
+  // This ensures that when scrolling forward, pieces are removed top-down,
+  // and when reverse-scrolling, the tower is built naturally from the foundation up.
+  const ranks = ids.map((_, i) => ids.length - 1 - i);
   return ids.map((id, index) => {
     const rank = ranks[index];
     const layer = Math.floor(rank / 3), count = Math.min(3, ids.length - layer * 3);

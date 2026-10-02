@@ -63,7 +63,7 @@ export function useCinematicScroll(enabled: boolean) {
       // eliminating micro-stutters caused by WebGL frame drops on the team page.
       lenis = new Lenis({
         smoothWheel: true,
-        syncTouch: false,
+        syncTouch: true,
         wheelMultiplier: 0.7,
         duration: 1.2,
         easing: (t: number) => 1 - Math.pow(1 - t, 4), // ease-out quartic
