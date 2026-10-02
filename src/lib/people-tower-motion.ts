@@ -54,7 +54,7 @@ export function advanceTowerScroll(scroll: TowerScroll, target: number, delta: n
  * The short zero-size tail also tolerates rounding at timeline boundaries. */
 export function towerExit(local: number) {
   const progress = local >= .98 ? 1 : clamp01(smooth((local - .76) / .22));
-  return { progress, scale: 1 - progress, opacity: smooth((local - .25) / .13) * (1 - progress) };
+  return { progress, scale: 1 - progress, opacity: smooth((local - .33) / .10) * (1 - progress) };
 }
 function hash(value: string) {
   let result = 2166136261;
