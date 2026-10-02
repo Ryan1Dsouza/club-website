@@ -138,7 +138,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       camera.getWorldDirection(forward);
       const distance = 4.8;
       targetScale.set(2 * halfFov * distance * camera.aspect * .93, 2 * halfFov * distance * .79, .16);
-      destination.copy(camera.position).addScaledVector(forward, distance + .08);
+      destination.copy(camera.position).addScaledVector(forward, distance + .08).addScaledVector(up, -0.1);
       const exitState = towerExit(state.local);
       const profileVisible = state.index >= 0 && exitState.opacity > 0 && exitState.scale > 0;
       const labelsChanged = profileObject.visible !== profileVisible || matricesDirty || changedProgress || cameraMoved;
@@ -151,17 +151,23 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
           block.position.copy(body.interpolatedPosition); block.quaternion.copy(body.interpolatedQuaternion); block.scale.copy(plankScale);
           if (index === state.index) {
             source.copy(activeSource); block.position.copy(source); block.quaternion.copy(activeQuaternion);
-            const t = state.local, pull = smooth(t / .14), flight = smooth((t - .14) / .29), unfold = smooth((t - .2) / .23);
+            const t = state.local, pull = smooth(t / .10), flight = smooth((t - .10) / .24), unfold = smooth((t - .2) / .23);
             direction.set(slot.direction, 0, 0).applyQuaternion(activeQuaternion);
-            // Clear the whole plank before tumbling, then arc above the stack.
+            // Clear the whole plank before tumbling toward the profile.
             pulled.copy(source).addScaledVector(direction, BLOCK_SIZE[0] + .35); block.position.lerp(pulled, pull);
-            if (t > .14) {
-              control1.copy(pulled).addScaledVector(direction, 2).addScaledVector(up, 1.5);
-              control2.copy(destination).addScaledVector(right, slot.direction * targetScale.x * .45).addScaledVector(up, -.9);
+            if (t > .10) {
+              control1.copy(pulled).addScaledVector(direction, 2);
+              // Flatten high-layer flight arcs toward the final profile height.
+              control1.y = THREE.MathUtils.lerp(control1.y, destination.y, 0.85);
+              control2.copy(destination).addScaledVector(right, slot.direction * targetScale.x * .45).addScaledVector(up, -0.4);
               curve.v0.copy(pulled); curve.v1.copy(control1); curve.v2.copy(control2); curve.v3.copy(destination);
               curve.getPoint(flight, block.position);
+              // Aggressively pull the Y-coordinate to the center of the screen early in the flight.
+              // This guarantees that cards starting at the top of the tower don't hover at the topmost 
+              // edge of the screen if the user stops scrolling mid-animation to read them.
+              block.position.y = THREE.MathUtils.lerp(pulled.y, destination.y, smooth(Math.min(1, flight * 1.6)));
               tumbleQuaternion.setFromEuler(euler.set(.85 * slot.spin, slot.yaw + .6 * slot.direction, 1.3 * slot.direction));
-              block.quaternion.slerp(tumbleQuaternion, smooth((t - .14) / .1));
+              block.quaternion.slerp(tumbleQuaternion, smooth((t - .10) / .1));
               block.quaternion.slerp(camera.quaternion, smooth((t - .23) / .2));
             }
             block.scale.lerp(targetScale, unfold);
@@ -173,7 +179,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
               block.quaternion.multiply(exitQuaternion);
             }
             block.scale.multiplyScalar(exitState.scale);
-            physics.placeStory(block.position, block.quaternion, block.scale);
+            physics.placeStory(block.position, block.quaternion, block.scale, t > 0.10);
             profile.style.opacity = String(exitState.opacity);
             faceOffset.set(0, 0, block.scale.z / 2 + .008).applyQuaternion(block.quaternion);
             profileObject.position.copy(block.position).add(faceOffset); profileObject.quaternion.copy(block.quaternion);
@@ -211,7 +217,7 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
         if (scrollDirty) sampleScroll();
         if (!initialized) { scrollMotion.value = target; initialized = true; }
         // Input response is independent of rendering quality and pointer type.
-        progress = advanceTowerScroll(scrollMotion, target, elapsed);
+        progress = advanceTowerScroll(scrollMotion, target, elapsed, 26);
         const state = towerFrame(progress, members.length);
         // The desktop intro orbits; readable profiles and settled mobile scenes rest.
         const idleOrbit = !quality.simplified && state.index < 0 && state.completed === 0 && state.outro === 0;

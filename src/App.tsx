@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, useNavigationType } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, BrainCircuit, Code2, Network, Github, Instagram, Linkedin, Mail, Check, LoaderCircle } from 'lucide-react';
 import { MorphingNavbar } from './components/ui/morphing-navbar';
 import { Logo } from './components/shared/Logo';
 import Modal from './components/shared/Modal';
 import LoadingScreen from './components/shared/LoadingScreen';
+import { LOADER_MINIMUM_MS, LOADER_MAXIMUM_MS } from './components/shared/loading-frames';
 import { api } from './api';
 import type { SiteData, SiteSettings } from './types';
 import seed from '../shared/public-data.json';
 import LogoLanding from './components/home/LogoLanding';
-import EventExplorer from './pages/EventExplorer';
+import EventsPage from './pages/EventsPage';
 import DomainParallax from './components/home/DomainParallax';
 import WorkPage from './pages/WorkPage';
 import PeoplePage from './pages/PeoplePage';
@@ -73,31 +74,34 @@ export default function App({ initialData = seed, serverRendered = false }: { in
   const [applyOpen, setApplyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [domain, setDomain] = useState<number | null>(null);
-  // Start after hydration so server-rendered content remains usable without JS.
+  // The static curtain renders with SSR; interactivity is locked after hydration.
   const [loadingStage, setLoadingStage] = useState<'idle' | 'loading' | 'exiting' | 'done'>('idle');
   const loading = loadingStage === 'loading' || loadingStage === 'exiting';
   const location = useLocation();
+  const navigationType = useNavigationType();
   useCinematicScroll(location.pathname === '/' && !loading && !applyOpen && !menuOpen && domain === null);
 
   useEffect(() => {
     const abort = new AbortController();
     let disposed = false, finished = false, finishTimer = 0;
     const started = performance.now();
-    const minimum = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 450;
-    // Production HTML already contains the current data. Refresh in the background
-    // instead of covering usable server content with another loading sequence.
-    setLoadingStage(serverRendered ? 'done' : 'loading');
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const minimum = reduced ? 0 : LOADER_MINIMUM_MS;
+    // Play the same opening on hydrated production pages and client-only pages.
+    setLoadingStage('loading');
     const dismiss = () => {
       if (disposed || finished) return;
       finished = true; window.clearTimeout(deadline); window.clearTimeout(finishTimer);
-      if (!serverRendered) setLoadingStage('exiting');
+      setLoadingStage('exiting');
     };
     // The existing seed/SSR data stays available if startup requests stall.
-    const deadline = window.setTimeout(dismiss, 8000);
+    const deadline = window.setTimeout(dismiss, LOADER_MAXIMUM_MS);
     const refresh = () => api<SiteData>('/site', { signal: abort.signal }).then(site => {
       if (!disposed) { setData(site); setOnline(true); }
     }).catch(error => { if (!disposed && error.name !== 'AbortError') setOnline(false); });
-    void Promise.allSettled([refresh(), document.fonts.ready]).then(() => {
+    const firstRequest = refresh();
+    // Fonts and decorative frames load independently. SSR already has usable data.
+    void (serverRendered ? Promise.resolve() : firstRequest).then(() => {
       if (!disposed && !finished) finishTimer = window.setTimeout(dismiss, Math.max(0, minimum - (performance.now() - started)));
     });
     window.addEventListener('focus', refresh);
@@ -109,7 +113,7 @@ export default function App({ initialData = seed, serverRendered = false }: { in
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-    setApplyOpen(false); setDomain(null); setMenuOpen(false);
+    setApplyOpen(false); setDomain(null);
     const meta = pageMeta(location.pathname);
     document.title = meta.title;
     const setMeta = (attribute: 'name' | 'property', name: string, content: string) => {
@@ -127,6 +131,11 @@ export default function App({ initialData = seed, serverRendered = false }: { in
     if (canonical) canonical.href = meta.canonical;
   }, [location.pathname]);
 
+  // Menu links finish their own exit; browser Back/Forward still dismisses it.
+  useEffect(() => {
+    if (navigationType === 'POP') setMenuOpen(false);
+  }, [location.key, navigationType]);
+
   const settings = data.settings;
   const domainItems = domains.map((item, index) => ({ ...item, onClick: () => setDomain(index) }));
   const navItems = [
@@ -139,18 +148,18 @@ export default function App({ initialData = seed, serverRendered = false }: { in
 
 
   return <>
-    <LoadingScreen active={loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
+    <LoadingScreen active={loadingStage === 'idle' || loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
     <div className="site-shell" inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
     <a href="#main-content" className="skip-link">Skip to content</a>
-    <header className={`site-header${location.pathname === '/' ? ' site-header--home' : ''}`}>
+    <header className={`site-header${['/', '/team', '/events'].includes(location.pathname) ? ' site-header--home' : ''}`}>
       <MorphingNavbar items={navItems} settings={settings} open={menuOpen} onOpenChange={setMenuOpen} onApply={() => setApplyOpen(true)} />
     </header>
     <main id="main-content" tabIndex={-1} inert={menuOpen}>
       <Routes>
-        <Route path="/" element={<><LogoLanding /><DomainParallax domains={domainItems} /><CommunityCTA isOpen={settings.recruitmentOpen} /><VoicesMarquee /></>} />
+        <Route path="/" element={<><LogoLanding active={loadingStage !== 'loading'} /><DomainParallax domains={domainItems} /><CommunityCTA isOpen={settings.recruitmentOpen} /><VoicesMarquee /></>} />
         <Route path="/about" element={<><div className="about-heading section-wrap"><span className="eyebrow">Nucleus · SJEC</span><h1>A meeting<br /><em>of minds.</em></h1></div><DomainParallax domains={domainItems} /></>} />
         <Route path="/recruitment" element={<Recruitment settings={settings} onApply={() => setApplyOpen(true)} />} />
-        <Route path="/events" element={<EventExplorer events={data.events} onPublished={event => setData(current => ({ ...current, events: [...current.events.filter(item => item.id !== event.id), event] }))} />} />
+        <Route path="/events" element={<EventsPage events={data.events} onPublished={event => setData(current => ({ ...current, events: [...current.events.filter(item => item.id !== event.id), event] }))} />} />
         <Route path="/projects" element={<WorkPage projects={data.projects} settings={settings} />} />
         <Route path="/team" element={<PeoplePage members={data.team} />} />
         <Route path="*" element={<section className="recruitment-page section-wrap"><span className="eyebrow">404</span><h1>Lost the<br /><em>connection?</em></h1><Link className="button primary" to="/">Back to Nucleus <ArrowRight size={17} /></Link></section>} />

@@ -1,6 +1,27 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cinematicCamera, glimpseFrame, GLIMPSE_INTERVAL, GLIMPSE_LIFETIME, GLIMPSE_SLOTS, GLIMPSE_EXIT, GLIMPSE_FADE_IN, GLIMPSE_ENLARGE, GLIMPSE_HOLD, GLIMPSE_FADE_OUT } from '../src/lib/event-cinematics.ts';
+import { cinematicCamera, stationArrivalFrame, ARRIVAL_TIME_SCALE, glimpseFrame, GLIMPSE_INTERVAL, GLIMPSE_LIFETIME, GLIMPSE_SLOTS, GLIMPSE_EXIT, GLIMPSE_FADE_IN, GLIMPSE_ENLARGE, GLIMPSE_HOLD, GLIMPSE_FADE_OUT } from '../src/lib/event-cinematics.ts';
+
+test('arrival reveal grows smoothly as time slows, and releases outside each station radius', () => {
+  for (const radius of [12, 22, 27]) {
+    let previous = stationArrivalFrame(radius, radius);
+    assert.equal(previous.timeScale, 1); assert.equal(previous.opacity, 0); assert.equal(previous.focus, 0);
+    for (let step = 1; step <= 100; step++) {
+      const frame = stationArrivalFrame(radius * (1 - step / 100), radius);
+      assert.ok(frame.timeScale <= previous.timeScale && frame.timeScale >= ARRIVAL_TIME_SCALE - 1e-10);
+      assert.ok(frame.opacity >= previous.opacity && frame.opacity <= 1);
+      assert.ok(frame.focus >= previous.focus && frame.focus <= 1);
+      assert.ok(Math.abs(frame.timeScale - previous.timeScale) < .02, 'no jump when entering slow motion');
+      previous = frame;
+    }
+    assert.equal(previous.opacity, 1); assert.equal(previous.focus, 1);
+    assert.ok(Math.abs(previous.timeScale - ARRIVAL_TIME_SCALE) < 1e-10);
+    assert.deepEqual(stationArrivalFrame(radius * 2, radius), stationArrivalFrame(Infinity, radius));
+    const reduced = stationArrivalFrame(0, radius, true);
+    assert.equal(reduced.timeScale, 1); assert.equal(reduced.focus, 0); assert.equal(reduced.opacity, 0);
+  }
+  assert.deepEqual(stationArrivalFrame(0, 0), stationArrivalFrame(Infinity, 22));
+});
 
 test('photos repeat in order with at most one visible throughout long journeys', () => {
   const shown = [];

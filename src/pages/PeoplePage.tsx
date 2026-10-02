@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { ArrowDown, ArrowUpRight, RotateCcw } from 'lucide-react';
+import { ArrowDown, RotateCcw } from 'lucide-react';
 import type { Member } from '../types';
 import { memberProgress, sortTowerMembers } from '../lib/people-tower-motion';
 import './showcase.css';
@@ -65,11 +65,11 @@ export default function PeoplePage({ members }: { members: Member[] }) {
   return <section className="people-page" aria-labelledby="people-title" data-tower-status={status}>
     <h1 id="people-title" className="sr-only">The people behind Nucleus</h1>
     <div className="people-tower" ref={story} style={{
-      '--tower-length': `${sorted.length * 90 + 180}svh`,
+      '--tower-length': `${sorted.length * 55 + 120}svh`,
     } as CSSProperties}>
       <div className="people-tower__stage">
         <div className="people-tower__world" ref={host} aria-hidden="true" />
-        <div className="people-tower__topline"><span className="eyebrow">02 / The people</span><a href="#team-roster" className="people-tower__skip">View all members <ArrowDown size={14} /></a></div>
+        <div className="people-tower__topline"><span className="eyebrow">02 / The people</span></div>
         <div className="people-tower__finish" aria-hidden="true"><p>The<br /><em>whole team.</em></p><span>Meet everyone <ArrowDown size={15} /></span></div>
         <p className="people-tower__hint" hidden={status !== 'ready'}>Click a block to pull it out. Drag to play. Scroll to meet the team.</p>
         <div className="people-tower__hud" hidden={status !== 'ready'}>
@@ -80,14 +80,14 @@ export default function PeoplePage({ members }: { members: Member[] }) {
         </div>
       </div>
     </div>
-    <div className="people-roster section-wrap" id="team-roster">
-      <div className="people-roster__heading"><div><span className="eyebrow">The whole nucleus</span><h2>Stronger <em>together.</em></h2></div><span className="eyebrow">{sorted.length} people · One community</span></div>
-      <div className="people-roster__grid">{sorted.map((member, index) => <article className="people-roster__member" key={member.id}>
-        <div className="people-roster__initials" aria-hidden="true">{member.initials}</div><span className="people-roster__number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><h3>{member.name}</h3><p>{member.role}</p>
-        {status === 'ready' && <button onClick={() => revealMember(index)} className="people-roster__reveal" aria-label={`Show ${member.name} in the tower`}><ArrowUpRight size={19} /></button>}
-      </article>)}</div>
-      {!sorted.length && <div className="empty-state">The team will be announced here soon.</div>}
 
-    </div>
+
+
+
+
+
+
+
+
   </section>;
 }

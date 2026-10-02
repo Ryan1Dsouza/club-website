@@ -8,8 +8,31 @@ import type { QualityLevel } from './event-quality.ts';
 import { createTrackSupports } from './event-supports.ts';
 
 const MINT = '#c3e5c8';
+/** Remove tiny raster-trace steps before extruding them into multiple bevel rings. */
+function simplifyContour(points: number[][]) {
+  const ring = [...points, points[0]], keep = new Set([0, points.length]);
+  const pending = [[0, points.length]];
+  // 0.1 source units is 0.24 world units; preserve every larger contour feature.
+  const toleranceSquared = .1 ** 2;
+  while (pending.length) {
+    const [first, last] = pending.pop()!;
+    const a = ring[first], b = ring[last], dx = b[0] - a[0], dy = b[1] - a[1];
+    const lengthSquared = dx * dx + dy * dy;
+    let farthest = -1, maximum = toleranceSquared;
+    for (let i = first + 1; i < last; i++) {
+      const point = ring[i];
+      const t = lengthSquared ? THREE.MathUtils.clamp(((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / lengthSquared, 0, 1) : 0;
+      const distance = (point[0] - a[0] - t * dx) ** 2 + (point[1] - a[1] - t * dy) ** 2;
+      if (distance > maximum) { maximum = distance; farthest = i; }
+    }
+    if (farthest !== -1) { keep.add(farthest); pending.push([first, farthest], [farthest, last]); }
+  }
+  const simplified = [...keep].sort((a, b) => a - b).slice(0, -1).map(index => ring[index]);
+  return simplified.length >= 3 ? simplified : points;
+}
+
 function roundedContour<T extends THREE.Path>(path: T, outline: number[][]): T {
-  const points = outline.map(([x, z]) => new THREE.Vector2(x, -z));
+  const points = simplifyContour(outline).map(([x, z]) => new THREE.Vector2(x, -z));
   points.forEach((point, index) => {
     const previous = points[(index + points.length - 1) % points.length], next = points[(index + 1) % points.length];
     // Round only the traced pixel corners; short edges and passage widths survive.
@@ -30,23 +53,19 @@ function shape(outline: number[][], holes: number[][][] = []) {
   return result;
 }
 
-/** One opaque, softly beveled surface, built once and shared by all quality levels. */
+/** An opaque sculpture with neon feature edges, shared by all quality levels. */
 export function createVerticalLogo() {
   const bevel = .16;
   const pieces = WORLD.walls.map(wall => new THREE.ExtrudeGeometry(shape(wall.outline, wall.holes), {
-    // The source is already densely traced; two samples round each tiny corner.
-    depth: LOGO_DEPTH - bevel * 2, steps: 1, curveSegments: 2,
-    bevelEnabled: true, bevelSegments: 2, bevelThickness: bevel,
+    // Dense traced curves need only one corner sample and one bevel ring.
+    depth: LOGO_DEPTH - bevel * 2, steps: 1, curveSegments: 1,
+    bevelEnabled: true, bevelSegments: 1, bevelThickness: bevel,
     bevelSize: .055, bevelOffset: -.055,
   }).translate(0, 0, bevel));
   const geometry = mergeGeometries(pieces)!; pieces.forEach(piece => piece.dispose());
-  // Extrusions duplicate vertices at face boundaries, so computeVertexNormals()
-  // alone cannot smooth them. Include the traced right-angle pixel corners in
-  // the averaging so long sides do not break into vertical lighting stripes.
   geometry.scale(LOGO_SCALE, LOGO_SCALE, 1);
   toCreasedNormals(geometry, Math.PI / 2 + .001);
-  // Keep the broad caps planar: averaging their normals with bevels can draw
-  // false diagonal shading across the extrusion's large triangulated faces.
+  // Smooth the bevels while keeping the broad caps planar.
   const positions = geometry.getAttribute('position'), normals = geometry.getAttribute('normal');
   for (let i = 0; i < positions.count; i++) {
     const z = positions.getZ(i);
@@ -54,9 +73,30 @@ export function createVerticalLogo() {
     else if (Math.abs(z - LOGO_DEPTH) < 1e-6) normals.setXYZ(i, 0, 0, 1);
   }
   geometry.normalizeNormals(); geometry.computeBoundingSphere();
-  const material = new THREE.MeshStandardMaterial({ color: '#79a787', metalness: .22, roughness: .46, emissive: '#709b7e', emissiveIntensity: .24, flatShading: false });
+  const material = new THREE.MeshStandardMaterial({
+    color: '#061c11',
+    emissive: '#0a2918',
+    emissiveIntensity: .25,
+    metalness: .2,
+    roughness: .65,
+    // Keep the outline visible on the surface without moving the geometry.
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+  });
   const logo = new THREE.Mesh(geometry, material);
-  logo.name = 'Solid Nucleus sculpture'; logo.userData.logoObstacle = true;
+  // Only sharp feature edges survive; flat cap triangles and shallow curve seams do not.
+  const edges = new THREE.EdgesGeometry(geometry, 20);
+  const neon = new THREE.LineBasicMaterial({
+    color: new THREE.Color('#79ffa0').multiplyScalar(3),
+    depthWrite: false,
+  });
+  const outline = new THREE.LineSegments(edges, neon);
+  outline.name = 'Nucleus neon outline';
+  // Draw after opaque surfaces, with depth testing hiding the rear edges.
+  outline.renderOrder = 1;
+  logo.add(outline);
+  logo.name = 'Neon-edged Nucleus sculpture'; logo.userData.logoObstacle = true;
   logo.position.set(0, LOGO_CENTER_Y, -LOGO_DEPTH / 2);
   return logo;
 }
@@ -139,12 +179,40 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
   terrainGeometry.setAttribute('color', new THREE.BufferAttribute(terrainColors, 3));
   const terrain = new THREE.Mesh(terrainGeometry, new THREE.MeshBasicMaterial({ vertexColors: true }));
   terrain.rotation.x = -Math.PI / 2; terrain.position.y = -3.1; scene.add(terrain);
+
+  // Bake the floor lighting once; the basic terrain material does not react to lights.
+  const glowCanvas = document.createElement('canvas');
+  glowCanvas.width = 256; glowCanvas.height = 256;
+  const ctx = glowCanvas.getContext('2d');
+  if (ctx) {
+    const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+    gradient.addColorStop(0, 'rgba(112, 155, 126, 0.45)');
+    gradient.addColorStop(1, 'rgba(112, 155, 126, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 256, 256);
+
+    const glowTexture = new THREE.CanvasTexture(glowCanvas);
+    const glowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(240, 240),
+      new THREE.MeshBasicMaterial({
+        map: glowTexture,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    );
+    glowPlane.name = 'Nucleus floor glow';
+    glowPlane.rotation.x = -Math.PI / 2;
+    // Float just above both the terrain and grid to avoid depth flicker.
+    glowPlane.position.set(0, -2.9, -LOGO_DEPTH / 2);
+    scene.add(glowPlane);
+  }
   const dais = new THREE.Mesh(new THREE.TorusGeometry(44, .07, 4, 100), railMaterial); dais.rotation.x = Math.PI / 2; dais.position.y = -2.6; scene.add(dais);
 
   // Short rail sections cull separately; vertices follow the exact physics curve.
   const divisions = Math.ceil(length / 1.1);
   const frames = Array.from({ length: divisions + 1 }, (_, i) => sampleTrack(track, length * i / divisions, length));
-  const railLevels: THREE.LOD[] = [];
+  const railLevels: THREE.LOD[] = [], mapRailParts: THREE.BufferGeometry[] = [];
   for (let start = 0; start < divisions; start += 64) {
     const section = frames.slice(start, Math.min(divisions + 1, start + 65));
     const near = new THREE.Group(), lod = new THREE.LOD();
@@ -158,8 +226,13 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
       for (const f of [section[i - 1], section[i]]) segments.push(f.point.clone().addScaledVector(f.side, offset).sub(center));
     }
     const far = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(segments), distantRailMaterial);
+    mapRailParts.push(far.geometry.clone().translate(center.x, center.y, center.z));
     lod.position.copy(center); lod.addLevel(near, 0); lod.addLevel(far, coarse ? 65 : 100, .12); scene.add(lod); railLevels.push(lod);
   }
+  // The whole route is visible on the map; one line batch replaces every rail LOD.
+  const mapRails = new THREE.LineSegments(mergeGeometries(mapRailParts)!, distantRailMaterial);
+  mapRailParts.forEach(geometry => geometry.dispose());
+  mapRails.name = 'Overview rails'; mapRails.visible = false; scene.add(mapRails);
   const sleepers: THREE.Matrix4[] = [], supports: THREE.Matrix4[] = [], supportFeet: THREE.Matrix4[] = [];
   for (let distance = 0; distance <= length; distance += 1.15) {
     const f = sampleTrack(track, distance, length);
@@ -175,8 +248,15 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
     dummy.scale.set(part.radius, direction.length(), part.radius); dummy.updateMatrix(); supports.push(dummy.matrix.clone());
     if (part.kind === 'column') supportFeet.push(matrix(part.start.x, -2.85, part.start.z, .8, .3, .8));
   }
-  batchInstances(scene, new THREE.CylinderGeometry(1, 1, 1, 6), dark, supports);
-  batchInstances(scene, box, dark, [matrix(0, -1.5, 0, 78, 3, 13), ...supportFeet]);
+  // The map draws the whole structure in larger batches; riding keeps fine culling.
+  const rideSupports = new THREE.Group(), mapSupports = new THREE.Group();
+  const supportGeometry = new THREE.CylinderGeometry(1, 1, 1, 6);
+  const supportBases = [matrix(0, -1.5, 0, 78, 3, 13), ...supportFeet];
+  for (const [group, cellSize] of [[rideSupports, 45], [mapSupports, 120]] as const) {
+    batchInstances(group, supportGeometry, dark, supports, cellSize);
+    batchInstances(group, box, dark, supportBases, cellSize);
+  }
+  mapSupports.visible = false; scene.add(rideSupports, mapSupports);
   const sleeperBatches = batchInstances(scene, box, dark, sleepers, 32);
 
   const gates = new THREE.Group(); scene.add(gates);
@@ -239,6 +319,12 @@ export function createScenery(scene: THREE.Scene, track: CoasterTrack, coarse: b
       railLevels.forEach(lod => { lod.levels[1].distance = [40, 65, 100][value]; });
     },
     update(_elapsed: number, _reduced: boolean, mapBlend: number, camera: THREE.Camera) {
+      const overview = mapBlend > .85;
+      if (mapRails.visible !== overview) {
+        mapRails.visible = overview;
+        rideSupports.visible = !overview; mapSupports.visible = overview;
+        railLevels.forEach(lod => { lod.visible = !overview; });
+      }
       gates.visible = level > 0 && mapBlend < .85;
       cart.visible = mapBlend < .15; player.visible = mapBlend > .5;
       for (const batch of sleeperBatches) batch.visible = mapBlend < .85 && batch.boundingSphere!.center.distanceToSquared(camera.position) < (level === 2 ? 100 : 55) ** 2;

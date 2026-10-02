@@ -90,7 +90,7 @@ export function createTowerPhysics(slots: Slots) {
     body.type = Body.KINEMATIC; body.mass = 0;
     body.removeShape(shape); body.addShape(storyShape); body.sleep();
   }
-  function placeStory(position: Point, quaternion: Rotation, size: Point) {
+  function placeStory(position: Point, quaternion: Rotation, size: Point, isFlying = true) {
     const body = bodies[story];
     if (!body?.world) return;
     const half = storyShape.halfExtents;
@@ -123,7 +123,8 @@ export function createTowerPhysics(slots: Slots) {
       }
     });
     let lift = Math.max(0, (overlapsXZ(plinth.aabb) ? floorY : floorY - .28) + margin - bounds.lowerBound.y);
-    for (let pass = 0; pass < bodies.length; pass++) {
+    if (isFlying) {
+      for (let pass = 0; pass < bodies.length; pass++) {
       const before = lift;
       for (let index = 0; index < bodies.length; index++) {
         const other = bodies[index], contact = contactBounds[index];
@@ -134,8 +135,9 @@ export function createTowerPhysics(slots: Slots) {
         }
       }
       if (before === lift) break;
+      }
     }
-    body.position.y += lift; position.y = body.position.y;
+    body.position.y += lift;
     body.previousPosition.copy(body.position); body.interpolatedPosition.copy(body.position);
     body.previousQuaternion.copy(body.quaternion); body.interpolatedQuaternion.copy(body.quaternion);
     body.aabbNeedsUpdate = true; world.broadphase.dirty = true;
@@ -144,6 +146,12 @@ export function createTowerPhysics(slots: Slots) {
     release(); story = -1; accumulator = 0;
     bodies.forEach((body, index) => {
       const slot = slots[index];
+      const oldPos = body.interpolatedPosition.clone();
+      const oldQuat = body.interpolatedQuaternion.clone();
+      // Only transition if it was actively offset from the target grid slot
+      const dist = oldPos.distanceTo(new Vec3(...slot.position));
+      const needsTransition = body.world && dist > 0.01;
+
       body.type = Body.DYNAMIC; body.mass = .36; body.collisionFilterMask = -1;
       if (body.shapes[0] !== shape) { body.removeShape(storyShape); body.addShape(shape); }
       body.position.set(...slot.position); body.quaternion.setFromEuler(0, slot.yaw, 0);
@@ -154,10 +162,16 @@ export function createTowerPhysics(slots: Slots) {
       body.aabbNeedsUpdate = true;
       if (index < completed) { if (body.world) world.removeBody(body); }
       else { if (!body.world) world.addBody(body); body.sleep(); }
+
+      if (needsTransition) {
+        (body as any).transition = { time: 0, fromPos: oldPos, fromQuat: oldQuat };
+      } else {
+        (body as any).transition = null;
+      }
     });
     world.broadphase.dirty = true;
   }
-  const moving = () => held >= 0 || bodies.some(body => body.world && body.type === Body.DYNAMIC && body.sleepState !== Body.SLEEPING);
+  const moving = () => held >= 0 || bodies.some(body => (body.world && body.type === Body.DYNAMIC && body.sleepState !== Body.SLEEPING) || (body as any).transition);
   function step(delta: number) {
     if (disposed || !moving()) return false;
     accumulator += Math.min(.05, Math.max(0, delta));
@@ -182,8 +196,19 @@ export function createTowerPhysics(slots: Slots) {
       if (body.type === Body.DYNAMIC && body.sleepState !== Body.SLEEPING) {
         body.previousPosition.lerp(body.position, alpha, body.interpolatedPosition);
         body.previousQuaternion.slerp(body.quaternion, alpha, body.interpolatedQuaternion);
+        (body as any).transition = null;
       } else {
         body.interpolatedPosition.copy(body.position); body.interpolatedQuaternion.copy(body.quaternion);
+        if ((body as any).transition) {
+          const t = (body as any).transition;
+          t.time += delta;
+          const progress = Math.min(1, t.time / 0.25); // 250ms smooth transition
+          const ease = progress * (2 - progress); // simple ease-out
+          t.fromPos.lerp(body.position, ease, body.interpolatedPosition);
+          t.fromQuat.slerp(body.quaternion, ease, body.interpolatedQuaternion);
+          if (progress >= 1) (body as any).transition = null;
+          changed = true;
+        }
       }
     });
     return changed || moving();

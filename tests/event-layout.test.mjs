@@ -17,32 +17,30 @@ test('rail, cart, and rider envelopes clear the solid logo over the entire route
     assert.ok(logoClearance(f.point.clone().addScaledVector(f.up, 1.5)) > 2.5, `rider clips at ${i}`);
   }
   const logo = createVerticalLogo();
-  assert.ok(logo.isMesh); assert.equal(logo.children.length, 0);
+  assert.ok(logo.isMesh); assert.equal(logo.children.length, 1);
   assert.equal(logo.material.transparent, false); assert.equal(logo.material.wireframe, false);
-  logo.geometry.dispose(); logo.material.dispose();
+  assert.equal(logo.material.depthWrite, true);
+  assert.ok(logo.children[0].isLineSegments);
+  assert.equal(logo.children[0].material.depthTest, true);
+  disposeObject(logo);
 });
 
-test('logo has smoothly shaded bevels within the original depth and a bounded mesh budget', () => {
+test('solid logo and outline stay within the original depth and a bounded geometry budget', () => {
   const logo = createVerticalLogo(), geometry = logo.geometry;
   geometry.computeBoundingBox();
   assert.ok(Math.abs(geometry.boundingBox.min.z) < 1e-6);
   assert.ok(Math.abs(geometry.boundingBox.max.z - LOGO_DEPTH) < 1e-6);
-  assert.equal(logo.material.flatShading, false);
-  const normals = geometry.getAttribute('normal'), a = new THREE.Vector3(), b = new THREE.Vector3();
   const positions = geometry.getAttribute('position');
-  for (let i = 0; i < positions.count; i++) {
-    if (Math.abs(positions.getZ(i)) < 1e-6) assert.equal(normals.getZ(i), -1);
-    if (Math.abs(positions.getZ(i) - LOGO_DEPTH) < 1e-6) assert.equal(normals.getZ(i), 1);
-  }
-  let smoothTriangles = 0;
-  for (let i = 0; i < normals.count; i += 3) {
-    a.fromBufferAttribute(normals, i); b.fromBufferAttribute(normals, i + 1);
-    assert.ok(Number.isFinite(a.lengthSq()));
-    if (a.dot(b) < .999 && a.lengthSq() > .99 && b.lengthSq() > .99) smoothTriangles++;
-  }
-  assert.ok(smoothTriangles > 100, 'curved surfaces interpolate normals instead of showing individual facets');
-  assert.ok(geometry.getAttribute('position').count / 3 < 50_000, 'logo stays inexpensive enough for phones');
-  // Check the actual rendered mesh, not just the original polygon clearance mask.
+  assert.equal(positions.count % 3, 0);
+  assert.ok(positions.array.every(Number.isFinite));
+  assert.ok(positions.count > 0 && positions.count / 3 < 12_000, 'logo stays inexpensive enough for phones');
+  const outlineGeometry = logo.children[0].geometry, outlinePositions = outlineGeometry.getAttribute('position');
+  outlineGeometry.computeBoundingBox();
+  assert.ok(geometry.boundingBox.containsBox(outlineGeometry.boundingBox));
+  assert.equal(outlinePositions.count % 2, 0);
+  assert.ok(outlinePositions.array.every(Number.isFinite));
+  assert.ok(outlinePositions.count > 0 && outlinePositions.count / 2 < 6_500, 'outline stays inexpensive enough for phones');
+  // Check the actual solid surface, not just the original polygon clearance mask.
   logo.updateMatrixWorld(true);
   const ray = new THREE.Raycaster(), frame = createTrackFrame();
   for (let i = 0; i <= 2000; i++) {
@@ -50,11 +48,11 @@ test('logo has smoothly shaded bevels within the original depth and a bounded me
     for (const point of [f.point, f.point.clone().addScaledVector(f.up, 1.68)]) {
       for (const direction of [f.side, f.up]) {
         ray.set(point.clone().addScaledVector(direction, -1.5), direction); ray.far = 3;
-        assert.equal(ray.intersectObject(logo).length, 0, 'rounded edges must leave room for the rider and cart');
+        assert.equal(ray.intersectObject(logo, false).length, 0, 'rounded edges must leave room for the rider and cart');
       }
     }
   }
-  geometry.dispose(); logo.material.dispose();
+  disposeObject(logo);
 });
 
 test('three evenly spaced default stations and subsequent stations avoid structures and each other', () => {
@@ -153,8 +151,14 @@ test('adaptive quality reacts before 30fps, ignores suspension, and recovers wit
   for (let i = 0; i < 1200; i++) quality.sample(1 / 60);
   assert.ok(quality.level >= 1);
   const verySlow = createQualityController(2);
-  for (let i = 0; i < 40; i++) verySlow.sample(.2);
+  for (let i = 0; i < 4; i++) verySlow.sample(.2);
   assert.equal(verySlow.level, 0);
+  const overloaded = createQualityController(2);
+  overloaded.sample(.6); overloaded.sample(.6);
+  assert.equal(overloaded.level, 1, 'long visible frames are overload, not a suspended tab');
+  const mobile = createQualityController(0, 1);
+  for (let i = 0; i < 2400; i++) mobile.sample(1 / 60);
+  assert.equal(mobile.level, 1, 'mobile recovery keeps its effects budget');
   assert.ok(qualityPixelRatio(2, 3840, 2160, 3, false) ** 2 * 3840 * 2160 <= 2_200_001);
   assert.ok(qualityPixelRatio(0, 390, 844, 3, true) < 1);
   assert.equal(shouldShowJoystick(false, false, 390), false);

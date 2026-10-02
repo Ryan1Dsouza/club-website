@@ -6,7 +6,8 @@ import { createScenery } from './event-scenery';
 import { createStationPlanner } from './event-layout';
 import { createQualityController, qualityPixelRatio } from './event-quality';
 import { disposeObject } from './event-batching';
-import { cinematicCamera, GLIMPSE_EXIT } from './event-cinematics';
+import { cinematicCamera, stationArrivalFrame, GLIMPSE_EXIT } from './event-cinematics';
+import { stationCardAnchor } from './event-navigation';
 import { createRideMap } from './event-minimap';
 import { createRidePostprocessing } from './event-postprocessing';
 
@@ -14,7 +15,8 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
   const coarse = window.matchMedia('(pointer: coarse)').matches;
   // Keep edges antialiased on phones too; adaptive resolution still bounds GPU cost.
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
-  const quality = createQualityController(coarse || navigator.hardwareConcurrency <= 4 ? 1 : 2);
+  // Start within a modest budget, then earn higher quality through sustained fast frames.
+  const quality = createQualityController(coarse || navigator.hardwareConcurrency <= 4 ? 0 : 1, coarse ? 1 : 2);
   renderer.setClearColor('#010604');
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -46,6 +48,8 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
   let travelTarget: number | null = null, travelDirection = 1, travelStops: CoasterStop[] = [];
   const scenery = createScenery(scene, track, coarse);
   let markers: HTMLButtonElement[] = [], stopPoints: (THREE.Vector3 | null)[] = [];
+  let cardPoints: (THREE.Vector3 | null)[] = [];
+  let cards: { element: HTMLElement; index: number; opacity: number }[] = [];
   let stationProps: LogoWorldProps['stations'] | null = null;
   let worldStations: LogoWorldProps['stations'] = [];
   const stationSignatures = new Map<string, string>();
@@ -61,7 +65,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
   let dragging: { id: number; x: number; y: number } | null = null;
   let gazeX = 0, gazeY = 0, bank = 0, mapBlend = mode === 'overview' ? 1 : 0;
   let transition = 1, initialized = false, notified: number | null = null;
-  let dilation = 1, lastAnticipation = 0;
+  let dilation = 1, stationFocus = 0, focusStation: number | null = null;
   let mapInteracted = false, cameraLift = 0, cameraPitch = 0, cameraPullback = 0, lastDiagnostics = 0;
   let reduced = get().reduced;
   let rendered = false, width = 1, height = 1, lastMarkerUpdate = 0;
@@ -102,7 +106,29 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     if (journey.station === null && journey.phase !== 'riding') journey = departCoasterStation(journey);
     notified = journey.station;
     if (travelTarget !== null) setTravel(null);
+    cardPoints = placements.map(stop => {
+      if (!stop) return null;
+      const f = sampleTrack(track, stop.distance, length);
+      const anchor = stationCardAnchor(f.point, f.side, f.up);
+      return new THREE.Vector3(anchor.x, anchor.y, anchor.z);
+    });
+    stationFocus = 0; focusStation = null; syncCards();
     props.onLayout?.(placements.map(Boolean), minimap.layout(placements.map(stop => stop?.point ?? null)));
+  }
+
+  function syncCards() {
+    cards = Array.from(host.querySelectorAll<HTMLElement>('[data-world-card]')).map(element => ({
+      element, index: worldStations.findIndex(station => station.id === element.dataset.worldCard), opacity: 0,
+    }));
+  }
+
+  function arrivalFrame(journeyStops: CoasterStop[]) {
+    // Once braking begins, keep the same station even while reversing or crossing the loop seam.
+    const next = nextCoasterStop(motion.distance, journeyStops, length, Math.sign(motion.speed), journey.dismissed);
+    const docking = journey.phase === 'braking' || journey.phase === 'stopped';
+    const index = docking ? journey.station : next.index;
+    const remaining = docking && index !== null ? trackSeparation(motion.distance, stops[index], length) : next.remaining;
+    return { index, ...stationArrivalFrame(remaining, index === null ? 0 : stopDefinitions[index].radius, get().reduced) };
   }
 
   function setTravel(index: number | null) {
@@ -189,7 +215,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     const rawDelta = last ? (now - last) / 1000 : 0;
     const dt = Math.min(rawDelta, .05); last = now;
     const props = get();
-    if (reduced !== props.reduced) { reduced = props.reduced; size(false); }
+    if (reduced !== props.reduced) { reduced = props.reduced; size(false); syncCards(); }
     let resumeKey: string | undefined;
     if (stationProps !== props.stations) syncStations(props);
     if (!props.paused) elapsed += dt;
@@ -209,6 +235,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       else if (props.command.resume) journey = departCoasterStation(journey);
       else { journey = initialCoasterJourney(destination === null || !Number.isFinite(stops[destination]) ? 0 : stops[destination]); journey.dismissed = destination; }
       motion = journey.motion; notified = null; bank = 0; dilation = 1; cameraLift = cameraPitch = cameraPullback = 0; resetInput();
+      if (!props.command.resume) { stationFocus = 0; focusStation = null; cards.forEach(card => { card.opacity = 0; }); }
       resumeKey = props.command.driveKey;
       if (mode === 'explore') focus();
     }
@@ -227,30 +254,31 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     if (driveOptions.boost && !throttle && !drivingKey) throttle = Math.sign(motion.speed) || 1;
     if (active) {
       const current = sampleTrack(track, motion.distance, length, slopeFrame);
-      const scale = approachScale(motion.distance, journeyStops, length, Math.sign(motion.speed) || Math.sign(throttle), journey.dismissed);
+      const scale = Math.min(approachScale(motion.distance, journeyStops, length, Math.sign(motion.speed) || Math.sign(throttle), journey.dismissed), arrivalFrame(journeyStops).timeScale);
       dilation = props.reduced ? 1 : THREE.MathUtils.damp(dilation, scale, 4, dt);
+      // Dilate the simulation clock, preserving the braking solver's exact stopping point.
       journey = stepCoasterJourney(journey, throttle, current.tangent.y, dt * dilation, length, journeyStops, props.reduced, driveOptions);
       motion = journey.motion;
       if (journey.phase === 'stopped' && journey.station !== null && notified !== journey.station) { setTravel(null); openStation(journey.station); }
     }
     setBoost(driveOptions.boost && (journey.phase === 'riding' || journey.phase === 'approaching'));
-    props.audio.current?.update(motion.speed / COASTER_SPEED, active && document.hasFocus() && Math.abs(motion.speed) > .1);
+    if (props.reduced) dilation = 1;
+    const arrival = arrivalFrame(journeyStops);
+    const revealStation = mode === 'explore' && transition >= 1 && (!paused || journey.phase === 'stopped') ? arrival.index : null;
+    if (revealStation !== null && arrival.focus > 0) focusStation = revealStation;
+    stationFocus = props.reduced ? 0 : THREE.MathUtils.damp(stationFocus, revealStation === null ? 0 : arrival.focus, 6, dt);
+    const visualSpeed = motion.speed * dilation;
+    props.audio.current?.update(visualSpeed / COASTER_SPEED, active && document.hasFocus() && Math.abs(visualSpeed) > .1);
     boostFocus = props.reduced ? 0 : THREE.MathUtils.damp(boostFocus, boosting ? 1 : 0, boosting ? 3.8 : 4.5, dt);
     controlsRoot.style.setProperty('--nx-boost-focus', boostFocus.toFixed(3));
-    if (now - lastAnticipation >= 250) {
-      lastAnticipation = now;
-      const next = nextCoasterStop(motion.distance, stopDefinitions, length, Math.sign(motion.speed), journey.dismissed);
-      const anticipating = active && !props.reduced && journey.phase !== 'stopped' && next.remaining <= 90 && next.remaining >= 15;
-      props.onAnticipate(anticipating ? next.index : null, next.remaining / Math.max(.1, Math.abs(motion.speed) * dilation), next.remaining);
-    }
-    const nextEvent = nextCoasterStop(motion.distance, stopDefinitions, length, Math.sign(motion.speed), journey.dismissed);
-    const showGlimpse = active && !props.reduced && Math.abs(motion.speed) > .1 && journey.phase !== 'stopped' && nextEvent.remaining > GLIMPSE_EXIT;
+    const nextEvent = nextCoasterStop(motion.distance, journeyStops, length, Math.sign(motion.speed), journey.dismissed);
+    const showGlimpse = active && !props.reduced && Math.abs(motion.speed) > .1 && journey.phase !== 'stopped' && nextEvent.remaining > Math.max(GLIMPSE_EXIT, nextEvent.index === null ? 0 : stopDefinitions[nextEvent.index].radius);
     props.glimpses.current?.update(showGlimpse && nextEvent.index !== null ? worldStations[nextEvent.index] : null, nextEvent.remaining, dt);
     const f = sampleTrack(track, motion.distance, length, rideFrame);
     props.minimap.current?.update(minimap.project(f.point));
     const compactCamera = coarse || width <= 768 || height <= 500;
-    const cinematic = cinematicCamera(motion.speed, motion.acceleration, f.tangent.y, COASTER_SPEED, compactCamera, props.reduced, boostFocus);
-    bank = props.reduced ? 0 : THREE.MathUtils.damp(bank, cameraBank(f.curvature, motion.speed, false) * cinematic.bankScale, 9, dt);
+    const cinematic = cinematicCamera(visualSpeed, motion.acceleration * dilation, f.tangent.y, COASTER_SPEED, compactCamera, props.reduced, boostFocus);
+    bank = props.reduced ? 0 : THREE.MathUtils.damp(bank, cameraBank(f.curvature, visualSpeed, false) * cinematic.bankScale, 9, dt);
     cameraLift = props.reduced ? 0 : THREE.MathUtils.damp(cameraLift, cinematic.lift, 9, dt);
     cameraPitch = props.reduced ? 0 : THREE.MathUtils.damp(cameraPitch, cinematic.pitch, 9, dt);
     cameraPullback = props.reduced ? 0 : THREE.MathUtils.damp(cameraPullback, cinematic.pullback, 6, dt);
@@ -262,6 +290,11 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     scenery.player.position.copy(f.point).addScaledVector(f.up, 1);
     desiredPosition.copy(f.point).addScaledVector(f.up, (compactCamera ? 1.68 : 1.48) + cameraLift).addScaledVector(f.tangent, -cameraPullback);
     look.setFromEuler(euler.set(gazeY + cameraPitch, gazeX, 0)); desiredRotation.multiply(look);
+    const focusPoint = focusStation === null ? null : cardPoints[focusStation];
+    if (focusPoint && stationFocus > .001) {
+      basis.lookAt(desiredPosition, focusPoint, up); look.setFromRotationMatrix(basis);
+      desiredRotation.slerp(look, stationFocus);
+    }
     const rideFov = cinematic.fov - (props.reduced ? 0 : (1 - dilation) * 5);
     if (!initialized) {
       initialized = true; camera.position.copy(desiredPosition); camera.quaternion.copy(desiredRotation); camera.fov = rideFov;
@@ -290,6 +323,29 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       }
     }
     frameMapView(); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
+    // Project fixed world anchors after the final camera update. Never clamp their
+    // screen positions: off-screen / behind-camera cards leave the view naturally.
+    for (const card of cards) {
+      const point = cardPoints[card.index];
+      const opacity = card.index === revealStation ? arrival.opacity : 0;
+      card.opacity = THREE.MathUtils.damp(card.opacity, opacity, 7, dt);
+      let show = !!point && mode === 'explore' && !props.reduced && card.opacity > .002;
+      if (show) {
+        projected.copy(point!).applyMatrix4(camera.matrixWorldInverse);
+        const depth = -projected.z;
+        projected.copy(point!).project(camera);
+        show = depth > camera.near && projected.z >= -1 && projected.z <= 1 && Math.abs(projected.x) <= 1.2 && Math.abs(projected.y) <= 1.2;
+        if (show) {
+          const pixelsPerUnit = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * depth);
+          const scale = Math.min(compactCamera ? 1 : 1.2, pixelsPerUnit * 5.8 / Math.max(1, card.element.offsetWidth));
+          card.element.style.transform = `translate(${(projected.x * .5 + .5) * width}px,${(-projected.y * .5 + .5) * height}px) translate(-50%,-50%) scale(${scale})`;
+        }
+      }
+      card.element.style.opacity = String(card.opacity);
+      card.element.style.visibility = show ? 'visible' : 'hidden';
+      card.element.setAttribute('aria-hidden', String(!show || paused || card.opacity < .1));
+      card.element.style.setProperty('--nx-arrival-progress', String(card.index === revealStation ? arrival.proximity : 0));
+    }
     mapBlend = props.reduced ? (mode === 'overview' ? 1 : 0) : THREE.MathUtils.damp(mapBlend, mode === 'overview' ? 1 : 0, 3, dt);
     scenery.update(elapsed, props.reduced, mapBlend, camera);
     (scene.fog as THREE.FogExp2).density = THREE.MathUtils.lerp(.0042, .0008, mapBlend);
@@ -312,7 +368,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     // wake rendering without restarting the motor, transition, or orbit.
     const cameraChanged = renderedPosition.distanceToSquared(camera.position) > .000001 || renderedRotation.angleTo(camera.quaternion) > .0001 || Math.abs(renderedFov - camera.fov) > .001;
     drewLastFrame = !rendered || renderDirty || cameraChanged || transition < 1;
-    try { if (drewLastFrame) { renderer.info.reset(); postprocessing.render(scene, camera, mapBlend, compactCamera, motion.speed); renderDirty = false; renderedPosition.copy(camera.position); renderedRotation.copy(camera.quaternion); renderedFov = camera.fov; } }
+    try { if (drewLastFrame) { renderer.info.reset(); postprocessing.render(scene, camera, mapBlend, compactCamera, visualSpeed); renderDirty = false; renderedPosition.copy(camera.position); renderedRotation.copy(camera.quaternion); renderedFov = camera.fov; } }
     catch (error) { failed = true; props.audio.current?.quiet(); console.error('Unable to render the Nucleus ride:', error); props.onError(); return; }
     if (!rendered) { rendered = true; props.onReady(); }
     if (import.meta.env.DEV && now - lastDiagnostics > 200) {
@@ -322,6 +378,8 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       host.dataset.distance = motion.distance.toFixed(2);
       host.dataset.speed = motion.speed.toFixed(2); host.dataset.boost = String(boosting); host.dataset.trackLength = length.toFixed(2);
       host.dataset.phase = journey.phase; host.dataset.dilation = dilation.toFixed(3);
+      host.dataset.stationFocus = stationFocus.toFixed(3);
+      host.dataset.cardStation = revealStation === null ? '' : String(revealStation);
       host.dataset.travelTarget = travelTarget === null ? '' : String(travelTarget);
       host.dataset.driveReady = String(active);
       host.dataset.pan = orbit.target.toArray().map(n => n.toFixed(1)).join(',');

@@ -3,7 +3,7 @@ import logoUrl from '../../assets/nucleus-logo.webp';
 import { MorphingText } from '../magicui/morphing-text';
 import './logo-landing.css';
 
-export default function LogoLanding() {
+export default function LogoLanding({ active = true }: { active?: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const host = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState('loading');
@@ -32,6 +32,11 @@ export default function LogoLanding() {
   }, []);
 
   useEffect(() => {
+    // Warm the scene code under the curtain; start assembly as the curtain exits.
+    if (!active) {
+      void import('../../lib/logo-scene').catch(() => {});
+      return;
+    }
     const element = host.current!;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let disposed = false;
@@ -72,7 +77,7 @@ export default function LogoLanding() {
       motion.removeEventListener('change', start);
       disposeScene?.();
     };
-  }, []);
+  }, [active]);
 
   return <section ref={sectionRef} className="logo-landing" aria-label="Nucleus" data-status={status} data-text-ready={textReady}>
     <h1 className="sr-only">Nucleus SJEC — A connection worth making.</h1>

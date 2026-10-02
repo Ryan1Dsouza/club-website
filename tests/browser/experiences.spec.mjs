@@ -6,10 +6,10 @@ import { openDatabase, hashPassword } from '../../server/db.mjs';
 import { getSite } from '../../server/db.mjs';
 
 let db, server, apiBase;
-test.beforeEach(async () => {
+test.beforeEach(async ({ baseURL }) => {
   db = openDatabase(':memory:');
   db.prepare('INSERT INTO admins VALUES(?,?,?)').run('browser-admin', 'browser@example.com', hashPassword('browser-fixture-password'));
-  server = createApp(db, { limits: false, origin: 'http://127.0.0.1:3010', dist: resolve('__no_browser_dist__') }).listen(0, '127.0.0.1');
+  server = createApp(db, { limits: false, origin: baseURL, dist: resolve('__no_browser_dist__') }).listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve)); apiBase = `http://127.0.0.1:${server.address().port}`;
 });
 test.afterEach(async () => { await new Promise(resolve => server.close(resolve)); db.close(); });
@@ -19,6 +19,7 @@ async function connect(page) {
     await route.fulfill({ response });
   });
   await page.goto('/events');
+  await page.getByRole('button', { name: /The Nucleus Ride/ }).click();
 }
 async function ready(page) {
   await expect(page.locator('.nx-map-button')).toBeEnabled({ timeout: 30_000 });
@@ -155,6 +156,8 @@ test('continuing after docking preserves a forward key that is still held', asyn
 });
 
 test('desktop publishes a photo folder without replacing the canvas, and another visitor sees it', async ({ page, browser }, info) => {
+  // Two WebGL visitors plus the frame sample need room on software-rendered CI.
+  test.setTimeout(120_000);
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await connect(page); await ready(page);
@@ -190,7 +193,7 @@ test('desktop publishes a photo folder without replacing the canvas, and another
     function frame(now) { if (last) timings.push(now - last); last = now; if (timings.length < 180) requestAnimationFrame(frame); else { timings.sort((a,b) => a-b); resolve({ medianMs: timings[90], p95Ms: timings[171], ...document.querySelector('.nx-world').dataset }); } } requestAnimationFrame(frame);
   }));
   console.log('Desktop map frame sample:', JSON.stringify(stats));
-  const visitor = await browser.newContext({ baseURL: 'http://127.0.0.1:3010' }), otherPage = await visitor.newPage();
+  const visitor = await browser.newContext({ baseURL: info.project.use.baseURL }), otherPage = await visitor.newPage();
   await connect(otherPage); await ready(otherPage); await expect(otherPage.locator('[data-stop-kind=event]')).toHaveCount(4);
   await otherPage.getByRole('button', { name: 'Events 4', exact: true }).click();
   await otherPage.getByRole('dialog', { name: 'Event stations' }).getByRole('button', { name: /A shared photo workshop/ }).click();
@@ -327,12 +330,21 @@ test('a photo-free event has category artwork and both links after publishing', 
   await page.getByLabel('Registration link', { exact: false }).fill('https://example.com/community');
   await page.getByRole('button', { name: 'Publish event & add station', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('is published');
-  await page.getByRole('navigation', { name: 'Event checkpoints' }).getByRole('button', { name: /Connections without uploads/ }).click();
+  await page.getByRole('button', { name: 'Events 4', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Event stations' }).getByRole('button', { name: /Connections without uploads/ }).click();
   await expect(page.locator('.nx-event-artwork')).toBeVisible();
   await expect(page.locator('.nx-event-gallery')).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'View photo album' })).toHaveAttribute('href', 'https://drive.google.com/drive/folders/community');
   await expect(page.getByRole('link', { name: 'Register for event' })).toHaveAttribute('href', 'https://example.com/community');
   await page.screenshot({ path: info.outputPath('photo-free-event.png') });
+  await page.getByRole('button', { name: 'Close event', exact: true }).click();
+  await page.getByRole('button', { name: 'Change experience' }).click();
+  await page.getByRole('button', { name: /Quick Browse/ }).click();
+  await page.getByRole('region', { name: 'Event carousel' }).focus();
+  await page.keyboard.press('End');
+  await page.getByRole('button', { name: 'Explore Connections without uploads', exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText('A community afternoon to share ideas');
+  await expect(page.getByRole('link', { name: 'Register for event' })).toHaveAttribute('href', 'https://example.com/community');
 });
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 1024, height: 1366 }]) {
