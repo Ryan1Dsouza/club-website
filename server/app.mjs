@@ -11,6 +11,7 @@ import { createCoasterTrack } from '../src/lib/event-coaster.ts';
 import { createStationPlanner } from '../src/lib/event-layout.ts';
 import { createExperienceStations } from '../src/lib/experience-stations.ts';
 import { pageMeta } from '../shared/page-meta.ts';
+import { routeAssets } from '../shared/route-assets.mjs';
 
 const safeUrl = z.union([z.literal(''), z.url().refine(value => ['https:', 'http:'].includes(new URL(value).protocol), 'Use an https:// URL')]);
 const isoDate = z.union([z.literal(''), z.iso.datetime({ offset: true })]);
@@ -160,6 +161,8 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
   });
   if (existsSync(resolve(dist, 'index.html'))) {
     const template = readFileSync(resolve(dist, 'index.html'), 'utf8');
+    const manifestPath = resolve(dist, '.vite/manifest.json');
+    const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : null;
     app.use('/assets', express.static(resolve(dist, 'assets'), { immutable: true, maxAge: '1y' }));
     app.use(express.static(dist, { 
       index: false, 
@@ -183,6 +186,24 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
           (_match, start, name, end) => start + escape(name.endsWith('title') ? meta.title : name === 'og:url' ? meta.canonical : meta.description) + end)
         .replace('</head>', `<meta name="robots" content="${meta.robots}"></head>`);
       if (!admin && render) {
+        // Route CSS is split from the homepage bundle. Include it in SSR too,
+        // so direct requests paint correctly before the client module arrives.
+        if (manifest) {
+          const styles = new Set(), visited = new Set();
+          const collect = key => {
+            if (!key || visited.has(key)) return;
+            visited.add(key);
+            const chunk = manifest[key];
+            chunk?.css?.forEach(file => styles.add(file));
+            chunk?.imports?.forEach(collect);
+          };
+          const entry = routeAssets[req.path.replace(/\/$/, '')];
+          const name = entry?.split('/').pop().replace('.tsx', '');
+          // Rollup may merge a dynamic entry with a shared module and key it by
+          // chunk name instead of source path; its logical name stays available.
+          if (entry) collect(manifest[entry] ? entry : Object.keys(manifest).find(key => manifest[key].name === name && manifest[key].isDynamicEntry));
+          html = html.replace('</head>', [...styles].filter(file => !html.includes(`/${file}`)).map(file => `<link rel="stylesheet" href="/${file}">`).join('') + '</head>');
+        }
         const data = getSite(db);
         const safeData = JSON.stringify(data).replace(/</g, '\\u003c');
         html = html.replace(/<div id="root">[\s\S]*?<\/div>\s*<\/div>/, () => `<div id="root">${render(data, req.originalUrl)}</div><script id="nucleus-data" type="application/json">${safeData}</script>`);

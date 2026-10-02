@@ -1,5 +1,12 @@
 export type QualityLevel = 0 | 1 | 2;
 
+/** Safari omits memory hints; touch input still earns a conservative effects budget. */
+export function rideQuality(device: { coarse: boolean; cores?: number; memory?: number }): { initial: QualityLevel; maximum: QualityLevel } {
+  const constrained = device.coarse || (device.cores !== undefined && device.cores > 0 && device.cores <= 4)
+    || (device.memory !== undefined && device.memory > 0 && device.memory <= 4);
+  return { initial: constrained ? 0 : 1, maximum: constrained ? 1 : 2 };
+}
+
 /** Resolution is also bounded by total pixels: a 4K monitor is not a free GPU. */
 export function qualityPixelRatio(level: QualityLevel, width: number, height: number, deviceRatio: number, touch: boolean) {
   const cap = (touch ? [.65, .9, 1.25] : [.75, 1, 1.5])[level];

@@ -5,7 +5,7 @@ import { isEventPhoto, prepareEventPhotos } from '../lib/event-photos';
 import type { ClubEvent } from '../types';
 
 type Session = { email: string; csrf: string };
-export default function AddEventForm({ onPublished, onBusy }: { onPublished: (event: ClubEvent) => void; onBusy: (busy: boolean) => void }) {
+export default function AddEventForm({ onPublished, onBusy, stationNumber }: { onPublished: (event: ClubEvent) => void; onBusy: (busy: boolean) => void; stationNumber: string }) {
   const [session, setSession] = useState<Session | null>(null), [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [progress, setProgress] = useState('');
   const [files, setFiles] = useState<File[]>([]), [skipped, setSkipped] = useState(0);
@@ -39,7 +39,7 @@ export default function AddEventForm({ onPublished, onBusy }: { onPublished: (ev
   }
   return <>
     <span className="nx-event-category">A new stop on the journey</span><h2>Add Event</h2>
-    <p>Publish an event for everyone. Add an album link, upload photos, or publish with just the details. A station will be placed in a clear space along the track.</p>
+    <p>Your event becomes Station {stationNumber} on the Nucleus Ride. Existing stations stay in place. Upload photos for its comic book, add an album link, or publish with just the story.</p>
     {checking && <p role="status">Checking admin access…</p>}
     {!checking && !session && <form className="nx-event-form" onSubmit={login}>
       <p>Sign in with your Nucleus administrator account.</p>

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS3DObject, CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import type { Member } from '../types';
-import { BLOCK_SIZE, LAYER_HEIGHT, TOWER_INTRO, TOWER_OUTRO, advanceTowerScroll, clamp01, smooth, towerExit, towerFrame, towerSlots } from './people-tower-motion.ts';
+import { BLOCK_SIZE, LAYER_HEIGHT, advanceTowerScroll, clamp01, smooth, towerExit, towerFrame, towerSlots } from './people-tower-motion.ts';
 import { towerPixelRatio, towerQuality } from './people-tower-quality';
 import { createTowerScenery } from './people-tower-scenery';
 import { createTowerBlocks, TOWER_PALETTES } from './people-tower-blocks';
@@ -20,7 +20,7 @@ function makeProfile() {
 /** A sleeping rigid-body tower, two instanced draws, and one crisp DOM profile. */
 export async function createPeopleTower(host: HTMLElement, section: HTMLElement, members: Member[], callbacks: Callbacks) {
   const cleanups: (() => void)[] = [];
-  let disposed = false;
+  let disposed = false, compiled = false;
   function dispose() {
     if (disposed) return;
     disposed = true;
@@ -88,13 +88,12 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
 
     const stage = host.parentElement!;
     let width = 1, height = 1, profileWidth = 1, profileHeight = 1;
+    let bufferWidth = 0, bufferHeight = 0, viewportResizeTimer = 0;
     let start = 0, range = 1, target = 0, progress = 0, frame = 0, previousTime = 0;
     let active = -2, storyRemoved = 0, visible = true, idleAngle = 0, lastInteraction = -Infinity;
     let matricesDirty = true, renderedProgress = -1, lastRenderTime = 0;
     let layoutDirty = true, scrollDirty = true, initialized = false;
     let resolutionScale = 1, averageFrameTime = 1 / 60, slowTime = 0, effectsReduced = false;
-    // When true, target is being nudged forward to finish an in-flight animation.
-    let autoAdvancing = false;
     const scrollMotion = { value: 0, velocity: 0 };
     const right = new THREE.Vector3(), up = new THREE.Vector3(), forward = new THREE.Vector3();
     const source = new THREE.Vector3(), pulled = new THREE.Vector3(), activeSource = new THREE.Vector3();
@@ -106,6 +105,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2(), dragPlane = new THREE.Plane(), dragPoint = new THREE.Vector3();
     let pointerId = -1, draggedIndex = -1, downX = 0, downY = 0, travelled = 0;
     cleanups.push(() => {
+      window.clearTimeout(viewportResizeTimer);
       cancelAnimationFrame(frame); releasePointer();
       section.style.removeProperty('--tower-intro'); section.style.removeProperty('--tower-progress'); section.style.removeProperty('--tower-outro');
       delete host.dataset.activeMember; delete host.dataset.dragging;
@@ -176,6 +176,9 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       if (transformsChanged || matricesDirty || changedProgress || (cameraMoved && state.index >= 0)) {
         const block = batch.pose;
         physics.bodies.forEach((body, index) => {
+          // Sleeping pieces keep their instance matrices and hidden profiles.
+          // Scrolling normally changes only the currently extracted piece.
+          if (!transformsChanged && !matricesDirty && index !== state.index) return;
           const slot = slots[index];
           const profileData = profiles[index];
           
@@ -219,8 +222,10 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
             }
             block.scale.lerp(targetScale, unfold);
             
-            // Ensure the visual mesh never dips below the floor level
-            block.position.y = Math.max(block.position.y, physics.floorY + 0.3);
+            // A fallen plank can rest below the plinth. Lift its clearance as it
+            // unfolds, without popping it upward on the first scroll frame.
+            const floorClearance = THREE.MathUtils.lerp(Math.min(source.y, physics.floorY + .3), physics.floorY + .3, unfold);
+            block.position.y = Math.max(block.position.y, floorClearance);
 
             const exit = exitState.progress;
             if (exit > 0) {
@@ -279,27 +284,10 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         sampleScroll();
         if (!initialized) { scrollMotion.value = target; initialized = true; }
 
-        // If a block is mid-flight (left the tower but hasn't fully landed yet),
-        // auto-advance target to the fully-landed position so it never hangs
-        // frozen in front of the camera. This also handles mobile touch momentum
-        // that stops between discrete scroll positions.
-        if (!autoAdvancing) {
-          const checkState = towerFrame(target, members.length);
-          if (checkState.index >= 0 && checkState.local > 0.10 && checkState.local < 0.43) {
-            // Push target to the fully-landed point for this member (local = 0.43)
-            const duration = TOWER_INTRO + members.length + TOWER_OUTRO;
-            const landedTime = TOWER_INTRO + checkState.index + 0.43;
-            target = Math.min(1, landedTime / duration);
-            autoAdvancing = true;
-          }
-        } else {
-          // Keep advancing until the block has fully landed
-          const checkState = towerFrame(target, members.length);
-          if (checkState.index < 0 || checkState.local >= 0.43) autoAdvancing = false;
-        }
-
-        // Lenis handles all scroll smoothing. Response 200 makes the tower
-        // track its output near-instantly with zero perceptible lag.
+        // Keep the block and profile on the scroll timeline. Advancing to a
+        // speculative landing here gets undone by sampleScroll on the next
+        // frame, briefly flashing the open profile during extraction.
+        // Lenis handles scroll smoothing; this response tracks its output.
         progress = advanceTowerScroll(scrollMotion, target, elapsed, 200);
         const state = towerFrame(progress, members.length);
         // The desktop intro orbits; readable profiles and settled mobile scenes rest.
@@ -321,7 +309,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       } catch { dispose(); callbacks.onError(); }
     }
     function wake() {
-      if (!frame && !disposed && visible && !document.hidden) { previousTime = performance.now(); frame = requestAnimationFrame(draw); }
+      if (compiled && !frame && !disposed && visible && !document.hidden) { previousTime = performance.now(); frame = requestAnimationFrame(draw); }
     }
     function scroll() {
       scrollDirty = true; lastInteraction = performance.now(); wake();
@@ -347,10 +335,23 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       quality.simplified ||= effectsReduced;
       const ratio = towerPixelRatio(quality.pixelRatio, resolutionScale);
       const sizeChanged = width !== nextWidth || height !== nextHeight;
-      if (sizeChanged || renderer.getPixelRatio() !== ratio) {
-        renderer.setDrawingBufferSize(nextWidth, nextHeight, ratio); matricesDirty = true;
+      if (device.coarsePointer && width === nextWidth && height !== nextHeight) {
+        // Address-bar motion can resize the viewport several times per swipe.
+        // Keep rendering into the existing buffer until it settles; CSS fills
+        // the viewport immediately and the camera/profile layout stays in sync.
+        window.clearTimeout(viewportResizeTimer);
+        viewportResizeTimer = window.setTimeout(() => {
+          viewportResizeTimer = 0; layoutDirty = true; wake();
+        }, 150);
+      } else if (width !== nextWidth) {
+        window.clearTimeout(viewportResizeTimer); viewportResizeTimer = 0;
+      }
+      if (!viewportResizeTimer && (bufferWidth !== nextWidth || bufferHeight !== nextHeight || renderer.getPixelRatio() !== ratio)) {
+        renderer.setDrawingBufferSize(nextWidth, nextHeight, ratio);
+        bufferWidth = nextWidth; bufferHeight = nextHeight; matricesDirty = true;
       }
       if (sizeChanged) {
+        matricesDirty = true;
         width = nextWidth; height = nextHeight;
         css.setSize(width, height); camera.aspect = width / height; camera.updateProjectionMatrix();
         profileWidth = width * .93; profileHeight = height * .79;
@@ -437,6 +438,10 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     document.addEventListener('visibilitychange', visibility);
     host.append(renderer.domElement, css.domElement);
     await renderer.compileAsync(scene, camera);
+    if (disposed) throw new Error('Tower initialization was interrupted');
+    // Observers can fire during compilation. Drawing before it completes can
+    // force synchronous shader work onto the first mobile scroll frame.
+    compiled = true;
     resize();
     return { dispose, rebuild };
   } catch (error) {

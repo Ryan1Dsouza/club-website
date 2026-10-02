@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { createCoasterTrack, sampleTrack, createTrackFrame, LOGO_DEPTH } from '../src/lib/event-coaster.ts';
 import { createStationPlanner, logoClearance, BUILDING_BOUNDS, maxStopGap, fillWaypoints } from '../src/lib/event-layout.ts';
 import { createExperienceStations } from '../src/lib/experience-stations.ts';
-import { createQualityController, qualityPixelRatio, shouldShowJoystick } from '../src/lib/event-quality.ts';
+import { createQualityController, qualityPixelRatio, rideQuality, shouldShowJoystick } from '../src/lib/event-quality.ts';
 import { createVerticalLogo } from '../src/lib/event-scenery.ts';
 import { disposeObject } from '../src/lib/event-batching.ts';
 
@@ -140,6 +140,18 @@ test('removing a station retains shared resources until the owning world is disp
   disposeObject(station, { geometries: new Set([geometry]), materials: new Set([material]) });
   assert.equal(geometries, 0); assert.equal(materials, 0); assert.equal(signs, 1); assert.equal(station.parent, null);
   disposeObject(scene); assert.equal(geometries, 1); assert.equal(materials, 1);
+});
+
+test('touch and constrained hardware recover detail without enabling the expensive depth pass', () => {
+  for (const device of [{ coarse: true }, { coarse: false, cores: 4 }, { coarse: false, cores: 8, memory: 4 }]) {
+    const budget = rideQuality(device), controller = createQualityController(budget.initial, budget.maximum);
+    assert.equal(controller.level, 0);
+    for (let i = 0; i < 2400; i++) controller.sample(1 / 60);
+    assert.equal(controller.level, 1);
+  }
+  for (const device of [{ coarse: false }, { coarse: false, cores: 0, memory: 0 }, { coarse: false, cores: 8, memory: 8 }]) {
+    assert.deepEqual(rideQuality(device), { initial: 1, maximum: 2 });
+  }
 });
 
 test('adaptive quality reacts before 30fps, ignores suspension, and recovers without oscillation', () => {

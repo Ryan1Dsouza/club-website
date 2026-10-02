@@ -1,0 +1,36 @@
+.site-shell--home { position: relative; isolation: isolate; }
+.site-shell--home :is(.logo-landing, .dp-section, .vm-container) { background: transparent; }
+
+.home-particles {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  contain: strict;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 12% 28%, rgb(var(--mint-rgb) / .035), transparent 48%),
+    radial-gradient(ellipse at 90% 74%, rgb(107 148 123 / .035), transparent 44%);
+}
+.home-particles::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .45;
+  background:
+    radial-gradient(circle at 8% 22%, #8fbd99 0 1px, transparent 2px),
+    radial-gradient(circle at 21% 65%, #8fbd99 0 1px, transparent 2px),
+    radial-gradient(circle at 13% 85%, #6b947b 0 1px, transparent 2px),
+    radial-gradient(circle at 35% 12%, #6b947b 0 1px, transparent 2px),
+    radial-gradient(circle at 71% 80%, #8fbd99 0 1px, transparent 2px),
+    radial-gradient(circle at 85% 20%, #8fbd99 0 1px, transparent 2px),
+    radial-gradient(circle at 94% 58%, #6b947b 0 1px, transparent 2px);
+}
+.home-particles[data-ready='true']::before { opacity: 0; }
+.home-particles__canvas { position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s ease; mask-image: radial-gradient(ellipse at 50% 43%, rgb(0 0 0 / .2) 12%, #000 72%); }
+.home-particles[data-ready='true'] .home-particles__canvas { opacity: 1; }
+.home-particles__canvas canvas { display: block; width: 100%; height: 100%; }
+.home-particles-toggle { position: fixed; right: 18px; bottom: 18px; z-index: 30; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: rgb(0 0 0 / .75); color: var(--muted); }
+.home-particles-toggle[hidden] { display: none; }
+.home-particles-toggle:hover, .home-particles-toggle:focus-visible { border-color: var(--line-strong); color: var(--mint); }
+@media (max-width: 760px) { .home-particles-toggle { right: 12px; bottom: 12px; } }
+@media (prefers-reduced-motion: reduce) { .home-particles__canvas { transition: none; } .home-particles-toggle { display: none; } }

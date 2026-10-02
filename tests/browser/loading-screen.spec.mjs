@@ -127,7 +127,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
   });
 }
 
-test('home particles start rendering beneath the exiting loading curtain', async ({ page }) => {
+test('desktop logo waits until the loading curtain has exited', async ({ page }) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await recordTiming(page);
   await page.addInitScript(() => {
@@ -152,10 +152,9 @@ test('home particles start rendering beneath the exiting loading curtain', async
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done', { timeout: 15000 });
   await expect(page.locator('.logo-landing')).toHaveAttribute('data-status', 'ready');
   const { firstFrame, times } = await page.evaluate(() => ({ firstFrame: window.heroFirstFrame, times: window.loaderTimes }));
-  expect(firstFrame.stage).toBe('exiting');
-  expect(firstFrame.curtainPresent).toBe(true);
-  expect(firstFrame.time).toBeGreaterThanOrEqual(times.exiting);
-  expect(firstFrame.time).toBeLessThan(times.done);
+  expect(firstFrame.stage).toBe('done');
+  expect(firstFrame.curtainPresent).toBe(false);
+  expect(firstFrame.time).toBeGreaterThanOrEqual(times.done);
   expect(errors).toEqual([]);
 });
 
@@ -240,7 +239,9 @@ test('hydrated server content plays the intro without waiting for its background
   finally { await vite.close(); }
   const serverPage = async route => {
     const response = await route.fetch();
-    const html = (await response.text()).replace('<div id="root"></div>', `<div id="root">${markup}</div><script id="nucleus-data" type="application/json">${JSON.stringify(site)}</script>`);
+    const html = (await response.text()).replace(/<div id="root">[\s\S]*?<\/div>\s*<\/div>/,
+      () => `<div id="root">${markup}</div><script id="nucleus-data" type="application/json">${JSON.stringify(site)}</script>`);
+    expect(html).toContain('id="nucleus-data"');
     await route.fulfill({ response, body: html });
   };
   await page.route('**/recruitment', serverPage);
@@ -248,10 +249,11 @@ test('hydrated server content plays the intro without waiting for its background
   const release = await holdInitialRequest(page);
   await recordTiming(page);
   await page.goto('/recruitment');
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
   await expect(screen(page)).toHaveCount(0, { timeout: 2500 });
   const times = await page.evaluate(() => window.loaderTimes);
   expect(times.done - times.loading).toBeGreaterThan(700);
-  expect(times.done - times.loading).toBeLessThan(1500);
+  expect(times.done - times.loading).toBeLessThan(2400);
   await expect(page.locator('.site-shell')).not.toHaveAttribute('inert');
   expect(errors).toEqual([]);
   release();

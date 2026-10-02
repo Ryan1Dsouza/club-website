@@ -88,7 +88,7 @@ export function createVerticalLogo() {
   // Only sharp feature edges survive; flat cap triangles and shallow curve seams do not.
   const edges = new THREE.EdgesGeometry(geometry, 20);
   const neon = new THREE.LineBasicMaterial({
-    color: new THREE.Color('#79ffa0').multiplyScalar(3),
+    color: new THREE.Color('#79ffa0').multiplyScalar(2.5),
     depthWrite: false,
   });
   const outline = new THREE.LineSegments(edges, neon);

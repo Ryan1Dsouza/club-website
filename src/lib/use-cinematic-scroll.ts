@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import Lenis from '@studio-freight/lenis';
 
-/** Gentle desktop wheel movement for the homepage's scroll-driven scenes. */
-export function useCinematicScroll(enabled: boolean) {
+/** Smooth wheel input while keeping touch scrolling on the browser compositor. */
+export function useCinematicScroll(enabled: boolean, syncScenes = false) {
   useEffect(() => {
     if (!enabled) return;
     // ScrollTrigger temporarily repositions the document when measuring scenes.
@@ -14,7 +14,7 @@ export function useCinematicScroll(enabled: boolean) {
     let disposed = false;
     let stopTracking: (() => void) | undefined;
 
-    void import('./scroll-motion').then(({ ScrollTrigger }) => {
+    if (syncScenes) void import('./scroll-motion').then(({ ScrollTrigger }) => {
       if (disposed) return;
       // Rebuilding all scenes can clear ScrollTrigger's saved scroll position.
       // Preserve the reader's place through motion and viewport media changes.
@@ -47,7 +47,9 @@ export function useCinematicScroll(enabled: boolean) {
     const tick = (time: number) => {
       frame = 0;
       // A virtual clock prevents an idle tab's first wheel input from jumping.
-      animationTime += lastTick ? Math.min(32, time - lastTick) : 16;
+      // Use elapsed time on slow frames too, so a busy GPU cannot stretch the
+      // scroll duration. Only an idle wake/background pause needs a short step.
+      animationTime += lastTick ? Math.min(250, time - lastTick) : 1000 / 60;
       lastTick = time;
       lenis?.raf(animationTime);
       if (lenis?.isScrolling) frame = requestAnimationFrame(tick);
@@ -63,9 +65,9 @@ export function useCinematicScroll(enabled: boolean) {
       // eliminating micro-stutters caused by WebGL frame drops on the team page.
       lenis = new Lenis({
         smoothWheel: true,
-        syncTouch: true,
-        wheelMultiplier: 0.7,
-        duration: 1.2,
+        syncTouch: false,
+        wheelMultiplier: 1,
+        duration: .6,
         easing: (t: number) => 1 - Math.pow(1 - t, 4), // ease-out quartic
       });
       animationTime = 0;
@@ -77,12 +79,18 @@ export function useCinematicScroll(enabled: boolean) {
     const onKeyDown = (event: KeyboardEvent) => {
       if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Tab'].includes(event.key)) settle();
     };
+    const onVisibilityChange = () => {
+      cancelAnimationFrame(frame); frame = 0; lastTick = 0;
+      if (document.hidden) settle();
+      else wake();
+    };
     sync();
     preference.addEventListener('change', sync);
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('pointerdown', settle);
     window.addEventListener('focusin', settle);
     window.addEventListener('wheel', wake, { passive: true });
+    document.addEventListener('visibilitychange', onVisibilityChange);
     return () => {
       disposed = true;
       stopTracking?.();
@@ -93,6 +101,7 @@ export function useCinematicScroll(enabled: boolean) {
       window.removeEventListener('pointerdown', settle);
       window.removeEventListener('focusin', settle);
       window.removeEventListener('wheel', wake);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [enabled]);
+  }, [enabled, syncScenes]);
 }

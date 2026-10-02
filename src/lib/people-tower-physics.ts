@@ -43,6 +43,7 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
   // Kept OUT of the world during the wait so they are never rendered.
   type PendingReturn = { delay: number; fromPos: Vec3; fromQuat: CannonQuat; toPos: Vec3; toQuat: CannonQuat };
   const pendingReturns = new Map<number, PendingReturn>();
+  const storyOrigins = new Map<number, { position: Vec3; quaternion: CannonQuat }>();
 
   const wake = () => bodies.forEach(body => { if (body.world) body.wakeUp(); });
   // Story order removes the top first. Losing a top block does not require
@@ -105,6 +106,7 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
     }
     const body = bodies[index];
     if (!body) return;
+    const returning = pendingReturns.has(index) || (body as any).transition?.returning;
     
     // If the block was pending a staggered return, cancel it and force it back into the world immediately.
     // This happens if we reverse scroll quickly and this block becomes the active UI block.
@@ -113,17 +115,32 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
       if (!body.world) world.addBody(body);
     }
     
-    // Force the body to its ideal slot position so the UI cinematic (which uses body.position as the source) starts from the correct tower slot, not an off-screen position.
-    const slot = slots[index];
-    body.position.set(...slot.position);
-    body.quaternion.setFromEuler(0, slot.yaw, 0);
-
     if (!body.world) return;
+    if (returning) {
+      // Re-enter the same flight when reversing across a member boundary.
+      // A queued tower return must not replace a flung block's starting pose.
+      const origin = storyOrigins.get(index);
+      if (origin) { body.position.copy(origin.position); body.quaternion.copy(origin.quaternion); }
+      else {
+        const slot = slots[index];
+        body.position.set(...slot.position); body.quaternion.setFromEuler(0, slot.yaw, 0);
+      }
+    } else {
+      // Hand off exactly the pose the visitor last saw, including a flung block's
+      // rotation or an unfinished rebuild. The solver can be one step ahead.
+      body.position.copy(body.interpolatedPosition); body.quaternion.copy(body.interpolatedQuaternion);
+      storyOrigins.set(index, { position: body.position.clone(), quaternion: body.quaternion.clone() });
+    }
+    (body as any).transition = null;
+    body.previousPosition.copy(body.position); body.interpolatedPosition.copy(body.position);
+    body.previousQuaternion.copy(body.quaternion); body.interpolatedQuaternion.copy(body.quaternion);
+    body.velocity.setZero(); body.angularVelocity.setZero(); body.force.setZero(); body.torque.setZero();
     story = index;
     storyShape.halfExtents.set(BLOCK_SIZE[0] / 2, BLOCK_SIZE[1] / 2, BLOCK_SIZE[2] / 2);
     storyShape.updateConvexPolyhedronRepresentation(); storyShape.updateBoundingSphereRadius();
-    body.type = Body.KINEMATIC; body.mass = 0;
-    body.removeShape(shape); body.addShape(storyShape); body.sleep();
+    body.type = Body.KINEMATIC; body.mass = 0; body.collisionFilterMask = 0;
+    body.removeShape(shape); body.addShape(storyShape); body.updateMassProperties(); body.sleep();
+    body.aabbNeedsUpdate = true; world.broadphase.dirty = true;
   }
   function placeStory(position: Point, quaternion: Rotation, size: Point, isFlying = true) {
     const body = bodies[story];
@@ -184,7 +201,7 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
     body.aabbNeedsUpdate = true; world.broadphase.dirty = true;
   }
   function reset(completed = 0) {
-    release(); story = -1; accumulator = 0; pendingReturns.clear();
+    release(); story = -1; accumulator = 0; pendingReturns.clear(); storyOrigins.clear();
     bodies.forEach((body, index) => {
       const slot = slots[index];
       const oldPos = body.interpolatedPosition.clone();
@@ -347,7 +364,7 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
   }
   function dispose() {
     if (disposed) return;
-    release(); disposed = true; pendingReturns.clear();
+    release(); disposed = true; pendingReturns.clear(); storyOrigins.clear();
     [...world.bodies].forEach(body => world.removeBody(body));
     world.contacts.length = 0; world.frictionEquations.length = 0;
   }

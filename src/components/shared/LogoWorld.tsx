@@ -21,6 +21,7 @@ export interface LogoWorldProps {
   command: { serial: number; station: number | null; resume?: boolean; driveKey?: string; travel?: boolean };
   onReady: () => void;
   onError: () => void;
+  onRecovering?: (recovering: boolean) => void;
   onSnapshot?: (snapshot: WorldSnapshot) => void;
   onArrive: (index: number) => void;
   onBoard: (index: number) => void;

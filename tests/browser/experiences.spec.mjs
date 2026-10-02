@@ -155,9 +155,9 @@ test('continuing after docking preserves a forward key that is still held', asyn
   await page.keyboard.up('w');
 });
 
-test('desktop publishes a photo folder without replacing the canvas, and another visitor sees it', async ({ page, browser }, info) => {
-  // Two WebGL visitors plus the frame sample need room on software-rendered CI.
-  test.setTimeout(120_000);
+test('desktop publishes a photo folder, another visitor rides to its station and resumes after switching tabs', async ({ page, browser }, info) => {
+  // Include actual travel to the new platform on software-rendered CI.
+  test.setTimeout(180_000);
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await connect(page); await ready(page);
@@ -185,6 +185,8 @@ test('desktop publishes a photo folder without replacing the canvas, and another
   await expect(page.getByText('1 unsupported file skipped.')).toBeVisible();
   await page.getByRole('button', { name: 'Publish event & add station', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('is published'); await expect(page.locator('[data-stop-kind=event]')).toHaveCount(4);
+  await expect(page.getByRole('status')).toContainText('Station 04');
+  await expect(page.getByRole('navigation', { name: 'Ride route map' }).getByRole('button', { name: /Travel to station 04/ })).toHaveCount(1);
   expect(await page.evaluate(() => window.testCanvas === document.querySelector('.nx-world canvas'))).toBe(true);
   await page.getByRole('button', { name: 'Open holographic map' }).click(); await page.waitForTimeout(1800);
   await page.screenshot({ path: info.outputPath('desktop-map.png') });
@@ -195,16 +197,44 @@ test('desktop publishes a photo folder without replacing the canvas, and another
   console.log('Desktop map frame sample:', JSON.stringify(stats));
   const visitor = await browser.newContext({ baseURL: info.project.use.baseURL }), otherPage = await visitor.newPage();
   await connect(otherPage); await ready(otherPage); await expect(otherPage.locator('[data-stop-kind=event]')).toHaveCount(4);
-  await otherPage.getByRole('button', { name: 'Events 4', exact: true }).click();
-  await otherPage.getByRole('dialog', { name: 'Event stations' }).getByRole('button', { name: /A shared photo workshop/ }).click();
+  const world = otherPage.locator('.nx-world');
+  await otherPage.evaluate(() => { window.visitCanvas = document.querySelector('.nx-world canvas'); });
+  await otherPage.getByRole('button', { name: /Travel to station 04/ }).click();
+  await expect(world).toHaveAttribute('data-travel-target', '3');
+  await expect(otherPage.getByRole('dialog', { name: 'A shared photo workshop' })).toBeVisible({ timeout: 100_000 });
+  await expect(world).toHaveAttribute('data-phase', 'stopped');
   await expect(otherPage.getByRole('heading', { name: 'A shared photo workshop' })).toBeVisible();
-  await expect.poll(() => otherPage.locator('.nx-event-gallery img').evaluate(img => img.naturalWidth)).toBe(100);
+  await expect(otherPage.locator('.station-book')).toHaveAttribute('data-station-number', '04');
+  await expect.poll(() => otherPage.locator('.station-book__cover-art img').evaluate(img => img.naturalWidth)).toBe(100);
+  await otherPage.getByRole('button', { name: 'Next book page' }).click();
+  await expect(otherPage.locator('.station-book__panel')).toHaveCount(1);
   await expect(otherPage.getByRole('link', { name: 'View photo album' })).toHaveAttribute('href', 'https://drive.google.com/drive/folders/workshop');
   await expect(otherPage.getByRole('link', { name: 'Register for event' })).toHaveAttribute('href', 'https://example.com/register');
+  const parked = await world.getAttribute('data-distance');
+  await otherPage.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+    window.dispatchEvent(new Event('blur'));
+  });
+  const refreshed = otherPage.waitForResponse('**/api/site');
+  await otherPage.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, value: false });
+    document.dispatchEvent(new Event('visibilitychange'));
+    window.dispatchEvent(new Event('focus'));
+  });
+  await refreshed;
+  await expect(otherPage.locator('.station-book')).toHaveAttribute('data-book-page', '2');
+  await expect(world).toHaveAttribute('data-distance', parked);
+  expect(await otherPage.evaluate(() => window.visitCanvas === document.querySelector('.nx-world canvas'))).toBe(true);
+  await otherPage.getByRole('button', { name: 'Continue ride', exact: true }).click();
+  await expect(world).toHaveAttribute('data-drive-ready', 'true');
+  await otherPage.keyboard.down('w');
+  await expect.poll(() => world.getAttribute('data-distance')).not.toBe(parked);
+  await otherPage.keyboard.up('w');
   expect(errors).toEqual([]); await visitor.close();
 });
 
-for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 844, height: 390 }, { width: 1024, height: 1366 }]) {
+for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 640, height: 360 }, { width: 768, height: 1024 }, { width: 844, height: 390 }, { width: 1024, height: 1366 }]) {
   test(`compact ride controls and camera fit ${viewport.width}x${viewport.height}`, async ({ browser }, info) => {
     const compact = viewport.width <= 768 || viewport.height <= 500;
     const context = await browser.newContext({ baseURL: info.project.use.baseURL, viewport, deviceScaleFactor: 3, isMobile: true, hasTouch: true });

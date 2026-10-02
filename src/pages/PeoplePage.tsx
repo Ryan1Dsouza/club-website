@@ -20,6 +20,7 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     if (!element || !section || !sorted.length) { setStatus('still'); return; }
     const media = matchMedia('(prefers-reduced-motion: reduce)');
     let disposed = false, generation = 0;
+    let idle = 0, timer = 0;
     let cleanup: (() => void) | undefined;
     function stop() {
       controller.current = null;
@@ -27,6 +28,8 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     }
     async function start() {
       if (disposed) return;
+      if (idle) { cancelIdleCallback(idle); idle = 0; }
+      window.clearTimeout(timer);
       const current = ++generation;
       stop(); setActive(-1);
       if (media.matches) { setStatus('still'); return; }
@@ -38,20 +41,29 @@ export default function PeoplePage({ members }: { members: Member[] }) {
           onMember: index => { if (!disposed && current === generation) setActive(index); },
           onError: () => {
             if (!disposed && current === generation) {
+              generation++;
               stop(); setStatus('fallback'); setActive(-1);
             }
           },
         });
+        // Navigation or a motion preference change may finish while the GPU is
+        // compiling. Release that obsolete scene instead of reviving it.
+        if (disposed || current !== generation) { tower.dispose(); return; }
         cleanup = tower.dispose; controller.current = tower;
         setStatus('ready');
       } catch {
         if (!disposed && current === generation) { stop(); setStatus('fallback'); setActive(-1); }
       }
     }
-    if (typeof requestIdleCallback !== 'undefined') requestIdleCallback(() => start(), { timeout: 2000 });
-    else window.setTimeout(() => start(), 100);
+    if (typeof requestIdleCallback !== 'undefined') idle = requestIdleCallback(() => void start(), { timeout: 2000 });
+    else timer = window.setTimeout(() => void start(), 100);
     media.addEventListener('change', start);
-    return () => { disposed = true; generation++; media.removeEventListener('change', start); stop(); };
+    return () => {
+      disposed = true; generation++;
+      if (idle) cancelIdleCallback(idle);
+      window.clearTimeout(timer);
+      media.removeEventListener('change', start); stop();
+    };
     // Equivalent API refreshes should preserve the current scene.
   }, [memberKey]);
   function revealMember(index: number) {
@@ -73,7 +85,10 @@ export default function PeoplePage({ members }: { members: Member[] }) {
         <div className="people-tower__world" ref={host} aria-hidden="true" />
         <div className="people-tower__topline"><span className="eyebrow">02 / The people</span></div>
         <div className="people-tower__finish" aria-hidden="true"><p>The<br /><em>whole team.</em></p><span>Meet everyone <ArrowDown size={15} /></span></div>
-        <p className="people-tower__hint" hidden={status !== 'ready'}>Click a block to pull it out. Drag to play. Scroll to meet the team.</p>
+        <p className="people-tower__hint" hidden={status !== 'ready'}>
+          <span className="people-tower__hint-mouse">Click a block to pull it out. Drag to play. Scroll to meet the team.</span>
+          <span className="people-tower__hint-touch">Tap a block to pull it out. Drag sideways to play. Swipe up to meet the team.</span>
+        </p>
         <div className="people-tower__hud" hidden={status !== 'ready'}>
           <div className="people-tower__counter"><span>{active < 0 ? '—' : String(active + 1).padStart(2, '0')}</span><span>/ {String(sorted.length).padStart(2, '0')}</span></div>
 

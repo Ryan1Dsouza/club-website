@@ -152,6 +152,58 @@ test('click pulls and pointer constraints move dynamic blocks, disturb neighbour
   assert.equal(physics.world.bodies.length, 0); assert.equal(physics.world.constraints.length, 0);
 });
 
+test('scroll reveals take over the visible pose of flung blocks, including between physics steps', () => {
+  for (const simplified of [false, true]) {
+    const slots = fixtureSlots(), physics = createTowerPhysics(slots, simplified);
+    try {
+      physics.pull(0); simulate(physics, 2, 1 / 144);
+      const body = physics.bodies[0];
+      assert.ok(body.position.distanceTo(new Vec3(...slots[0].position)) > 2, 'the block has left its tower slot');
+      const position = body.interpolatedPosition.clone(), rotation = body.interpolatedQuaternion.clone();
+      physics.beginStory(0);
+      assert.deepEqual(body.position.toArray(), position.toArray());
+      assert.deepEqual(body.quaternion.toArray(), rotation.toArray());
+      assert.equal(physics.world.constraints.length, 0);
+      assert.equal(body.type, Body.KINEMATIC);
+      assert.equal(body.velocity.length() + body.angularVelocity.length(), 0);
+      physics.step(1 / 60);
+      assert.deepEqual(body.interpolatedPosition.toArray(), position.toArray());
+      assert.deepEqual(body.interpolatedQuaternion.toArray(), rotation.toArray());
+    } finally { physics.dispose(); }
+  }
+});
+
+test('revisiting a flung member after the next reveal preserves the original flight path', () => {
+  const slots = fixtureSlots(), physics = createTowerPhysics(slots);
+  try {
+    physics.pull(0); simulate(physics, 2); physics.beginStory(0);
+    const body = physics.bodies[0], position = body.position.clone(), rotation = body.quaternion.clone();
+    assert.ok(position.distanceTo(new Vec3(...slots[0].position)) > 2);
+    physics.placeStory(new Vec3(7, 4, 8), new Quaternion(), new Vec3(5, 3, .16), false);
+    physics.remove(0); physics.beginStory(1);
+    physics.returnBody(0); physics.beginStory(0);
+    assert.deepEqual(body.position.toArray(), position.toArray());
+    assert.deepEqual(body.quaternion.toArray(), rotation.toArray());
+    simulate(physics, 2);
+    assert.deepEqual(body.interpolatedPosition.toArray(), position.toArray(), 'a cancelled return cannot overwrite the reveal');
+    physics.reset(); simulate(physics, .5);
+    physics.remove(0); physics.returnBody(0); physics.beginStory(0);
+    assert.deepEqual(body.position.toArray(), [...slots[0].position], 'rebuilding clears the old flung origin');
+  } finally { physics.dispose(); }
+});
+
+test('a reveal can take over an unfinished rebuild without its old animation moving the source', () => {
+  const physics = createTowerPhysics(fixtureSlots());
+  try {
+    physics.pull(0); simulate(physics, 2); physics.reset(); physics.step(.1);
+    const body = physics.bodies[0], position = body.interpolatedPosition.clone(), rotation = body.interpolatedQuaternion.clone();
+    assert.ok(body.position.distanceTo(position) > .1, 'the rebuild is visibly between poses');
+    physics.beginStory(0); simulate(physics, .5);
+    assert.deepEqual(body.interpolatedPosition.toArray(), position.toArray());
+    assert.deepEqual(body.interpolatedQuaternion.toArray(), rotation.toArray());
+  } finally { physics.dispose(); }
+});
+
 test('fixed steps preserve physics across frame rates and cap work after long pauses', () => {
   const slow = createTowerPhysics(fixtureSlots()), fast = createTowerPhysics(fixtureSlots());
   try {

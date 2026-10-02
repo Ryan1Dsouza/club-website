@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { ArrowUpRight, MessageCircle } from 'lucide-react';
 import { TextReveal } from '../ui/text-reveal';
+import { clampProgress, observeScroll } from '../../lib/scroll-effects';
 import './domain-parallax.css';
 
 export type DomainItem = {
@@ -18,29 +19,20 @@ export default function DomainParallax({ domains }: { domains: DomainItem[] }) {
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
-    let disposed = false;
-    let cleanup: (() => void) | undefined;
-    void import('../../lib/scroll-motion').then(({ gsap, ScrollTrigger }) => {
-      if (disposed) return;
-      const media = gsap.matchMedia();
-      cleanup = () => media.revert();
-      media.add({ motion: '(prefers-reduced-motion: no-preference)', compact: '(max-width: 760px)' }, context => {
-        if (!context.conditions?.motion) return;
-        section.dataset.motion = 'true';
-        const compact = context.conditions.compact;
-        const surfaces = Array.from(section.querySelectorAll<HTMLElement>('.dp-panel__inner'));
-        surfaces.forEach(surface => {
-          // Finish the entrance near the bottom edge so reading never waits on a scrub.
-          gsap.fromTo(surface, { y: compact ? 20 : 38, scale: .94, opacity: 0 }, {
-            y: 0, scale: 1, opacity: 1, ease: 'none',
-            scrollTrigger: { trigger: surface.parentElement, start: 'top 100%', end: 'top 86%', scrub: true },
-          });
-        });
-        ScrollTrigger.refresh(true);
-        return () => { delete section.dataset.motion; };
-      }, section);
-    }).catch(() => { /* Static content remains readable if the enhancement cannot load. */ });
-    return () => { disposed = true; cleanup?.(); };
+    const cleanups = Array.from(section.querySelectorAll<HTMLElement>('.dp-panel__inner')).map(surface => {
+      let previous = '';
+      return observeScroll(surface.parentElement!, ({ top, viewport, reduced }) => {
+        if (section.dataset.motion !== String(!reduced)) section.dataset.motion = String(!reduced);
+        const progress = reduced ? 1 : clampProgress((viewport - top) / (viewport * .14));
+        const lift = matchMedia('(max-width: 760px)').matches ? 20 : 38;
+        const key = `${progress}:${lift}`;
+        if (previous === key) return;
+        previous = key;
+        surface.style.opacity = String(progress);
+        surface.style.transform = `translateY(${(1 - progress) * lift}px) scale(${.94 + .06 * progress})`;
+      });
+    });
+    return () => cleanups.forEach(cleanup => cleanup());
   }, []);
 
   return <section className="dp-section" ref={sectionRef} id="domains" aria-labelledby="domains-title">

@@ -258,7 +258,7 @@ test('all four navigation links change pages as soon as the reverse slide clears
 test.describe('touch navigation', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
-  test('preloads the people scene during the exit and navigates when the bands clear', async ({ page }) => {
+  test('touch navigation loads the people scene after arriving and navigates when the bands clear', async ({ page }) => {
     await page.goto('/recruitment');
     await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
     await toggle(page).tap();
@@ -266,10 +266,10 @@ test.describe('touch navigation', () => {
     await recordMenuFrames(page);
     const sceneRequest = page.waitForRequest(/\/src\/lib\/people-tower\.ts(?:\?|$)/);
     await menu(page).getByRole('link', { name: 'The people', exact: true }).tap();
-    await sceneRequest;
     await expect(page).toHaveURL(/\/recruitment$/);
     await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
     await expect(page).toHaveURL(/\/team$/);
+    await sceneRequest;
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
     const frames = await recordedMenuFrames(page);
     const cleared = frames.findIndex(frame => frame.bands.every(x => x >= 389));
