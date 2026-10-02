@@ -1,3 +1,7 @@
-// Add member biographies here; the current team is shown until this list is populated.
-// Entries use name, role, image, tagline, and socials, like core_team_info.
-export const members_info = [];
+export const members_info = [
+    { name: "Ryan D'souza", role: "Member", image: "/team_images/members/ryan.avif", tagline: "turning coffee into algorithms", socials: { linkedin: "https://www.linkedin.com/in/poorvik-kuthyala", github: "https://github.com/poorvikkg", leetcode: "https://leetcode.com/u/Poorvikkg/", gfg: "https://share.google/1Ql7r13HdAmNspLeY" } },
+    { name: "Oswin Gerard Mnezes", role: "Member", image: "/team_images/members/oswin.avif", tagline: "Running on caffeine, GPUs, and La Pasión.", socials: { linkedin: "https://www.linkedin.com/in/dinol-castelino-57053631a", github: "https://GitHub.com/Dinol-ino", leetcode: "#" } },
+    { name: "Elvin Machado", role: "Member", image: "/team_images/members/elvin.avif", tagline: "Keeping the team in sync while ideas find their rhythm", socials: { linkedin: "https://www.linkedin.com/in/joylin-mathias", github: "https://github.com/joylinmhs", leetcode: "#" } },
+    { name: "Manvith", role: "Member", image: "/team_images/members/manvith.avif", tagline: "Keeping the team in sync while ideas find their rhythm", socials: { linkedin: "https://www.linkedin.com/in/joylin-mathias", github: "https://github.com/joylinmhs", leetcode: "#" } },
+    { name: "Aidon Patrao", role: "Member", image: "/team_images/members/aidon.avif", tagline: "Keeping the team in sync while ideas find their rhythm", socials: { linkedin: "https://www.linkedin.com/in/joylin-mathias", github: "https://github.com/joylinmhs", leetcode: "#" } },
+];
