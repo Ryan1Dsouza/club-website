@@ -1,0 +1,22 @@
+HTTP/1.1 202 Accepted
+Content-Type: text/html; charset=UTF-8
+Content-Length: 0
+Connection: keep-alive
+Server: awselb/2.0
+Date: Fri, 02 Oct 2026 02:43:29 GMT
+Access-Control-Expose-Headers: x-amzn-waf-action
+x-amzn-waf-action: challenge
+Cache-Control: no-store, max-age=0
+Access-Control-Allow-Origin: *
+Access-Control-Max-Age: 86400
+Access-Control-Allow-Methods: OPTIONS,GET,POST
+X-Cache: Miss from cloudfront
+Via: 1.1 b95cbbc218b9125be2beb7f8546fa4d8.cloudfront.net (CloudFront)
+X-Amz-Cf-Pop: CDG50-P5
+X-Amz-Cf-Id: mP_SL0TrmLXzvNaeRUzDX-vULpDjOUagYffDsx2vvrRwkGH3vWtJSQ==
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+

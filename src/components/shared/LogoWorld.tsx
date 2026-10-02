@@ -21,10 +21,10 @@ export interface LogoWorldProps {
   command: { serial: number; station: number | null; resume?: boolean; driveKey?: string; travel?: boolean };
   onReady: () => void;
   onError: () => void;
+  onRecovering?: (recovering: boolean) => void;
   onSnapshot?: (snapshot: WorldSnapshot) => void;
   onArrive: (index: number) => void;
   onBoard: (index: number) => void;
-  onAnticipate: (station: number | null, secondsToArrival: number, distance: number) => void;
   onLayout?: (available: boolean[], map: RideMapLayout) => void;
 }
 
@@ -34,8 +34,14 @@ export default function LogoWorld(props: LogoWorldProps) {
   live.current = props;
   useEffect(() => {
     if (!host.current) return;
-    try { return createEventWorld(host.current, () => live.current); }
-    catch (error) { console.error('Unable to create the Nucleus world:', error); live.current.onError(); }
+    let dispose: (() => void) | undefined;
+    // Let the shell paint and cancel StrictMode's discarded mount before building WebGL.
+    const frame = requestAnimationFrame(() => {
+      if (!host.current) return;
+      try { dispose = createEventWorld(host.current, () => live.current); }
+      catch (error) { console.error('Unable to create the Nucleus world:', error); live.current.onError(); }
+    });
+    return () => { cancelAnimationFrame(frame); dispose?.(); };
   }, []);
   return <div ref={host} className="nx-world" tabIndex={0} role="group"
     aria-label="Nucleus roller coaster. W or D to accelerate, S or A to brake and reverse. Hold Shift to boost. Drag to look. E opens a nearby station."
@@ -46,5 +52,16 @@ export default function LogoWorld(props: LogoWorldProps) {
         <span>{station.number}</span><small>{station.name}</small>
       </button>)}
     </div>
+    {!props.reduced && <div className="nx-world-cards">
+      {props.stations.map(station => <aside key={station.id} className="nx-teaser" data-world-card={station.id} aria-hidden="true">
+        <svg className="nx-approach-arc" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" /><circle cx="22" cy="22" r="19" pathLength="1" strokeDasharray="1" /></svg>
+        <div><span className="nx-event-category">{station.event?.category || 'Preview station'} · {station.number}</span>
+          <h2>{station.name}</h2>
+          {station.event?.startsAt && <p>{new Date(station.event.startsAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })}</p>}
+          {station.event?.location && <p>{station.event.location}</p>}
+          <small>Arriving at station</small>
+        </div>
+      </aside>)}
+    </div>}
   </div>;
 }

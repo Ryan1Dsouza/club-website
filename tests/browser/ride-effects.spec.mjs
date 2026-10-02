@@ -24,7 +24,8 @@ test('depth blur preserves near edges, bloom lifts highlights, and quality chang
     const sample = () => {
       const gl = renderer.getContext(), pixels = new Uint8Array(256 * 128 * 4);
       gl.readPixels(0, 0, 256, 128, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-      return { near: pixels[(64 * 256 + 109) * 4], far: pixels[(64 * 256 + 164) * 4], glow: pixels[(64 * 256 + 130) * 4] };
+      return { near: pixels[(64 * 256 + 109) * 4], far: pixels[(64 * 256 + 164) * 4], glow: pixels[(64 * 256 + 130) * 4],
+        innerGlow: pixels[(64 * 256 + 129) * 4], surface: pixels[(64 * 256 + 101) * 4] };
     };
     try {
       renderer.render(scene, camera);
@@ -35,11 +36,16 @@ test('depth blur preserves near edges, bloom lifts highlights, and quality chang
       const after = sample(), image = renderer.domElement.toDataURL('image/png');
       const depthOfField = pipeline.depthOfField;
       pipeline.resize(256, 128, 1, false); pipeline.render(scene, camera, 0, false, 0);
-      const lowTier = { enabled: pipeline.enabled, depthOfField: pipeline.depthOfField };
+      const lowTier = { enabled: pipeline.enabled, depthOfField: pipeline.depthOfField, textures: renderer.info.memory.textures, pixels: sample() };
+      // Upgrading rebuilds the depth attachment; downgrading releases it again.
+      pipeline.resize(256, 128, 2, false); pipeline.render(scene, camera, 0, false, 0);
+      const restored = { textures: renderer.info.memory.textures, pixels: sample() };
+      pipeline.resize(256, 128, 1, false); pipeline.render(scene, camera, 0, false, 0);
+      const mediumTextures = renderer.info.memory.textures;
       pipeline.resize(256, 128, 0, false);
       const disabled = { enabled: pipeline.enabled, textures: renderer.info.memory.textures };
       pipeline.resize(256, 128, 2, true);
-      return { supported: true, before, after, image, depthOfField, lowTier, disabled, reducedEnabled: pipeline.enabled };
+      return { supported: true, before, after, image, depthOfField, lowTier, restored, mediumTextures, disabled, reducedEnabled: pipeline.enabled };
     } finally {
       pipeline.dispose(); geometry.dispose(); grey.dispose(); bright.dispose(); renderer.dispose(); renderer.forceContextLoss();
     }
@@ -50,7 +56,14 @@ test('depth blur preserves near edges, bloom lifts highlights, and quality chang
   expect(result.after.far).toBeGreaterThan(result.before.far + 3);
   expect(result.after.glow).toBeGreaterThan(result.before.glow + 3);
   expect(result.depthOfField).toBe(true);
-  expect(result.lowTier).toEqual({ enabled: true, depthOfField: false });
+  expect(result.lowTier).toMatchObject({ enabled: true, depthOfField: false, textures: 1 });
+  expect(result.lowTier.pixels.near).toBeLessThanOrEqual(result.before.near + 2);
+  expect(result.lowTier.pixels.far).toBeLessThanOrEqual(result.before.far + 2);
+  // Medium quality keeps a tighter halo; the lit surface must survive the buffer change.
+  expect(result.lowTier.pixels.innerGlow).toBeGreaterThan(result.before.innerGlow + 3);
+  expect(Math.abs(result.lowTier.pixels.surface - result.before.surface)).toBeLessThanOrEqual(2);
+  expect(result.restored).toEqual({ textures: 2, pixels: result.after });
+  expect(result.mediumTextures).toBe(1);
   expect(result.disabled).toEqual({ enabled: false, textures: 0 });
   expect(result.reducedEnabled).toBe(false);
   expect(errors).toEqual([]);

@@ -2,6 +2,16 @@ import layout from './event-logo.json' with { type: 'json' };
 import type { ClubEvent } from '../types';
 
 export type Point = { x: number; z: number };
+export type WorldPoint = Point & { y: number };
+
+/** Fixed above the station's side terrace, independent of camera and travel direction. */
+export function stationCardAnchor(point: WorldPoint, side: WorldPoint, up: WorldPoint): WorldPoint {
+  return {
+    x: point.x + side.x * 3.3 + up.x * 2.8,
+    y: point.y + side.y * 3.3 + up.y * 2.8,
+    z: point.z + side.z * 3.3 + up.z * 2.8,
+  };
+}
 export type MoveInput = { x: number; y: number };
 export type WorldMode = 'overview' | 'explore';
 export type WorldSnapshot = Point & { yaw: number; nearest: number | null; distance: number; moving: boolean };

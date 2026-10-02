@@ -13,27 +13,14 @@ function makeProfile() {
   const element = document.createElement('div');
   element.className = 'tower-profile';
   // Member values are always assigned with textContent.
-  element.innerHTML = `
-    <div class="tower-profile__meta"><span>NUCLEUS / SJEC</span><span data-profile-index></span></div>
-    <div class="tower-profile__body">
-      <div class="tower-profile__copy">
-        <p class="tower-profile__role"></p>
-        <div class="tower-profile__name"><span></span><span></span></div>
-        <p class="tower-profile__tagline"></p>
-      </div>
-      <div class="tower-profile__portrait">
-        <span class="tower-profile__monogram"></span>
-        <img alt="" decoding="async" />
-      </div>
-    </div>
-    <div class="tower-profile__footer"><span>The people / Nucleus</span><span>Keep scrolling ↗</span></div>`;
+  element.innerHTML = '<div class="tower-profile__meta"><span>NUCLEUS / SJEC</span><span data-profile-index></span></div><div class="tower-profile__monogram"></div><img class="tower-profile__photo" loading="lazy" src="" alt="" /><div class="tower-profile__photo-fade"></div><span class="tower-profile__cross">+</span><div class="tower-profile__copy"><p class="tower-profile__role"></p><div class="tower-profile__name"><span></span><span></span></div></div><div class="tower-profile__footer"><span>The people / Nucleus</span><span>Keep scrolling ↗</span></div>';
   return element;
 }
 
 /** A sleeping rigid-body tower, two instanced draws, and one crisp DOM profile. */
-export function createPeopleTower(host: HTMLElement, section: HTMLElement, members: Member[], callbacks: Callbacks) {
+export async function createPeopleTower(host: HTMLElement, section: HTMLElement, members: Member[], callbacks: Callbacks) {
   const cleanups: (() => void)[] = [];
-  let disposed = false;
+  let disposed = false, compiled = false;
   function dispose() {
     if (disposed) return;
     disposed = true;
@@ -55,37 +42,53 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     renderer.shadowMap.autoUpdate = false;
     const css = new CSS3DRenderer(); css.domElement.className = 'people-tower__labels';
     cleanups.push(() => css.domElement.remove());
-    host.append(renderer.domElement, css.domElement);
     const scene = new THREE.Scene(), labels = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, 1, .1, 150);
     const slots = towerSlots(members.map(member => member.id)), layers = Math.ceil(members.length / 3);
-    const physics = createTowerPhysics(slots);
+    const physics = createTowerPhysics(slots, quality.simplified);
     cleanups.push(physics.dispose);
     const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const batch = createTowerBlocks(scene, members, Math.min(quality.maxTextureSize, renderer.capabilities.maxTextureSize), quality.simplified, anisotropy);
     cleanups.push(batch.dispose);
     const scenery = createTowerScenery(scene, physics.floorY, layers * LAYER_HEIGHT, quality.simplified);
     cleanups.push(scenery.dispose);
-    const profile = makeProfile(), profileObject = new CSS3DObject(profile); labels.add(profileObject);
-    cleanups.push(() => profileObject.removeFromParent());
-    const profileName = profile.querySelector('.tower-profile__name')!;
-    const firstName = profileName.children[0], lastName = profileName.children[1];
-    const profileRole = profile.querySelector('.tower-profile__role')!;
-    const monogram = profile.querySelector('.tower-profile__monogram')!;
-    const profileIndex = profile.querySelector('[data-profile-index]')!;
-    const portrait = profile.querySelector<HTMLElement>('.tower-profile__portrait')!;
-    const portraitImg = portrait.querySelector('img')!;
-    const profileTagline = profile.querySelector<HTMLElement>('.tower-profile__tagline')!;
-    const showPortrait = () => { portrait.dataset.loaded = 'true'; };
-    const hidePortrait = () => { portrait.dataset.loaded = 'false'; };
-    portraitImg.addEventListener('load', showPortrait);
-    portraitImg.addEventListener('error', hidePortrait);
-    cleanups.push(() => {
-      portraitImg.removeEventListener('load', showPortrait);
-      portraitImg.removeEventListener('error', hidePortrait);
+    const profiles = members.map((member, index) => {
+      const profile = makeProfile(), profileObject = new CSS3DObject(profile);
+      profileObject.visible = true; labels.add(profileObject);
+      
+      const parts = member.name.split(' ');
+      const palette = TOWER_PALETTES[index % TOWER_PALETTES.length];
+      profile.style.setProperty('--tower-paper', palette.paper); profile.style.setProperty('--tower-ink', palette.ink);
+      
+      const profileName = profile.querySelector('.tower-profile__name')!;
+      profileName.children[0].textContent = parts[0]; 
+      profileName.children[1].textContent = parts.slice(1).join(' ');
+      
+      profile.querySelector('.tower-profile__role')!.textContent = member.role; 
+      profile.querySelector('.tower-profile__monogram')!.textContent = member.initials;
+      
+      const photo = profile.querySelector('.tower-profile__photo') as HTMLImageElement;
+      if (member.image) { 
+        photo.dataset.loaded = 'false';
+        photo.onload = () => { photo.dataset.loaded = 'true'; };
+        photo.src = member.image; 
+      } else { 
+        photo.dataset.loaded = 'false';
+      }
+      
+      profile.querySelector('[data-profile-index]')!.textContent = `${String(index + 1).padStart(2, '0')} / ${String(members.length).padStart(2, '0')}`;
+      const longest = Math.max(parts[0].length, parts.slice(1).join(' ').length);
+      const fontSize = Math.min(100 * .225, 100 * .83 / (Math.max(5, longest) * .49)); // Initial font size calculation
+      profile.style.setProperty('--profile-name', `${fontSize}px`);
+      
+      return { profile, profileObject, photo };
     });
+    
+    cleanups.push(() => profiles.forEach(p => p.profileObject.removeFromParent()));
+
     const stage = host.parentElement!;
     let width = 1, height = 1, profileWidth = 1, profileHeight = 1;
+    let bufferWidth = 0, bufferHeight = 0, viewportResizeTimer = 0;
     let start = 0, range = 1, target = 0, progress = 0, frame = 0, previousTime = 0;
     let active = -2, storyRemoved = 0, visible = true, idleAngle = 0, lastInteraction = -Infinity;
     let matricesDirty = true, renderedProgress = -1, lastRenderTime = 0;
@@ -102,38 +105,11 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2(), dragPlane = new THREE.Plane(), dragPoint = new THREE.Vector3();
     let pointerId = -1, draggedIndex = -1, downX = 0, downY = 0, travelled = 0;
     cleanups.push(() => {
+      window.clearTimeout(viewportResizeTimer);
       cancelAnimationFrame(frame); releasePointer();
       section.style.removeProperty('--tower-intro'); section.style.removeProperty('--tower-progress'); section.style.removeProperty('--tower-outro');
       delete host.dataset.activeMember; delete host.dataset.dragging;
     });
-
-    function setProfile(index: number) {
-      const member = members[index], parts = member.name.split(' ');
-      const palette = TOWER_PALETTES[index % TOWER_PALETTES.length];
-      profile.style.setProperty('--tower-paper', palette.paper); profile.style.setProperty('--tower-ink', palette.ink);
-      firstName.textContent = parts[0]; lastName.textContent = parts.slice(1).join(' ');
-      profileRole.textContent = member.role; monogram.textContent = member.initials;
-      profileIndex.textContent = `${String(index + 1).padStart(2, '0')} / ${String(members.length).padStart(2, '0')}`;
-      profile.dataset.portraitSide = index % 2 === 0 ? 'right' : 'left';
-      portraitImg.alt = member.name;
-      if (member.image) {
-        if (portraitImg.getAttribute('src') !== member.image) {
-          hidePortrait();
-          portraitImg.src = member.image;
-        }
-        if (portraitImg.complete && portraitImg.naturalWidth > 0) showPortrait();
-      } else {
-        hidePortrait();
-        portraitImg.removeAttribute('src');
-      }
-      profileTagline.textContent = member.tagline ? `“${member.tagline}”` : '';
-      profileTagline.hidden = !member.tagline;
-
-      const longest = Math.max(parts[0].length, parts.slice(1).join(' ').length);
-      // Leave the other half of the existing card for the portrait.
-      const fontSize = Math.min(profileHeight * .2, profileWidth * .43 / (Math.max(5, longest) * .49));
-      profile.style.setProperty('--profile-name', `${fontSize}px`);
-    }
 
     function releasePointer() {
       const id = pointerId; pointerId = -1; draggedIndex = -1; physics.release();
@@ -145,18 +121,30 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       const desiredRemoved = state.completed;
       if (active === state.index && storyRemoved === desiredRemoved) return;
       releasePointer();
-      // Reverse seeking explicitly rebuilds supports. Forward motion never resets
-      // surviving bodies, so a falling or tilted block keeps its physical pose.
+      // When scrolling all the way back to the start, do a full reset so the
+      // tower looks exactly as it did originally (all blocks in perfect position).
+      // For partial reverse, return only the needed pieces individually.
       if (state.completed < storyRemoved || (state.index < 0 && state.completed === 0 && active >= 0)) {
-        physics.reset(state.completed); storyRemoved = state.completed;
+        if (state.index < 0 && state.completed === 0) {
+          // Full rewind — restore every block to its pristine grid position
+          physics.reset(0);
+        } else {
+          // Partial rewind — return pieces that need to come back.
+          // Each block's stagger delay is based on slot.layer so the tower
+          // always builds bottom-up (foundation first) regardless of scroll speed.
+          for (let i = storyRemoved - 1; i >= state.completed; i--) {
+            physics.returnBody(i);
+          }
+        }
+        storyRemoved = state.completed;
       }
       for (let i = storyRemoved; i < state.completed; i++) physics.remove(i);
       storyRemoved = state.completed;
       active = state.index;
       if (active >= 0) {
+        physics.beginStory(active);
         const body = physics.bodies[active];
         activeSource.copy(body.position); activeQuaternion.copy(body.quaternion);
-        physics.beginStory(active); setProfile(active);
       }
       callbacks.onMember(active); matricesDirty = true;
     }
@@ -179,33 +167,67 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       camera.getWorldDirection(forward);
       const distance = 4.8;
       targetScale.set(2 * halfFov * distance * camera.aspect * .93, 2 * halfFov * distance * .79, .16);
-      destination.copy(camera.position).addScaledVector(forward, distance + .08);
+      destination.copy(camera.position).addScaledVector(forward, distance + .08).addScaledVector(up, -0.1);
       const exitState = towerExit(state.local);
       const profileVisible = state.index >= 0 && exitState.opacity > 0 && exitState.scale > 0;
-      const labelsChanged = profileObject.visible !== profileVisible || matricesDirty || changedProgress || cameraMoved;
-      profileObject.visible = profileVisible;
+      const labelsChanged = matricesDirty || changedProgress || cameraMoved;
+      // We do not use display:none or visibility:hidden because toggling them causes 
+      // 1-frame transform flashes in Chromium. We rely purely on opacity.
+      
       if (transformsChanged || matricesDirty || changedProgress || (cameraMoved && state.index >= 0)) {
         const block = batch.pose;
         physics.bodies.forEach((body, index) => {
-          if (index < state.completed || state.outro > 0) { batch.update(index, false); return; }
+          // Sleeping pieces keep their instance matrices and hidden profiles.
+          // Scrolling normally changes only the currently extracted piece.
+          if (!transformsChanged && !matricesDirty && index !== state.index) return;
           const slot = slots[index];
+          const profileData = profiles[index];
+          
+          if ((index < state.completed || state.outro > 0 || physics.isPending(index)) && index !== state.index) { 
+            batch.update(index, false);
+            profileData.profile.style.opacity = '0';
+            profileData.photo.style.opacity = '0';
+            profileData.profileObject.visible = false;
+            // Strictly track the resting tower position to avoid matrix jump flashes
+            faceOffset.set(0, 0, plankScale.z / 2 + .008).applyQuaternion(body.interpolatedQuaternion);
+            profileData.profileObject.position.copy(body.interpolatedPosition).add(faceOffset); 
+            profileData.profileObject.quaternion.copy(body.interpolatedQuaternion);
+            profileData.profileObject.scale.set(plankScale.x / profileWidth, plankScale.y / profileHeight, 1);
+            return; 
+          }
+          
           block.position.copy(body.interpolatedPosition); block.quaternion.copy(body.interpolatedQuaternion); block.scale.copy(plankScale);
+          
+          let currentOpacity = 0;
+          let currentPhotoOpacity = 0;
+          let isVisible = false;
+          
           if (index === state.index) {
             source.copy(activeSource); block.position.copy(source); block.quaternion.copy(activeQuaternion);
-            const t = state.local, pull = smooth(t / .14), flight = smooth((t - .14) / .29), unfold = smooth((t - .2) / .23);
+            const t = state.local, pull = smooth(t / .10), flight = smooth((t - .10) / .24), unfold = smooth((t - .2) / .23);
             direction.set(slot.direction, 0, 0).applyQuaternion(activeQuaternion);
-            // Clear the whole plank before tumbling, then arc above the stack.
+            // Clear the whole plank before tumbling toward the profile.
             pulled.copy(source).addScaledVector(direction, BLOCK_SIZE[0] + .35); block.position.lerp(pulled, pull);
-            if (t > .14) {
-              control1.copy(pulled).addScaledVector(direction, 2).addScaledVector(up, 1.5);
-              control2.copy(destination).addScaledVector(right, slot.direction * targetScale.x * .45).addScaledVector(up, -.9);
+            if (t > .10) {
+              control1.copy(pulled).addScaledVector(direction, 2);
+              // Flatten high-layer flight arcs toward the final profile height.
+              control1.y = THREE.MathUtils.lerp(control1.y, destination.y, 0.85);
+              control2.copy(destination).addScaledVector(right, slot.direction * targetScale.x * .45).addScaledVector(up, -0.4);
               curve.v0.copy(pulled); curve.v1.copy(control1); curve.v2.copy(control2); curve.v3.copy(destination);
               curve.getPoint(flight, block.position);
+              
               tumbleQuaternion.setFromEuler(euler.set(.85 * slot.spin, slot.yaw + .6 * slot.direction, 1.3 * slot.direction));
-              block.quaternion.slerp(tumbleQuaternion, smooth((t - .14) / .1));
+              // Delay the tumble slightly so the block's tail clears the tower before rotating
+              block.quaternion.slerp(tumbleQuaternion, smooth(Math.max(0, t - .14) / .1));
               block.quaternion.slerp(camera.quaternion, smooth((t - .23) / .2));
             }
             block.scale.lerp(targetScale, unfold);
+            
+            // A fallen plank can rest below the plinth. Lift its clearance as it
+            // unfolds, without popping it upward on the first scroll frame.
+            const floorClearance = THREE.MathUtils.lerp(Math.min(source.y, physics.floorY + .3), physics.floorY + .3, unfold);
+            block.position.y = Math.max(block.position.y, floorClearance);
+
             const exit = exitState.progress;
             if (exit > 0) {
               block.position.addScaledVector(right, slot.direction * targetScale.x * 1.55 * exit)
@@ -214,12 +236,23 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
               block.quaternion.multiply(exitQuaternion);
             }
             block.scale.multiplyScalar(exitState.scale);
-            physics.placeStory(block.position, block.quaternion, block.scale);
-            profile.style.opacity = String(exitState.opacity);
-            faceOffset.set(0, 0, block.scale.z / 2 + .008).applyQuaternion(block.quaternion);
-            profileObject.position.copy(block.position).add(faceOffset); profileObject.quaternion.copy(block.quaternion);
-            profileObject.scale.set(block.scale.x / profileWidth, block.scale.y / profileHeight, 1);
+            physics.placeStory(block.position, block.quaternion, block.scale, t > 0.10 && t < 0.35);
+            
+            currentOpacity = exitState.opacity;
+            currentPhotoOpacity = exitState.opacity;
+            isVisible = exitState.opacity > 0 && exitState.scale > 0;
           }
+          
+          profileData.profileObject.visible = isVisible;
+          profileData.profile.style.opacity = String(currentOpacity);
+          
+          faceOffset.set(0, 0, block.scale.z / 2 + .008).applyQuaternion(block.quaternion);
+          profileData.profileObject.position.copy(block.position).add(faceOffset); 
+          profileData.profileObject.quaternion.copy(block.quaternion);
+          profileData.profileObject.scale.set(block.scale.x / profileWidth, block.scale.y / profileHeight, 1);
+          
+          profileData.photo.style.opacity = String(currentPhotoOpacity);
+          
           batch.update(index);
         });
         batch.commit(); renderer.shadowMap.needsUpdate = renderer.shadowMap.enabled; matricesDirty = false;
@@ -249,10 +282,14 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       }
       try {
         if (layoutDirty) measure();
-        if (scrollDirty) sampleScroll();
+        sampleScroll();
         if (!initialized) { scrollMotion.value = target; initialized = true; }
-        // Input response is independent of rendering quality and pointer type.
-        progress = advanceTowerScroll(scrollMotion, target, elapsed);
+
+        // Keep the block and profile on the scroll timeline. Advancing to a
+        // speculative landing here gets undone by sampleScroll on the next
+        // frame, briefly flashing the open profile during extraction.
+        // Lenis handles scroll smoothing; this response tracks its output.
+        progress = advanceTowerScroll(scrollMotion, target, elapsed, 200);
         const state = towerFrame(progress, members.length);
         // The desktop intro orbits; readable profiles and settled mobile scenes rest.
         const idleOrbit = !quality.simplified && state.index < 0 && state.completed === 0 && state.outro === 0;
@@ -265,15 +302,18 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
         if (transformsChanged || matricesDirty || progress !== renderedProgress || (orbiting && time - lastRenderTime >= 1000 / 30)) {
           render(state, transformsChanged, orbiting); lastRenderTime = time;
         }
-        if (idleOrbit || physics.moving() || progress !== target || layoutDirty || scrollDirty) frame = requestAnimationFrame(draw);
+        // Keep the loop alive for 200ms after the last scroll input so the spring
+        // interpolates smoothly across the gaps between discrete wheel ticks.
+        const scrollSettling = time - lastInteraction < 200;
+        if (idleOrbit || physics.moving() || progress !== target || layoutDirty || scrollDirty || scrollSettling) frame = requestAnimationFrame(draw);
         else slowTime = 0;
       } catch { dispose(); callbacks.onError(); }
     }
     function wake() {
-      if (!frame && !disposed && visible && !document.hidden) { previousTime = performance.now(); frame = requestAnimationFrame(draw); }
+      if (compiled && !frame && !disposed && visible && !document.hidden) { previousTime = performance.now(); frame = requestAnimationFrame(draw); }
     }
     function scroll() {
-      scrollDirty = true; wake();
+      scrollDirty = true; lastInteraction = performance.now(); wake();
     }
     function sampleScroll() {
       scrollDirty = false;
@@ -296,16 +336,37 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
       quality.simplified ||= effectsReduced;
       const ratio = towerPixelRatio(quality.pixelRatio, resolutionScale);
       const sizeChanged = width !== nextWidth || height !== nextHeight;
-      if (sizeChanged || renderer.getPixelRatio() !== ratio) {
-        renderer.setDrawingBufferSize(nextWidth, nextHeight, ratio); matricesDirty = true;
+      if (device.coarsePointer && width === nextWidth && height !== nextHeight) {
+        // Address-bar motion can resize the viewport several times per swipe.
+        // Keep rendering into the existing buffer until it settles; CSS fills
+        // the viewport immediately and the camera/profile layout stays in sync.
+        window.clearTimeout(viewportResizeTimer);
+        viewportResizeTimer = window.setTimeout(() => {
+          viewportResizeTimer = 0; layoutDirty = true; wake();
+        }, 150);
+      } else if (width !== nextWidth) {
+        window.clearTimeout(viewportResizeTimer); viewportResizeTimer = 0;
+      }
+      if (!viewportResizeTimer && (bufferWidth !== nextWidth || bufferHeight !== nextHeight || renderer.getPixelRatio() !== ratio)) {
+        renderer.setDrawingBufferSize(nextWidth, nextHeight, ratio);
+        bufferWidth = nextWidth; bufferHeight = nextHeight; matricesDirty = true;
       }
       if (sizeChanged) {
+        matricesDirty = true;
         width = nextWidth; height = nextHeight;
         css.setSize(width, height); camera.aspect = width / height; camera.updateProjectionMatrix();
         profileWidth = width * .93; profileHeight = height * .79;
-        profile.style.width = `${profileWidth}px`; profile.style.height = `${profileHeight}px`;
-        profile.style.setProperty('--profile-monogram', `${Math.min(profileHeight * .57, profileWidth * .6)}px`);
-        if (active >= 0) setProfile(active);
+        const monogramSize = Math.min(profileHeight * .57, profileWidth * .6);
+        profiles.forEach((p, i) => {
+          p.profile.style.width = `${profileWidth}px`; 
+          p.profile.style.height = `${profileHeight}px`;
+          p.profile.style.setProperty('--profile-monogram', `${monogramSize}px`);
+          
+          const parts = members[i].name.split(' ');
+          const longest = Math.max(parts[0].length, parts.slice(1).join(' ').length);
+          const fontSize = Math.min(profileHeight * .225, profileWidth * .83 / (Math.max(5, longest) * .49));
+          p.profile.style.setProperty('--profile-name', `${fontSize}px`);
+        });
       }
       if (renderer.shadowMap.enabled === quality.simplified) matricesDirty = true;
       renderer.shadowMap.enabled = !quality.simplified;
@@ -376,6 +437,12 @@ export function createPeopleTower(host: HTMLElement, section: HTMLElement, membe
     renderer.domElement.addEventListener('lostpointercapture', pointerUp);
     window.addEventListener('scroll', scroll, { passive: true }); window.addEventListener('resize', resize, { passive: true });
     document.addEventListener('visibilitychange', visibility);
+    host.append(renderer.domElement, css.domElement);
+    await renderer.compileAsync(scene, camera);
+    if (disposed) throw new Error('Tower initialization was interrupted');
+    // Observers can fire during compilation. Drawing before it completes can
+    // force synchronous shader work onto the first mobile scroll frame.
+    compiled = true;
     resize();
     return { dispose, rebuild };
   } catch (error) {

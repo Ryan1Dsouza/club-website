@@ -11,6 +11,19 @@ export const GLIMPSE_FADE = .9;
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const smooth = (value: number) => { const t = clamp(value); return t * t * (3 - 2 * t); };
 
+export const ARRIVAL_TIME_SCALE = .22;
+
+/** One proximity curve coordinates the station reveal and the final slow coast. */
+export function stationArrivalFrame(remaining: number, radius: number, reduced = false) {
+  const proximity = Number.isFinite(remaining) && radius > 0 ? smooth(1 - Math.max(0, remaining) / radius) : 0;
+  return {
+    proximity,
+    timeScale: reduced ? 1 : 1 - (1 - ARRIVAL_TIME_SCALE) * proximity,
+    opacity: reduced ? 0 : smooth((proximity - .08) / .72),
+    focus: reduced ? 0 : smooth((proximity - .15) / .85),
+  };
+}
+
 /** Present one photo at a time near alternating sides, with a quiet gap between shots. */
 export function glimpseFrame(elapsed: number, slot: number, remaining: number) {
   const age = elapsed - slot * GLIMPSE_INTERVAL;

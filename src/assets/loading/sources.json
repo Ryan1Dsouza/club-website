@@ -1,0 +1,24 @@
+{
+    "reference":  "https://freshman.tv/",
+    "inspected":  "2026-10-02",
+    "frameDurationMs":  50,
+    "frames":  [
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/1aa9a8ad7109dcba3ad96d7d0a8180958ae0d4db-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/0504847ab676f6a18ec400759649b304558ae176-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/36c6c579cbb4533e50dab6d7eaa9db64093a3308-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/6d5d1a0a1834dc67c2d2cc91e118835a902c87ab-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/015d6cd644578bd4ae446b7b6a7a0a601c120b08-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/d8563522d75cb45a300942f1c8f328ca0807f462-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/32863d06a0d41894ccfcc6eb79a0938c8667ee91-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/489e0b08e0d7ebee83a76a2e0e437004204a2198-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/457b501f9bab8e306fedcf08883f1b58f2e45388-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/80da6ad9653ed45d918f9853da209295acca1ae7-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/cbb1715881f440848fab2cb190c01d7416558adc-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/bdad57bdf69985847c420e9048b7a44a07b79a65-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/88865c35745c169f412740025b4b93041fa3aa80-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/384bb7312ef29cbafab70afa513b7e963ce70744-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/808c1aa0e1d810842e57afb987034d5e9c749486-2880x1620.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/e935c88c019a579e010ab70756d39e0fcd58cd7f-2880x1760.webp",
+                   "https://cdn.sanity.io/images/vd6iwdcs/production/964bd53e38aced7f3d2ce39a3d1156c569452b9f-2880x1620.webp"
+               ]
+}

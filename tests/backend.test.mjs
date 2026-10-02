@@ -6,6 +6,9 @@ import { join, resolve } from 'node:path';
 import { openDatabase, hashPassword, verifyPassword, getSite } from '../server/db.mjs';
 import { createApp } from '../server/app.mjs';
 import { pageMeta } from '../shared/page-meta.ts';
+import { createCoasterTrack, trackSeparation } from '../src/lib/event-coaster.ts';
+import { createStationPlanner } from '../src/lib/event-layout.ts';
+import { createExperienceStations } from '../src/lib/experience-stations.ts';
 
 async function fixture(fn, options = {}) {
   const db = openDatabase(':memory:');
@@ -41,6 +44,8 @@ test('new team members get immutable server creation dates and legacy edits pres
 }));
 
 test('publishing an experience requires auth and CSRF, persists photos and a safe station, and is idempotent', () => fixture(async ({ request, login, db, base }) => {
+  const track = createCoasterTrack(), planner = createStationPlanner(track);
+  const originalStations = planner.forEvents(createExperienceStations(getSite(db).events).map(station => station.event));
   const id = 'baf123c4-e81b-43df-831d-e85916d1ad80', path = `/admin/experience-events/${id}`;
   const event = { ...getSite(db).events[0], title: 'Photo workshop' };
   const image = { name: 'workshop.png', mime: 'image/png', data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aN4sAAAAASUVORK5CYII=' };
@@ -52,6 +57,14 @@ test('publishing an experience requires auth and CSRF, persists photos and a saf
   const result = await request(path, 'PUT', body, { ...headers, Origin: 'http://127.0.0.1:3000' });
   assert.equal(result.status, 201); const saved = await result.json();
   assert.ok(saved.trackPosition > 0 && saved.trackPosition < 1); assert.equal(saved.photos.length, 1);
+  const stations = createExperienceStations(getSite(db).events), placements = planner.forEvents(stations.map(station => station.event));
+  assert.equal(stations.length, 4); assert.equal(stations[3].number, '04'); assert.equal(stations[3].id, id);
+  assert.deepEqual(placements.slice(0, 3).map(stop => stop.distance), originalStations.map(stop => stop.distance));
+  assert.equal(placements[3].distance / track.getLength(), saved.trackPosition);
+  for (const original of placements.slice(0, 3)) {
+    assert.ok(trackSeparation(original.distance, placements[3].distance, track.getLength()) > 48);
+    assert.ok(!original.bounds.intersectsBox(placements[3].bounds));
+  }
   assert.equal((await request(path, 'PUT', body, headers)).status, 200);
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM event_photos').get().n, 1);
   const photo = await fetch(base + saved.photos[0].url); assert.equal(photo.status, 200); assert.match(photo.headers.get('content-type'), /image\/png/);

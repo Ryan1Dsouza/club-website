@@ -1,6 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { WORLD, SPAWN, WALK_SPEED, createStations, isWalkable, movePlayer, updateArrival } from '../src/lib/event-navigation.ts';
+import { WORLD, SPAWN, WALK_SPEED, createStations, isWalkable, movePlayer, updateArrival, stationCardAnchor } from '../src/lib/event-navigation.ts';
+
+test('station cards stay on the terrace in a station-local frame, including elevated track', () => {
+  const point = { x: 10, y: 70, z: -20 };
+  const side = { x: 1, y: 0, z: 0 }, up = { x: 0, y: 1, z: 0 };
+  const anchor = stationCardAnchor(point, side, up);
+  assert.ok(anchor.x > point.x && anchor.y > point.y);
+  assert.equal(anchor.z, point.z, 'anchor stays at the station along the rails');
+  const rotate = p => ({ x: -p.y, y: p.x, z: p.z });
+  assert.deepEqual(stationCardAnchor(rotate(point), rotate(side), rotate(up)), rotate(anchor));
+  assert.deepEqual(point, { x: 10, y: 70, z: -20 }, 'navigation coordinates are never mutated');
+});
 
 const events = count => Array.from({ length: count }, (_, i) => ({ id: `event-${i}`, title: `Workshop ${i + 1}`, published: true }));
 

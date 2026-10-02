@@ -5,6 +5,7 @@ const LOGO_WIDTH = 6;
 const TAU = Math.PI * 2;
 const ASSEMBLY_SECONDS = 5.8;
 const clamp = THREE.MathUtils.clamp;
+const yieldToBrowser = () => new Promise<void>(resolve => window.setTimeout(resolve, 0));
 
 // Particle arrival, the contour hand-off, and the text entrance share one clock.
 const particleVertex = /* glsl */ `
@@ -105,7 +106,11 @@ function traceLogo(image: HTMLImageElement): Contour {
 
   for (let y = Math.max(0, top - 1); y <= Math.min(bottom, canvas.height - 2); y++) {
     for (let x = Math.max(0, left - 1); x <= Math.min(right, canvas.width - 2); x++) {
-      const corners = [alpha(x, y), alpha(x + 1, y), alpha(x + 1, y + 1), alpha(x, y + 1)];
+      const a0 = alpha(x, y), a1 = alpha(x + 1, y), a2 = alpha(x + 1, y + 1), a3 = alpha(x, y + 1);
+      const mask = (a0 >= .5 ? 1 : 0) | (a1 >= .5 ? 2 : 0) | (a2 >= .5 ? 4 : 0) | (a3 >= .5 ? 8 : 0);
+      // Most cells contain no edge. Skip them before allocating coordinate arrays.
+      if (mask === 0 || mask === 15) continue;
+      const corners = [a0, a1, a2, a3];
       const coordinates = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]];
       const crossings: number[][] = [];
       for (let edge = 0; edge < 4; edge++) {
@@ -133,23 +138,24 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
   source.src = url;
   await source.decode();
   const contour = traceLogo(source);
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'low-power' });
+  await yieldToBrowser();
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
   const geometries: THREE.BufferGeometry[] = [];
   const materials: THREE.Material[] = [];
   const textures: THREE.Texture[] = [];
-  let frame = 0, stopped = false;
+  let frame = 0, stopped = false, ready = false;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 150);
   const viewport = new THREE.Vector2();
   const pointer = new THREE.Vector2();
   const desiredPointer = new THREE.Vector2();
-  const quality = createQualityController(2);
   const coarsePointer = window.matchMedia('(pointer: coarse)');
+  const quality = createQualityController(coarsePointer.matches ? 1 : 2, coarsePointer.matches ? 1 : 2);
   let renderWidth = 0, renderHeight = 0, outlineSize = 0;
   let pointerDirty = false, pointerX = 0, pointerY = 0;
   const style = getComputedStyle(host);
   const mint = new THREE.Color(style.getPropertyValue('--mint').trim());
-  renderer.setClearColor(style.getPropertyValue('--bg').trim());
+  renderer.setClearColor(style.getPropertyValue('--bg').trim(), 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.domElement.setAttribute('aria-hidden', 'true');
 
@@ -247,7 +253,6 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
     outlines.push({ canvas, context, texture, width, mesh: line });
     return material;
   }
-  const glow = makeContour(9);
   const edge = makeContour(2);
 
   const resizeBuffer = () => {
@@ -270,6 +275,7 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
     camera.updateProjectionMatrix();
     uniforms.uCameraZ.value = camera.position.z;
     resizeBuffer();
+    wake();
     // Rasterize the exact traced contour only on resize. Each outline then draws
     // as two triangles instead of thousands of overlapping wide-line segments.
     if (outlineSize === logoPixels) return;
@@ -297,20 +303,28 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
   let offscreen = false;
   let completed = false;
 
+  function wake() {
+    if (ready && !frame && !stopped && !document.hidden && !offscreen) {
+      previous = 0;
+      frame = requestAnimationFrame(animate);
+    }
+  }
+
   // Stop rendering when the logo section is completely off-screen (saves GPU during parallax scroll)
   const io = new IntersectionObserver(
     ([entry]) => {
       offscreen = !entry.isIntersecting;
-      cancelAnimationFrame(frame);
+      cancelAnimationFrame(frame); frame = 0;
       previous = 0;
       quality.reset();
-      if (!offscreen && !stopped && !document.hidden) frame = requestAnimationFrame(animate);
+      wake();
     },
     { threshold: 0 }
   );
   io.observe(host);
 
   function animate(now: number) {
+    frame = 0;
     if (stopped || document.hidden || offscreen) {
       frame = 0;
       return;
@@ -335,9 +349,7 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
     const progress = Math.min(elapsed / ASSEMBLY_SECONDS, 1);
     const reveal = clamp((progress - 0.45) / 0.2, 0, 1);
     edge.opacity = reveal * 1.0;
-    glow.opacity = 0;
-    outlines[0].mesh.visible = glow.opacity > 0;
-    outlines[1].mesh.visible = edge.opacity > 0;
+    outlines[0].mesh.visible = edge.opacity > 0;
     logo.position.set(pointer.x, pointer.y, 0);
     assembly.visible = reveal < 0.84;
     renderer.render(scene, camera);
@@ -345,19 +357,21 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
       completed = true;
       onComplete();
     }
-    frame = requestAnimationFrame(animate);
+    // Phones play the complete formation once, then retain the finished frame.
+    // Resizing or returning onscreen wakes one paint without restarting it.
+    if (!completed || !coarsePointer.matches) frame = requestAnimationFrame(animate);
   }
 
   const move = (event: PointerEvent) => {
-    if (event.pointerType !== 'mouse' || elapsed < ASSEMBLY_SECONDS * .55) return;
+    if (coarsePointer.matches || event.pointerType !== 'mouse' || elapsed < ASSEMBLY_SECONDS * .55) return;
     pointerX = event.clientX; pointerY = event.clientY; pointerDirty = true;
   };
   const leave = () => { pointerDirty = false; desiredPointer.set(0, 0); };
   const visibility = () => {
-    cancelAnimationFrame(frame);
+    cancelAnimationFrame(frame); frame = 0;
     previous = 0;
     quality.reset();
-    if (!document.hidden && !stopped && !offscreen) frame = requestAnimationFrame(animate);
+    wake();
   };
   const contextLost = (event: Event) => {
     event.preventDefault();
@@ -385,6 +399,8 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
   }
 
   try {
+    // Give pending input and layout a turn between geometry setup and rasterizing.
+    await yieldToBrowser();
     resize();
     host.appendChild(renderer.domElement);
     observer.observe(host);
@@ -392,7 +408,8 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
     host.addEventListener('pointerleave', leave);
     document.addEventListener('visibilitychange', visibility);
     renderer.domElement.addEventListener('webglcontextlost', contextLost);
-    frame = requestAnimationFrame(animate);
+    ready = true;
+    wake();
   } catch (error) {
     dispose();
     throw error;

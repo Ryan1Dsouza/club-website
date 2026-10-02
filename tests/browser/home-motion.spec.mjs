@@ -63,6 +63,7 @@ test('hero buffers stay bounded across resizing, pause offscreen, and clean up o
   const canvas = page.locator('.logo-landing__scene canvas');
   for (const viewport of [{ width: 1920, height: 1080 }, { width: 390, height: 844 }, { width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
+    await expect(canvas).toHaveCount(1);
     await expect.poll(() => canvas.evaluate(element => element.clientWidth)).toBe(viewport.width);
     await expect.poll(() => canvas.evaluate(element => Math.abs(element.width / element.clientWidth - element.height / element.clientHeight))).toBeLessThan(.01);
     const pixels = await canvas.evaluate(element => element.width * element.height);

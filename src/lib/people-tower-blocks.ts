@@ -5,11 +5,21 @@ import type { Member } from '../types';
 import { BLOCK_SIZE } from './people-tower-motion';
 
 export const TOWER_PALETTES = [
-  { paper: '#142c24', ink: '#edf0dc', wood: '#b4a080' },
-  { paper: '#1b3028', ink: '#e9edda', wood: '#a99677' },
-  { paper: '#152b27', ink: '#e4ebde', wood: '#bda889' },
-  { paper: '#21352a', ink: '#edf0dc', wood: '#af9d81' },
-  { paper: '#182e27', ink: '#e8ecdc', wood: '#baa586' },
+  { paper: '#2e2224', ink: '#e9e1e2', wood: '#7a718d' },
+  { paper: '#292520', ink: '#e8e6e2', wood: '#9b8663' },
+  { paper: '#302a28', ink: '#e8e4e2', wood: '#71768d' },
+  { paper: '#382f2d', ink: '#e8e3e2', wood: '#83708e' },
+  { paper: '#2c2923', ink: '#e8e6e2', wood: '#8a8274' },
+  { paper: '#1a1813', ink: '#e9e6e1', wood: '#85797b' },
+  { paper: '#36302f', ink: '#e7e4e3', wood: '#8d8171' },
+  { paper: '#38332d', ink: '#e8e5e2', wood: '#7f7e80' },
+  { paper: '#2e3437', ink: '#e3e6e7', wood: '#6b8493' },
+  { paper: '#1c1418', ink: '#eae0e4', wood: '#7a7d84' },
+  { paper: '#353130', ink: '#e6e4e4', wood: '#797688' },
+  { paper: '#39332c', ink: '#e8e5e2', wood: '#a56b59' },
+  { paper: '#171411', ink: '#e9e6e1', wood: '#817d7d' },
+  { paper: '#392f2c', ink: '#e8e3e2', wood: '#a55971' },
+  { paper: '#2d2a22', ink: '#e9e6e1', wood: '#8e8470' }
 ];
 
 /** One small, shared grain map adds surface detail without extra meshes. */

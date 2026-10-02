@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import logoUrl from '../../assets/nucleus-logo.webp';
 import { MorphingText } from '../magicui/morphing-text';
+import { clampProgress, observeScroll } from '../../lib/scroll-effects';
 import './logo-landing.css';
 
-export default function LogoLanding() {
+export default function LogoLanding({ active = true }: { active?: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const host = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState('loading');
@@ -11,32 +12,33 @@ export default function LogoLanding() {
   const textReady = formed || status === 'still' || status === 'fallback';
 
   useEffect(() => {
-    let disposed = false;
-    let cleanup: (() => void) | undefined;
-    void import('../../lib/scroll-motion').then(({ gsap }) => {
-      if (disposed) return;
-      const media = gsap.matchMedia();
-      cleanup = () => media.revert();
-      media.add({ motion: '(prefers-reduced-motion: no-preference)', compact: '(max-width: 760px)' }, context => {
-        if (!context.conditions?.motion) return;
-        const section = sectionRef.current!;
-        gsap.timeline({
-          defaults: { ease: 'none' },
-          scrollTrigger: { trigger: section, start: 'top top', end: 'bottom top', scrub: .3 },
-        })
-          .to(host.current, { yPercent: context.conditions.compact ? 6 : 12, scale: .94, opacity: .12 }, 0)
-          .to(section.querySelector('.logo-landing__text'), { yPercent: -28, opacity: 0 }, 0);
-      }, sectionRef);
-    }).catch(() => { /* The static hero remains usable when motion cannot load. */ });
-    return () => { disposed = true; cleanup?.(); };
+    const section = sectionRef.current!;
+    const text = section.querySelector<HTMLElement>('.logo-landing__text')!;
+    let previous = -1;
+    return observeScroll(section, ({ top, height, reduced }) => {
+      const progress = reduced ? 0 : clampProgress(-top / Math.max(1, height));
+      if (progress === previous) return;
+      previous = progress;
+      host.current!.style.transform = `translateY(${progress * 12}%) scale(${1 - progress * .06})`;
+      host.current!.style.opacity = String(1 - progress * .88);
+      text.style.transform = `translateY(${-progress * 28}%)`;
+      text.style.opacity = String(1 - progress);
+    });
   }, []);
 
   useEffect(() => {
-    const element = host.current!;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!active) {
+      // Fetch scene code under the loader, but start its clock only after exit.
+      if (!motion.matches) void import('../../lib/logo-scene').catch(() => {});
+      return;
+    }
+    const element = host.current!;
     let disposed = false;
     let generation = 0;
     let disposeScene: (() => void) | undefined;
+    let idle = 0, timer = 0;
+    let visible = false;
 
     async function start() {
       const current = ++generation;
@@ -45,6 +47,7 @@ export default function LogoLanding() {
       setFormed(false);
       setStatus('loading');
       if (motion.matches) { setStatus('still'); return; }
+      if (!visible || document.hidden) return;
       try {
         const { createLogoScene } = await import('../../lib/logo-scene');
         if (disposed || current !== generation) return;
@@ -64,20 +67,37 @@ export default function LogoLanding() {
       }
     }
 
-    void start();
-    motion.addEventListener('change', start);
+    const schedule = () => {
+      clearTimeout(timer);
+      if (idle) cancelIdleCallback(idle);
+      // Allow the page to paint before compiling the scene's shaders.
+      if (typeof window.requestIdleCallback === 'function') idle = requestIdleCallback(() => void start(), { timeout: 1200 });
+      else timer = window.setTimeout(() => void start(), 80);
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible && !disposeScene) schedule();
+    });
+    observer.observe(element);
+    if (motion.matches) setStatus('still');
+    const visibility = () => { if (!document.hidden && !disposeScene) schedule(); };
+    motion.addEventListener('change', schedule);
+    document.addEventListener('visibilitychange', visibility);
     return () => {
       disposed = true;
       generation++;
-      motion.removeEventListener('change', start);
+      clearTimeout(timer);
+      if (idle) cancelIdleCallback(idle);
+      observer.disconnect();
+      motion.removeEventListener('change', schedule);
+      document.removeEventListener('visibilitychange', visibility);
       disposeScene?.();
     };
-  }, []);
+  }, [active]);
 
-  return <section ref={sectionRef} className="logo-landing" aria-label="Nucleus" data-status={status} data-text-ready={textReady}>
+  return <section ref={sectionRef} className="logo-landing" aria-label="Nucleus" data-status={status} data-active={active} data-text-ready={textReady}>
     <h1 className="sr-only">Nucleus SJEC — A connection worth making.</h1>
     <div className="logo-landing__scene" ref={host} role="img" aria-label="The Nucleus brain logo assembles from a field of luminous particles." />
-    {/* Crop the supplied PNG's transparent padding without changing the asset. */}
     <svg className="logo-landing__fallback" viewBox="430 128 672 625" aria-hidden="true">
       <image href={logoUrl} width="1599" height="899" />
     </svg>

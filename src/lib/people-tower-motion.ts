@@ -54,7 +54,7 @@ export function advanceTowerScroll(scroll: TowerScroll, target: number, delta: n
  * The short zero-size tail also tolerates rounding at timeline boundaries. */
 export function towerExit(local: number) {
   const progress = local >= .98 ? 1 : clamp01(smooth((local - .76) / .22));
-  return { progress, scale: 1 - progress, opacity: smooth((local - .25) / .13) * (1 - progress) };
+  return { progress, scale: 1 - progress, opacity: smooth((local - .33) / .10) * (1 - progress) };
 }
 function hash(value: string) {
   let result = 2166136261;
@@ -64,11 +64,14 @@ function hash(value: string) {
 /** Fill every foundation layer before the next, with story leaders at the top. */
 export function towerSlots(ids: readonly string[]) {
   const layers = Math.ceil(ids.length / 3);
+  // Map the presentation index directly to the tower rank (top to bottom).
+  // This ensures that when scrolling forward, pieces are removed top-down,
+  // and when reverse-scrolling, the tower is built naturally from the foundation up.
+  const ranks = ids.map((_, i) => ids.length - 1 - i);
   return ids.map((id, index) => {
-    const rank = ids.length - 1 - index;
+    const rank = ranks[index];
     const layer = Math.floor(rank / 3), count = Math.min(3, ids.length - layer * 3);
-    const posInLayer = rank % 3;
-    const lane = posInLayer - (count - 1) / 2, turned = layer % 2 === 1;
+    const lane = rank % 3 - (count - 1) / 2, turned = layer % 2 === 1;
     const seed = hash(id);
     return {
       rank, layer, yaw: turned ? Math.PI / 2 : 0,
