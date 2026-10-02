@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 import { ArrowDown, ArrowUpRight, GraduationCap, RotateCcw, UsersRound } from 'lucide-react';
 import type { Member } from '../types';
 import { memberProgress, sortTowerMembers, TOWER_INTRO, TOWER_OUTRO } from '../lib/people-tower-motion';
@@ -9,6 +11,15 @@ import './people-tower.css';
 import './people-directory.css';
 
 export default function PeoplePage({ members }: { members: Member[] }) {
+  const location = useLocation();
+  const isReturningRef = useRef(
+    typeof window !== 'undefined' && (
+      sessionStorage.getItem('people_return_to_directory') === 'true' ||
+      location.hash === '#directory' ||
+      (location.state as { scrollToDirectory?: boolean })?.scrollToDirectory
+    )
+  );
+  const isReturning = isReturningRef.current;
   const enrichedMembers = useMemo(() => enrichTowerMembers(members), [members]);
 
   const sorted = useMemo(
@@ -19,7 +30,7 @@ export default function PeoplePage({ members }: { members: Member[] }) {
   const directory = useRef<HTMLElement>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'still' | 'fallback'>('loading');
   const [active, setActive] = useState(-1);
-  const [directoryOpen, setDirectoryOpen] = useState(false);
+  const [directoryOpen, setDirectoryOpen] = useState(isReturning);
   const showDirectory = directoryOpen || status === 'still' || status === 'fallback';
   const memberKey = useMemo(() => JSON.stringify(sorted), [sorted]);
   const controller = useRef<{ rebuild: () => void } | null>(null);
@@ -50,8 +61,13 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     async function start() {
       if (disposed) return;
       const current = ++generation;
-      stop(); setActive(-1); setDirectoryOpen(false);
-      directory.current?.style.removeProperty('--directory-progress');
+      stop(); setActive(-1);
+      if (!isReturningRef.current) {
+        setDirectoryOpen(false);
+        directory.current?.style.removeProperty('--directory-progress');
+      } else {
+        directory.current?.style.setProperty('--directory-progress', '1');
+      }
       if (media.matches) { setStatus('still'); return; }
       setStatus('loading');
       try {
@@ -91,11 +107,32 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     section.querySelector<HTMLSelectElement>('select')?.focus({ preventScroll: true });
   }
   function revealDirectory() {
+    if (directory.current && (status === 'still' || status === 'fallback')) {
+      directory.current.scrollIntoView({ behavior: 'instant' });
+      return;
+    }
     const section = story.current;
     if (!section) return;
     // A keyboard-accessible shortcut to the same final scroll position.
     window.scrollTo({ top: section.offsetTop + section.offsetHeight - innerHeight, behavior: 'instant' });
   }
+  useIsomorphicLayoutEffect(() => {
+    if (isReturning) {
+      sessionStorage.removeItem('people_return_to_directory');
+      if (directory.current) {
+        directory.current.style.setProperty('--directory-progress', '1');
+      }
+      const section = story.current;
+      if (section) {
+        if (directory.current && (status === 'still' || status === 'fallback')) {
+          directory.current.scrollIntoView({ behavior: 'instant' });
+        } else {
+          const top = section.offsetTop + section.offsetHeight - window.innerHeight;
+          window.scrollTo({ top, behavior: 'instant' });
+        }
+      }
+    }
+  }, []);
   return <section className="people-page" aria-labelledby="people-title" data-tower-status={status}>
     <h1 id="people-title" className="sr-only">The people behind Nucleus</h1>
     <div className="people-tower" ref={story} style={{
@@ -115,12 +152,12 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     </div>
     <nav className="people-directory" ref={directory} aria-label="Explore the Nucleus community" aria-hidden={!showDirectory} inert={!showDirectory} data-visible={showDirectory} onKeyDown={event => { if (event.key === 'Escape' && status === 'ready') revealMember(sorted.length - 1); }}>
       <div className="people-directory__cards">
-        <Link to="/members" className="people-directory__card" aria-label="Members">
+        <Link to="/members" onClick={() => sessionStorage.setItem('people_return_to_directory', 'true')} className="people-directory__card" aria-label="Members">
           <div className="people-directory__meta"><span>01 / The community</span><UsersRound size={22} aria-hidden="true" /></div>
           <div className="people-directory__copy"><h2>Members</h2><p>The people making it happen.</p></div>
           <div className="people-directory__footer"><span>Meet our members</span><ArrowUpRight size={23} aria-hidden="true" /></div>
         </Link>
-        <Link to="/alumni" className="people-directory__card people-directory__card--alumni" aria-label="Alumni">
+        <Link to="/alumni" onClick={() => sessionStorage.setItem('people_return_to_directory', 'true')} className="people-directory__card people-directory__card--alumni" aria-label="Alumni">
           <div className="people-directory__meta"><span>02 / The legacy</span><GraduationCap size={23} aria-hidden="true" /></div>
           <div className="people-directory__copy"><h2>Alumni</h2><p>Part of Nucleus. Always.</p></div>
           <div className="people-directory__footer"><span>Meet our alumni</span><ArrowUpRight size={23} aria-hidden="true" /></div>

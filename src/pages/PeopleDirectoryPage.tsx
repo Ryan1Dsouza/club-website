@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Code2, Database, Globe, Github, Linkedin, Terminal } from 'lucide-react';
 import type { Member } from '../types';
@@ -33,9 +33,14 @@ const emptyTeam: Member[] = [];
 export default function PeopleDirectoryPage({ kind, members = emptyTeam }: { kind: 'members' | 'alumni'; members?: Member[] }) {
   const people = useMemo(() => sortTowerMembers(directoryMembers(kind, members)), [kind, members]);
   const alumni = kind === 'alumni';
+
+  useEffect(() => {
+    sessionStorage.setItem('people_return_to_directory', 'true');
+  }, []);
+
   return <section className="people-page people-directory-page section-wrap" aria-labelledby="directory-title">
     <div className="people-directory-page__nav">
-      <Link to="/team" className="text-link"><ArrowLeft size={16} />The people</Link>
+      <Link to="/team" state={{ scrollToDirectory: true }} onClick={() => sessionStorage.setItem('people_return_to_directory', 'true')} className="text-link"><ArrowLeft size={16} />The people</Link>
       <Link to={alumni ? '/members' : '/alumni'} className="text-link">{alumni ? 'Members' : 'Alumni'}<ArrowUpRight size={16} /></Link>
     </div>
     <div className="people-directory-page__heading">

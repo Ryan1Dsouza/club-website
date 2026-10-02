@@ -109,7 +109,17 @@ export default function App({ initialData = seed, serverRendered = false }: { in
   }, [serverRendered]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    const isReturningToDirectory = location.pathname === '/team' && (
+      sessionStorage.getItem('people_return_to_directory') === 'true' ||
+      location.hash === '#directory' ||
+      (location.state as { scrollToDirectory?: boolean })?.scrollToDirectory
+    );
+    if (!isReturningToDirectory) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+    if (location.pathname !== '/team' && location.pathname !== '/members' && location.pathname !== '/alumni') {
+      sessionStorage.removeItem('people_return_to_directory');
+    }
     setApplyOpen(false); setDomain(null); setMenuOpen(false);
     const meta = pageMeta(location.pathname);
     document.title = meta.title;
