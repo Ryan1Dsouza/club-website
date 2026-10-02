@@ -183,6 +183,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
             batch.update(index, false);
             profileData.profile.style.opacity = '0';
             profileData.photo.style.opacity = '0';
+            profileData.profileObject.visible = false;
             // Strictly track the resting tower position to avoid matrix jump flashes
             faceOffset.set(0, 0, plankScale.z / 2 + .008).applyQuaternion(body.interpolatedQuaternion);
             profileData.profileObject.position.copy(body.interpolatedPosition).add(faceOffset); 
@@ -195,6 +196,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
           
           let currentOpacity = 0;
           let currentPhotoOpacity = 0;
+          let isVisible = false;
           
           if (index === state.index) {
             source.copy(activeSource); block.position.copy(source); block.quaternion.copy(activeQuaternion);
@@ -232,14 +234,12 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
             
             currentOpacity = exitState.opacity;
             currentPhotoOpacity = smooth(Math.max(0, unfold - 0.2) / 0.8) * exitState.scale;
+            isVisible = exitState.opacity > 0 && exitState.scale > 0;
           }
           
-          // Apply to the specific profile object for this block
+          profileData.profileObject.visible = isVisible;
           profileData.profile.style.opacity = String(currentOpacity);
           
-          // Because each profile is bound to one block, it NEVER teleports between pieces.
-          // By strictly tracking the block's position at all times (even when invisible), 
-          // the WebKit compositor never lags, and opacity: 0 perfectly hides the element.
           faceOffset.set(0, 0, block.scale.z / 2 + .008).applyQuaternion(block.quaternion);
           profileData.profileObject.position.copy(block.position).add(faceOffset); 
           profileData.profileObject.quaternion.copy(block.quaternion);
