@@ -150,7 +150,7 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
   const pointer = new THREE.Vector2();
   const desiredPointer = new THREE.Vector2();
   const coarsePointer = window.matchMedia('(pointer: coarse)');
-  const quality = createQualityController(coarsePointer.matches ? 1 : 2, coarsePointer.matches ? 1 : 2);
+  const quality = createQualityController(coarsePointer.matches ? 1 : 2, 2);
   let renderWidth = 0, renderHeight = 0, outlineSize = 0;
   let pointerDirty = false, pointerX = 0, pointerY = 0;
   const style = getComputedStyle(host);
@@ -416,3 +416,4 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
   }
   return dispose;
 }
+
