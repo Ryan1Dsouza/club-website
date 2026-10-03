@@ -6,6 +6,7 @@ import { createEventStations } from '../lib/event-stations';
 import { populateWorkshopStation } from '../events/workshop-content';
 import EventFlipCard from '../components/events/EventFlipCard';
 import Book from '../components/events/Book';
+import { useCinematicScroll } from '../lib/use-cinematic-scroll';
 import './events-page.css';
 
 const loadRide = () => import('./EventRollercoaster');
@@ -23,6 +24,8 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
   const lastPortal = useRef(0);
   const stations = useMemo(() => createEventStations(events).map(populateWorkshopStation), [events]);
   const station = stations.find(item => item.id === selected);
+
+  useCinematicScroll(mode === 'grid');
 
   useEffect(() => {
     if (portal === null) return;
@@ -48,20 +51,25 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
   return <section className={`events-page events-page--${mode}`} data-event-mode={mode} aria-label="Nucleus events">
     {mode === 'grid' ? <div className={`events-archive${flying ? ' events-archive--departing' : ''}`} inert={flying}>
       <header className="events-heading">
-        <p className="events-eyebrow"><span />Nucleus / The archive</p>
-        <div><h1>Events<span>.</span></h1><p>Small sparks. Lasting connections.<br />Open a chapter of our journey.</p></div>
-        <div className="events-heading__rule"><span>FIELD NOTES / SJEC</span><span>{String(stations.length).padStart(2, '0')} CHAPTERS & COUNTING</span></div>
+        <h1>Events<span>.</span></h1>
       </header>
-      <div className="events-grid" style={{ '--grid-rows': Math.ceil(stations.length / 3), '--mobile-rows': stations.length } as CSSProperties}>
-        {stations.map((item, index) => <article className="events-grid__item" key={item.id} style={{ '--desktop-col': index % 3 * 2 + 1, '--desktop-row': Math.floor(index / 3) + 1, '--tablet-col': index % 2 * 2 + 1, '--tablet-row': Math.floor(index / 2) + 1 } as CSSProperties}>
-          <span className="events-grid__station">STATION {item.number}<ArrowUpRight size={12} /></span>
-          <EventFlipCard event={item.event!} photo={item.event?.photos?.[0]} workshopFolder={item.workshop ?? item.id} onClick={() => setSelected(item.id)} />
-        </article>)}
-        {[0, 1].map(index => <div key={index} className={`events-portal-lane events-portal-lane--${index === 0 ? 'left' : 'right'}`}>
-          <button ref={element => { portalButtons.current[index] = element; }} type="button" className="events-portal" onClick={() => setPortal(index)} aria-haspopup="dialog">
-            <span className="events-portal__signal" /><span>Ride Immersive Experience</span><ArrowUpRight size={16} />
+      <div className="events-grid">
+        {stations.map((item) => (
+          <article key={item.id} className="events-grid__item">
+            <EventFlipCard event={item.event!} photo={item.event?.photos?.[0]} workshopFolder={item.workshop ?? item.id} onClick={() => setSelected(item.id)} />
+          </article>
+        ))}
+        
+        <div className="events-portal-lane events-portal-lane--left">
+          <button ref={element => { portalButtons.current[0] = element; }} type="button" className="events-portal" onClick={() => setPortal(0)} aria-haspopup="dialog">
+            <span className="events-portal__signal" /><span>The Nucleus Ride</span><ArrowUpRight size={16} />
           </button>
-        </div>)}
+        </div>
+        <div className="events-portal-lane events-portal-lane--right">
+          <button ref={element => { portalButtons.current[1] = element; }} type="button" className="events-portal" onClick={() => setPortal(1)} aria-haspopup="dialog">
+            <span className="events-portal__signal" /><span>The Nucleus Ride</span><ArrowUpRight size={16} />
+          </button>
+        </div>
       </div>
       <footer className="events-footer"><span>Hover to discover. Click to relive.</span><span>Made of many minds.</span></footer>
     </div> : <>

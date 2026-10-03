@@ -5,10 +5,8 @@
 [data-tower-status='ready'] .people-tower__stage { position: sticky; top: 0; }
 @media (max-width: 768px), (pointer: coarse) {
   .people-page { background: var(--bg, #020d07); }
-  /* The story provides scroll distance; its scene stays attached to the mobile
-     viewport as browser controls expand/collapse on the first swipe. */
   [data-tower-status='ready'] .people-tower { background: #020d07; }
-  [data-tower-status='ready'] .people-tower__stage { position: fixed; inset: 0; height: auto; will-change: transform; }
+  /* Use sticky positioning to match desktop and prevent address bar layout shifts */
   html:has(.people-page[data-tower-status='ready']) { overscroll-behavior-y: none; }
 }
 .people-tower__world { position: absolute; inset: 0; }

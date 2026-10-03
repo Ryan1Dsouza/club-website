@@ -110,7 +110,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
             <div className="station-book__page station-book__page--left">{renderPage(page, 0)}</div>
             <div className="station-book__page station-book__page--right">{closing && !reduced ? <div className="station-book__end-cover" /> : renderPage(turning && !reduced ? page + 1 : page, 1)}</div>
           </div>
-          {turning && !reduced && <div className="station-book__leaf" aria-hidden="true">
+          {!reduced && <div className="station-book__leaf" aria-hidden="true" style={{ visibility: turning ? 'visible' : 'hidden' }}>
             {leafStrip(0)}
           </div>}
         </div>
