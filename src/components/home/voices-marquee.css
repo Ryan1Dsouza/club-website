@@ -126,7 +126,7 @@
 @media (prefers-reduced-motion: reduce) {
   .vm-marquee-wrapper { overflow-x: auto; user-select: text; }
   .vm-marquee-content { animation: none; }
-  .vm-marquee-content[aria-hidden='true'], .vm-fade-left, .vm-fade-right { display: none; }
+  .vm-marquee-content[aria-hidden='true'], .vm-fade-left, .vm-fade-right, .vm-pause { display: none; }
 }
 
 .vm-meta {
@@ -156,12 +156,7 @@
 }
 
 .vm-pause { margin-top: 20px; }
-/* Touch readers control the cards directly, with no duplicated or faded text. */
-@media (pointer: coarse), (prefers-reduced-motion: reduce) {
-  .vm-marquee-wrapper { overflow-x: auto; user-select: text; }
-  .vm-marquee-content { animation: none; }
-  .vm-marquee-content[aria-hidden='true'], .vm-pause { display: none; }
-}
+/* Reduced motion users control the cards directly, with no duplicated or faded text. */
 
 /* Gradient fades on the edges */
 .vm-fade-left,
