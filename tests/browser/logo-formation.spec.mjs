@@ -21,6 +21,7 @@ test.beforeEach(async ({ page }) => {
           stage: document.querySelector('.site-shell')?.dataset.loadingStage,
           curtain: Boolean(document.querySelector('[data-loading-screen]')),
           assemblyVisible: assembly.visible,
+          pixelRatio: renderer.getPixelRatio(),
         });
       };
     } };
@@ -55,6 +56,7 @@ for (const mobile of [true, false]) {
       expect(await page.evaluate(() => window.__logoFrames.at(-1).assemblyVisible)).toBe(false);
       await page.screenshot({ path: info.outputPath('formed.png') });
       if (mobile) {
+        expect(await page.evaluate(() => window.__logoFrames.at(-1).pixelRatio)).toBe(2);
         const frames = await page.evaluate(() => window.__logoFrames.length);
         await page.waitForTimeout(400);
         expect(await page.evaluate(() => window.__logoFrames.length)).toBe(frames);
@@ -62,6 +64,7 @@ for (const mobile of [true, false]) {
         await expect.poll(() => page.evaluate(() => window.__logoFrames.length)).toBeGreaterThan(frames);
         await expect(hero).toHaveAttribute('data-text-ready', 'true');
         await expect(hero.locator('canvas')).toHaveCount(1);
+        expect(await page.evaluate(() => window.__logoFrames.at(-1).pixelRatio)).toBe(2);
       }
       expect(errors).toEqual([]);
     });

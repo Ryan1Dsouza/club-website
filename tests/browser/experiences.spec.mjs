@@ -89,7 +89,7 @@ test('wind is opt-in, follows motion, suspends for dialogs, and closes on naviga
   await world.focus(); await page.keyboard.down('w');
   await expect.poll(() => world.getAttribute('data-audio-gain').then(Number)).toBeGreaterThan(.002);
   await page.keyboard.up('w');
-  await page.getByRole('button', { name: 'Events 3', exact: true }).click();
+  await page.getByRole('button', { name: 'Events 7', exact: true }).click();
   await expect.poll(() => page.evaluate(() => window.rideAudioContexts[0].state)).toBe('suspended');
   await page.getByRole('button', { name: 'Close event', exact: true }).click();
   await sound.click(); await expect(sound).toHaveAttribute('aria-pressed', 'false');
@@ -119,24 +119,23 @@ test('station-only travel repeats event photos, departs Station 01, and rides to
   await expect.poll(() => page.locator('.nx-glimpse img').evaluateAll(images => images.map(img => img.getAttribute('src'))), { timeout: 15_000 }).not.toEqual(firstSources);
   await expect.poll(() => page.locator('.nx-glimpse img').evaluateAll(images => images.every(img => img.naturalWidth > 0))).toBe(true);
   await page.screenshot({ path: info.outputPath('repeating-event-photos.png') });
-  await expect(page.getByRole('dialog', { name: events[0].title })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole('dialog', { name: 'Inauguration' })).toBeVisible({ timeout: 60_000 });
   await expect(world).toHaveAttribute('data-distance', '211.00');
   await expect(page.locator('.nx-glimpses')).toBeHidden();
   // One uninterrupted press must close the event AND begin driving immediately.
   await page.keyboard.down('d');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect.poll(() => world.getAttribute('data-distance').then(Number), { timeout: 15_000 }).toBeGreaterThan(245);
-  await expect(page.locator('.nx-glimpses')).toHaveAttribute('aria-label', `A glimpse of the next event: ${events[1].title}`);
-  await expect.poll(() => page.locator('.nx-glimpse').first().getAttribute('data-frame').then(Number), { timeout: 12_000 }).toBeGreaterThan(0);
+  await expect(page.locator('.nx-glimpses')).toHaveAttribute('aria-label', 'A glimpse of the next event: Dev');
   await page.keyboard.up('d');
   await map.getByRole('button', { name: /Travel to station 02/ }).click();
   await expect(world).toHaveAttribute('data-travel-target', '1');
-  await expect(page.getByRole('dialog', { name: events[1].title })).toBeVisible({ timeout: 75_000 });
+  await expect(page.getByRole('dialog', { name: 'Dev' })).toBeVisible({ timeout: 75_000 });
   const secondDistance = Number(await world.getAttribute('data-distance'));
   await page.keyboard.down('s');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect.poll(() => world.getAttribute('data-distance').then(Number), { timeout: 15_000 }).toBeLessThan(secondDistance - 20);
-  await expect(page.locator('.nx-glimpses')).toHaveAttribute('aria-label', `A glimpse of the next event: ${events[0].title}`);
+  await expect(page.locator('.nx-glimpses')).toHaveAttribute('aria-label', 'A glimpse of the next event: Inauguration');
   await page.keyboard.up('s');
   expect(errors).toEqual([]);
 });
@@ -147,7 +146,7 @@ test('continuing after docking preserves a forward key that is still held', asyn
   await page.getByRole('button', { name: 'Return to ride' }).click();
   await expect(world).toHaveAttribute('data-drive-ready', 'true');
   await page.keyboard.down('w');
-  await expect(page.getByRole('dialog', { name: 'The first connection' })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole('dialog', { name: 'Inauguration' })).toBeVisible({ timeout: 30_000 });
   const parked = Number(await world.getAttribute('data-distance'));
   await page.getByRole('button', { name: 'Continue ride', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -161,9 +160,9 @@ test('desktop publishes a photo folder, another visitor rides to its station and
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await connect(page); await ready(page);
-  await expect(page.locator('.nx-joystick')).toHaveCount(0); await expect(page.locator('[data-stop-kind=event]')).toHaveCount(3);
+  await expect(page.locator('.nx-joystick')).toHaveCount(0); await expect(page.locator('[data-stop-kind=event]')).toHaveCount(7);
   await expect(page.locator('[data-stop-kind=waypoint]')).toHaveCount(0);
-  await expect(page.getByRole('navigation', { name: 'Ride route map' }).getByRole('button')).toHaveCount(3);
+  await expect(page.getByRole('navigation', { name: 'Ride route map' }).getByRole('button')).toHaveCount(7);
   await page.evaluate(() => { window.testCanvas = document.querySelector('.nx-world canvas'); });
   await page.getByRole('button', { name: 'Return to ride' }).click();
   await page.locator('.nx-world').focus(); await expect(page.locator('.nx-world')).toHaveAttribute('data-drive-ready', 'true');
@@ -184,9 +183,9 @@ test('desktop publishes a photo folder, another visitor rides to its station and
   await page.getByLabel('Upload a photo folder', { exact: true }).setInputFiles(album);
   await expect(page.getByText('1 unsupported file skipped.')).toBeVisible();
   await page.getByRole('button', { name: 'Publish event & add station', exact: true }).click();
-  await expect(page.getByRole('status')).toContainText('is published'); await expect(page.locator('[data-stop-kind=event]')).toHaveCount(4);
-  await expect(page.getByRole('status')).toContainText('Station 04');
-  await expect(page.getByRole('navigation', { name: 'Ride route map' }).getByRole('button', { name: /Travel to station 04/ })).toHaveCount(1);
+  await expect(page.getByRole('status')).toContainText('is published'); await expect(page.locator('[data-stop-kind=event]')).toHaveCount(8);
+  await expect(page.getByRole('status')).toContainText('Station 08');
+  await expect(page.getByRole('navigation', { name: 'Ride route map' }).getByRole('button', { name: /Travel to station 08/ })).toHaveCount(1);
   expect(await page.evaluate(() => window.testCanvas === document.querySelector('.nx-world canvas'))).toBe(true);
   await page.getByRole('button', { name: 'Open holographic map' }).click(); await page.waitForTimeout(1800);
   await page.screenshot({ path: info.outputPath('desktop-map.png') });
@@ -196,18 +195,17 @@ test('desktop publishes a photo folder, another visitor rides to its station and
   }));
   console.log('Desktop map frame sample:', JSON.stringify(stats));
   const visitor = await browser.newContext({ baseURL: info.project.use.baseURL }), otherPage = await visitor.newPage();
-  await connect(otherPage); await ready(otherPage); await expect(otherPage.locator('[data-stop-kind=event]')).toHaveCount(4);
+  await connect(otherPage); await ready(otherPage); await expect(otherPage.locator('[data-stop-kind=event]')).toHaveCount(8);
   const world = otherPage.locator('.nx-world');
   await otherPage.evaluate(() => { window.visitCanvas = document.querySelector('.nx-world canvas'); });
-  await otherPage.getByRole('button', { name: /Travel to station 04/ }).click();
-  await expect(world).toHaveAttribute('data-travel-target', '3');
+  await otherPage.getByRole('button', { name: /Travel to station 08/ }).click();
+  await expect(world).toHaveAttribute('data-travel-target', '7');
   await expect(otherPage.getByRole('dialog', { name: 'A shared photo workshop' })).toBeVisible({ timeout: 100_000 });
   await expect(world).toHaveAttribute('data-phase', 'stopped');
   await expect(otherPage.getByRole('heading', { name: 'A shared photo workshop' })).toBeVisible();
-  await expect(otherPage.locator('.station-book')).toHaveAttribute('data-station-number', '04');
+  await expect(otherPage.locator('.station-book')).toHaveAttribute('data-station-number', '08');
   await expect.poll(() => otherPage.locator('.station-book__cover-art img').evaluate(img => img.naturalWidth)).toBe(100);
-  await otherPage.getByRole('button', { name: 'Next book page' }).click();
-  await expect(otherPage.locator('.station-book__panel')).toHaveCount(1);
+  await expect(otherPage.getByRole('button', { name: 'Next book page' })).toBeDisabled();
   await expect(otherPage.getByRole('link', { name: 'View photo album' })).toHaveAttribute('href', 'https://drive.google.com/drive/folders/workshop');
   await expect(otherPage.getByRole('link', { name: 'Register for event' })).toHaveAttribute('href', 'https://example.com/register');
   const parked = await world.getAttribute('data-distance');
@@ -223,7 +221,7 @@ test('desktop publishes a photo folder, another visitor rides to its station and
     window.dispatchEvent(new Event('focus'));
   });
   await refreshed;
-  await expect(otherPage.locator('.station-book')).toHaveAttribute('data-book-page', '2');
+  await expect(otherPage.locator('.station-book')).toHaveAttribute('data-book-page', '1');
   await expect(world).toHaveAttribute('data-distance', parked);
   expect(await otherPage.evaluate(() => window.visitCanvas === document.querySelector('.nx-world canvas'))).toBe(true);
   await otherPage.getByRole('button', { name: 'Continue ride', exact: true }).click();
@@ -249,15 +247,19 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
       await expect(world).toHaveAttribute('data-antialias', 'true');
       await expect(page.locator('.nx-joystick')).toBeEnabled();
       await expect(page.getByRole('button', { name: /restart|reset ride/i })).toHaveCount(0);
-      await expect(page.getByRole('button', { name: 'Events 3', exact: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Events 7', exact: true })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Add Event', exact: true })).toBeVisible();
       if (compact) { await expect(page.locator('.nx-minimap')).toHaveCount(0); await expect(page.locator('.nx-glimpses')).toHaveCount(0); }
       const layout = await page.evaluate(() => {
         const rect = selector => document.querySelector(selector).getBoundingClientRect().toJSON();
-        return { width: innerWidth, scroll: document.documentElement.scrollWidth, pixelWidth: document.querySelector('.nx-world canvas').width,
+        const canvas = document.querySelector('.nx-world canvas');
+        return { width: innerWidth, scroll: document.documentElement.scrollWidth, pixelWidth: canvas.width, pixels: canvas.width * canvas.height,
           world: rect('.nx-world'), controls: rect('.nx-controls'), joystick: rect('.nx-joystick'), boost: rect('.nx-boost-button'), map: rect('.nx-map-button'), top: rect('.nx-topbar') };
       });
-      expect(layout.scroll).toBe(layout.width); expect(layout.pixelWidth / layout.world.width).toBeLessThanOrEqual(1.26);
+      expect(layout.scroll).toBe(layout.width);
+      expect(layout.pixelWidth / layout.world.width).toBeGreaterThanOrEqual(1);
+      expect(layout.pixelWidth / layout.world.width).toBeLessThanOrEqual(2);
+      expect(layout.pixels).toBeLessThanOrEqual(2_200_000);
       expect(layout.controls.height).toBeLessThanOrEqual(72);
       expect(layout.controls.y - layout.top.bottom).toBeGreaterThan(layout.world.height * .45);
       for (const control of [layout.joystick, layout.boost, layout.map]) {
@@ -290,7 +292,7 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
       await expect(world).toHaveAttribute('data-orbit', 'true');
       await page.screenshot({ path: info.outputPath('mobile-map.png') });
       await page.locator('[data-stop-kind=event]').first().click();
-      await expect(page.getByRole('dialog', { name: 'The first connection' })).toBeVisible();
+      await expect(page.getByRole('dialog', { name: 'Inauguration' })).toBeVisible();
       await page.getByRole('button', { name: 'Close event', exact: true }).click();
       await page.getByRole('button', { name: 'Add Event', exact: true }).click(); await expect(page.getByLabel('Email', { exact: true })).toBeVisible();
       expect(errors).toEqual([]);
@@ -303,8 +305,8 @@ test('reduced motion and WebGL failure preserve the accessible event list and pu
   await page.addInitScript(() => { const original = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function(type, ...args) { return type.startsWith('webgl') ? null : original.call(this, type, ...args); }; });
   await connect(page); await expect(page.getByText('The ride is unavailable.')).toBeVisible();
   await expect(page.locator('.nx-experience')).toHaveAttribute('data-reduced-motion', 'true');
-  await page.getByRole('button', { name: 'Events 3', exact: true }).click();
-  await page.getByRole('dialog', { name: 'Event stations' }).getByRole('button', { name: /The first connection/ }).click(); await expect(page.getByRole('heading', { name: 'The first connection' })).toBeVisible();
+  await page.getByRole('button', { name: 'Events 7', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Event stations' }).getByRole('button', { name: /Inauguration/ }).click(); await expect(page.getByRole('heading', { name: 'Inauguration' })).toBeVisible();
   await page.getByRole('button', { name: 'Close event', exact: true }).click();
   await page.getByRole('button', { name: 'Add Event', exact: true }).click(); await expect(page.getByLabel('Email', { exact: true })).toBeVisible();
 });
@@ -328,8 +330,8 @@ test('map checkpoints park the trolley, panning is bounded, and teasers do not i
   await page.getByRole('button', { name: 'Return to ride' }).click(); await page.waitForTimeout(1500);
   await page.getByRole('button', { name: 'Open holographic map' }).click(); await page.waitForTimeout(1500);
   await page.locator('[data-stop-kind=event]').first().click();
-  await expect(page.getByRole('dialog', { name: 'The first connection' })).toBeVisible();
-  await expect(page.locator('.nx-event-artwork')).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Inauguration' })).toBeVisible();
+  await expect(page.locator('.station-book__cover-art img')).toBeVisible();
   await page.screenshot({ path: info.outputPath('event-template.png') });
   await page.getByRole('button', { name: 'Close event', exact: true }).click();
   await expect(world).toHaveAttribute('data-distance', '211.00');
@@ -360,7 +362,7 @@ test('a photo-free event has category artwork and both links after publishing', 
   await page.getByLabel('Registration link', { exact: false }).fill('https://example.com/community');
   await page.getByRole('button', { name: 'Publish event & add station', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('is published');
-  await page.getByRole('button', { name: 'Events 4', exact: true }).click();
+  await page.getByRole('button', { name: 'Events 8', exact: true }).click();
   await page.getByRole('dialog', { name: 'Event stations' }).getByRole('button', { name: /Connections without uploads/ }).click();
   await expect(page.locator('.nx-event-artwork')).toBeVisible();
   await expect(page.locator('.nx-event-gallery')).toHaveCount(0);

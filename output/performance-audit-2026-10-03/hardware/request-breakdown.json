@@ -1,0 +1,276 @@
+[
+  {
+    "name": "mobile-home",
+    "loader": {
+      "requests": 34,
+      "transfer": 508150,
+      "decoded": 983592
+    },
+    "scripts": {
+      "requests": 4,
+      "transfer": 287183,
+      "decoded": 977890
+    },
+    "fonts": {
+      "requests": 3,
+      "transfer": 98302,
+      "decoded": 95416
+    },
+    "images": {
+      "requests": 0,
+      "transfer": 0,
+      "decoded": 0
+    },
+    "lcp": "NUCLEUS",
+    "slowScripts": [
+      {
+        "url": "/assets/index-iqgFDlwM.js",
+        "transfer": 143624,
+        "decoded": 436588,
+        "priority": "High",
+        "start": 75.15799999982119,
+        "end": 98.21699999924749
+      },
+      {
+        "url": "/assets/logo-scene-DDM0xDYb.js",
+        "transfer": 5094,
+        "decoded": 9057,
+        "priority": "High",
+        "start": 205.6940000001341,
+        "end": 215.51699999906123
+      },
+      {
+        "url": "/assets/three-Cb8aZj6Z.js",
+        "transfer": 136708,
+        "decoded": 531490,
+        "priority": "High",
+        "start": 205.81199999991804,
+        "end": 244.7050000000745
+      },
+      {
+        "url": "/assets/event-quality-BrajZ-Lg.js",
+        "transfer": 1757,
+        "decoded": 755,
+        "priority": "High",
+        "start": 206.18599999975413,
+        "end": 213.32699999958277
+      }
+    ]
+  },
+  {
+    "name": "mobile-experiences",
+    "loader": {
+      "requests": 34,
+      "transfer": 508150,
+      "decoded": 983592
+    },
+    "scripts": {
+      "requests": 3,
+      "transfer": 148791,
+      "decoded": 445377
+    },
+    "fonts": {
+      "requests": 2,
+      "transfer": 77080,
+      "decoded": 75156
+    },
+    "images": {
+      "requests": 0,
+      "transfer": 0,
+      "decoded": 0
+    },
+    "lcp": "Two ways in.",
+    "slowScripts": [
+      {
+        "url": "/assets/index-iqgFDlwM.js",
+        "transfer": 143624,
+        "decoded": 436588,
+        "priority": "High",
+        "start": 46.027000000700355,
+        "end": 63.59300000127405
+      },
+      {
+        "url": "/assets/EventsPage-5fA9xcXw.js",
+        "transfer": 4005,
+        "decoded": 8628,
+        "priority": "High",
+        "start": 109.31300000008196,
+        "end": 113.76300000119954
+      },
+      {
+        "url": "/assets/arrow-left-CW1q0J9F.js",
+        "transfer": 1162,
+        "decoded": 161,
+        "priority": "High",
+        "start": 109.47900000121444,
+        "end": 112.4740000013262
+      }
+    ]
+  },
+  {
+    "name": "mobile-people",
+    "loader": {
+      "requests": 34,
+      "transfer": 508150,
+      "decoded": 983592
+    },
+    "scripts": {
+      "requests": 7,
+      "transfer": 328503,
+      "decoded": 1100051
+    },
+    "fonts": {
+      "requests": 1,
+      "transfer": 49394,
+      "decoded": 48432
+    },
+    "images": {
+      "requests": 0,
+      "transfer": 0,
+      "decoded": 0
+    },
+    "lcp": "Tap a block to pull it out. Drag sideways to play. Swipe up to meet the team.",
+    "slowScripts": [
+      {
+        "url": "/assets/index-iqgFDlwM.js",
+        "transfer": 143624,
+        "decoded": 436588,
+        "priority": "High",
+        "start": 43.32400000002235,
+        "end": 60.6929999999702
+      },
+      {
+        "url": "/assets/PeoplePage-DMR6kIzV.js",
+        "transfer": 2783,
+        "decoded": 4073,
+        "priority": "High",
+        "start": 95.26900000032037,
+        "end": 100.51699999999255
+      },
+      {
+        "url": "/assets/people-tower-motion-rW6-VmEw.js",
+        "transfer": 2030,
+        "decoded": 1823,
+        "priority": "High",
+        "start": 95.43699999991804,
+        "end": 100.34999999962747
+      },
+      {
+        "url": "/assets/arrow-down--k8zjW0k.js",
+        "transfer": 1162,
+        "decoded": 161,
+        "priority": "High",
+        "start": 95.98399999924004,
+        "end": 98.58600000012666
+      },
+      {
+        "url": "/assets/people-tower-Dn0msb0h.js",
+        "transfer": 39611,
+        "decoded": 121039,
+        "priority": "High",
+        "start": 161.98199999984354,
+        "end": 183.69600000046194
+      },
+      {
+        "url": "/assets/three-Cb8aZj6Z.js",
+        "transfer": 136708,
+        "decoded": 531490,
+        "priority": "High",
+        "start": 162.5690000001341,
+        "end": 192.34400000050664
+      },
+      {
+        "url": "/assets/BufferGeometryUtils-CyVYaxEE.js",
+        "transfer": 2585,
+        "decoded": 4877,
+        "priority": "High",
+        "start": 162.72599999979138,
+        "end": 180.7620000001043
+      }
+    ]
+  },
+  {
+    "name": "mobile-projects",
+    "loader": {
+      "requests": 34,
+      "transfer": 508150,
+      "decoded": 983592
+    },
+    "scripts": {
+      "requests": 2,
+      "transfer": 145684,
+      "decoded": 439673
+    },
+    "fonts": {
+      "requests": 1,
+      "transfer": 49394,
+      "decoded": 48432
+    },
+    "images": {
+      "requests": 0,
+      "transfer": 0,
+      "decoded": 0
+    },
+    "lcp": "Ideas,\nmade real.",
+    "slowScripts": [
+      {
+        "url": "/assets/index-iqgFDlwM.js",
+        "transfer": 143624,
+        "decoded": 436588,
+        "priority": "High",
+        "start": 31.55099999997765,
+        "end": 48.338000000454485
+      },
+      {
+        "url": "/assets/WorkPage-Bxa4BXqk.js",
+        "transfer": 2060,
+        "decoded": 3085,
+        "priority": "High",
+        "start": 84.66399999987334,
+        "end": 87.57400000002235
+      }
+    ]
+  },
+  {
+    "name": "mobile-recruitment",
+    "loader": {
+      "requests": 34,
+      "transfer": 508150,
+      "decoded": 983592
+    },
+    "scripts": {
+      "requests": 2,
+      "transfer": 145159,
+      "decoded": 437736
+    },
+    "fonts": {
+      "requests": 1,
+      "transfer": 49394,
+      "decoded": 48432
+    },
+    "images": {
+      "requests": 0,
+      "transfer": 0,
+      "decoded": 0
+    },
+    "lcp": "Stay\nconnected.",
+    "slowScripts": [
+      {
+        "url": "/assets/index-iqgFDlwM.js",
+        "transfer": 143624,
+        "decoded": 436588,
+        "priority": "High",
+        "start": 30.118999999947846,
+        "end": 44.75100000016391
+      },
+      {
+        "url": "/assets/Recruitment-zspVHhML.js",
+        "transfer": 1535,
+        "decoded": 1148,
+        "priority": "High",
+        "start": 79.51400000043213,
+        "end": 82.31699999980628
+      }
+    ]
+  }
+]

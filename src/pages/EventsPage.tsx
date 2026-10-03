@@ -39,7 +39,7 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
               whileHover={reduced ? undefined : { y: -6 }} whileTap={reduced ? undefined : { scale: .985 }} transition={{ type: 'spring', stiffness: 240, damping: 28 }}>
               <span className="events-choice-card__top"><span>01 / At your pace</span><MoveDown size={19} /></span>
               <div className="events-choice-card__visual" aria-hidden="true"><span className="events-choice-card__plate" /><EventArtwork variant={0} /></div>
-              <span className="events-choice-card__bottom"><span><small>Superficial experience</small><strong>Quick Browse</strong><span>A fast, visual overview of all upcoming events.</span></span><i><ArrowUpRight size={27} /></i></span>
+              <span className="events-choice-card__bottom"><span><small>Superficial experience</small><strong>Quick Browse</strong><span>A fast, visual overview of our events.</span></span><i><ArrowUpRight size={27} /></i></span>
             </motion.button>
             <motion.button className="events-choice-card events-choice-card--ride" data-mode="immersive" onClick={() => choose('immersive')}
               whileHover={reduced ? undefined : { y: -6 }} whileTap={reduced ? undefined : { scale: .985 }} transition={{ type: 'spring', stiffness: 240, damping: 28 }}>

@@ -89,13 +89,19 @@
   .people-tower__rebuild { gap: 5px; padding: 8px; font-size: 10px; }
   .people-tower__hint { max-width: 300px; font-size: 10px; }
   .people-tower__picker select { max-width: 175px; font-size: 10px; }
+  .tower-profile { color: #fff; }
+  .tower-profile::before, .tower-profile::after { display: none; }
+  .tower-profile__photo, .tower-profile__photo-fade { inset: 0; width: 100%; }
+  .tower-profile__photo-fade { background: linear-gradient(to bottom, rgb(0 0 0 / .35), transparent 35%, rgb(0 0 0 / .6) 65%, rgb(0 0 0 / .85)); }
+  .tower-profile__meta, .tower-profile__copy, .tower-profile__footer { text-shadow: 0 2px 8px rgb(0 0 0 / .65); }
   .tower-profile__meta { inset: 22px 20px auto; font-size: 9px; }
   .tower-profile__copy { bottom: 13%; left: 7%; right: 7%; }
   .tower-profile__role { font-size: 10px; letter-spacing: .09em; margin-bottom: 20px; }
+  .tower-profile__name > span:last-child { opacity: 1; }
   .tower-profile__monogram { top: 17%; right: 9%; }
 
   .tower-profile__cross { top: 21%; left: 7%; font-size: 35px; }
-  .tower-profile__footer { font-size: 8px; inset-inline: 7%; }
+  .tower-profile__footer { z-index: 2; font-size: 8px; inset-inline: 7%; }
   .people-roster__heading { align-items: flex-start; flex-direction: column; gap: 20px; }
   .people-roster__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .people-roster__member { padding: 22px 19px; }

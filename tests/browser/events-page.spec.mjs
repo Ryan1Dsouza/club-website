@@ -28,6 +28,8 @@ test('choice screen loads neither scene, Quick Browse snaps with parallax, and d
   await page.screenshot({ path: info.outputPath('events-choice-desktop.png') });
   await browse(page);
   expect(worldRequests).toEqual([]);
+  await expect(page.locator('[data-event-card]')).toHaveCount(7);
+  await expect(page.locator('.ec-counter > span').last()).toHaveText('07');
   const scroller = page.getByRole('region', { name: 'Event carousel' });
   await expect(scroller).toHaveCSS('scroll-snap-type', 'y mandatory');
   await expect(scroller).toBeFocused();
@@ -53,7 +55,8 @@ test('choice screen loads neither scene, Quick Browse snaps with parallax, and d
   await expect(explore).toBeFocused();
   await scroller.focus();
   await page.keyboard.press('End');
-  await expect(carousel(page)).toHaveAttribute('data-active-event', site.events.at(-1).id);
+  await expect(carousel(page)).toHaveAttribute('data-active-event', 'preview-station-6');
+  await expect(page.getByRole('heading', { name: 'Event 07', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Next event', exact: true })).toBeDisabled();
   await page.getByRole('button', { name: 'Change experience' }).click();
   await expect(page.getByRole('button', { name: /Quick Browse/ })).toBeFocused();
@@ -81,18 +84,30 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
     await expect(carousel(page)).toHaveAttribute('data-active-event', site.events[1].id);
     const violations = (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations;
     expect(violations.map(({ id, nodes }) => ({ id, targets: nodes.map(node => node.target) }))).toEqual([]);
+    for (let index = 2; index < 7; index++) {
+      await page.getByRole('button', { name: 'Next event', exact: true }).click();
+      await expect(page.locator('.ec-counter > span').first()).toHaveText(String(index + 1).padStart(2, '0'));
+      if (index < site.events.length) continue;
+      await expect(card.getByRole('heading', { name: `Event ${String(index + 1).padStart(2, '0')}`, exact: true })).toBeVisible();
+      await expect(card.locator('.ec-category')).toContainText('Details coming soon');
+      await expect(card.locator('.ec-meta, .ec-open')).toHaveCount(0);
+      await expect(card).not.toContainText('Coming up');
+    }
+    await expect(page.getByRole('button', { name: 'Next event', exact: true })).toBeDisabled();
+    await page.screenshot({ path: info.outputPath(`event-carousel-seven-${viewport.width}.png`) });
   });
 }
 
-test('photos overflow their panel, unpublished events stay private, and one-event navigation is bounded', async ({ page }, info) => {
+test('photos overflow their panel, unpublished events stay private, and preview navigation is bounded', async ({ page }, info) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const image = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800"><circle cx="300" cy="290" r="230" fill="#c3e5c8"/><path d="M130 750L470 750 380 200 220 200Z" fill="#364939"/><text x="300" y="330" text-anchor="middle" fill="white" font-size="66">NUCLEUS</text></svg>');
   const event = { ...site.events[0], photos: [{ id: 'photo', name: 'Event poster', url: image }], registrationUrl: 'https://example.com/register', albumUrl: 'https://example.com/album' };
   await open(page, { ...site, events: [event, { ...site.events[1], published: false }] });
   await browse(page);
-  await expect(page.locator('[data-event-card]')).toHaveCount(1);
+  await expect(page.locator('[data-event-card]')).toHaveCount(7);
+  await expect(page.locator(`[data-event-card="${site.events[1].id}"]`)).toHaveCount(0);
   await expect(page.locator('.ec-photo-main')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Next event', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Next event', exact: true })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Previous event', exact: true })).toBeDisabled();
   await page.screenshot({ path: info.outputPath('event-carousel-photo.png') });
   await page.getByRole('button', { name: `Explore ${event.title}` }).click();
@@ -117,7 +132,7 @@ test('long titles and failed photos remain usable on a short phone screen', asyn
   const event = { ...site.events[0], title: 'A collaborative workshop on building useful artificial intelligence with the Nucleus community', photos: [{ id: 'broken', name: 'Unavailable photo', url: '/missing-event-photo.png' }] };
   await open(page, { ...site, events: [event] });
   await browse(page);
-  await expect(page.locator('.ec-foreground .event-sculpture')).toBeVisible();
+  await expect(page.locator('[data-event-card][data-active="true"] .ec-foreground .event-sculpture')).toBeVisible();
   const title = await page.getByRole('heading', { name: event.title, exact: true }).boundingBox();
   expect(title.x).toBeGreaterThanOrEqual(0); expect(title.x + title.width).toBeLessThanOrEqual(320);
   const button = await page.locator('.ec-open').boundingBox();

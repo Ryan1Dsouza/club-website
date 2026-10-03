@@ -1,0 +1,105 @@
+[
+  {
+    "label": "mobile-people",
+    "score": 73,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 1984.314,
+        "display": "2.0 s"
+      },
+      "largest-contentful-paint": {
+        "value": 5465.628000000001,
+        "display": "5.5 s"
+      },
+      "speed-index": {
+        "value": 4053.6841897577483,
+        "display": "4.1 s"
+      },
+      "total-blocking-time": {
+        "value": 214,
+        "display": "210 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "interactive": {
+        "value": 5877.870560000001,
+        "display": "5.9 s"
+      }
+    },
+    "bytes": 919124,
+    "requests": 48,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.0 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "5.5 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "4.1 s"
+      },
+      {
+        "id": "total-blocking-time",
+        "title": "Total Blocking Time",
+        "value": "210 ms"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "320 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "5.9 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 146 KiB",
+        "savings": {
+          "FCP": 300,
+          "LCP": 750
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 300 ms",
+        "savings": {
+          "FCP": 300,
+          "LCP": 300
+        }
+      }
+    ]
+  }
+]

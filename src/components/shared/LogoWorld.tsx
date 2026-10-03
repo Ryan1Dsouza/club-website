@@ -18,7 +18,7 @@ export interface LogoWorldProps {
   minimap: RefObject<RideMapHandle | null>;
   onTravelChange: (station: number | null) => void;
   onBoostChange: (active: boolean) => void;
-  command: { serial: number; station: number | null; resume?: boolean; driveKey?: string; travel?: boolean };
+  command: { serial: number; station: number | null; resume?: boolean; driveKey?: string; travel?: boolean; board?: boolean };
   onReady: () => void;
   onError: () => void;
   onRecovering?: (recovering: boolean) => void;

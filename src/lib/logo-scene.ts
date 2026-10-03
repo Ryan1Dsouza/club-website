@@ -256,7 +256,8 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
   const edge = makeContour(2);
 
   const resizeBuffer = () => {
-    const pixelRatio = qualityPixelRatio(quality.level, renderWidth, renderHeight, window.devicePixelRatio, coarsePointer.matches);
+    const level = coarsePointer.matches && completed ? 2 : quality.level;
+    const pixelRatio = qualityPixelRatio(level, renderWidth, renderHeight, window.devicePixelRatio, coarsePointer.matches);
     uniforms.uPixelRatio.value = pixelRatio;
     renderer.setPixelRatio(pixelRatio);
     renderer.setSize(renderWidth, renderHeight, false);
@@ -352,11 +353,15 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
     outlines[0].mesh.visible = edge.opacity > 0;
     logo.position.set(pointer.x, pointer.y, 0);
     assembly.visible = reveal < 0.84;
-    renderer.render(scene, camera);
-    if (!completed && reveal === 1) {
+    const justCompleted = !completed && reveal === 1;
+    if (justCompleted) {
       completed = true;
-      onComplete();
+      // The retained phone frame can be sharp without paying for continuous
+      // high-resolution rendering. Keep this quality when resizing or waking.
+      if (coarsePointer.matches) resizeBuffer();
     }
+    renderer.render(scene, camera);
+    if (justCompleted) onComplete();
     // Phones play the complete formation once, then retain the finished frame.
     // Resizing or returning onscreen wakes one paint without restarting it.
     if (!completed || !coarsePointer.matches) frame = requestAnimationFrame(animate);

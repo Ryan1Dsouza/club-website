@@ -1,5 +1,6 @@
 import layout from './event-logo.json' with { type: 'json' };
 import type { ClubEvent } from '../types';
+import type { WorkshopId } from '../experiences/stations';
 
 export type Point = { x: number; z: number };
 export type WorldPoint = Point & { y: number };
@@ -16,7 +17,7 @@ export type MoveInput = { x: number; y: number };
 export type WorldMode = 'overview' | 'explore';
 export type WorldSnapshot = Point & { yaw: number; nearest: number | null; distance: number; moving: boolean };
 export const WORLD = layout;
-export type Station = { id: string; index: number; number: string; name: string; position: Point; radius: number; event: ClubEvent | null; kind?: 'event' | 'waypoint' };
+export type Station = { id: string; index: number; number: string; name: string; position: Point; radius: number; event: ClubEvent | null; workshop?: WorkshopId; kind?: 'event' | 'waypoint' };
 export const SPAWN: Point = { x: layout.spawn[0], z: layout.spawn[1] };
 export const START_YAW = Math.atan2(SPAWN.x - layout.route[1][0], SPAWN.z - layout.route[1][1]);
 export const STATION_RADIUS = 1.5;

@@ -3,6 +3,7 @@ import { motion, useInView, useMotionValueEvent, useReducedMotion, useScroll, us
 import { ArrowDown, ArrowUp, ArrowUpRight, CalendarDays, MapPin } from 'lucide-react';
 import type { ClubEvent } from '../types';
 import { eventTheme } from '../lib/event-artwork';
+import { createExperienceStations } from '../lib/experience-stations';
 import EventArtwork from '../components/events/EventArtwork';
 import Modal from '../components/shared/Modal';
 import './event-carousel.css';
@@ -11,6 +12,7 @@ import './event-carousel.css';
 const ART_SPRING = { stiffness: 115, damping: 25, mass: 1.05 };
 const PANEL_SPRING = { stiffness: 180, damping: 30, mass: .8 };
 const BACKGROUND_SPRING = { stiffness: 85, damping: 28, mass: 1.1 };
+type BrowseEvent = ClubEvent & { placeholder?: boolean };
 
 function titleLines(title: string) {
   const words = title.trim().split(/\s+/), lines: string[] = [];
@@ -29,7 +31,7 @@ function dateLabel(event: ClubEvent) {
 }
 
 function EventCard({ event, index, active, container, onOpen }: {
-  event: ClubEvent; index: number; active: boolean; container: RefObject<HTMLDivElement | null>; onOpen: () => void;
+  event: BrowseEvent; index: number; active: boolean; container: RefObject<HTMLDivElement | null>; onOpen: () => void;
 }) {
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
@@ -50,7 +52,7 @@ function EventCard({ event, index, active, container, onOpen }: {
   const hasPhoto = photo && !imageFailed;
   const past = new Date(event.endsAt || event.startsAt).getTime() < Date.now();
 
-  return <article ref={ref} className="ec-card" data-event-card={event.id} data-active={active} inert={!active}
+  return <article ref={ref} className="ec-card" data-event-card={event.id} data-active={active} data-placeholder={event.placeholder || undefined} inert={!active}
     aria-label={event.title} aria-roledescription="slide"
     style={{ '--event-accent': theme.accent, '--event-panel': theme.panel } as CSSProperties}>
     <motion.div className="ec-backdrop" style={{ y: reduced ? 0 : backdropY }} aria-hidden="true">
@@ -60,7 +62,7 @@ function EventCard({ event, index, active, container, onOpen }: {
     <motion.span className="ec-ghost-type" style={{ y: reduced ? 0 : ghostY }} aria-hidden="true">{String(index + 1).padStart(2, '0')}</motion.span>
     <div className="ec-copy">
       <motion.p className="ec-category" initial={false} animate={{ opacity: inView || reduced ? 1 : 0, y: inView || reduced ? 0 : 14 }} transition={{ duration: reduced ? 0 : .35 }}>
-        <span />{event.category || 'Nucleus event'}<i />{past ? 'From the archive' : 'Coming up'}
+        <span />{event.category || 'Nucleus event'}<i />{event.placeholder ? 'Details coming soon' : past ? 'From the archive' : 'Coming up'}
       </motion.p>
       <h2 className="ec-title" aria-label={event.title} style={{ '--title-size': `${Math.min(8.6, 85 / longestLine)}vw`, '--title-mobile-size': `${Math.min(12.8, 128 / longestLine)}vw` } as CSSProperties}>
         {lines.map((line, lineIndex) => <span className="ec-title__mask" key={lineIndex} aria-hidden="true">
@@ -71,8 +73,10 @@ function EventCard({ event, index, active, container, onOpen }: {
       <motion.div className="ec-copy__details" initial={false} animate={{ opacity: inView || reduced ? 1 : 0, y: inView || reduced ? 0 : 22 }}
         transition={{ duration: reduced ? 0 : .5, delay: reduced ? 0 : .14, ease: [.22, 1, .36, 1] }}>
         <p className="ec-description">{event.description}</p>
-        <div className="ec-meta"><span><CalendarDays size={14} />{dateLabel(event)}</span><span><MapPin size={14} />{event.location || 'Location to be announced'}</span></div>
-        <button className="ec-open" onClick={onOpen} aria-label={`Explore ${event.title}`}><span>Explore event</span><ArrowUpRight size={20} /></button>
+        {!event.placeholder && <>
+          <div className="ec-meta"><span><CalendarDays size={14} />{dateLabel(event)}</span><span><MapPin size={14} />{event.location || 'Location to be announced'}</span></div>
+          <button className="ec-open" onClick={onOpen} aria-label={`Explore ${event.title}`}><span>Explore event</span><ArrowUpRight size={20} /></button>
+        </>}
       </motion.div>
     </div>
     <div className="ec-scene" aria-hidden="true">
@@ -90,7 +94,7 @@ function EventCard({ event, index, active, container, onOpen }: {
   </article>;
 }
 
-function CarouselScene({ events }: { events: ClubEvent[] }) {
+function CarouselScene({ events }: { events: BrowseEvent[] }) {
   const container = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const [active, setActive] = useState(0);
@@ -134,7 +138,7 @@ function CarouselScene({ events }: { events: ClubEvent[] }) {
   return <motion.div className="event-carousel" data-active-event={events[current].id} data-reduced-motion={Boolean(reduced)}
     style={{ backgroundColor: reduced ? themes[current].background : background }}>
     <h1 className="sr-only">Nucleus events — Quick Browse</h1>
-    <p id="event-carousel-help" className="sr-only">Scroll to explore events. Use the up and down arrow keys, Page Up, Page Down, Home, or End when the carousel is focused. Each event has an Explore event button.</p>
+    <p id="event-carousel-help" className="sr-only">Scroll to explore events. Use the up and down arrow keys, Page Up, Page Down, Home, or End when the carousel is focused. Open available event details with the Explore event button.</p>
     <div ref={container} className="ec-scroll" tabIndex={0} role="region" aria-label="Event carousel" aria-roledescription="carousel" aria-describedby="event-carousel-help" data-lenis-prevent onKeyDown={keyNavigate}>
       {events.map((event, index) => <EventCard key={event.id} event={event} index={index} active={index === current} container={container} onOpen={() => setSelected(event)} />)}
     </div>
@@ -158,7 +162,14 @@ function CarouselScene({ events }: { events: ClubEvent[] }) {
 }
 
 export default function EventCarousel({ events }: { events: ClubEvent[] }) {
-  const published = useMemo(() => events.filter(event => event.published), [events]);
-  if (!published.length) return <div className="ec-empty"><span className="events-eyebrow">Nucleus / What's next</span><EventArtwork variant={0} /><h1>The next connection<br /><em>is taking shape.</em></h1><p>New events will appear here. Come back soon.</p></div>;
-  return <CarouselScene events={published} />;
+  const collection = useMemo<BrowseEvent[]>(() => {
+    if (!events.some(event => event.published)) return [];
+    return createExperienceStations(events).map(station => station.event ?? {
+      id: station.id, title: `Event ${station.number}`, placeholder: true,
+      description: 'Details and highlights from this club event will be added soon.',
+      startsAt: '', endsAt: '', location: '', category: 'Nucleus event', registrationUrl: '', published: false,
+    });
+  }, [events]);
+  if (!collection.length) return <div className="ec-empty"><span className="events-eyebrow">Nucleus / What's next</span><EventArtwork variant={0} /><h1>The next connection<br /><em>is taking shape.</em></h1><p>New events will appear here. Come back soon.</p></div>;
+  return <CarouselScene events={collection} />;
 }

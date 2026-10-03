@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import Lenis from '@studio-freight/lenis';
+import type Lenis from '@studio-freight/lenis';
+import { createCinematicLenis } from './cinematic-lenis';
 
 /** Smooth wheel input while keeping touch scrolling on the browser compositor. */
 export function useCinematicScroll(enabled: boolean, syncScenes = false) {
@@ -63,13 +64,7 @@ export function useCinematicScroll(enabled: boolean, syncScenes = false) {
       if (!preference.matches) return;
       // Duration mode uses time-based easing instead of frame-rate-dependent lerp,
       // eliminating micro-stutters caused by WebGL frame drops on the team page.
-      lenis = new Lenis({
-        smoothWheel: true,
-        syncTouch: false,
-        wheelMultiplier: 1,
-        duration: .6,
-        easing: (t: number) => 1 - Math.pow(1 - t, 4), // ease-out quartic
-      });
+      lenis = createCinematicLenis();
       animationTime = 0;
       wake();
     };

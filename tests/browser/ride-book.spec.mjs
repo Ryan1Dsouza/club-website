@@ -35,26 +35,26 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 851 
     page.on('pageerror', error => errors.push(error.message));
     try {
       await openRide(page);
-      await page.getByRole('button', { name: 'Events 3', exact: true }).click();
-      await page.getByRole('dialog', { name: 'Event stations' }).getByRole('button', { name: /The first connection/ }).click();
-      const book = page.locator('.station-book'), dialog = page.getByRole('dialog', { name: 'The first connection' });
+      await page.getByRole('button', { name: 'Events 7', exact: true }).click();
+      await page.getByRole('dialog', { name: 'Event stations' }).getByRole('button', { name: /Inauguration/ }).click();
+      const book = page.locator('.station-book'), dialog = page.getByRole('dialog', { name: 'Inauguration' });
       await expect(book).toHaveAttribute('data-book-page', '1');
       await expect(book).toHaveAttribute('data-station-number', '01');
-      await expect(dialog).toContainText(site.events[0].description);
+      await expect(dialog).toContainText('A moment from Inauguration.');
       await expect(page.getByRole('button', { name: 'Previous book page' })).toBeDisabled();
       await page.waitForTimeout(500);
       await page.screenshot({ path: info.outputPath('book-cover.png') });
-      const surface = page.getByRole('region', { name: 'The first connection event book' });
+      const surface = page.getByRole('region', { name: 'Inauguration event book' });
       if (mobile) {
         const box = await surface.boundingBox(), cdp = await context.newCDPSession(page);
         const x = box.x + box.width * .8, y = box.y + box.height * .85;
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
-        for (let offset = 15; offset <= 90; offset += 15) {
+        for (let offset = 20; offset <= 300; offset += 20) {
           await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y - offset }] });
         }
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
         await cdp.detach();
-      } else { await surface.hover(); await page.mouse.wheel(0, 220); }
+      } else { await surface.hover(); await page.mouse.wheel(0, 420); }
       await expect(book).toHaveAttribute('data-book-page', '2');
       await expect(book.locator('.station-book__panel')).toHaveCount(2);
       await expect.poll(() => book.locator('.station-book__panel img').evaluateAll(images => images.every(image => image.naturalWidth > 0))).toBe(true);
@@ -65,10 +65,14 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 851 
       await expect(dialog).toBeVisible();
       await page.getByRole('button', { name: 'Next book page' }).click();
       await expect(book).toHaveAttribute('data-book-page', '4');
+      for (let next = 5; next <= 7; next++) {
+        await page.getByRole('button', { name: 'Next book page' }).click();
+        await expect(book).toHaveAttribute('data-book-page', String(next));
+      }
       await expect(book.locator('.station-book__panel')).toHaveCount(1);
       await expect(page.getByRole('button', { name: 'Next book page' })).toBeDisabled();
       await page.getByRole('button', { name: 'Previous book page' }).click();
-      await expect(book).toHaveAttribute('data-book-page', '3');
+      await expect(book).toHaveAttribute('data-book-page', '6');
       const box = await dialog.boundingBox();
       expect(box.x).toBeGreaterThanOrEqual(0); expect(box.y).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width).toBeLessThanOrEqual(viewport.width); expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
@@ -144,11 +148,11 @@ test('a focus refresh with updated event details preserves automatic travel', as
 test('long event stories remain readable on a small phone with reduced motion', async ({ page }, info) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  const event = { ...site.events[0], title: 'A connection between curious minds, ambitious builders, and future collaborators at the Nucleus community gathering',
+  const event = { ...site.events[0], id: 'long-story', trackPosition: .72, title: 'A connection between curious minds, ambitious builders, and future collaborators at the Nucleus community gathering',
     description: 'A community of curious minds came together to explore ideas, share their experiences, and build new connections. '.repeat(14) };
-  await openRide(page, { ...site, events: [event, ...site.events.slice(1)] });
-  await page.getByRole('button', { name: 'Events 3', exact: true }).click();
-  await page.getByRole('dialog', { name: 'Event stations' }).locator('.nx-station-list button').first().click();
+  await openRide(page, { ...site, events: [...site.events, event] });
+  await page.getByRole('button', { name: 'Events 8', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Event stations' }).locator('.nx-station-list button').last().click();
   const book = page.locator('.station-book'), story = page.getByRole('region', { name: 'Event story' });
   await expect(book).toHaveAttribute('data-book-page', '1');
   await expect(book.locator('.station-book__spread')).toHaveCSS('animation-name', 'none');

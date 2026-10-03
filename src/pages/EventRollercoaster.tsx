@@ -4,6 +4,7 @@ import { type MoveInput, type WorldMode } from '../lib/event-navigation';
 import type { LogoWorldProps } from '../components/shared/LogoWorld';
 import type { RideMapLayout } from '../lib/event-minimap';
 import { createExperienceStations } from '../lib/experience-stations';
+import { populateWorkshopStation } from '../experiences/workshop-content';
 import StationBook from '../components/events/StationBook';
 import { shouldShowJoystick } from '../lib/event-quality';
 import { createRideAudio, type RideAudio } from '../lib/event-audio';
@@ -88,7 +89,7 @@ export default function EventRollercoaster({ events, onPublished }: { events: Cl
   // Focus refreshes return fresh arrays even when no event changed. Keep the
   // current journey, book, and station layout intact through those refreshes.
   const eventKey = JSON.stringify(events);
-  const stations = useMemo(() => createExperienceStations(events), [eventKey]);
+  const stations = useMemo(() => createExperienceStations(events).map(populateWorkshopStation), [eventKey]);
   const [mapLayout, setMapLayout] = useState<RideMapLayout | null>(null);
   const [traveling, setTraveling] = useState<number | null>(null);
   const wrapper = useRef<HTMLElement>(null);
@@ -143,7 +144,7 @@ export default function EventRollercoaster({ events, onPublished }: { events: Cl
   const toggleMap = () => { input.current = { x: 0, y: 0 }; setSelected(null); setMode(value => value === 'explore' ? 'overview' : 'explore'); };
   const boardStation = (index: number) => {
     if (available[index] === false) { selectStation(index); return; }
-    setCommand(value => ({ serial: value.serial + 1, station: index })); setMode('explore'); selectStation(index);
+    setCommand(value => ({ serial: value.serial + 1, station: index, board: true })); setMode('explore'); setSelected(null);
   };
   const travelToStation = (index: number) => {
     if (available[index] === false) { selectStation(index); return; }
@@ -201,7 +202,7 @@ export default function EventRollercoaster({ events, onPublished }: { events: Cl
       <a href="/">Back to Nucleus</a>
     </div>}
     {adding && <EventDialog label="Add Event" busy={publishing} onClose={() => setAdding(false)}><Suspense fallback={<p role="status">Opening event form…</p>}><AddEventForm stationNumber={String(stations.length + 1).padStart(2, '0')} onBusy={setPublishing} onPublished={event => { const added = createExperienceStations([...events.filter(item => item.id !== event.id), event]).find(item => item.id === event.id)!; onPublished(event); setAdding(false); setNotice(`“${event.title}” is published as Station ${added.number}. Find it on the map.`); }} /></Suspense></EventDialog>}
-    {listing && <EventDialog label="Event stations" onClose={() => setListing(false)}><span className="nx-event-category">Explore every connection</span><h2>Event stations</h2><div className="nx-station-list">{stations.map(item => <button key={item.id} onClick={() => { setListing(false); selectStation(item.index); }}><span>{item.number}</span><span>{item.name}{!item.event && <small>Preview station</small>}{available[item.index] === false && <small>Gallery only · track at capacity</small>}</span><ArrowRight size={16} /></button>)}</div></EventDialog>}
+    {listing && <EventDialog label="Event stations" onClose={() => setListing(false)}><span className="nx-event-category">Explore every connection</span><h2>Event stations</h2><div className="nx-station-list">{stations.map(item => <button key={item.id} onClick={() => { setListing(false); if (failed) selectStation(item.index); else boardStation(item.index); }}><span>{item.number}</span><span>{item.name}{!item.event && <small>Preview station</small>}{available[item.index] === false && <small>Gallery only · track at capacity</small>}</span><ArrowRight size={16} /></button>)}</div></EventDialog>}
     {station && <EventDialog book label={station.event?.title || station.name} onClose={() => continueRide()}>
       <StationBook key={station.id} station={station} onContinue={() => continueRide()} galleryOnly={available[selected!] === false}
         continueLabel={failed ? 'Back to events' : mode === 'overview' && available[selected!] !== false ? 'Ride from here' : 'Continue ride'} />

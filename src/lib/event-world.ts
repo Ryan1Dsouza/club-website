@@ -6,7 +6,7 @@ import { createScenery } from './event-scenery';
 import { createStationPlanner } from './event-layout';
 import { createQualityController, qualityPixelRatio, rideQuality } from './event-quality';
 import { disposeObject } from './event-batching';
-import { cinematicCamera, stationArrivalFrame, GLIMPSE_EXIT } from './event-cinematics';
+import { cinematicCamera, stationArrivalFrame, stationPanAngle, STATION_PAN_SECONDS, GLIMPSE_EXIT } from './event-cinematics';
 import { stationCardAnchor } from './event-navigation';
 import { createRideMap } from './event-minimap';
 import { createRidePostprocessing } from './event-postprocessing';
@@ -69,6 +69,8 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
   let gazeX = 0, gazeY = 0, bank = 0, mapBlend = mode === 'overview' ? 1 : 0;
   let transition = 1, initialized = false, notified: number | null = null;
   let dilation = 1, stationFocus = 0, focusStation: number | null = null;
+  let panStation: number | null = null, panProgress = 0, panStarted = false, bookRevealed = false;
+  const panFrom = new THREE.Quaternion(), panTarget = new THREE.Quaternion();
   let mapInteracted = false, cameraLift = 0, cameraPitch = 0, cameraPullback = 0, lastDiagnostics = 0;
   let reduced = get().reduced;
   let rendered = false, width = 1, height = 1, lastMarkerUpdate = 0;
@@ -90,6 +92,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     const dismissedId = journey.dismissed === null ? null : worldStations[journey.dismissed]?.id;
     const travelingId = travelTarget === null ? null : worldStations[travelTarget]?.id;
     const focusedId = focusStation === null ? null : worldStations[focusStation]?.id;
+    const panId = panStation === null ? null : worldStations[panStation]?.id;
     stationProps = props.stations;
     const placements = planner.forEvents(props.stations.map(station => station.event));
     worldStations = props.stations;
@@ -118,6 +121,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       return new THREE.Vector3(anchor.x, anchor.y, anchor.z);
     });
     focusStation = indexOf(focusedId);
+    panStation = indexOf(panId);
     if (focusStation === null) stationFocus = 0;
     syncCards();
     props.onLayout?.(placements.map(Boolean), minimap.layout(placements.map(stop => stop?.point ?? null)));
@@ -187,7 +191,11 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     transition = get().reduced ? 1 : 0;
     orbit.enabled = false; orbit.autoRotate = false;
     resetInput(); gazeX = gazeY = 0;
-    if (mode === 'overview') { orbit.target.copy(mapCenter); mapInteracted = false; mapCamera(); }
+    if (mode === 'overview') {
+      panStation = null; panProgress = 0; bookRevealed = false;
+      orbit.target.copy(mapCenter); mapInteracted = false; mapCamera();
+      if (get().reduced) { camera.position.copy(mapPosition); camera.quaternion.copy(mapRotation); }
+    }
   }
   function nearest() {
     let index = -1, distance = Infinity;
@@ -196,17 +204,19 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
   }
   function openStation(index: number) {
     notified = index; journey = { ...journey, phase: 'stopped', station: index, motion: { ...motion, speed: 0, acceleration: 0 } }; motion = journey.motion;
-    resetInput(); get().onArrive(index);
+    resetInput(); panStation = index; panProgress = 0; panStarted = false; bookRevealed = false;
+    const cover = worldStations[index].event?.photos?.[0];
+    if (cover) { const image = new Image(); image.src = cover.url; }
   }
   const keydown = (event: KeyboardEvent) => {
     if (controlled.has(event.code) && !event.altKey && !event.ctrlKey && !event.metaKey) heldKeys.add(event.code);
-    if (event.altKey || event.ctrlKey || event.metaKey || get().paused || get().mode !== 'explore') return;
+    if (event.altKey || event.ctrlKey || event.metaKey || get().paused || panStation !== null || get().mode !== 'explore') return;
     if (controlled.has(event.code)) { event.preventDefault(); keys.add(event.code); }
     if (event.code === 'KeyE' && !event.repeat) { const near = nearest(); if (near.index >= 0 && near.distance < 3.8 && Math.abs(motion.speed) < .12) { event.preventDefault(); openStation(near.index); } }
   };
   const keyup = (event: KeyboardEvent) => { keys.delete(event.code); heldKeys.delete(event.code); };
   const pointerDown = (event: PointerEvent) => {
-    if (event.button !== 0 || get().mode !== 'explore' || get().paused) return;
+    if (event.button !== 0 || get().mode !== 'explore' || get().paused || panStation !== null) return;
     focus(); dragging = { id: event.pointerId, x: event.clientX, y: event.clientY }; renderer.domElement.setPointerCapture(event.pointerId);
   };
   const pointerMove = (event: PointerEvent) => {
@@ -248,12 +258,13 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     const dt = Math.min(rawDelta, .05); last = now;
     const props = get();
     if (reduced !== props.reduced) { reduced = props.reduced; size(false); syncCards(); }
-    let resumeInput = false;
+    let resumeInput = false, board: number | null = null;
     if (stationProps !== props.stations) syncStations(props);
     if (!props.paused) elapsed += dt;
     if (command !== props.command.serial) {
       command = props.command.serial;
       const destination = props.command.station;
+      panStation = null; panProgress = 0; panStarted = false; bookRevealed = false;
       setTravel(null);
       if (props.command.travel && destination !== null && Number.isFinite(stops[destination])) {
         const forward = THREE.MathUtils.euclideanModulo(stops[destination] - motion.distance, length);
@@ -269,14 +280,16 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       motion = journey.motion; notified = null; bank = 0; dilation = 1; cameraLift = cameraPitch = cameraPullback = 0; resetInput();
       if (!props.command.resume) { stationFocus = 0; focusStation = null; cards.forEach(card => { card.opacity = 0; }); }
       resumeInput = Boolean(props.command.resume || props.command.driveKey);
+      if (props.command.board && destination !== null && Number.isFinite(stops[destination])) board = destination;
       if (mode === 'explore') focus();
     }
     if (mode !== props.mode) { mode = props.mode; beginTransition(); if (mode === 'explore') focus(); }
     if (paused !== props.paused) { paused = props.paused; resetInput(); if (!paused && mode === 'explore') { if (journey.phase === 'stopped') journey = departCoasterStation(journey); notified = null; focus(); } }
+    if (board !== null) openStation(board);
     // Docking clears motor input, but a key can remain physically held while
     // the reader clicks Continue. Restore it only after the pause has ended.
     if (resumeInput && !paused) for (const key of heldKeys) keys.add(key);
-    const active = mode === 'explore' && !paused && transition >= 1 && controlsRoot.contains(document.activeElement);
+    const active = mode === 'explore' && !paused && panStation === null && transition >= 1 && controlsRoot.contains(document.activeElement);
     const keyboard = Number(keys.has('KeyW') || keys.has('KeyD') || keys.has('ArrowUp') || keys.has('ArrowRight')) - Number(keys.has('KeyS') || keys.has('KeyA') || keys.has('ArrowDown') || keys.has('ArrowLeft'));
     const stick = props.input.current;
     const drivingKey = keys.size > Number(keys.has('ShiftLeft')) + Number(keys.has('ShiftRight'));
@@ -298,7 +311,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     setBoost(driveOptions.boost && (journey.phase === 'riding' || journey.phase === 'approaching'));
     if (props.reduced) dilation = 1;
     const arrival = arrivalFrame(journeyStops);
-    const revealStation = mode === 'explore' && transition >= 1 && (!paused || journey.phase === 'stopped') ? arrival.index : null;
+    const revealStation = mode === 'explore' && panStation === null && transition >= 1 && (!paused || journey.phase === 'stopped') ? arrival.index : null;
     if (revealStation !== null && arrival.focus > 0) focusStation = revealStation;
     stationFocus = props.reduced ? 0 : THREE.MathUtils.damp(stationFocus, revealStation === null ? 0 : arrival.focus, 6, dt);
     const visualSpeed = motion.speed * dilation;
@@ -325,11 +338,6 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     scenery.player.position.copy(f.point).addScaledVector(f.up, 1);
     desiredPosition.copy(f.point).addScaledVector(f.up, (compactCamera ? 1.68 : 1.48) + cameraLift).addScaledVector(f.tangent, -cameraPullback);
     look.setFromEuler(euler.set(gazeY + cameraPitch, gazeX, 0)); desiredRotation.multiply(look);
-    const focusPoint = focusStation === null ? null : cardPoints[focusStation];
-    if (focusPoint && stationFocus > .001) {
-      basis.lookAt(desiredPosition, focusPoint, up); look.setFromRotationMatrix(basis);
-      desiredRotation.slerp(look, stationFocus);
-    }
     const rideFov = cinematic.fov - (props.reduced ? 0 : (1 - dilation) * 5);
     if (!initialized) {
       initialized = true; camera.position.copy(desiredPosition); camera.quaternion.copy(desiredRotation); camera.fov = rideFov;
@@ -356,6 +364,14 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
         panOffset.copy(orbit.target); orbit.target.clamp(mapBounds.min, mapBounds.max);
         panOffset.sub(orbit.target); camera.position.sub(panOffset);
       }
+    }
+    // Dock first, then turn 90 degrees toward the right-hand terrace. The book
+    // opens only after the final pan frame, and the cart stays parked throughout.
+    if (panStation !== null && mode === 'explore' && transition >= 1) {
+      if (!panStarted) { panFrom.copy(camera.quaternion); panStarted = true; }
+      if (!paused) panProgress = props.reduced ? 1 : Math.min(1, panProgress + dt / STATION_PAN_SECONDS);
+      panTarget.copy(panFrom).multiply(look.setFromEuler(euler.set(0, stationPanAngle(panProgress), 0)));
+      camera.quaternion.copy(panTarget);
     }
     frameMapView(); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
     // Project fixed world anchors after the final camera update. Never clamp their
@@ -408,6 +424,9 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     try { if (drewLastFrame) { renderer.info.reset(); postprocessing.render(scene, camera, mapBlend, compactCamera, visualSpeed); renderDirty = false; renderedPosition.copy(camera.position); renderedRotation.copy(camera.quaternion); renderedFov = camera.fov; } }
     catch (error) { failed = true; props.audio.current?.quiet(); console.error('Unable to render the Nucleus ride:', error); props.onError(); return; }
     if (!rendered) { rendered = true; props.onRecovering?.(false); props.onReady(); }
+    if (panStation !== null && panProgress === 1 && !bookRevealed && !paused) {
+      bookRevealed = true; props.onArrive(panStation);
+    }
     if (import.meta.env.DEV && now - lastDiagnostics > 200) {
       lastDiagnostics = now;
       host.dataset.quality = String(quality.level); host.dataset.pixelRatio = renderer.getPixelRatio().toFixed(2);
@@ -416,6 +435,9 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
       host.dataset.speed = motion.speed.toFixed(2); host.dataset.boost = String(boosting); host.dataset.trackLength = length.toFixed(2);
       host.dataset.phase = journey.phase; host.dataset.dilation = dilation.toFixed(3);
       host.dataset.stationFocus = stationFocus.toFixed(3);
+      host.dataset.arrivalStage = panStation === null ? 'riding' : bookRevealed ? 'book' : 'panning';
+      host.dataset.panProgress = panProgress.toFixed(3);
+      host.dataset.panAngle = stationPanAngle(panProgress).toFixed(4);
       host.dataset.cardStation = revealStation === null ? '' : String(revealStation);
       host.dataset.travelTarget = travelTarget === null ? '' : String(travelTarget);
       host.dataset.driveReady = String(active);

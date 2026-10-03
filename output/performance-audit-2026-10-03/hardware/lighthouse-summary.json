@@ -1,0 +1,882 @@
+[
+  {
+    "label": "mobile-home",
+    "score": 91,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 1960.6250999999997,
+        "display": "2.0 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2948.6250999999997,
+        "display": "2.9 s"
+      },
+      "speed-index": {
+        "value": 2308.882489663658,
+        "display": "2.3 s"
+      },
+      "total-blocking-time": {
+        "value": 152.5,
+        "display": "150 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.000183722000392785,
+        "display": "0"
+      },
+      "interactive": {
+        "value": 3930.4595525000004,
+        "display": "3.9 s"
+      }
+    },
+    "bytes": 1085432,
+    "requests": 46,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.0 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "2.9 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "2.3 s"
+      },
+      {
+        "id": "total-blocking-time",
+        "title": "Total Blocking Time",
+        "value": "150 ms"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "220 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "3.9 s"
+      },
+      {
+        "id": "mainthread-work-breakdown",
+        "title": "Minimize main-thread work",
+        "value": "3.0 s",
+        "savings": {
+          "TBT": 150
+        }
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 128 KiB",
+        "savings": {
+          "FCP": 300,
+          "LCP": 300
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 450 ms",
+        "savings": {
+          "FCP": 450,
+          "LCP": 450
+        }
+      }
+    ]
+  },
+  {
+    "label": "mobile-experiences",
+    "score": 91,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2042.698625,
+        "display": "2.0 s"
+      },
+      "largest-contentful-paint": {
+        "value": 3195.278075,
+        "display": "3.2 s"
+      },
+      "speed-index": {
+        "value": 2455.3383519096433,
+        "display": "2.5 s"
+      },
+      "total-blocking-time": {
+        "value": 7.5397250000000895,
+        "display": "10 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "interactive": {
+        "value": 3236.9820475,
+        "display": "3.2 s"
+      }
+    },
+    "bytes": 763462,
+    "requests": 44,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.0 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "3.2 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "2.5 s"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "3.2 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 67 KiB",
+        "savings": {
+          "FCP": 300,
+          "LCP": 300
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 450 ms",
+        "savings": {
+          "FCP": 450,
+          "LCP": 450
+        }
+      }
+    ]
+  },
+  {
+    "label": "mobile-people",
+    "score": 73,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 1857.8604,
+        "display": "1.9 s"
+      },
+      "largest-contentful-paint": {
+        "value": 5407.1859,
+        "display": "5.4 s"
+      },
+      "speed-index": {
+        "value": 3957.840912830775,
+        "display": "4.0 s"
+      },
+      "total-blocking-time": {
+        "value": 211,
+        "display": "210 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "interactive": {
+        "value": 5833.58241,
+        "display": "5.8 s"
+      }
+    },
+    "bytes": 919124,
+    "requests": 48,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "1.9 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "5.4 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "4.0 s"
+      },
+      {
+        "id": "total-blocking-time",
+        "title": "Total Blocking Time",
+        "value": "210 ms"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "350 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "5.8 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 146 KiB",
+        "savings": {
+          "FCP": 450,
+          "LCP": 750
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 300 ms",
+        "savings": {
+          "FCP": 300,
+          "LCP": 300
+        }
+      }
+    ]
+  },
+  {
+    "label": "mobile-projects",
+    "score": 96,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 1732.6217500000002,
+        "display": "1.7 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2649.6704499999996,
+        "display": "2.6 s"
+      },
+      "speed-index": {
+        "value": 2152.9357947468575,
+        "display": "2.2 s"
+      },
+      "total-blocking-time": {
+        "value": 12.5,
+        "display": "10 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "interactive": {
+        "value": 2655.922885,
+        "display": "2.7 s"
+      }
+    },
+    "bytes": 732604,
+    "requests": 42,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "1.7 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "2.6 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "2.2 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "80 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "2.7 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 67 KiB",
+        "savings": {
+          "FCP": 300,
+          "LCP": 300
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 150 ms",
+        "savings": {
+          "FCP": 150,
+          "LCP": 150
+        }
+      }
+    ]
+  },
+  {
+    "label": "mobile-recruitment",
+    "score": 98,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 1656.4317,
+        "display": "1.7 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2256.4317,
+        "display": "2.3 s"
+      },
+      "speed-index": {
+        "value": 1656.4317,
+        "display": "1.7 s"
+      },
+      "total-blocking-time": {
+        "value": 5.5,
+        "display": "10 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "interactive": {
+        "value": 2454.9817000000003,
+        "display": "2.5 s"
+      }
+    },
+    "bytes": 728343,
+    "requests": 41,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "1.7 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "2.3 s"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "2.5 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 67 KiB",
+        "savings": {
+          "FCP": 300,
+          "LCP": 450
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 150 ms",
+        "savings": {
+          "FCP": 150,
+          "LCP": 150
+        }
+      }
+    ]
+  },
+  {
+    "label": "desktop-home",
+    "score": 100,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 447.9085,
+        "display": "0.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 591.4085,
+        "display": "0.6 s"
+      },
+      "speed-index": {
+        "value": 467.73544913507646,
+        "display": "0.5 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "interactive": {
+        "value": 597.7585,
+        "display": "0.6 s"
+      }
+    },
+    "bytes": 1085432,
+    "requests": 46,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 40,
+      "throughputKbps": 10240,
+      "requestLatencyMs": 0,
+      "downloadThroughputKbps": 0,
+      "uploadThroughputKbps": 0,
+      "cpuSlowdownMultiplier": 1
+    },
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "0.6 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 127 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 50
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      }
+    ]
+  },
+  {
+    "label": "desktop-experiences",
+    "score": 100,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 429.477125,
+        "display": "0.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 573.3725499999999,
+        "display": "0.6 s"
+      },
+      "speed-index": {
+        "value": 704.2255140006407,
+        "display": "0.7 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.0005080608603395061,
+        "display": "0.001"
+      },
+      "interactive": {
+        "value": 573.3725499999999,
+        "display": "0.6 s"
+      }
+    },
+    "bytes": 763462,
+    "requests": 44,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 40,
+      "throughputKbps": 10240,
+      "requestLatencyMs": 0,
+      "downloadThroughputKbps": 0,
+      "uploadThroughputKbps": 0,
+      "cpuSlowdownMultiplier": 1
+    },
+    "issues": [
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 67 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 100
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 80 ms",
+        "savings": {
+          "FCP": 100,
+          "LCP": 100
+        }
+      }
+    ]
+  },
+  {
+    "label": "desktop-people",
+    "score": 96,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 412.9431,
+        "display": "0.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 1173.8862,
+        "display": "1.2 s"
+      },
+      "speed-index": {
+        "value": 1399.2519061934681,
+        "display": "1.4 s"
+      },
+      "total-blocking-time": {
+        "value": 13,
+        "display": "10 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "interactive": {
+        "value": 1216.1862,
+        "display": "1.2 s"
+      }
+    },
+    "bytes": 919124,
+    "requests": 48,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 40,
+      "throughputKbps": 10240,
+      "requestLatencyMs": 0,
+      "downloadThroughputKbps": 0,
+      "uploadThroughputKbps": 0,
+      "cpuSlowdownMultiplier": 1
+    },
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "1.2 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.4 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "80 ms"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 140 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 150
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 80 ms",
+        "savings": {
+          "FCP": 100,
+          "LCP": 100
+        }
+      }
+    ]
+  },
+  {
+    "label": "desktop-projects",
+    "score": 100,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 402.763625,
+        "display": "0.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 553.3163499999999,
+        "display": "0.6 s"
+      },
+      "speed-index": {
+        "value": 647.9158093088787,
+        "display": "0.6 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "interactive": {
+        "value": 553.3163499999999,
+        "display": "0.6 s"
+      }
+    },
+    "bytes": 732604,
+    "requests": 42,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 40,
+      "throughputKbps": 10240,
+      "requestLatencyMs": 0,
+      "downloadThroughputKbps": 0,
+      "uploadThroughputKbps": 0,
+      "cpuSlowdownMultiplier": 1
+    },
+    "issues": [
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 67 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 100
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 40 ms",
+        "savings": {
+          "FCP": 50,
+          "LCP": 50
+        }
+      }
+    ]
+  },
+  {
+    "label": "desktop-recruitment",
+    "score": 100,
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 365.803,
+        "display": "0.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 485.803,
+        "display": "0.5 s"
+      },
+      "speed-index": {
+        "value": 365.803,
+        "display": "0.4 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "interactive": {
+        "value": 485.80300000000005,
+        "display": "0.5 s"
+      }
+    },
+    "bytes": 728343,
+    "requests": 41,
+    "warnings": [],
+    "throttling": {
+      "rttMs": 40,
+      "throughputKbps": 10240,
+      "requestLatencyMs": 0,
+      "downloadThroughputKbps": 0,
+      "uploadThroughputKbps": 0,
+      "cpuSlowdownMultiplier": 1
+    },
+    "issues": [
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 67 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 100
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      }
+    ]
+  }
+]

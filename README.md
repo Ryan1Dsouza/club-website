@@ -41,7 +41,11 @@ An open intake is required before applications are accepted. A passed deadline c
 
 ## The event ride
 
-The Experiences page (`/events`) loads a Three.js coaster around the upright Nucleus sculpture. Three default stations are always present; missing published content gets explicitly labelled preview stations.
+The Experiences page (`/events`) loads a Three.js coaster around the upright Nucleus sculpture. The seven existing platforms are numbered in forward travel order: Inauguration, Dev, Khoj, LinkedIn, n8n, Noesis, and Unlocked. Their physical locations are unchanged.
+
+The ride's content lives in `src/experiences/`. `stations.ts` defines the workshop mapping and placeholder story text. `workshop-content.ts` discovers images in `workshops/`, including the existing `inaugration` and `linkdin` folder spellings. Photo names are sorted by their final number, supporting both `photo(1).jpg` and `n8n1.avif`. Vite includes these images in production builds.
+
+At each stop the camera turns right before revealing the open book. Its first spread has the story on the left and photo 1 on the right. Lenis scroll progress turns a two-sided page around the spine; later spreads contain only photos 2 onward, without captions or a repeated cover photo. An unmatched last photo leaves the facing page blank. Keyboard and button navigation also work; reduced motion skips the camera and page rotation.
 
 - Hold W/D or the arrow keys to accelerate; S/A brakes and reverses. Drag to look, use Map to orbit, and Restart to return to the beginning. Phones and tablets with a coarse touch pointer also get a joystick; mouse devices do not.
 - The ride automatically brakes at stations. Continue resumes travel. Opening a dialog freezes the ride.

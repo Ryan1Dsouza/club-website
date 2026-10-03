@@ -1,0 +1,58 @@
+{
+  "scope": "Five public routes; production SSR; hardware-accelerated Chromium; mobile emulation, not physical devices",
+  "peopleMobile": {
+    "runs": 3,
+    "score": 73,
+    "lcpMs": 5438.853375,
+    "tbtMs": 211
+  },
+  "verifiedRuntimeScenarios": [
+    {
+      "name": "mobile-home",
+      "sampleCount": 2,
+      "errors": []
+    },
+    {
+      "name": "mobile-people",
+      "sampleCount": 3,
+      "errors": []
+    },
+    {
+      "name": "mobile-quick-browse",
+      "sampleCount": 2,
+      "errors": []
+    },
+    {
+      "name": "desktop-home",
+      "sampleCount": 2,
+      "errors": []
+    },
+    {
+      "name": "desktop-people",
+      "sampleCount": 3,
+      "errors": []
+    },
+    {
+      "name": "desktop-quick-browse",
+      "sampleCount": 2,
+      "errors": []
+    },
+    {
+      "name": "desktop-ride",
+      "sampleCount": 3,
+      "errors": []
+    },
+    {
+      "name": "mobile-ride",
+      "sampleCount": 3,
+      "errors": []
+    }
+  ],
+  "bundleNames": [
+    "/assets/index-iqgFDlwM.js",
+    "/assets/three-Cb8aZj6Z.js",
+    "/assets/people-tower-motion-rW6-VmEw.js",
+    "/assets/people-tower-Dn0msb0h.js",
+    "/assets/EventRollercoaster-CgEnf3Cc.js"
+  ]
+}

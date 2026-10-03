@@ -1,0 +1,1217 @@
+[
+  {
+    "name": "mobile-ride",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "cpuSlowdown": 4,
+    "interactionReady": 2284.7999999998137,
+    "initial": {
+      "marks": {
+        "loader:idle": 138.79999999981374,
+        "loader:loading": 707,
+        "loader:exiting": 2025.1000000005588,
+        "loader:done": 2390.5
+      },
+      "longTasks": [
+        {
+          "start": 162.40000000037253,
+          "duration": 146
+        },
+        {
+          "start": 318.1000000005588,
+          "duration": 105
+        },
+        {
+          "start": 471.70000000018626,
+          "duration": 86
+        },
+        {
+          "start": 2973,
+          "duration": 101
+        },
+        {
+          "start": 3178.9000000003725,
+          "duration": 57
+        },
+        {
+          "start": 3241,
+          "duration": 933
+        },
+        {
+          "start": 4188.5,
+          "duration": 471
+        }
+      ],
+      "lcp": [
+        {
+          "start": 1284,
+          "duration": 0,
+          "text": "Two ways in."
+        }
+      ],
+      "layoutShift": 0.0033207607588236956,
+      "domNodes": 285,
+      "overflow": false,
+      "renderers": [
+        {
+          "count": 4,
+          "compilations": [],
+          "last": {
+            "frame": 4,
+            "calls": 104,
+            "triangles": 26959,
+            "points": 0,
+            "lines": 8022,
+            "geometries": 36,
+            "textures": 5,
+            "width": 682,
+            "height": 1477,
+            "pixelRatio": 1.75,
+            "shadows": false
+          },
+          "disposed": false
+        }
+      ],
+      "resources": [
+        {
+          "url": "/fonts/inter-latin.woff2",
+          "type": "link",
+          "transfer": 48732,
+          "encoded": 48432,
+          "decoded": 48432,
+          "duration": 7.599999999627471,
+          "start": 118.90000000037253
+        },
+        {
+          "url": "/assets/index-iqgFDlwM.js",
+          "type": "script",
+          "transfer": 142814,
+          "encoded": 142514,
+          "decoded": 436588,
+          "duration": 21.699999999254942,
+          "start": 120.1000000005588
+        },
+        {
+          "url": "/assets/index-JPX89Z53.css",
+          "type": "link",
+          "transfer": 7912,
+          "encoded": 7612,
+          "decoded": 30038,
+          "duration": 11.599999999627471,
+          "start": 120.70000000018626
+        },
+        {
+          "url": "/assets/EventsPage-BBG4uCHH.css",
+          "type": "link",
+          "transfer": 1873,
+          "encoded": 1573,
+          "decoded": 5101,
+          "duration": 10.799999999813735,
+          "start": 120.90000000037253
+        },
+        {
+          "url": "/assets/EventsPage-5fA9xcXw.js",
+          "type": "script",
+          "transfer": 3261,
+          "encoded": 2961,
+          "decoded": 8628,
+          "duration": 4.7000000001862645,
+          "start": 281.5
+        },
+        {
+          "url": "/assets/arrow-left-CW1q0J9F.js",
+          "type": "script",
+          "transfer": 461,
+          "encoded": 161,
+          "decoded": 161,
+          "duration": 4.7000000001862645,
+          "start": 282.79999999981374
+        },
+        {
+          "url": "/assets/frame-00-DwyED5eV.webp",
+          "type": "css",
+          "transfer": 38216,
+          "encoded": 37916,
+          "decoded": 37916,
+          "duration": 4.8999999994412065,
+          "start": 292.40000000037253
+        },
+        {
+          "url": "/fonts/space-grotesk.woff2",
+          "type": "css",
+          "transfer": 27024,
+          "encoded": 26724,
+          "decoded": 26724,
+          "duration": 10,
+          "start": 306.1000000005588
+        },
+        {
+          "url": "/favicon.svg",
+          "type": "other",
+          "transfer": 9363,
+          "encoded": 9063,
+          "decoded": 20140,
+          "duration": 4.900000000372529,
+          "start": 468
+        },
+        {
+          "url": "/api/site",
+          "type": "fetch",
+          "transfer": 1655,
+          "encoded": 1355,
+          "decoded": 3770,
+          "duration": 3.2000000001862645,
+          "start": 600
+        },
+        {
+          "url": "/assets/frame-00-DwyED5eV.webp",
+          "type": "img",
+          "transfer": 0,
+          "encoded": 37916,
+          "decoded": 37916,
+          "duration": 0.6999999992549419,
+          "start": 605.6000000005588
+        },
+        {
+          "url": "/assets/frame-01-D5EDl1cw.webp",
+          "type": "img",
+          "transfer": 20446,
+          "encoded": 20146,
+          "decoded": 20146,
+          "duration": 4.8999999994412065,
+          "start": 606.1000000005588
+        },
+        {
+          "url": "/assets/frame-02-DBc6cmva.webp",
+          "type": "img",
+          "transfer": 24320,
+          "encoded": 24020,
+          "decoded": 24020,
+          "duration": 5.599999999627471,
+          "start": 606.2000000001863
+        },
+        {
+          "url": "/assets/frame-03-BtMC94TO.webp",
+          "type": "img",
+          "transfer": 35696,
+          "encoded": 35396,
+          "decoded": 35396,
+          "duration": 5.599999999627471,
+          "start": 606.6000000005588
+        },
+        {
+          "url": "/assets/frame-04-BCO95kRg.webp",
+          "type": "img",
+          "transfer": 42730,
+          "encoded": 42430,
+          "decoded": 42430,
+          "duration": 5,
+          "start": 607.2999999998137
+        },
+        {
+          "url": "/assets/frame-05-L5HKyoTB.webp",
+          "type": "img",
+          "transfer": 25308,
+          "encoded": 25008,
+          "decoded": 25008,
+          "duration": 5.099999999627471,
+          "start": 607.9000000003725
+        },
+        {
+          "url": "/assets/frame-06-BX_QDz_f.webp",
+          "type": "img",
+          "transfer": 17390,
+          "encoded": 17090,
+          "decoded": 17090,
+          "duration": 4.2000000001862645,
+          "start": 608.9000000003725
+        },
+        {
+          "url": "/assets/frame-07-DoHVLlAC.webp",
+          "type": "img",
+          "transfer": 21342,
+          "encoded": 21042,
+          "decoded": 21042,
+          "duration": 6,
+          "start": 609.7000000001863
+        },
+        {
+          "url": "/assets/frame-08-iYpomgXS.webp",
+          "type": "img",
+          "transfer": 37722,
+          "encoded": 37422,
+          "decoded": 37422,
+          "duration": 5.599999999627471,
+          "start": 610.7000000001863
+        },
+        {
+          "url": "/assets/frame-09-BN3u9_WQ.webp",
+          "type": "img",
+          "transfer": 27518,
+          "encoded": 27218,
+          "decoded": 27218,
+          "duration": 6.2999999998137355,
+          "start": 611.1000000005588
+        },
+        {
+          "url": "/assets/frame-10-BERPnfXQ.webp",
+          "type": "img",
+          "transfer": 36466,
+          "encoded": 36166,
+          "decoded": 36166,
+          "duration": 5.300000000745058,
+          "start": 612.2999999998137
+        },
+        {
+          "url": "/assets/frame-11-BsIIqPWa.webp",
+          "type": "img",
+          "transfer": 36064,
+          "encoded": 35764,
+          "decoded": 35764,
+          "duration": 4.599999999627471,
+          "start": 613.1000000005588
+        },
+        {
+          "url": "/assets/frame-12-DvxlFgvb.webp",
+          "type": "img",
+          "transfer": 31666,
+          "encoded": 31366,
+          "decoded": 31366,
+          "duration": 4.5,
+          "start": 614.2000000001863
+        },
+        {
+          "url": "/assets/frame-13-BP7tAixj.webp",
+          "type": "img",
+          "transfer": 34918,
+          "encoded": 34618,
+          "decoded": 34618,
+          "duration": 6.2999999998137355,
+          "start": 615
+        },
+        {
+          "url": "/assets/frame-14-BlnVFHMo.webp",
+          "type": "img",
+          "transfer": 29314,
+          "encoded": 29014,
+          "decoded": 29014,
+          "duration": 5.199999999254942,
+          "start": 616.1000000005588
+        },
+        {
+          "url": "/assets/frame-15-Bg6gmB3E.webp",
+          "type": "img",
+          "transfer": 16370,
+          "encoded": 16070,
+          "decoded": 16070,
+          "duration": 5,
+          "start": 617.2999999998137
+        },
+        {
+          "url": "/assets/frame-16-l_NTfjiY.webp",
+          "type": "img",
+          "transfer": 21410,
+          "encoded": 21110,
+          "decoded": 21110,
+          "duration": 5.3999999994412065,
+          "start": 617.9000000003725
+        },
+        {
+          "url": "/assets/frame-01-D5EDl1cw.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 20146,
+          "decoded": 20146,
+          "duration": 0.7999999998137355,
+          "start": 1149
+        },
+        {
+          "url": "/assets/frame-02-DBc6cmva.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 24020,
+          "decoded": 24020,
+          "duration": 0.599999999627471,
+          "start": 1149.6000000005588
+        },
+        {
+          "url": "/assets/frame-03-BtMC94TO.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 35396,
+          "decoded": 35396,
+          "duration": 0.5,
+          "start": 1150.1000000005588
+        },
+        {
+          "url": "/assets/frame-04-BCO95kRg.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 42430,
+          "decoded": 42430,
+          "duration": 0.7000000001862645,
+          "start": 1150.4000000003725
+        },
+        {
+          "url": "/assets/frame-05-L5HKyoTB.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 25008,
+          "decoded": 25008,
+          "duration": 0.8000000007450581,
+          "start": 1150.7999999998137
+        },
+        {
+          "url": "/assets/frame-06-BX_QDz_f.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 17090,
+          "decoded": 17090,
+          "duration": 0.7999999998137355,
+          "start": 1152.1000000005588
+        },
+        {
+          "url": "/assets/frame-07-DoHVLlAC.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 21042,
+          "decoded": 21042,
+          "duration": 0.40000000037252903,
+          "start": 1153.5
+        },
+        {
+          "url": "/assets/frame-08-iYpomgXS.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 37422,
+          "decoded": 37422,
+          "duration": 0.5,
+          "start": 1154.5
+        },
+        {
+          "url": "/assets/frame-09-BN3u9_WQ.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 27218,
+          "decoded": 27218,
+          "duration": 0.599999999627471,
+          "start": 1154.9000000003725
+        },
+        {
+          "url": "/assets/frame-10-BERPnfXQ.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 36166,
+          "decoded": 36166,
+          "duration": 0.8000000007450581,
+          "start": 1156.2999999998137
+        },
+        {
+          "url": "/assets/frame-11-BsIIqPWa.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 35764,
+          "decoded": 35764,
+          "duration": 0.6000000005587935,
+          "start": 1157.5
+        },
+        {
+          "url": "/assets/frame-12-DvxlFgvb.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 31366,
+          "decoded": 31366,
+          "duration": 0.599999999627471,
+          "start": 1158.7000000001863
+        },
+        {
+          "url": "/assets/frame-13-BP7tAixj.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 34618,
+          "decoded": 34618,
+          "duration": 0.599999999627471,
+          "start": 1160.2000000001863
+        },
+        {
+          "url": "/assets/frame-14-BlnVFHMo.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 29014,
+          "decoded": 29014,
+          "duration": 0.7999999998137355,
+          "start": 1162
+        },
+        {
+          "url": "/assets/frame-15-Bg6gmB3E.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 16070,
+          "decoded": 16070,
+          "duration": 1,
+          "start": 1162.9000000003725
+        },
+        {
+          "url": "/assets/frame-16-l_NTfjiY.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 21110,
+          "decoded": 21110,
+          "duration": 0.599999999627471,
+          "start": 1164.1000000005588
+        },
+        {
+          "url": "/assets/EventRollercoaster-CgEnf3Cc.js",
+          "type": "script",
+          "transfer": 10207,
+          "encoded": 9907,
+          "decoded": 26218,
+          "duration": 4.2000000001862645,
+          "start": 2846.7999999998137
+        },
+        {
+          "url": "/assets/experience-stations-CX9k4d77.js",
+          "type": "script",
+          "transfer": 965,
+          "encoded": 665,
+          "decoded": 1249,
+          "duration": 3.7000000001862645,
+          "start": 2848.2000000001863
+        },
+        {
+          "url": "/assets/arrow-down--k8zjW0k.js",
+          "type": "script",
+          "transfer": 461,
+          "encoded": 161,
+          "decoded": 161,
+          "duration": 3.800000000745058,
+          "start": 2849.7999999998137
+        },
+        {
+          "url": "/assets/event-quality-BrajZ-Lg.js",
+          "type": "script",
+          "transfer": 1055,
+          "encoded": 755,
+          "decoded": 755,
+          "duration": 4.2999999998137355,
+          "start": 2850.9000000003725
+        },
+        {
+          "url": "/assets/plus-C2Otu0KT.js",
+          "type": "script",
+          "transfer": 450,
+          "encoded": 150,
+          "decoded": 150,
+          "duration": 3.5,
+          "start": 2851.7000000001863
+        },
+        {
+          "url": "/assets/EventRollercoaster-DpnQ7xG4.css",
+          "type": "link",
+          "transfer": 8907,
+          "encoded": 8607,
+          "decoded": 35774,
+          "duration": 4.900000000372529,
+          "start": 2852.2999999998137
+        },
+        {
+          "url": "/assets/LogoWorld-5qY6uQHl.js",
+          "type": "script",
+          "transfer": 28089,
+          "encoded": 27789,
+          "decoded": 79812,
+          "duration": 5.900000000372529,
+          "start": 2906.7999999998137
+        },
+        {
+          "url": "/assets/three-Cb8aZj6Z.js",
+          "type": "script",
+          "transfer": 135898,
+          "encoded": 135598,
+          "decoded": 531490,
+          "duration": 16,
+          "start": 2907.600000000559
+        },
+        {
+          "url": "/assets/BufferGeometryUtils-CyVYaxEE.js",
+          "type": "script",
+          "transfer": 1841,
+          "encoded": 1541,
+          "decoded": 4877,
+          "duration": 3.400000000372529,
+          "start": 2908.7000000001863
+        }
+      ],
+      "profiles": 0,
+      "images": [],
+      "statuses": {}
+    },
+    "samples": [
+      {
+        "name": "mobile-ride-idle",
+        "duration": 4501.299999999814,
+        "animationFps": 143.95841201431293,
+        "frameP50": 6.900000000000546,
+        "frameP95": 7.100000000000364,
+        "framesOver33ms": 0,
+        "totalFrames": 648,
+        "longTasks": [],
+        "renderers": [
+          {
+            "renders": 0,
+            "rendersPerSecond": 0,
+            "submissionP95": 0,
+            "submissionTotal": 0,
+            "last": {
+              "frame": 4,
+              "calls": 104,
+              "triangles": 26959,
+              "points": 0,
+              "lines": 8022,
+              "geometries": 36,
+              "textures": 5,
+              "width": 682,
+              "height": 1477,
+              "pixelRatio": 1.75,
+              "shadows": false
+            },
+            "disposed": false
+          }
+        ],
+        "world": {},
+        "scrollY": 0,
+        "taskMs": 1271.8310000000001,
+        "scriptMs": 622.5999999999998,
+        "layoutMs": 0,
+        "styleMs": 15.44200000000001,
+        "heapMB": 14.431514739990234
+      },
+      {
+        "name": "mobile-ride-driving",
+        "duration": 4512.200000000186,
+        "animationFps": 78.01072647488708,
+        "frameP50": 13.899999999999636,
+        "frameP95": 20.799999999999272,
+        "framesOver33ms": 0,
+        "totalFrames": 352,
+        "longTasks": [],
+        "renderers": [
+          {
+            "renders": 702,
+            "rendersPerSecond": 155.5782101857123,
+            "submissionP95": 11.599999999627471,
+            "submissionTotal": 3174.7999999932945,
+            "last": {
+              "frame": 706,
+              "calls": 63,
+              "triangles": 28761,
+              "points": 0,
+              "lines": 6870,
+              "geometries": 46,
+              "textures": 5,
+              "width": 682,
+              "height": 1477,
+              "pixelRatio": 1.75,
+              "shadows": false
+            },
+            "disposed": false
+          }
+        ],
+        "world": {},
+        "scrollY": 0,
+        "taskMs": 4460.571,
+        "scriptMs": 3635.1769999999997,
+        "layoutMs": 0,
+        "styleMs": 0.40400000000001546,
+        "heapMB": 15.365615844726562
+      },
+      {
+        "name": "mobile-ride-dialog",
+        "duration": 2501.2000000001863,
+        "animationFps": 135.13513513512507,
+        "frameP50": 7,
+        "frameP95": 7.699999999998909,
+        "framesOver33ms": 0,
+        "totalFrames": 338,
+        "longTasks": [],
+        "renderers": [
+          {
+            "renders": 50,
+            "rendersPerSecond": 19.99040460578773,
+            "submissionP95": 11.900000000372529,
+            "submissionTotal": 216.49999999906868,
+            "last": {
+              "frame": 780,
+              "calls": 73,
+              "triangles": 30959,
+              "points": 0,
+              "lines": 6742,
+              "geometries": 48,
+              "textures": 5,
+              "width": 682,
+              "height": 1477,
+              "pixelRatio": 1.75,
+              "shadows": false
+            },
+            "disposed": false
+          }
+        ],
+        "world": {},
+        "scrollY": 0,
+        "taskMs": 817.9289999999994,
+        "scriptMs": 485.932,
+        "layoutMs": 0,
+        "styleMs": 8.095999999999993,
+        "heapMB": 14.298404693603516
+      }
+    ],
+    "errors": [],
+    "final": {
+      "marks": {
+        "loader:idle": 138.79999999981374,
+        "loader:loading": 707,
+        "loader:exiting": 2025.1000000005588,
+        "loader:done": 2390.5
+      },
+      "longTasks": [
+        {
+          "start": 162.40000000037253,
+          "duration": 146
+        },
+        {
+          "start": 318.1000000005588,
+          "duration": 105
+        },
+        {
+          "start": 471.70000000018626,
+          "duration": 86
+        },
+        {
+          "start": 2973,
+          "duration": 101
+        },
+        {
+          "start": 3178.9000000003725,
+          "duration": 57
+        },
+        {
+          "start": 3241,
+          "duration": 933
+        },
+        {
+          "start": 4188.5,
+          "duration": 471
+        },
+        {
+          "start": 14413.299999999814,
+          "duration": 63
+        }
+      ],
+      "lcp": [
+        {
+          "start": 1284,
+          "duration": 0,
+          "text": "Two ways in."
+        }
+      ],
+      "layoutShift": 0.0033207607588236956,
+      "domNodes": 339,
+      "overflow": false,
+      "renderers": [
+        {
+          "count": 780,
+          "compilations": [],
+          "last": {
+            "frame": 780,
+            "calls": 73,
+            "triangles": 30959,
+            "points": 0,
+            "lines": 6742,
+            "geometries": 48,
+            "textures": 5,
+            "width": 682,
+            "height": 1477,
+            "pixelRatio": 1.75,
+            "shadows": false
+          },
+          "disposed": false
+        }
+      ],
+      "resources": [
+        {
+          "url": "/fonts/inter-latin.woff2",
+          "type": "link",
+          "transfer": 48732,
+          "encoded": 48432,
+          "decoded": 48432,
+          "duration": 7.599999999627471,
+          "start": 118.90000000037253
+        },
+        {
+          "url": "/assets/index-iqgFDlwM.js",
+          "type": "script",
+          "transfer": 142814,
+          "encoded": 142514,
+          "decoded": 436588,
+          "duration": 21.699999999254942,
+          "start": 120.1000000005588
+        },
+        {
+          "url": "/assets/index-JPX89Z53.css",
+          "type": "link",
+          "transfer": 7912,
+          "encoded": 7612,
+          "decoded": 30038,
+          "duration": 11.599999999627471,
+          "start": 120.70000000018626
+        },
+        {
+          "url": "/assets/EventsPage-BBG4uCHH.css",
+          "type": "link",
+          "transfer": 1873,
+          "encoded": 1573,
+          "decoded": 5101,
+          "duration": 10.799999999813735,
+          "start": 120.90000000037253
+        },
+        {
+          "url": "/assets/EventsPage-5fA9xcXw.js",
+          "type": "script",
+          "transfer": 3261,
+          "encoded": 2961,
+          "decoded": 8628,
+          "duration": 4.7000000001862645,
+          "start": 281.5
+        },
+        {
+          "url": "/assets/arrow-left-CW1q0J9F.js",
+          "type": "script",
+          "transfer": 461,
+          "encoded": 161,
+          "decoded": 161,
+          "duration": 4.7000000001862645,
+          "start": 282.79999999981374
+        },
+        {
+          "url": "/assets/frame-00-DwyED5eV.webp",
+          "type": "css",
+          "transfer": 38216,
+          "encoded": 37916,
+          "decoded": 37916,
+          "duration": 4.8999999994412065,
+          "start": 292.40000000037253
+        },
+        {
+          "url": "/fonts/space-grotesk.woff2",
+          "type": "css",
+          "transfer": 27024,
+          "encoded": 26724,
+          "decoded": 26724,
+          "duration": 10,
+          "start": 306.1000000005588
+        },
+        {
+          "url": "/favicon.svg",
+          "type": "other",
+          "transfer": 9363,
+          "encoded": 9063,
+          "decoded": 20140,
+          "duration": 4.900000000372529,
+          "start": 468
+        },
+        {
+          "url": "/api/site",
+          "type": "fetch",
+          "transfer": 1655,
+          "encoded": 1355,
+          "decoded": 3770,
+          "duration": 3.2000000001862645,
+          "start": 600
+        },
+        {
+          "url": "/assets/frame-00-DwyED5eV.webp",
+          "type": "img",
+          "transfer": 0,
+          "encoded": 37916,
+          "decoded": 37916,
+          "duration": 0.6999999992549419,
+          "start": 605.6000000005588
+        },
+        {
+          "url": "/assets/frame-01-D5EDl1cw.webp",
+          "type": "img",
+          "transfer": 20446,
+          "encoded": 20146,
+          "decoded": 20146,
+          "duration": 4.8999999994412065,
+          "start": 606.1000000005588
+        },
+        {
+          "url": "/assets/frame-02-DBc6cmva.webp",
+          "type": "img",
+          "transfer": 24320,
+          "encoded": 24020,
+          "decoded": 24020,
+          "duration": 5.599999999627471,
+          "start": 606.2000000001863
+        },
+        {
+          "url": "/assets/frame-03-BtMC94TO.webp",
+          "type": "img",
+          "transfer": 35696,
+          "encoded": 35396,
+          "decoded": 35396,
+          "duration": 5.599999999627471,
+          "start": 606.6000000005588
+        },
+        {
+          "url": "/assets/frame-04-BCO95kRg.webp",
+          "type": "img",
+          "transfer": 42730,
+          "encoded": 42430,
+          "decoded": 42430,
+          "duration": 5,
+          "start": 607.2999999998137
+        },
+        {
+          "url": "/assets/frame-05-L5HKyoTB.webp",
+          "type": "img",
+          "transfer": 25308,
+          "encoded": 25008,
+          "decoded": 25008,
+          "duration": 5.099999999627471,
+          "start": 607.9000000003725
+        },
+        {
+          "url": "/assets/frame-06-BX_QDz_f.webp",
+          "type": "img",
+          "transfer": 17390,
+          "encoded": 17090,
+          "decoded": 17090,
+          "duration": 4.2000000001862645,
+          "start": 608.9000000003725
+        },
+        {
+          "url": "/assets/frame-07-DoHVLlAC.webp",
+          "type": "img",
+          "transfer": 21342,
+          "encoded": 21042,
+          "decoded": 21042,
+          "duration": 6,
+          "start": 609.7000000001863
+        },
+        {
+          "url": "/assets/frame-08-iYpomgXS.webp",
+          "type": "img",
+          "transfer": 37722,
+          "encoded": 37422,
+          "decoded": 37422,
+          "duration": 5.599999999627471,
+          "start": 610.7000000001863
+        },
+        {
+          "url": "/assets/frame-09-BN3u9_WQ.webp",
+          "type": "img",
+          "transfer": 27518,
+          "encoded": 27218,
+          "decoded": 27218,
+          "duration": 6.2999999998137355,
+          "start": 611.1000000005588
+        },
+        {
+          "url": "/assets/frame-10-BERPnfXQ.webp",
+          "type": "img",
+          "transfer": 36466,
+          "encoded": 36166,
+          "decoded": 36166,
+          "duration": 5.300000000745058,
+          "start": 612.2999999998137
+        },
+        {
+          "url": "/assets/frame-11-BsIIqPWa.webp",
+          "type": "img",
+          "transfer": 36064,
+          "encoded": 35764,
+          "decoded": 35764,
+          "duration": 4.599999999627471,
+          "start": 613.1000000005588
+        },
+        {
+          "url": "/assets/frame-12-DvxlFgvb.webp",
+          "type": "img",
+          "transfer": 31666,
+          "encoded": 31366,
+          "decoded": 31366,
+          "duration": 4.5,
+          "start": 614.2000000001863
+        },
+        {
+          "url": "/assets/frame-13-BP7tAixj.webp",
+          "type": "img",
+          "transfer": 34918,
+          "encoded": 34618,
+          "decoded": 34618,
+          "duration": 6.2999999998137355,
+          "start": 615
+        },
+        {
+          "url": "/assets/frame-14-BlnVFHMo.webp",
+          "type": "img",
+          "transfer": 29314,
+          "encoded": 29014,
+          "decoded": 29014,
+          "duration": 5.199999999254942,
+          "start": 616.1000000005588
+        },
+        {
+          "url": "/assets/frame-15-Bg6gmB3E.webp",
+          "type": "img",
+          "transfer": 16370,
+          "encoded": 16070,
+          "decoded": 16070,
+          "duration": 5,
+          "start": 617.2999999998137
+        },
+        {
+          "url": "/assets/frame-16-l_NTfjiY.webp",
+          "type": "img",
+          "transfer": 21410,
+          "encoded": 21110,
+          "decoded": 21110,
+          "duration": 5.3999999994412065,
+          "start": 617.9000000003725
+        },
+        {
+          "url": "/assets/frame-01-D5EDl1cw.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 20146,
+          "decoded": 20146,
+          "duration": 0.7999999998137355,
+          "start": 1149
+        },
+        {
+          "url": "/assets/frame-02-DBc6cmva.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 24020,
+          "decoded": 24020,
+          "duration": 0.599999999627471,
+          "start": 1149.6000000005588
+        },
+        {
+          "url": "/assets/frame-03-BtMC94TO.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 35396,
+          "decoded": 35396,
+          "duration": 0.5,
+          "start": 1150.1000000005588
+        },
+        {
+          "url": "/assets/frame-04-BCO95kRg.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 42430,
+          "decoded": 42430,
+          "duration": 0.7000000001862645,
+          "start": 1150.4000000003725
+        },
+        {
+          "url": "/assets/frame-05-L5HKyoTB.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 25008,
+          "decoded": 25008,
+          "duration": 0.8000000007450581,
+          "start": 1150.7999999998137
+        },
+        {
+          "url": "/assets/frame-06-BX_QDz_f.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 17090,
+          "decoded": 17090,
+          "duration": 0.7999999998137355,
+          "start": 1152.1000000005588
+        },
+        {
+          "url": "/assets/frame-07-DoHVLlAC.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 21042,
+          "decoded": 21042,
+          "duration": 0.40000000037252903,
+          "start": 1153.5
+        },
+        {
+          "url": "/assets/frame-08-iYpomgXS.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 37422,
+          "decoded": 37422,
+          "duration": 0.5,
+          "start": 1154.5
+        },
+        {
+          "url": "/assets/frame-09-BN3u9_WQ.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 27218,
+          "decoded": 27218,
+          "duration": 0.599999999627471,
+          "start": 1154.9000000003725
+        },
+        {
+          "url": "/assets/frame-10-BERPnfXQ.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 36166,
+          "decoded": 36166,
+          "duration": 0.8000000007450581,
+          "start": 1156.2999999998137
+        },
+        {
+          "url": "/assets/frame-11-BsIIqPWa.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 35764,
+          "decoded": 35764,
+          "duration": 0.6000000005587935,
+          "start": 1157.5
+        },
+        {
+          "url": "/assets/frame-12-DvxlFgvb.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 31366,
+          "decoded": 31366,
+          "duration": 0.599999999627471,
+          "start": 1158.7000000001863
+        },
+        {
+          "url": "/assets/frame-13-BP7tAixj.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 34618,
+          "decoded": 34618,
+          "duration": 0.599999999627471,
+          "start": 1160.2000000001863
+        },
+        {
+          "url": "/assets/frame-14-BlnVFHMo.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 29014,
+          "decoded": 29014,
+          "duration": 0.7999999998137355,
+          "start": 1162
+        },
+        {
+          "url": "/assets/frame-15-Bg6gmB3E.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 16070,
+          "decoded": 16070,
+          "duration": 1,
+          "start": 1162.9000000003725
+        },
+        {
+          "url": "/assets/frame-16-l_NTfjiY.webp",
+          "type": "css",
+          "transfer": 0,
+          "encoded": 21110,
+          "decoded": 21110,
+          "duration": 0.599999999627471,
+          "start": 1164.1000000005588
+        },
+        {
+          "url": "/assets/EventRollercoaster-CgEnf3Cc.js",
+          "type": "script",
+          "transfer": 10207,
+          "encoded": 9907,
+          "decoded": 26218,
+          "duration": 4.2000000001862645,
+          "start": 2846.7999999998137
+        },
+        {
+          "url": "/assets/experience-stations-CX9k4d77.js",
+          "type": "script",
+          "transfer": 965,
+          "encoded": 665,
+          "decoded": 1249,
+          "duration": 3.7000000001862645,
+          "start": 2848.2000000001863
+        },
+        {
+          "url": "/assets/arrow-down--k8zjW0k.js",
+          "type": "script",
+          "transfer": 461,
+          "encoded": 161,
+          "decoded": 161,
+          "duration": 3.800000000745058,
+          "start": 2849.7999999998137
+        },
+        {
+          "url": "/assets/event-quality-BrajZ-Lg.js",
+          "type": "script",
+          "transfer": 1055,
+          "encoded": 755,
+          "decoded": 755,
+          "duration": 4.2999999998137355,
+          "start": 2850.9000000003725
+        },
+        {
+          "url": "/assets/plus-C2Otu0KT.js",
+          "type": "script",
+          "transfer": 450,
+          "encoded": 150,
+          "decoded": 150,
+          "duration": 3.5,
+          "start": 2851.7000000001863
+        },
+        {
+          "url": "/assets/EventRollercoaster-DpnQ7xG4.css",
+          "type": "link",
+          "transfer": 8907,
+          "encoded": 8607,
+          "decoded": 35774,
+          "duration": 4.900000000372529,
+          "start": 2852.2999999998137
+        },
+        {
+          "url": "/assets/LogoWorld-5qY6uQHl.js",
+          "type": "script",
+          "transfer": 28089,
+          "encoded": 27789,
+          "decoded": 79812,
+          "duration": 5.900000000372529,
+          "start": 2906.7999999998137
+        },
+        {
+          "url": "/assets/three-Cb8aZj6Z.js",
+          "type": "script",
+          "transfer": 135898,
+          "encoded": 135598,
+          "decoded": 531490,
+          "duration": 16,
+          "start": 2907.600000000559
+        },
+        {
+          "url": "/assets/BufferGeometryUtils-CyVYaxEE.js",
+          "type": "script",
+          "transfer": 1841,
+          "encoded": 1541,
+          "decoded": 4877,
+          "duration": 3.400000000372529,
+          "start": 2908.7000000001863
+        }
+      ],
+      "profiles": 0,
+      "images": [],
+      "statuses": {}
+    }
+  }
+]

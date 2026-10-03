@@ -15,7 +15,6 @@ import DomainParallax from './components/home/DomainParallax';
 import { EventsPage, WorkPage, PeoplePage, Recruitment } from './route-pages';
 import VoicesMarquee from './components/home/VoicesMarquee';
 import CommunityCTA from './components/home/CommunityCTA';
-import HomeParticles from './components/home/HomeParticles';
 import { useReveal } from './components/ui/reveal';
 import { useCinematicScroll } from './lib/use-cinematic-scroll';
 import { pageMeta } from '../shared/page-meta';
@@ -148,7 +147,7 @@ export default function App({ initialData = seed, serverRendered = false }: { in
 
   return <>
     <LoadingScreen active={loadingStage === 'idle' || loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
-    <div className={`site-shell${location.pathname === '/' ? ' site-shell--home' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
+    <div className="site-shell" inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
     <a href="#main-content" className="skip-link">Skip to content</a>
     <header className={`site-header${['/', '/team', '/events'].includes(location.pathname) ? ' site-header--home' : ''}`}>
       <MorphingNavbar items={navItems} settings={settings} open={menuOpen} onOpenChange={setMenuOpen} onApply={() => setApplyOpen(true)} />
@@ -165,7 +164,6 @@ export default function App({ initialData = seed, serverRendered = false }: { in
       </Routes></Suspense></PageBoundary>
     </main>
     {location.pathname === '/' && <SiteFooter settings={settings} />}
-    {location.pathname === '/' && loadingStage === 'done' && <HomeParticles active={!menuOpen && !applyOpen && domain === null} />}
     {applyOpen && <ApplyForm settings={settings} online={online} onClose={() => setApplyOpen(false)} />}
     {domain !== null && <Modal title={`${domains[domain].title} ${domains[domain].subtitle}`} onClose={() => setDomain(null)}><p className="modal-lead">{domains[domain].detail}</p><div className="domain-tags">{domains[domain].tags.map(tag => <span key={tag}>{tag}</span>)}</div><button className="button primary" onClick={() => { setDomain(null); setApplyOpen(true); }}>Get involved <ArrowUpRight size={17} /></button></Modal>}
     </div>

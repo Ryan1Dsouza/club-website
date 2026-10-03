@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { createCoasterTrack, sampleTrack, createTrackFrame, LOGO_DEPTH } from '../src/lib/event-coaster.ts';
 import { createStationPlanner, logoClearance, BUILDING_BOUNDS, maxStopGap, fillWaypoints } from '../src/lib/event-layout.ts';
 import { createExperienceStations } from '../src/lib/experience-stations.ts';
+import { createRideMap } from '../src/lib/event-minimap.ts';
 import { createQualityController, qualityPixelRatio, rideQuality, shouldShowJoystick } from '../src/lib/event-quality.ts';
 import { createVerticalLogo } from '../src/lib/event-scenery.ts';
 import { disposeObject } from '../src/lib/event-batching.ts';
@@ -55,15 +56,19 @@ test('solid logo and outline stay within the original depth and a bounded geomet
   disposeObject(logo);
 });
 
-test('three evenly spaced default stations and subsequent stations avoid structures and each other', () => {
+test('seven stations follow travel order without moving platforms or overlapping', () => {
   const stops = planner.defaults();
-  assert.equal(stops.length, 3);
-  const fractions = stops.map(stop => stop.distance / length);
-  assert.ok(Math.abs(fractions[0] - .138) < .01 && Math.abs(fractions[1] - .472) < .01 && Math.abs(fractions[2] - .806) < .01);
+  assert.equal(stops.length, 7);
+  assert.deepEqual(stops.map(stop => stop.distance), [211, 343, 595, 727, 1027, 1243, 1487]);
+  const markers = createRideMap(track).layout(stops.map(stop => stop.point)).stations;
+  for (const [i, marker] of markers.entries()) for (const other of markers.slice(i + 1)) {
+    // The 194px drawing uses a 240-unit viewBox; each checkpoint is 30px wide.
+    assert.ok(Math.hypot(marker.x - other.x, marker.y - other.y) * 194 / 240 > 33);
+  }
   const original = stops.map(stop => stop.distance);
   while (stops.length < 50) { const next = planner.next(stops); if (!next) break; stops.push(next); }
   assert.ok(stops.length > 6); assert.ok(stops.length < 50); assert.equal(planner.next(stops), null);
-  assert.deepEqual(stops.slice(0, 3).map(stop => stop.distance), original);
+  assert.deepEqual(stops.slice(0, 7).map(stop => stop.distance), original);
   for (const [index, stop] of stops.entries()) {
     assert.ok(stop.bounds.min.z > 4.5 || stop.bounds.max.z < -4.5);
     assert.ok(BUILDING_BOUNDS.every(building => !building.intersectsBox(stop.bounds)));
@@ -74,7 +79,7 @@ test('three evenly spaced default stations and subsequent stations avoid structu
 });
 
 test('scenic stops fill the loop deterministically without moving events or overlapping', () => {
-  const anchors = planner.defaults(), combined = planner.fillWaypoints(anchors);
+  const defaults = planner.defaults(), anchors = [defaults[0], defaults[3], defaults[5]], combined = planner.fillWaypoints(anchors);
   assert.ok(combined.length >= 10 && combined.length <= 12);
   assert.ok(maxStopGap(combined, length) <= 150);
   assert.deepEqual(combined, planner.fillWaypoints(anchors));
@@ -107,22 +112,30 @@ test('global waypoint search avoids a greedy dead end, including non-neighbour c
   assert.ok(crossed.every((s, i) => crossed.every((o, j) => i === j || !s.bounds.intersectsBox(o.bounds))));
 });
 
-test('one or zero published events still yields three defaults; additions keep saved positions', () => {
+test('zero to seven published events keep seven stations; additions preserve every existing position', () => {
   const event = { id: 'one', title: 'Opening', published: true };
-  for (const input of [[], [event], [event, { ...event, id: 'draft', published: false }]]) assert.equal(createExperienceStations(input).length, 3);
+  for (let count = 0; count <= 7; count++) {
+    const input = Array.from({ length: count }, (_, i) => ({ ...event, id: `event-${i}` }));
+    const stations = createExperienceStations([...input, { ...event, id: 'draft', published: false }]);
+    assert.equal(stations.length, 7);
+    assert.equal(stations.filter(station => station.event !== null).length, count);
+    assert.deepEqual(stations.map(station => station.number), ['01', '02', '03', '04', '05', '06', '07']);
+    assert.ok(stations.every(station => station.name));
+    assert.deepEqual(planner.forEvents(stations.map(station => station.event)), planner.defaults());
+  }
   const initial = createExperienceStations([event]), occupied = planner.forEvents(initial.map(s => s.event));
   const next = planner.next(occupied), newEvent = { ...event, id: 'new', trackPosition: next.distance / length };
   const updated = createExperienceStations([event, newEvent]);
-  assert.equal(updated.length, 4); assert.deepEqual(updated.slice(0, 3), initial);
+  assert.equal(updated.length, 8); assert.deepEqual(updated.slice(0, 7), initial);
   const saved = planner.forEvents(updated.map(s => s.event));
-  assert.equal(saved[3].distance, next.distance);
-  assert.deepEqual(saved.slice(0, 3).map(s => s.distance), occupied.map(s => s.distance));
+  assert.equal(saved[7].distance, next.distance);
+  assert.deepEqual(saved.slice(0, 7).map(s => s.distance), occupied.map(s => s.distance));
 });
 
 test('retuning default anchors preserves an existing saved station in their new preferred position', () => {
   const saved = { id: 'saved-before-retuning', trackPosition: planner.defaults()[0].distance / length };
-  const placements = planner.forEvents([null, null, null, saved]);
-  assert.equal(placements[3].distance / length, saved.trackPosition);
+  const placements = planner.forEvents([...Array(7).fill(null), saved]);
+  assert.equal(placements[7].distance / length, saved.trackPosition);
   for (const [i, stop] of placements.entries()) for (const other of placements.slice(i + 1)) {
     assert.ok(!stop.bounds.intersectsBox(other.bounds));
     const d = Math.abs(stop.distance - other.distance); assert.ok(Math.min(d, length - d) > 48);
@@ -172,7 +185,10 @@ test('adaptive quality reacts before 30fps, ignores suspension, and recovers wit
   for (let i = 0; i < 2400; i++) mobile.sample(1 / 60);
   assert.equal(mobile.level, 1, 'mobile recovery keeps its effects budget');
   assert.ok(qualityPixelRatio(2, 3840, 2160, 3, false) ** 2 * 3840 * 2160 <= 2_200_001);
-  assert.ok(qualityPixelRatio(0, 390, 844, 3, true) < 1);
+  assert.ok(qualityPixelRatio(0, 390, 844, 3, true) >= 1.25, 'phones retain sharp edges when effects are reduced');
+  assert.ok(qualityPixelRatio(0, 1024, 1366, 3, true) >= 1, 'tablets retain at least CSS resolution within the pixel budget');
+  assert.ok(qualityPixelRatio(2, 1024, 1366, 3, true) ** 2 * 1024 * 1366 <= 2_200_001);
+  assert.equal(qualityPixelRatio(2, 390, 844, 1, true), 1, 'low-density screens are not supersampled');
   assert.equal(shouldShowJoystick(false, false, 390), false);
   assert.equal(shouldShowJoystick(true, false, 1280), false);
   assert.equal(shouldShowJoystick(true, true, 390), true);

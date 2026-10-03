@@ -7,10 +7,11 @@ export function rideQuality(device: { coarse: boolean; cores?: number; memory?: 
   return { initial: constrained ? 0 : 1, maximum: constrained ? 1 : 2 };
 }
 
-/** Resolution is also bounded by total pixels: a 4K monitor is not a free GPU. */
+/** Touch screens need extra samples for crisp edges, even with simpler effects.
+ * Total pixels remain bounded to limit GPU cost on tablets and large displays. */
 export function qualityPixelRatio(level: QualityLevel, width: number, height: number, deviceRatio: number, touch: boolean) {
-  const cap = [.75, 1, 1.5][level];
-  const pixels = [700_000, 1_300_000, 2_200_000][level];
+  const cap = (touch ? [1.25, 1.75, 2] : [.75, 1, 1.5])[level];
+  const pixels = (touch ? [1_400_000, 1_800_000, 2_200_000] : [700_000, 1_300_000, 2_200_000])[level];
   return Math.max(.35, Math.min(deviceRatio || 1, cap, Math.sqrt(pixels / Math.max(1, width * height))));
 }
 

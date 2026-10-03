@@ -58,12 +58,12 @@ test('publishing an experience requires auth and CSRF, persists photos and a saf
   assert.equal(result.status, 201); const saved = await result.json();
   assert.ok(saved.trackPosition > 0 && saved.trackPosition < 1); assert.equal(saved.photos.length, 1);
   const stations = createExperienceStations(getSite(db).events), placements = planner.forEvents(stations.map(station => station.event));
-  assert.equal(stations.length, 4); assert.equal(stations[3].number, '04'); assert.equal(stations[3].id, id);
-  assert.deepEqual(placements.slice(0, 3).map(stop => stop.distance), originalStations.map(stop => stop.distance));
-  assert.equal(placements[3].distance / track.getLength(), saved.trackPosition);
-  for (const original of placements.slice(0, 3)) {
-    assert.ok(trackSeparation(original.distance, placements[3].distance, track.getLength()) > 48);
-    assert.ok(!original.bounds.intersectsBox(placements[3].bounds));
+  assert.equal(stations.length, 8); assert.equal(stations[7].number, '08'); assert.equal(stations[7].id, id);
+  assert.deepEqual(placements.slice(0, 7).map(stop => stop.distance), originalStations.map(stop => stop.distance));
+  assert.equal(placements[7].distance / track.getLength(), saved.trackPosition);
+  for (const original of placements.slice(0, 7)) {
+    assert.ok(trackSeparation(original.distance, placements[7].distance, track.getLength()) > 48);
+    assert.ok(!original.bounds.intersectsBox(placements[7].bounds));
   }
   assert.equal((await request(path, 'PUT', body, headers)).status, 200);
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM event_photos').get().n, 1);

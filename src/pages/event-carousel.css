@@ -61,6 +61,7 @@ main[inert] .ec-scroll { overflow-y:hidden; }
   .ec-title { font-size:clamp(24px,var(--title-mobile-size,12.8vw),86px); line-height:.98; max-width:95%; }
   .ec-copy__details { margin-top:17px; width:100%; }
   .ec-description { display:none; }
+  .ec-card[data-placeholder='true'] .ec-description { display:block; }
   .ec-meta { margin-top:0; gap:7px; font-size:9px; max-width:85%; }
   .ec-open { margin-top:15px; min-height:40px; font-size:11px; gap:35px; }
   .ec-scene { width:54%; height:27%; right:17%; top:21%; }

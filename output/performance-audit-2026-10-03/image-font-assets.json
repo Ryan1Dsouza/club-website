@@ -1,0 +1,290 @@
+[
+  {
+    "path": "src/assets/loading/frame-00.webp",
+    "bytes": 37916,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-01.webp",
+    "bytes": 20146,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-02.webp",
+    "bytes": 24020,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-03.webp",
+    "bytes": 35396,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-04.webp",
+    "bytes": 42430,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-05.webp",
+    "bytes": 25008,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-06.webp",
+    "bytes": 17090,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-07.webp",
+    "bytes": 21042,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-08.webp",
+    "bytes": 37422,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-09.webp",
+    "bytes": 27218,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-10.webp",
+    "bytes": 36166,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-11.webp",
+    "bytes": 35764,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-12.webp",
+    "bytes": 31366,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-13.webp",
+    "bytes": 34618,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-14.webp",
+    "bytes": 29014,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-15.webp",
+    "bytes": 16070,
+    "width": 1440,
+    "height": 880,
+    "decodedBytes": 5068800,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/frame-16.webp",
+    "bytes": 21110,
+    "width": 1440,
+    "height": 810,
+    "decodedBytes": 4665600,
+    "channels": 4
+  },
+  {
+    "path": "src/assets/loading/sources.json",
+    "bytes": 2321
+  },
+  {
+    "path": "public/fonts/BEBAS-NEUE-LICENSE.txt",
+    "bytes": 4430
+  },
+  {
+    "path": "public/fonts/bebas-neue.woff2",
+    "bytes": 20260
+  },
+  {
+    "path": "public/fonts/inter-latin.woff2",
+    "bytes": 48432
+  },
+  {
+    "path": "public/fonts/LICENSE.txt",
+    "bytes": 4472
+  },
+  {
+    "path": "public/fonts/SPACE-GROTESK-LICENSE.txt",
+    "bytes": 4495
+  },
+  {
+    "path": "public/fonts/space-grotesk-semibold.woff2",
+    "bytes": 26428
+  },
+  {
+    "path": "public/fonts/space-grotesk.woff2",
+    "bytes": 26724
+  },
+  {
+    "path": "public/team_images/core/Deona.avif",
+    "bytes": 55771,
+    "width": 721,
+    "height": 1000,
+    "decodedBytes": 2884000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Dinol.avif",
+    "bytes": 164270,
+    "width": 746,
+    "height": 1000,
+    "decodedBytes": 2984000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Joylin.avif",
+    "bytes": 137320,
+    "width": 719,
+    "height": 1000,
+    "decodedBytes": 2876000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Karthik.avif",
+    "bytes": 149170,
+    "width": 723,
+    "height": 1000,
+    "decodedBytes": 2892000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Manvitha.avif",
+    "bytes": 140111,
+    "width": 805,
+    "height": 1000,
+    "decodedBytes": 3220000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Mohit.avif",
+    "bytes": 141815,
+    "width": 756,
+    "height": 1000,
+    "decodedBytes": 3024000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Navya.avif",
+    "bytes": 153015,
+    "width": 676,
+    "height": 1000,
+    "decodedBytes": 2704000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Nikhitha.avif",
+    "bytes": 143624,
+    "width": 705,
+    "height": 1000,
+    "decodedBytes": 2820000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Nishanth1.avif",
+    "bytes": 183470,
+    "width": 742,
+    "height": 1000,
+    "decodedBytes": 2968000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Poorvik.avif",
+    "bytes": 41733,
+    "width": 750,
+    "height": 1000,
+    "decodedBytes": 3000000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Prajwal.avif",
+    "bytes": 125762,
+    "width": 662,
+    "height": 1000,
+    "decodedBytes": 2648000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Rakshith.avif",
+    "bytes": 126982,
+    "width": 664,
+    "height": 1000,
+    "decodedBytes": 2656000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Salim.avif",
+    "bytes": 113815,
+    "width": 691,
+    "height": 1000,
+    "decodedBytes": 2764000,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Saniya.avif",
+    "bytes": 112299,
+    "width": 787,
+    "height": 974,
+    "decodedBytes": 3066152,
+    "channels": 3
+  },
+  {
+    "path": "public/team_images/core/Sweeden.avif",
+    "bytes": 137406,
+    "width": 642,
+    "height": 1000,
+    "decodedBytes": 2568000,
+    "channels": 3
+  }
+]

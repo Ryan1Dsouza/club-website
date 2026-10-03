@@ -25,11 +25,12 @@ test('mobile production home forms its logo without loading other routes', async
   await expect(page.locator('.logo-landing')).toHaveAttribute('data-text-ready', 'true', { timeout: 15_000 });
   await expect(page.locator('.logo-landing__fallback')).toBeHidden();
   await expect(page.locator('.mu-morph-wrap')).toBeVisible();
-  await expect(page.locator('.home-particles')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('.home-particles, .home-particles-toggle')).toHaveCount(0);
   await page.waitForTimeout(1200);
   await page.screenshot({ path: info.outputPath('mobile-home.png') });
   await expect(page.locator('.logo-landing__scene canvas')).toHaveCount(1);
   expect(scripts.some(url => /\/logo-scene-/.test(url))).toBe(true);
+  expect(scripts.some(url => /particles(?:\.js|[-/])/.test(url))).toBe(false);
   expect(scripts.filter(url => /\/(people-tower|PeoplePage|EventsPage|WorkPage|scroll-motion)-/.test(url))).toEqual([]);
   const bytes = await page.evaluate(() => performance.getEntriesByType('resource').filter(item => /\.js(?:\?|$)/.test(item.name)).reduce((total, item) => total + item.decodedBodySize, 0));
   // Includes the logo's shared WebGL engine, while unrelated scenes stay lazy.

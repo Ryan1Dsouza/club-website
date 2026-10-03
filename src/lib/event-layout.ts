@@ -44,7 +44,8 @@ export type StationPlacement = CoasterStop & { bounds: THREE.Box3; point: THREE.
 // Includes roof, platform, sign, entrance ring, and a margin for passing riders.
 const STATION_MIN = new THREE.Vector3(-5.6, -1.3, -7.8);
 const STATION_MAX = new THREE.Vector3(5.6, 5.6, 7.2);
-export const DEFAULT_STOP_FRACTIONS = [.138, .472, .806] as const;
+// Same seven platform locations, numbered in forward travel order.
+export const DEFAULT_STOP_FRACTIONS = [.138, .223, .386, .472, .667, .806, .966] as const;
 export const WAYPOINT_MIN = new THREE.Vector3(-3.6, -1, -2.5);
 export const WAYPOINT_MAX = new THREE.Vector3(3.6, 3.6, 2.5);
 
@@ -146,7 +147,7 @@ export function createStationPlanner(track: CoasterTrack, { minSeparation = 48 }
   }
   function defaults(reserved: StationPlacement[] = []) {
     const result: StationPlacement[] = [];
-    const names = ['West lookout', 'East observatory', 'Arrival gardens'];
+    const names = ['West lookout', 'Crown lookout', 'East passage', 'East observatory', 'Lower lookout', 'Arrival gardens', 'Return gardens'];
     DEFAULT_STOP_FRACTIONS.forEach((fraction, i) => {
       const placement = next([...reserved, ...result], fraction);
       if (!placement) throw new Error('No clear default platform position.');
@@ -155,17 +156,17 @@ export function createStationPlanner(track: CoasterTrack, { minSeparation = 48 }
     return result;
   }
   function forEvents(events: (ClubEvent | null)[]) {
-    // Reserve persisted platforms before retuning the three default anchors.
+    // Reserve persisted platforms before placing the seven default anchors.
     // A new scenic layout must never displace an already published station.
     const reserved: StationPlacement[] = [];
     const saved = events.map((event, index) => {
-      const placement = index >= 3 && event?.trackPosition !== undefined ? candidates.find(candidate => Math.abs(candidate.distance / length - event.trackPosition!) < 1e-9) : undefined;
+      const placement = index >= DEFAULT_STOP_FRACTIONS.length && event?.trackPosition !== undefined ? candidates.find(candidate => Math.abs(candidate.distance / length - event.trackPosition!) < 1e-9) : undefined;
       if (!placement || reserved.some(other => trackSeparation(other.distance, placement.distance, length) <= minSeparation || other.bounds.intersectsBox(placement.bounds))) return null;
       reserved.push(placement); return placement;
     });
     const anchors = defaults(reserved), occupied = [...anchors, ...reserved];
     return events.map((event, index) => {
-      if (index < 3) return anchors[index];
+      if (index < anchors.length) return anchors[index];
       if (saved[index]) return saved[index];
       const placement = next(occupied, event?.trackPosition);
       if (placement) occupied.push(placement);
