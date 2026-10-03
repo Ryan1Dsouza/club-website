@@ -22,7 +22,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
   // The final scroll step folds the cover shut and dismisses the modal.
   const { cursor, reduced, turn } = useBookScroll(wrapper, content, count + 1);
   const page = Math.min(count - 1, Math.floor(cursor + .00001));
-  const progress = Math.min(1, Math.max(0, cursor - page)), turning = progress > .0001;
+  const progress = Math.min(1, Math.max(0, cursor - page)), turning = progress > .005 && progress < .995;
   const closing = page === count - 1 && turning;
 
   useEffect(() => {
@@ -110,7 +110,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
             <div className="station-book__page station-book__page--left">{renderPage(page, 0)}</div>
             <div className="station-book__page station-book__page--right">{closing && !reduced ? <div className="station-book__end-cover" /> : renderPage(turning && !reduced ? page + 1 : page, 1)}</div>
           </div>
-          {!reduced && <div className="station-book__leaf" aria-hidden="true" style={{ visibility: turning ? 'visible' : 'hidden' }}>
+          {!reduced && <div className="station-book__leaf" aria-hidden="true" style={{ opacity: turning ? 1 : 0 }}>
             {leafStrip(0)}
           </div>}
         </div>
