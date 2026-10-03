@@ -1,0 +1,63 @@
+.nucleus-loader {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  z-index: 2147483000;
+  overflow: hidden;
+  isolation: isolate;
+  contain: layout paint;
+  background: var(--bg, #000000);
+  color: var(--mint, #c3e5c8);
+  overscroll-behavior: none;
+  touch-action: none;
+  will-change: transform, clip-path;
+}
+
+.nucleus-loader__art,
+.nucleus-loader__frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.nucleus-loader__frame {
+  background: currentColor;
+  mask-image: var(--frame-image);
+  mask-mode: alpha;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  visibility: hidden;
+}
+
+.nucleus-loader__frame:first-child { visibility: visible; }
+
+/* Replace the complete drawing on each beat. No interpolation or draw/erase. */
+.nucleus-loader[data-frames-ready="true"] .nucleus-loader__frame {
+  animation: nucleus-loader-frame 0.85s steps(1, end) infinite;
+  animation-delay: var(--frame-delay);
+}
+
+@keyframes nucleus-loader-frame {
+  0% { visibility: visible; }
+  5.882352941176471%, 100% { visibility: hidden; }
+}
+
+.nucleus-loader__fallback {
+  position: absolute;
+  inset: 50% 0 auto;
+  transform: translateY(-50%) rotate(-7deg);
+  text-align: center;
+  font: italic 24px/1 var(--serif, Georgia, serif);
+}
+
+/* The reference magnifies the center of the same artwork on narrow screens. */
+@media (max-width: 480px) {
+  .nucleus-loader__frame { mask-size: 400% auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nucleus-loader { will-change: auto; }
+  .nucleus-loader .nucleus-loader__frame { animation: none; visibility: hidden; }
+  .nucleus-loader .nucleus-loader__frame:first-child { visibility: visible; }
+}

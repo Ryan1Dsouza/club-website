@@ -8,7 +8,7 @@ import { createApp } from '../server/app.mjs';
 import { pageMeta } from '../shared/page-meta.ts';
 import { createCoasterTrack, trackSeparation } from '../src/lib/event-coaster.ts';
 import { createStationPlanner } from '../src/lib/event-layout.ts';
-import { createExperienceStations } from '../src/lib/experience-stations.ts';
+import { createEventStations } from '../src/lib/event-stations.ts';
 
 async function fixture(fn, options = {}) {
   const db = openDatabase(':memory:');
@@ -45,7 +45,7 @@ test('new team members get immutable server creation dates and legacy edits pres
 
 test('publishing an experience requires auth and CSRF, persists photos and a safe station, and is idempotent', () => fixture(async ({ request, login, db, base }) => {
   const track = createCoasterTrack(), planner = createStationPlanner(track);
-  const originalStations = planner.forEvents(createExperienceStations(getSite(db).events).map(station => station.event));
+  const originalStations = planner.forEvents(createEventStations(getSite(db).events).map(station => station.event));
   const id = 'baf123c4-e81b-43df-831d-e85916d1ad80', path = `/admin/experience-events/${id}`;
   const event = { ...getSite(db).events[0], title: 'Photo workshop' };
   const image = { name: 'workshop.png', mime: 'image/png', data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aN4sAAAAASUVORK5CYII=' };
@@ -57,7 +57,7 @@ test('publishing an experience requires auth and CSRF, persists photos and a saf
   const result = await request(path, 'PUT', body, { ...headers, Origin: 'http://127.0.0.1:3000' });
   assert.equal(result.status, 201); const saved = await result.json();
   assert.ok(saved.trackPosition > 0 && saved.trackPosition < 1); assert.equal(saved.photos.length, 1);
-  const stations = createExperienceStations(getSite(db).events), placements = planner.forEvents(stations.map(station => station.event));
+  const stations = createEventStations(getSite(db).events), placements = planner.forEvents(stations.map(station => station.event));
   assert.equal(stations.length, 8); assert.equal(stations[7].number, '08'); assert.equal(stations[7].id, id);
   assert.deepEqual(placements.slice(0, 7).map(stop => stop.distance), originalStations.map(stop => stop.distance));
   assert.equal(placements[7].distance / track.getLength(), saved.trackPosition);

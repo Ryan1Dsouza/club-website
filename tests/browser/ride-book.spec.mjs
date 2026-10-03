@@ -23,7 +23,8 @@ async function openRide(page, data = site) {
     } };
   });
   await page.goto('/events');
-  await page.getByRole('button', { name: /The Nucleus Ride/ }).click();
+  await page.getByRole('button', { name: 'Ride Immersive Experience', exact: true }).first().click();
+    await page.getByRole('button', { name: "Yes, Let's Go" }).click();
   await expect(page.locator('.nx-map-button')).toBeEnabled({ timeout: 30_000 });
 }
 
@@ -70,7 +71,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 851 
         await expect(book).toHaveAttribute('data-book-page', String(next));
       }
       await expect(book.locator('.station-book__panel')).toHaveCount(1);
-      await expect(page.getByRole('button', { name: 'Next book page' })).toBeDisabled();
+      await expect(page.getByRole('button', { name: 'Close book after last page' })).toBeEnabled();
       await page.getByRole('button', { name: 'Previous book page' }).click();
       await expect(book).toHaveAttribute('data-book-page', '6');
       const box = await dialog.boundingBox();

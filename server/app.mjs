@@ -9,7 +9,7 @@ import { resolve } from 'node:path';
 import { getSite, hashPassword, verifyPassword } from './db.mjs';
 import { createCoasterTrack } from '../src/lib/event-coaster.ts';
 import { createStationPlanner } from '../src/lib/event-layout.ts';
-import { createExperienceStations } from '../src/lib/experience-stations.ts';
+import { createEventStations } from '../src/lib/event-stations.ts';
 import { pageMeta } from '../shared/page-meta.ts';
 import { routeAssets } from '../shared/route-assets.mjs';
 
@@ -80,7 +80,7 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
     const existing = getSite(db, true).events.find(item => item.id === id);
     // A retried request cannot create duplicate events or duplicate photo blobs.
     if (existing) return res.json(existing);
-    const stations = createExperienceStations(getSite(db).events);
+    const stations = createEventStations(getSite(db).events);
     const occupied = stationPlanner.forEvents(stations.map(station => station.event)).filter(Boolean);
     const placement = stationPlanner.next(occupied);
     if (!placement) return res.status(409).json({ error: 'The track has no safe space for another station. Unpublish an event in the control room before adding one.' });
@@ -206,7 +206,11 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
         }
         const data = getSite(db);
         const safeData = JSON.stringify(data).replace(/</g, '\\u003c');
-        html = html.replace(/<div id="root">[\s\S]*?<\/div>\s*<\/div>/, () => `<div id="root">${render(data, req.originalUrl)}</div><script id="nucleus-data" type="application/json">${safeData}</script>`);
+        // Keep collected component styles in the head, outside the hydrated root.
+        const markup = render(data, req.originalUrl).replace(/<style data-styled[\s\S]*?<\/style>/g, style => {
+          html = html.replace('</head>', () => `${style}</head>`); return '';
+        });
+        html = html.replace(/<div id="root">[\s\S]*?<\/div>\s*<\/div>/, () => `<div id="root">${markup}</div><script id="nucleus-data" type="application/json">${safeData}</script>`);
         const organization = { '@context': 'https://schema.org', '@type': 'Organization', name: 'Nucleus SJEC', url: origin || 'https://nucleussjec.in', logo: `${origin || 'https://nucleussjec.in'}/brain-mark.svg`, email: data.settings.contactEmail, sameAs: [data.settings.instagramUrl, data.settings.githubUrl, data.settings.linkedinUrl].filter(Boolean), parentOrganization: { '@type': 'CollegeOrUniversity', name: 'St. Joseph Engineering College', address: { '@type': 'PostalAddress', addressLocality: 'Mangaluru', addressCountry: 'IN' } } };
         html = html.replace('</head>', () => `<script type="application/ld+json">${JSON.stringify(organization).replace(/</g, '\\u003c')}</script></head>`);
       }

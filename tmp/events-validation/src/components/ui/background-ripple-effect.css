@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind utilities;
+
+.background-ripple-effect {
+  --cell-border-color: rgba(195, 229, 200, 0.08);
+  --cell-fill-color: rgba(195, 229, 200, 0.04);
+  --cell-pulse-color: rgba(195, 229, 200, 0.14);
+  --cell-shadow-color: #c3e5c8;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 0;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: none;
+}
+
+.background-ripple-effect__grid {
+  mask-image: radial-gradient(ellipse at 50% 50%, #000 60%, transparent 100%);
+}
+
+.background-ripple-effect__cell {
+  border: 0.5px solid var(--cell-border-color);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .background-ripple-effect__cell[data-hovered='true'] {
+    opacity: 0.8;
+    background-color: var(--cell-pulse-color) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .background-ripple-effect__cell {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -36,6 +36,9 @@ img, video { display: block; max-width: 100%; }
 ::selection { color: var(--bg); background: var(--mint); }
 :focus-visible { outline: 2px solid var(--mint); outline-offset: 5px; }
 #main-content:focus { outline: none; }
+.site-shell--home { isolation: isolate; }
+.site-shell--home > #main-content, .site-shell--home > .site-footer { position: relative; z-index: 10; }
+.site-shell--home .logo-landing, .site-shell--home .dp-section, .site-shell--home .vm-container { background: transparent; }
 h1 { font-size: clamp(52px, 8vw, 112px); line-height: .99; font-weight: 450; letter-spacing: -.065em; }
 h2 { font-size: clamp(36px, 5vw, 66px); line-height: 1.08; font-weight: 450; letter-spacing: -.055em; }
 em { font-family: var(--serif); font-weight: 400; letter-spacing: -.065em; }

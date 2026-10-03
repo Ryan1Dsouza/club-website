@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
 const site = JSON.parse(await readFile(new URL('../../shared/public-data.json', import.meta.url), 'utf8'));
-const destinations = [['Home', '/'], ['Experiences', '/events'], ['Our work', '/projects'], ['The people', '/team']];
+const destinations = [['Home', '/'], ['Events', '/events'], ['Our work', '/projects'], ['The people', '/team']];
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/site', route => route.fulfill({ json: site }));

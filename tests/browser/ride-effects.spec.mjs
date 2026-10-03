@@ -35,6 +35,10 @@ test('depth blur preserves near edges, bloom lifts highlights, and quality chang
       pipeline.render(scene, camera, 0, false, 0);
       const after = sample(), image = renderer.domElement.toDataURL('image/png');
       const depthOfField = pipeline.depthOfField;
+      pipeline.render(scene, camera, 0, false, 0, true);
+      const stationPan = { depthOfField:pipeline.depthOfField, pixels:sample() };
+      pipeline.render(scene, camera, 0, false, 0, false);
+      const departureDepthOfField = pipeline.depthOfField;
       pipeline.resize(256, 128, 1, false); pipeline.render(scene, camera, 0, false, 0);
       const lowTier = { enabled: pipeline.enabled, depthOfField: pipeline.depthOfField, textures: renderer.info.memory.textures, pixels: sample() };
       // Upgrading rebuilds the depth attachment; downgrading releases it again.
@@ -45,7 +49,7 @@ test('depth blur preserves near edges, bloom lifts highlights, and quality chang
       pipeline.resize(256, 128, 0, false);
       const disabled = { enabled: pipeline.enabled, textures: renderer.info.memory.textures };
       pipeline.resize(256, 128, 2, true);
-      return { supported: true, before, after, image, depthOfField, lowTier, restored, mediumTextures, disabled, reducedEnabled: pipeline.enabled };
+      return { supported: true, before, after, image, depthOfField, stationPan, departureDepthOfField, lowTier, restored, mediumTextures, disabled, reducedEnabled: pipeline.enabled };
     } finally {
       pipeline.dispose(); geometry.dispose(); grey.dispose(); bright.dispose(); renderer.dispose(); renderer.forceContextLoss();
     }
@@ -56,6 +60,9 @@ test('depth blur preserves near edges, bloom lifts highlights, and quality chang
   expect(result.after.far).toBeGreaterThan(result.before.far + 3);
   expect(result.after.glow).toBeGreaterThan(result.before.glow + 3);
   expect(result.depthOfField).toBe(true);
+  expect(result.stationPan.depthOfField).toBe(false);
+  expect(result.stationPan.pixels.far).toBeLessThanOrEqual(result.before.far + 2);
+  expect(result.departureDepthOfField).toBe(true);
   expect(result.lowTier).toMatchObject({ enabled: true, depthOfField: false, textures: 1 });
   expect(result.lowTier.pixels.near).toBeLessThanOrEqual(result.before.near + 2);
   expect(result.lowTier.pixels.far).toBeLessThanOrEqual(result.before.far + 2);

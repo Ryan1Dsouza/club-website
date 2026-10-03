@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { createCoasterTrack, sampleTrack, createTrackFrame, LOGO_DEPTH } from '../src/lib/event-coaster.ts';
 import { createStationPlanner, logoClearance, BUILDING_BOUNDS, maxStopGap, fillWaypoints } from '../src/lib/event-layout.ts';
-import { createExperienceStations } from '../src/lib/experience-stations.ts';
+import { createEventStations } from '../src/lib/event-stations.ts';
 import { createRideMap } from '../src/lib/event-minimap.ts';
 import { createQualityController, qualityPixelRatio, rideQuality, shouldShowJoystick } from '../src/lib/event-quality.ts';
 import { createVerticalLogo } from '../src/lib/event-scenery.ts';
@@ -116,16 +116,16 @@ test('zero to seven published events keep seven stations; additions preserve eve
   const event = { id: 'one', title: 'Opening', published: true };
   for (let count = 0; count <= 7; count++) {
     const input = Array.from({ length: count }, (_, i) => ({ ...event, id: `event-${i}` }));
-    const stations = createExperienceStations([...input, { ...event, id: 'draft', published: false }]);
+    const stations = createEventStations([...input, { ...event, id: 'draft', published: false }]);
     assert.equal(stations.length, 7);
     assert.equal(stations.filter(station => station.event !== null).length, count);
     assert.deepEqual(stations.map(station => station.number), ['01', '02', '03', '04', '05', '06', '07']);
     assert.ok(stations.every(station => station.name));
     assert.deepEqual(planner.forEvents(stations.map(station => station.event)), planner.defaults());
   }
-  const initial = createExperienceStations([event]), occupied = planner.forEvents(initial.map(s => s.event));
+  const initial = createEventStations([event]), occupied = planner.forEvents(initial.map(s => s.event));
   const next = planner.next(occupied), newEvent = { ...event, id: 'new', trackPosition: next.distance / length };
-  const updated = createExperienceStations([event, newEvent]);
+  const updated = createEventStations([event, newEvent]);
   assert.equal(updated.length, 8); assert.deepEqual(updated.slice(0, 7), initial);
   const saved = planner.forEvents(updated.map(s => s.event));
   assert.equal(saved[7].distance, next.distance);

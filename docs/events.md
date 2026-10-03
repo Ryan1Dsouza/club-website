@@ -1,0 +1,13 @@
+# Events
+
+`/events` opens the photo-card grid. Its dark, responsive column arrangement follows https://www.sceptix.in/events; the 190 × 254px flip cards use the site's own workshop photos and the specified orange gradient back. Desktop has three card columns and two portal lanes; tablet has two columns with both portal labels in the central lane; phones keep one card column with a portal on either side. The archive is centered within 900px, with column gaps capped at 90px and row spacing of 40px. A lone final card is centered on desktop.
+
+`EventFlipCard` is a self-contained styled-components button. Hover reveals the target icon; click opens `Book`. Keyboard focus keeps the photo visible and uses an outline. Both “Ride Immersive Experience” labels open the same confirmation dialog. Only accepting that invitation loads the ride, following a 900ms perspective fly-through. Return restores focus to the originating portal. Query parameters do not bypass the portal.
+
+`src/events/stations.ts` maps stations 1–7 to inauguration, dev, khoj, linkedin, n8n, noesis and unlocked. The two formerly misspelled folders were renamed. `workshop-content.ts` discovers assets under `workshops/` and Vite emits their production URLs. `photo-order.ts` handles both `name(1)` and the existing `in1.avif` naming convention, including numeric ordering after 9. Dates that are not supplied say “Date to be added”; editorial descriptions are placeholders.
+
+The shared `Book` accepts `workshopFolder`, `imageList`, optional event metadata, and an `onClose` callback. Both the grid and ride use it. The first spread pairs editorial copy with photo 1; later spreads contain only photos in order. A final unpaired image faces blank paper. The existing local Lenis book hook drives 3D rotation; eight hinged strips bend the leaf during the turn. One additional scroll step closes the cover and dismisses the book. Escape, navigation buttons, arrow keys and touch are supported. The dialog traps focus, locks the background and restores the trigger on close. Reduced motion removes rotations.
+
+Station arrivals pan 90° right with a cubic ease-out over at most 400ms, using elapsed time rather than the capped physics timestep. Depth of field stays at zero from docking through the open book and restores on departure. The completed-pan callback opens the book in the same render frame; its reveal lasts 160ms.
+
+Validation: `npm run check`; browser coverage in `events-page.spec.mjs`, `ride-book.spec.mjs`, `ride-stations.spec.mjs`, `station-arrival.spec.mjs` and `ride-effects.spec.mjs`. Server rendering collects styled-components CSS into the document head before hydration.

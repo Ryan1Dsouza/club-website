@@ -4,9 +4,11 @@
 [data-tower-status='ready'] .people-tower { height: var(--tower-length); }
 [data-tower-status='ready'] .people-tower__stage { position: sticky; top: 0; }
 @media (max-width: 768px), (pointer: coarse) {
+  .people-page { background: var(--bg, #020d07); }
   /* The story provides scroll distance; its scene stays attached to the mobile
      viewport as browser controls expand/collapse on the first swipe. */
-  [data-tower-status='ready'] .people-tower__stage { position: fixed; inset: 0; height: auto; }
+  [data-tower-status='ready'] .people-tower { background: #020d07; }
+  [data-tower-status='ready'] .people-tower__stage { position: fixed; inset: 0; height: auto; will-change: transform; }
   html:has(.people-page[data-tower-status='ready']) { overscroll-behavior-y: none; }
 }
 .people-tower__world { position: absolute; inset: 0; }
@@ -72,6 +74,13 @@
 .tower-profile__name > span { display: block; }
 .tower-profile__name > span:last-child { opacity: .8; }
 .tower-profile__footer { position: absolute; inset: auto 5% 4%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 14px; border-top: 1px solid color-mix(in srgb, currentColor 35%, transparent); font: 10px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .1em; }
+@media (min-width: 761px) {
+  .tower-profile { color: #fff; text-shadow: 0 2px 8px rgb(0 0 0 / .8); }
+  .tower-profile::before, .tower-profile::after { display: none; }
+  .tower-profile__photo { right: 0; left: auto; width: 65%; object-position: center 20%; }
+  .tower-profile__photo-fade { right: 0; left: auto; width: 65%; background: linear-gradient(to right, var(--tower-paper) 0%, transparent 60%); }
+  .tower-profile__cross, .tower-profile__footer { z-index: 2; }
+}
 .people-roster { padding-block: 85px 80px; scroll-margin-top: calc(var(--header-height) + 20px); }
 .people-roster__heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; margin-bottom: 35px; }
 .people-roster__heading h2 { margin-top: 18px; font-size: clamp(35px, 5vw, 64px); }

@@ -3,166 +3,148 @@ import { readFile } from 'node:fs/promises';
 import AxeBuilder from '@axe-core/playwright';
 
 const site = JSON.parse(await readFile(new URL('../../shared/public-data.json', import.meta.url), 'utf8'));
-const shell = page => page.locator('[data-event-mode]');
-const carousel = page => page.locator('.event-carousel');
+const folders = ['inauguration', 'dev', 'khoj', 'linkedin', 'n8n', 'noesis', 'unlocked'];
+const titles = ['Inauguration', 'Dev', 'Khoj', 'LinkedIn', 'n8n', 'Noesis', 'Unlocked'];
+const counts = [12, 2, 4, 1, 4, 7, 6];
 
 async function open(page, data = site) {
   await page.route('**/api/site', route => route.fulfill({ json: data }));
   await page.goto('/events');
-  await expect(page.locator('[data-loading-screen]')).toHaveCount(0, { timeout: 12_000 });
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done', { timeout:15000 });
+  await expect(page.locator('[data-loading-screen]')).toHaveCount(0, { timeout: 15000 });
 }
 
-async function browse(page) {
-  await page.getByRole('button', { name: /Quick Browse/ }).click();
-  await expect(page.getByRole('region', { name: 'Event carousel' })).toBeVisible();
-  await expect(page.locator('.ec-title__mask').first().locator('span')).toHaveCSS('transform', 'none');
+for (const [width, columns] of [[2560, 3], [1440, 3], [820, 2], [390, 1]]) {
+  test(`Events grid has ${columns} columns, working images and two portals at ${width}px`, async ({ page }, info) => {
+    await page.setViewportSize({ width, height:900 });
+    await open(page, width === 2560 ? { ...site, events:[] } : site);
+    await expect(page).toHaveTitle(/Events/);
+    const cards = page.locator('.event-flip-card');
+    await expect(cards).toHaveCount(7);
+    expect(await cards.evaluateAll(elements => elements.map(element => element.dataset.workshop))).toEqual(folders);
+    const boxes = await cards.evaluateAll(elements => elements.map(element => { const box = element.getBoundingClientRect(); return { x:box.x, y:box.y, width:box.width, height:box.height }; }));
+    expect(new Set(boxes.map(box => box.x)).size).toBe(columns);
+    for (const box of boxes) { expect(box.width).toBe(190); expect(box.height).toBe(254); expect(box.x).toBeGreaterThanOrEqual(0); expect(box.x + box.width).toBeLessThanOrEqual(width); }
+    if (columns > 1) expect(boxes[1].x - boxes[0].x - 190).toBeLessThanOrEqual(90);
+    if (columns === 3) {
+      expect(boxes[6].x).toBe(boxes[1].x);
+      expect(boxes[6].x + 95).toBeCloseTo(width / 2, 0);
+      expect((await page.locator('.events-archive').boundingBox()).width).toBe(900);
+    }
+    await expect(cards.locator('.flip-card__footer')).toHaveText(Array(7).fill('Workshop'));
+    for (let index = 0; index < 7; index++) {
+      await cards.nth(index).scrollIntoViewIfNeeded();
+      const photo = cards.nth(index).locator('img');
+      await expect(photo).toHaveAttribute('src', new RegExp(`/workshops/${folders[index]}/.*1\\.avif`));
+      await expect.poll(() => photo.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
+    }
+    await expect(page.getByRole('button', { name:'Ride Immersive Experience', exact:true })).toHaveCount(2);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.screenshot({ path:info.outputPath('events-grid.png'), fullPage:true });
+  });
 }
 
-test('choice screen loads neither scene, Quick Browse snaps with parallax, and details preserve focus', async ({ page }, info) => {
-  const errors = []; page.on('pageerror', error => errors.push(error.message));
-  const worldRequests = []; page.on('request', request => { if (/LogoWorld|event-world/.test(request.url())) worldRequests.push(request.url()); });
-  await page.setViewportSize({ width: 1440, height: 900 });
+test('every card opens its own sequential, edge-to-edge book and the last turn dismisses it', async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion:'reduce' });
   await open(page);
-  await expect(shell(page)).toHaveAttribute('data-event-mode', 'choice');
-  await expect(page.locator('.nx-world,.ec-scroll')).toHaveCount(0);
-  await page.screenshot({ path: info.outputPath('events-choice-desktop.png') });
-  await browse(page);
-  expect(worldRequests).toEqual([]);
-  await expect(page.locator('[data-event-card]')).toHaveCount(7);
-  await expect(page.locator('.ec-counter > span').last()).toHaveText('07');
-  const scroller = page.getByRole('region', { name: 'Event carousel' });
-  await expect(scroller).toHaveCSS('scroll-snap-type', 'y mandatory');
-  await expect(scroller).toBeFocused();
-  const first = page.locator('[data-event-card]').first();
-  const [art, slab] = await Promise.all([first.locator('[data-event-art]').boundingBox(), first.locator('.ec-slab').boundingBox()]);
-  expect(art.y).toBeLessThan(slab.y);
-  expect(art.width).toBeGreaterThan(slab.width);
-  await page.screenshot({ path: info.outputPath('event-carousel-desktop.png') });
-  const background = await carousel(page).evaluate(element => getComputedStyle(element).backgroundColor);
-  const before = await first.locator('[data-event-art]').evaluate(element => getComputedStyle(element).transform);
-  await page.mouse.move(1100, 650);
-  await page.mouse.wheel(0, 780);
-  await expect(carousel(page)).toHaveAttribute('data-active-event', site.events[1].id);
-  await expect.poll(() => scroller.evaluate(element => Math.abs(element.scrollTop - element.clientHeight))).toBeLessThan(2);
-  await expect.poll(() => carousel(page).evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe(background);
-  await expect.poll(() => first.locator('[data-event-art]').evaluate(element => getComputedStyle(element).transform)).not.toBe(before);
-  await page.screenshot({ path: info.outputPath('event-carousel-second.png') });
-  const explore = page.getByRole('button', { name: `Explore ${site.events[1].title}`, exact: true });
-  await explore.click();
-  await expect(page.getByRole('dialog')).toContainText(site.events[1].description);
+  for (let index = 0; index < 7; index++) {
+    const card = page.getByRole('button', { name:`Open ${titles[index]} event book`, exact:true });
+    await card.click();
+    const dialog = page.getByRole('dialog', { name:titles[index], exact:true }), book = dialog.locator('.station-book');
+    await expect(book).toHaveAttribute('data-scroll-engine', 'lenis');
+    await expect(book).toHaveAttribute('data-workshop', folders[index]);
+    await expect(book.locator('.station-book__story')).toContainText('Key highlights');
+    const cover = book.locator('.station-book__cover-art img');
+    await expect(cover).toHaveAttribute('src', new RegExp(`/workshops/${folders[index]}/.*1\\.avif`));
+    await expect(cover).toHaveCSS('object-fit', 'cover');
+    if (index === 0) await page.screenshot({ path:info.outputPath('book-editorial.png') });
+    const sources = [await cover.getAttribute('src')];
+    const spreads = 1 + Math.ceil((counts[index] - 1) / 2);
+    for (let spread = 2; spread <= spreads; spread++) {
+      await dialog.getByRole('button', { name:'Next book page', exact:true }).click();
+      await expect(book).toHaveAttribute('data-book-page', String(spread));
+      const pages = book.locator('.station-book__spread');
+      expect(await pages.innerText()).toBe('');
+      sources.push(...await pages.locator('img').evaluateAll(images => images.map(image => image.getAttribute('src'))));
+      for (const image of await pages.locator('img').all()) {
+        await expect(image).toHaveCSS('object-fit', 'cover');
+        await expect.poll(() => image.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
+        await image.evaluate(image => image.decode());
+        expect((await image.boundingBox()).height).toBeGreaterThan(100);
+      }
+      if (index === 0 && spread === 2) await page.screenshot({ path:info.outputPath('book-photo-spread.png') });
+    }
+    expect(sources).toHaveLength(counts[index]);
+    expect(new Set(sources).size).toBe(counts[index]);
+    await book.getByRole('region', { name:`${titles[index]} event book`, exact:true }).focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(dialog).toHaveCount(0);
+    await expect(card).toBeFocused();
+    expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
+  }
+});
+
+test('scroll drives a curved page turn, locks background scrolling and restores focus', async ({ page }, info) => {
+  await open(page);
+  const card = page.getByRole('button', { name:'Open Inauguration event book', exact:true });
+  await card.focus();
+  await expect(card.locator('.flip-card__body')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
+  await card.hover();
+  await expect(card.locator('.flip-card__body')).toHaveCSS('transform', 'matrix3d(-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1)');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await card.click();
+  const scroll = await page.evaluate(() => scrollY);
+  await page.locator('.station-book__page--right').hover();
+  await page.mouse.wheel(0, 200);
+  await expect(page.locator('.station-book')).toHaveAttribute('data-book-turning', 'true');
+  await expect(page.locator('.station-book__strip')).toHaveCount(8);
+  await page.screenshot({ path:info.outputPath('book-mid-turn.png') });
+  expect(await page.evaluate(() => scrollY)).toBe(scroll);
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(explore).toBeFocused();
-  await scroller.focus();
-  await page.keyboard.press('End');
-  await expect(carousel(page)).toHaveAttribute('data-active-event', 'preview-station-6');
-  await expect(page.getByRole('heading', { name: 'Event 07', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Next event', exact: true })).toBeDisabled();
-  await page.getByRole('button', { name: 'Change experience' }).click();
-  await expect(page.getByRole('button', { name: /Quick Browse/ })).toBeFocused();
-  await expect(page.locator('.ec-scroll')).toHaveCount(0);
-  expect(errors).toEqual([]);
+  await expect(card).toBeFocused();
+  await expect(card.locator('.flip-card__body')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
 });
 
-for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }, { width: 280, height: 653 }]) {
-  test(`choice and carousel stay readable at ${viewport.width}x${viewport.height}`, async ({ page }, info) => {
-    await page.setViewportSize(viewport);
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await open(page);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
-    await page.screenshot({ path: info.outputPath(`events-choice-${viewport.width}.png`), fullPage: true });
-    await browse(page);
-    const card = page.locator('[data-event-card][data-active="true"]');
-    await expect(card).toHaveCSS('height', `${viewport.height}px`);
-    for (const target of [card.locator('h2'), card.locator('.ec-open'), page.getByRole('button', { name: 'Change experience' }), page.getByRole('button', { name: 'Next event', exact: true })]) {
-      const box = await target.boundingBox();
-      expect(box.x).toBeGreaterThanOrEqual(0); expect(box.y).toBeGreaterThanOrEqual(0);
-      expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1); expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
-    }
-    await page.screenshot({ path: info.outputPath(`event-carousel-${viewport.width}.png`) });
-    await page.getByRole('button', { name: 'Next event', exact: true }).click();
-    await expect(carousel(page)).toHaveAttribute('data-active-event', site.events[1].id);
-    const violations = (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations;
-    expect(violations.map(({ id, nodes }) => ({ id, targets: nodes.map(node => node.target) }))).toEqual([]);
-    for (let index = 2; index < 7; index++) {
-      await page.getByRole('button', { name: 'Next event', exact: true }).click();
-      await expect(page.locator('.ec-counter > span').first()).toHaveText(String(index + 1).padStart(2, '0'));
-      if (index < site.events.length) continue;
-      await expect(card.getByRole('heading', { name: `Event ${String(index + 1).padStart(2, '0')}`, exact: true })).toBeVisible();
-      await expect(card.locator('.ec-category')).toContainText('Details coming soon');
-      await expect(card.locator('.ec-meta, .ec-open')).toHaveCount(0);
-      await expect(card).not.toContainText('Coming up');
-    }
-    await expect(page.getByRole('button', { name: 'Next event', exact: true })).toBeDisabled();
-    await page.screenshot({ path: info.outputPath(`event-carousel-seven-${viewport.width}.png`) });
-  });
-}
-
-test('photos overflow their panel, unpublished events stay private, and preview navigation is bounded', async ({ page }, info) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  const image = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800"><circle cx="300" cy="290" r="230" fill="#c3e5c8"/><path d="M130 750L470 750 380 200 220 200Z" fill="#364939"/><text x="300" y="330" text-anchor="middle" fill="white" font-size="66">NUCLEUS</text></svg>');
-  const event = { ...site.events[0], photos: [{ id: 'photo', name: 'Event poster', url: image }], registrationUrl: 'https://example.com/register', albumUrl: 'https://example.com/album' };
-  await open(page, { ...site, events: [event, { ...site.events[1], published: false }] });
-  await browse(page);
-  await expect(page.locator('[data-event-card]')).toHaveCount(7);
-  await expect(page.locator(`[data-event-card="${site.events[1].id}"]`)).toHaveCount(0);
-  await expect(page.locator('.ec-photo-main')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Next event', exact: true })).toBeEnabled();
-  await expect(page.getByRole('button', { name: 'Previous event', exact: true })).toBeDisabled();
-  await page.screenshot({ path: info.outputPath('event-carousel-photo.png') });
-  await page.getByRole('button', { name: `Explore ${event.title}` }).click();
-  await expect(page.getByRole('link', { name: /Register for event/ })).toHaveAttribute('href', event.registrationUrl);
-  await expect(page.getByRole('img', { name: 'Event poster' })).toBeVisible();
-});
-
-test('empty collections have an honest empty state', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await open(page, { ...site, events: [] });
-  await page.getByRole('button', { name: /Quick Browse/ }).click();
-  await expect(page.getByRole('heading', { name: /The next connection/ })).toBeVisible();
-  await expect(page.locator('.ec-scroll')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Change experience' }).click();
-  await expect(shell(page)).toHaveAttribute('data-event-mode', 'choice');
-});
-
-test('long titles and failed photos remain usable on a short phone screen', async ({ page }, info) => {
-  await page.setViewportSize({ width: 320, height: 568 });
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.route('**/missing-event-photo.png', route => route.abort());
-  const event = { ...site.events[0], title: 'A collaborative workshop on building useful artificial intelligence with the Nucleus community', photos: [{ id: 'broken', name: 'Unavailable photo', url: '/missing-event-photo.png' }] };
-  await open(page, { ...site, events: [event] });
-  await browse(page);
-  await expect(page.locator('[data-event-card][data-active="true"] .ec-foreground .event-sculpture')).toBeVisible();
-  const title = await page.getByRole('heading', { name: event.title, exact: true }).boundingBox();
-  expect(title.x).toBeGreaterThanOrEqual(0); expect(title.x + title.width).toBeLessThanOrEqual(320);
-  const button = await page.locator('.ec-open').boundingBox();
-  expect(button.y + button.height).toBeLessThan(568);
-  await page.screenshot({ path: info.outputPath('event-carousel-long-title.png') });
-});
-
-test('the immersive choice still mounts the ride and switching back disposes the scene', async ({ page }) => {
-  const errors = []; page.on('pageerror', error => errors.push(error.message));
-  await page.addInitScript(() => {
-    window.rideContexts = new Set();
-    const getContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
-      const context = getContext.call(this, type, ...args);
-      if (context && (type === 'webgl2' || type === 'webgl')) window.rideContexts.add(context);
-      return context;
-    };
-  });
-  await page.emulateMedia({ reducedMotion: 'reduce' });
+test('both portals require confirmation, animate into the ride and return focus', async ({ page }, info) => {
+  const errors = [], requests = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => { if (/LogoWorld|event-world/.test(request.url())) requests.push(request.url()); });
   await open(page);
-  await page.getByRole('button', { name: /The Nucleus Ride/ }).click();
-  await expect(page.locator('.nx-map-button')).toBeEnabled({ timeout: 30_000 });
-  await expect(page.locator('.nx-world canvas')).toHaveCount(1);
-  expect(await page.evaluate(() => window.rideContexts.size)).toBe(1);
-  await expect.poll(() => page.locator('.nx-world').getAttribute('data-draw-calls').then(Number)).toBeLessThan(60);
-  await page.getByRole('button', { name: 'Change experience' }).click();
-  await expect(page.locator('.nx-world canvas')).toHaveCount(0);
-  expect(await page.evaluate(() => [...window.rideContexts].every(context => context.isContextLost()))).toBe(true);
-  await expect(page.getByRole('button', { name: /The Nucleus Ride/ })).toBeFocused();
-  await browse(page);
+  expect(requests).toEqual([]);
+  for (let index = 0; index < 2; index++) {
+    const trigger = page.getByRole('button', { name:'Ride Immersive Experience', exact:true }).nth(index);
+    await trigger.click();
+    await expect(page.getByRole('dialog')).toContainText('Do you want to hop into the Nucleus Ride?');
+    await page.getByRole('button', { name:'Maybe Later', exact:true }).click();
+    await expect(trigger).toBeFocused();
+    await expect(page.locator('.nx-world')).toHaveCount(0);
+  }
+  expect(requests).toEqual([]);
+  await page.getByRole('button', { name:'Ride Immersive Experience', exact:true }).last().click();
+  await page.screenshot({ path:info.outputPath('portal-invitation.png') });
+  await page.getByRole('button', { name:"Yes, Let's Go" }).click();
+  await expect(page.getByRole('status', { name:'Entering the Nucleus Ride' })).toBeVisible();
+  await expect(page.locator('.events-page')).toHaveAttribute('data-event-mode', 'immersive');
+  await expect(page.locator('.nx-map-button')).toBeEnabled({ timeout:30000 });
+  await page.getByRole('button', { name:'Back to Events', exact:true }).click();
+  await expect(page.getByRole('button', { name:'Ride Immersive Experience', exact:true }).last()).toBeFocused();
   await expect(page.locator('.nx-world')).toHaveCount(0);
   expect(errors).toEqual([]);
+});
+
+test('grid, invitation and book remain accessible on a small phone', async ({ page }) => {
+  await page.setViewportSize({ width:320, height:568 });
+  await page.emulateMedia({ reducedMotion:'reduce' });
+  await open(page);
+  expect((await new AxeBuilder({ page }).include('.events-page').analyze()).violations).toEqual([]);
+  await page.getByRole('button', { name:'Ride Immersive Experience', exact:true }).first().click();
+  expect((await new AxeBuilder({ page }).include('.events-portal-dialog').analyze()).violations).toEqual([]);
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name:'Open Inauguration event book', exact:true }).click();
+  const dialog = page.getByRole('dialog'), box = await dialog.boundingBox();
+  expect(box.x).toBeGreaterThanOrEqual(0); expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(320); expect(box.y + box.height).toBeLessThanOrEqual(568);
+  expect((await new AxeBuilder({ page }).include('.nx-book-dialog').analyze()).violations).toEqual([]);
 });

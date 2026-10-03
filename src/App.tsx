@@ -11,6 +11,7 @@ import { api } from './api';
 import type { SiteData, SiteSettings } from './types';
 import seed from '../shared/public-data.json';
 import LogoLanding from './components/home/LogoLanding';
+import { BackgroundRippleEffect } from './components/ui/background-ripple-effect';
 import DomainParallax from './components/home/DomainParallax';
 import { EventsPage, WorkPage, PeoplePage, Recruitment } from './route-pages';
 import VoicesMarquee from './components/home/VoicesMarquee';
@@ -138,7 +139,7 @@ export default function App({ initialData = seed, serverRendered = false }: { in
   const domainItems = domains.map((item, index) => ({ ...item, onClick: () => setDomain(index) }));
   const navItems = [
     { title: 'Home', href: '/' },
-    { title: 'Experiences', href: '/events' },
+    { title: 'Events', href: '/events' },
     { title: 'Our work', href: '/projects' },
     { title: 'The people', href: '/team' },
   ];
@@ -147,7 +148,8 @@ export default function App({ initialData = seed, serverRendered = false }: { in
 
   return <>
     <LoadingScreen active={loadingStage === 'idle' || loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
-    <div className="site-shell" inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
+    <div className={`site-shell${location.pathname === '/' ? ' site-shell--home' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
+    {location.pathname === '/' && <BackgroundRippleEffect className="background-ripple-effect--page" />}
     <a href="#main-content" className="skip-link">Skip to content</a>
     <header className={`site-header${['/', '/team', '/events'].includes(location.pathname) ? ' site-header--home' : ''}`}>
       <MorphingNavbar items={navItems} settings={settings} open={menuOpen} onOpenChange={setMenuOpen} onApply={() => setApplyOpen(true)} />

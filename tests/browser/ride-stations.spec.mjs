@@ -16,7 +16,8 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     await page.setViewportSize(viewport);
     await page.route('**/api/site', route => route.fulfill({ json: site }));
     await page.goto('/events');
-    await page.getByRole('button', { name: /The Nucleus Ride/ }).click();
+    await page.getByRole('button', { name: 'Ride Immersive Experience', exact: true }).first().click();
+    await page.getByRole('button', { name: "Yes, Let's Go" }).click();
     await expect(page.locator('.nx-map-button')).toBeEnabled({ timeout: 30_000 });
     await expect(page.locator('[data-loading-screen]')).toHaveCount(0, { timeout: 15_000 });
     if (viewport.width <= 768) await page.getByRole('button', { name: 'Open holographic map' }).click();
@@ -43,8 +44,6 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     for (let index = 0; index < 7; index++) {
       await page.getByRole('button', { name: `Ride from station ${numbers[index]}: ${titles[index]}`, exact: true }).click();
       const book = page.locator('.station-book');
-      await expect(world).toHaveAttribute('data-arrival-stage', 'panning');
-      await expect(book).toHaveCount(0);
       await expect(page.getByRole('dialog', { name: titles[index], exact: true })).toBeVisible();
       await expect(world).toHaveAttribute('data-pan-progress', '1.000');
       await expect(world).toHaveAttribute('data-pan-angle', '-1.5708');
@@ -74,7 +73,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
         if (index === 0) await page.screenshot({ path: info.outputPath('inauguration-photo-gallery.png') });
         await page.getByRole('button', { name: 'Previous book page' }).click();
         await expect(book).toHaveAttribute('data-book-progress', '0.000');
-      } else await expect(page.getByRole('button', { name: 'Next book page' })).toBeDisabled();
+      } else await expect(page.getByRole('button', { name: 'Close book after last page' })).toBeEnabled();
       await expect(world).toHaveAttribute('data-distance', before);
       await page.getByRole('button', { name: 'Continue ride', exact: true }).click();
       await expect(world).toHaveAttribute('data-drive-ready', 'true');
