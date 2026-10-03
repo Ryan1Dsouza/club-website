@@ -314,9 +314,14 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     function scroll() {
       scrollDirty = true; lastInteraction = performance.now(); wake();
     }
+    function getScrollPosition() {
+      const shell = document.querySelector('.site-shell');
+      if (shell && matchMedia('(max-width: 768px), (pointer: coarse)').matches) return shell.scrollTop;
+      return window.scrollY;
+    }
     function sampleScroll() {
       scrollDirty = false;
-      const next = clamp01((window.scrollY - start) / range);
+      const next = clamp01((getScrollPosition() - start) / range);
       if (next !== target) { lastInteraction = performance.now(); releasePointer(); }
       target = next;
     }
@@ -329,7 +334,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       // bursts only mark dirty, so this work happens at most once per frame.
       const nextWidth = Math.max(1, host.clientWidth), nextHeight = Math.max(1, host.clientHeight);
       const header = parseFloat(getComputedStyle(stage).top) || 0;
-      start = section.getBoundingClientRect().top + scrollY - header; range = Math.max(1, section.offsetHeight - stage.offsetHeight);
+      start = section.getBoundingClientRect().top + getScrollPosition() - header; range = Math.max(1, section.offsetHeight - stage.offsetHeight);
       device.coarsePointer = coarsePointer.matches;
       quality = towerQuality(nextWidth, nextHeight, window.devicePixelRatio, device);
       quality.simplified ||= effectsReduced;
@@ -404,7 +409,13 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       releasePointer(); physics.reset(); storyRemoved = 0; active = -2; progress = target = 0; idleAngle = 0;
       scrollMotion.value = 0; scrollMotion.velocity = 0;
       matricesDirty = true; renderedProgress = -1; lastInteraction = performance.now();
-      window.scrollTo({ top: start, behavior: 'instant' }); wake();
+      const shell = document.querySelector('.site-shell');
+      if (shell && matchMedia('(max-width: 768px), (pointer: coarse)').matches) {
+        shell.scrollTo({ top: start, behavior: 'instant' });
+      } else {
+        window.scrollTo({ top: start, behavior: 'instant' });
+      }
+      wake();
     }
 
     const resizeObserver = new ResizeObserver(resize);
@@ -424,6 +435,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     const contextLost = (event: Event) => { event.preventDefault(); dispose(); callbacks.onError(); };
     cleanups.push(() => {
       window.removeEventListener('scroll', scroll); window.removeEventListener('resize', resize);
+      const shell = document.querySelector('.site-shell');
+      if (shell) shell.removeEventListener('scroll', scroll);
       document.removeEventListener('visibilitychange', visibility);
       renderer.domElement.removeEventListener('webglcontextlost', contextLost);
       renderer.domElement.removeEventListener('pointerdown', pointerDown); renderer.domElement.removeEventListener('pointermove', pointerMove);
@@ -435,6 +448,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     renderer.domElement.addEventListener('pointerup', pointerUp); renderer.domElement.addEventListener('pointercancel', pointerUp);
     renderer.domElement.addEventListener('lostpointercapture', pointerUp);
     window.addEventListener('scroll', scroll, { passive: true }); window.addEventListener('resize', resize, { passive: true });
+    const shell = document.querySelector('.site-shell');
+    if (shell) shell.addEventListener('scroll', scroll, { passive: true });
     document.addEventListener('visibilitychange', visibility);
     host.append(renderer.domElement, css.domElement);
     await renderer.compileAsync(scene, camera);

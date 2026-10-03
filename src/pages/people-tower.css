@@ -7,7 +7,8 @@
   .people-page { background: var(--bg, #020d07); }
   [data-tower-status='ready'] .people-tower { background: #020d07; }
   /* Use sticky positioning to match desktop and prevent address bar layout shifts */
-  html:has(.people-page[data-tower-status='ready']) { overscroll-behavior-y: none; }
+  html:has(.people-page[data-tower-status='ready']), html:has(.people-page[data-tower-status='ready']) body { overscroll-behavior-y: none; overflow: hidden; height: 100%; }
+  .site-shell:has(.people-page[data-tower-status='ready']) { height: 100dvh; overflow-y: scroll; overscroll-behavior-y: none; }
 }
 .people-tower__world { position: absolute; inset: 0; }
 .people-tower__world > canvas, .people-tower__labels { position: absolute; inset: 0; display: block; pointer-events: none; }
