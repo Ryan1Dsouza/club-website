@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, type CSSProperties } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowDown, ArrowLeft, ArrowRight, CalendarDays, MapPin, X } from 'lucide-react';
 import type { ClubEvent, EventPhoto } from '../../types';
@@ -13,8 +13,16 @@ type Props = { workshopFolder: string; imageList: EventPhoto[]; event?: ClubEven
 
 export default function Book({ workshopFolder, imageList, event, title, stationNumber = '01', onClose, continueLabel = 'Back to Events', galleryOnly = false }: Props) {
   const name = title ?? WORKSHOP_STATIONS.find(item => item.id === workshopFolder)?.title ?? workshopFolder;
+  const [isMobile, setIsMobile] = useState(() => matchMedia('(max-width: 620px)').matches);
+  useEffect(() => {
+    const media = matchMedia('(max-width: 620px)');
+    const listener = () => setIsMobile(media.matches);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
+  }, []);
+
   const spreads = useMemo(() => bookSpreads(imageList), [imageList]);
-  const count = spreads.length;
+  const count = isMobile ? imageList.length + 1 : spreads.length;
   const dialog = useRef<HTMLDialogElement>(null), closed = useRef(false);
   const instructions = useId();
   const wrapper = useRef<HTMLDivElement>(null), content = useRef<HTMLDivElement>(null);
@@ -39,15 +47,18 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
 
   // Warm only the next spread, including the back of the turning leaf.
   useEffect(() => {
-    const images = (spreads[page + 1] ?? []).filter(photo => photo !== null).map(photo => {
-      const image = new Image(); image.src = photo.url; return image;
+    const images = isMobile 
+      ? [imageList[page]]
+      : (spreads[page + 1] ?? []).filter(photo => photo !== null);
+    
+    const preloads = images.filter(Boolean).map(photo => {
+      const image = new Image(); image.src = photo!.url; return image;
     });
-    return () => { images.forEach(image => { image.src = ''; }); };
-  }, [page, spreads]);
+    return () => { preloads.forEach(image => { image.src = ''; }); };
+  }, [page, spreads, imageList, isMobile]);
 
-  const renderPage = (spread: number, side: 0 | 1, duplicate = false) => {
-    const photo = spreads[spread]?.[side];
-    if (spread === 0 && side === 0) return <section className="station-book__story" data-book-scroll
+  const renderItem = (index: number, duplicate = false) => {
+    if (index === 0) return <section className="station-book__story" data-book-scroll
       tabIndex={duplicate ? -1 : 0} aria-label={duplicate ? undefined : 'Event story'}
       onWheelCapture={event => {
         const element = event.currentTarget;
@@ -71,12 +82,15 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
       </div>
       <span className="station-book__byline">Made of many minds. / SJEC</span>
     </section>;
-    if (spread === 0 && side === 1) return <figure className={`station-book__cover-art${photo ? '' : ' nx-event-artwork'}`}>
+    
+    const photo = imageList[index - 1];
+    if (index === 1) return <figure className={`station-book__cover-art${photo ? '' : ' nx-event-artwork'}`}>
       {photo ? <img src={photo.url} alt={duplicate ? '' : `${name} — opening photograph`} decoding="async" /> : <EventArtwork variant={Number(stationNumber) % 3} />}
     </figure>;
+    
     return photo ? <figure className="station-book__panel">
-      {duplicate ? <img src={photo.url} alt="" decoding="async" /> : <a href={photo.url} target="_blank" rel="noreferrer" aria-label={`Open ${name} photograph ${spread * 2 + side}`}>
-        <img src={photo.url} alt={`${name} — photograph ${spread * 2 + side}`} decoding="async" />
+      {duplicate ? <img src={photo.url} alt="" decoding="async" /> : <a href={photo.url} target="_blank" rel="noreferrer" aria-label={`Open ${name} photograph ${index}`}>
+        <img src={photo.url} alt={`${name} — photograph ${index}`} decoding="async" />
       </a>}
     </figure> : <div className="station-book__blank" aria-hidden="true" />;
   };
@@ -85,8 +99,8 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
 
   // Hinged strips form one continuous leaf: its bend peaks midway through a turn.
   const leafStrip = (index: number): React.ReactNode => <div className="station-book__strip" key={index} style={{ '--strip': index, '--reverse-strip': 7 - index } as CSSProperties}>
-    <div className="station-book__leaf-face station-book__leaf-front"><div className="station-book__slice">{renderPage(page, 1, true)}</div></div>
-    <div className="station-book__leaf-face station-book__leaf-back"><div className="station-book__slice">{closing ? <div className="station-book__end-cover" /> : renderPage(page + 1, 0, true)}</div></div>
+    <div className="station-book__leaf-face station-book__leaf-front"><div className="station-book__slice">{isMobile ? renderItem(page, true) : renderItem(page * 2 + 1, true)}</div></div>
+    <div className="station-book__leaf-face station-book__leaf-back"><div className="station-book__slice">{closing ? <div className="station-book__end-cover" /> : (isMobile ? null : renderItem(page * 2 + 2, true))}</div></div>
     {index < 7 && leafStrip(index + 1)}
   </div>;
 
@@ -107,8 +121,8 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
         <div className="station-book__surface" tabIndex={0} role="region" aria-label={`${name} event book`} aria-describedby={instructions}
           style={{ '--book-turn': `${reduced ? 0 : -180 * progress}deg`, '--book-bend': `${Math.sin(progress * Math.PI) * -3}deg`, '--book-close': closing && !reduced ? progress : 0 } as CSSProperties}>
           <div className={`station-book__spread ${page === 0 ? 'station-book__cover' : 'station-book__photos'}`}>
-            <div className="station-book__page station-book__page--left">{renderPage(page, 0)}</div>
-            <div className="station-book__page station-book__page--right">{closing && !reduced ? <div className="station-book__end-cover" /> : renderPage(turning && !reduced ? page + 1 : page, 1)}</div>
+            <div className="station-book__page station-book__page--left">{isMobile ? renderItem(page) : renderItem(page * 2)}</div>
+            <div className="station-book__page station-book__page--right">{closing && !reduced ? <div className="station-book__end-cover" /> : (isMobile ? renderItem(turning && !reduced ? page + 1 : page) : renderItem(turning && !reduced ? page * 2 + 3 : page * 2 + 1))}</div>
           </div>
           {!reduced && <div className="station-book__leaf" aria-hidden="true" style={{ opacity: turning ? 1 : 0 }}>
             {leafStrip(0)}

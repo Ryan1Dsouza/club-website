@@ -72,17 +72,16 @@
 .nx-book-dialog .station-book__capacity { margin-top:10px; font-size:10px; color:#52604e; }
 @media(max-width:620px) {
   .nx-dialog.nx-book-dialog { width:calc(100% - 24px); height:calc(100dvh - 32px); }
-  .station-book__spread { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
-  .station-book__leaf { inset: 50% 0 0 0; transform-origin: top center; transform: rotateX(var(--book-turn)); }
+  .station-book__spread { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+  .station-book__page--left { display: none; }
+  .station-book__page--right { grid-row: 1; grid-column: 1; z-index: 1; }
+  .station-book__leaf { inset: 0; transform-origin: top center; transform: rotateX(var(--book-turn)); }
   .station-book__strip { left: 0; top: 0; width: 100%; height: 12.5%; transform-origin: top center; transform: rotateX(var(--book-bend)); }
   .station-book__strip>.station-book__strip { left: 0; top: 100%; }
   .station-book__leaf-face { inset: -.5px 0 0 0; }
   .station-book__slice { left: 0; top: calc(var(--strip) * -100%); width: 100%; height: 800%; flex-direction: column; }
-  .station-book__leaf-back>.station-book__slice { left: 0; top: calc(var(--reverse-strip) * -100%); }
-  .station-book__leaf-front { background: linear-gradient(180deg, #322e1e12, transparent 15%), var(--book-paper); }
-  .station-book__leaf-back { transform: rotateX(-180deg); background: linear-gradient(180deg, transparent 85%, #322e1e12), var(--book-paper); }
-  .station-book__page--left { background: linear-gradient(180deg, transparent 92%, #322e1e0b), var(--book-paper); }
-  .station-book__page--right { background: linear-gradient(180deg, #322e1e0b, transparent 8%), var(--book-paper); }
+  .station-book__leaf-back { display: none; }
+  .station-book__leaf-front { background: var(--book-paper); }
   .station-book__end-cover { background: linear-gradient(180deg, #0b2015, #254332 12%, #142c20); }
   .station-book__masthead { padding:22px 57px 19px 14px; font-size:8px; gap:8px; }
   .station-book__masthead b { display:none; }
