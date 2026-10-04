@@ -1,0 +1,62 @@
+{
+  "samples": [
+    {
+      "time": 315
+    },
+    {
+      "time": 2160.100000000093,
+      "stage": "idle",
+      "ready": "false"
+    },
+    {
+      "time": 2470.899999999907,
+      "stage": "loading",
+      "ready": "false"
+    },
+    {
+      "time": 3848.100000000093,
+      "stage": "exiting",
+      "ready": "false"
+    },
+    {
+      "time": 4230.299999999814,
+      "stage": "done"
+    }
+  ],
+  "resources": [
+    {
+      "name": "http://127.0.0.1:3017/assets/index-C-kXdzNN.js",
+      "start": 306.79999999981374,
+      "end": 1523.6000000000931,
+      "bytes": 151734
+    },
+    {
+      "name": "http://127.0.0.1:3017/assets/EventsPage-B9POhwVC.js",
+      "start": 1680.6000000000931,
+      "end": 1950.2999999998137,
+      "bytes": 8975
+    },
+    {
+      "name": "http://127.0.0.1:3017/assets/arrow-left-CNx2CSv5.js",
+      "start": 1682.1000000000931,
+      "end": 1856.8999999999069,
+      "bytes": 161
+    },
+    {
+      "name": "http://127.0.0.1:3017/assets/arrow-down-D3AEiU9H.js",
+      "start": 1682.7999999998137,
+      "end": 1857.7999999998137,
+      "bytes": 161
+    },
+    {
+      "name": "http://127.0.0.1:3017/assets/sequence-Czk4t8jN.webp",
+      "start": 2161.1999999997206,
+      "end": 4325.899999999907,
+      "bytes": 112902
+    }
+  ],
+  "initial": {
+    "time": 1698.1999999997206,
+    "loader": false
+  }
+}

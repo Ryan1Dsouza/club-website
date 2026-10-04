@@ -65,7 +65,7 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
   return <section className={`events-page events-page--${mode}`} data-event-mode={mode} aria-label="Nucleus events">
     {mode === 'grid' ? <div className={`events-archive${flying ? ' events-archive--departing' : ''}`} inert={flying}>
       <header className="events-heading">
-        <p className="events-eyebrow">THE NUCLEUS ARCHIVE / SJEC</p>
+        <p className="events-eyebrow">THE NUCLEUS ARCHIVE / {String(stations.length).padStart(2, '0')} CHAPTERS</p>
         <h1>Events<span>.</span></h1>
         <p className="events-heading__intro">Good ideas bring us together. These are the moments that stay.</p>
       </header>

@@ -1,0 +1,44 @@
+.fan-carousel { position: relative; width: 100%; outline: none; }
+.fan-viewport { overflow: clip; padding-block: 12px 8px; }
+.fan-layout { position: relative; width: 100%; max-width: 1280px; height: clamp(260px, 48svh, 440px); margin-inline: auto; }
+.fan-card { position: absolute; top: 5%; left: 50%; margin-left: calc(var(--fan-card-width) / -2); width: var(--fan-card-width); height: 78%; max-height: 340px; padding: 0; overflow: hidden; border: 1px solid #c3e5c83d; border-radius: 10px; background: #19251b; color: #f7fff8; text-align: left; cursor: pointer; transform-origin: center 82%; box-shadow: 0 10px 25px #0005; }
+.fan-card:not([data-active='true']) { opacity: 0; }
+.fan-card[inert] { pointer-events: none; }
+.fan-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 22%; }
+.fan-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #0003, transparent 32%, #0001 45%, #030704ed 100%); pointer-events: none; }
+.fan-card__initials { position: absolute; inset: 15% 0 auto; text-align: center; font: italic 90px var(--serif); color: #c3e5c8; }
+.fan-card__number { position: absolute; z-index: 1; top: 16px; left: 18px; font: 10px var(--mono); text-shadow: 0 1px 4px #000; }
+.fan-card__caption { position: absolute; z-index: 1; inset: auto 20px 20px; display: grid; gap: 7px; }
+.fan-card__caption > span:first-child { font: 9px/1.5 var(--mono); text-transform: uppercase; letter-spacing: .12em; }
+.fan-card__caption strong { font: 500 clamp(20px, 2vw, 28px)/1.08 Inter, sans-serif; letter-spacing: -.05em; text-wrap: balance; }
+.fan-card__invitation { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; padding-top: 10px; border-top: 1px solid #ffffff50; font: 10px/1.3 Inter, sans-serif; }
+.fan-controls { display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: 8px; }
+.fan-arrow, .fan-pause { display: grid; place-items: center; flex-shrink: 0; border: 1px solid var(--line-strong); border-radius: 50%; background: #c3e5c807; color: var(--mint); cursor: pointer; }
+.fan-arrow { width: 46px; height: 46px; }
+.fan-pause { width: 34px; height: 34px; margin-left: 8px; }
+.fan-arrow:hover, .fan-pause:hover { background: #c3e5c817; border-color: #c3e5c878; }
+.fan-arrow:disabled, .fan-pause:disabled { opacity: .4; cursor: default; }
+.fan-card:focus-visible, .fan-arrow:focus-visible, .fan-pause:focus-visible { outline: 2px solid var(--mint); outline-offset: 4px; }
+.fan-counter { display: flex; align-items: baseline; gap: 9px; font: 11px var(--mono); }
+.fan-counter strong { font-weight: 500; }
+.fan-counter > span { color: var(--muted); }
+.fan-hint { text-align: center; margin: 14px 20px 0; color: var(--muted); font: 10px/1.6 var(--mono); }
+.fan-empty { margin: 100px auto; max-width: 40ch; padding: 20px; color: var(--muted); text-align: center; }
+.fan-carousel { --fan-card-width: clamp(190px, 22vw, 270px); }
+@media (max-width: 767px) {
+  .fan-carousel { --fan-card-width: clamp(170px, 43vw, 230px); }
+  .fan-layout { height: clamp(255px, 47svh, 360px); }
+  .fan-card { top: 6%; height: 78%; border-radius: 8px; }
+  .fan-card__caption { inset: auto 14px 14px; gap: 5px; }
+  .fan-card__caption strong { font-size: 21px; }
+  .fan-card__caption > span:first-child { font-size: 8px; letter-spacing: .06em; }
+  .fan-card__invitation { font-size: 9px; padding-top: 8px; }
+}
+@media (max-height: 540px) and (min-width: 600px) {
+  .fan-carousel { --fan-card-width: 170px; }
+  .fan-layout { height: 245px; }
+  .fan-card { top: 4%; height: 82%; }
+  .fan-card__caption { inset: auto 12px 12px; }
+  .fan-card__caption strong { font-size: 19px; }
+  .fan-card__invitation { display: none; }
+}

@@ -3,23 +3,7 @@ export const TOWER_OUTRO = .15;
 export const BLOCK_SIZE = [3.18, .71, 1.02] as const;
 export const LAYER_HEIGHT = BLOCK_SIZE[1] + .002;
 
-const ROLE_RANK: Record<string, number> = {
-  president: 0, 'vice president': 1, vp: 1, secretary: 2, treasurer: 3,
-  'plan & strategy lead': 4, 'technical lead': 5, 'tech lead': 5,
-  'ai & ml lead': 6, 'development lead': 7, 'dsa lead': 8,
-  'event lead': 9, 'media lead': 10, 'discipline head': 11,
-};
-function roleRank(role: string) {
-  const key = role.trim().toLowerCase();
-  return ROLE_RANK[key] ?? (/lead|head/.test(key) ? 50 : 100);
-}
-/** Story order is top to bottom. Dated additions follow the established team;
- * newest additions form the foundation, including newly appointed officers.
- * Legacy entries have no creation date, so use rank, then stable API order. */
-export function sortTowerMembers<T extends { role: string; createdAt?: string }>(members: readonly T[]): T[] {
-  const created = (member: T) => Date.parse(member.createdAt ?? '') || 0;
-  return [...members].sort((a, b) => created(a) - created(b) || roleRank(a.role) - roleRank(b.role));
-}
+export { sortTeamMembers as sortTowerMembers } from './team-members.ts';
 export const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 export function smooth(value: number) {
   const t = clamp01(value);

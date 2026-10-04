@@ -53,12 +53,12 @@
 .station-book__panel a,.station-book__cover-art a { display:block; width:100%; height:100%; min-height:0; overflow:hidden; }
 .station-book__blank { flex:1; }
 .station-book__leaf { position:absolute; inset:0 0 0 50%; z-index:3; transform-origin:left center; transform-style:preserve-3d; transform:rotateY(var(--book-turn)); pointer-events:none; will-change:transform; }
-.station-book__strip { position:absolute; left:0; top:0; width:12.5%; height:100%; transform-origin:left center; transform-style:preserve-3d; transform:rotateY(var(--book-bend)); }
+.station-book__strip { position:absolute; left:0; top:0; width:calc(100% / var(--book-strips,8)); height:100%; transform-origin:left center; transform-style:preserve-3d; transform:rotateY(var(--book-bend)); }
 .station-book__strip>.station-book__strip { left:100%; width:100%; }
 .station-book__leaf-face { position:absolute; inset:0 -.5px 0 0; display:flex; background:var(--book-paper); backface-visibility:hidden; -webkit-backface-visibility:hidden; overflow:hidden; }
 .station-book__leaf-face::after { content:''; position:absolute; inset:0; background:#132419; opacity:var(--book-shade,0); pointer-events:none; }
 .station-book__reverse-paper { flex:1; background:linear-gradient(#17281f0c 1px,transparent 1px) 0 0/100% 24px,var(--book-paper); }
-.station-book__slice { position:absolute; top:0; bottom:0; left:calc(var(--strip) * -100%); width:800%; display:flex; }
+.station-book__slice { position:absolute; top:0; bottom:0; left:calc(var(--strip) * -100%); width:calc(100% * var(--book-strips,8)); display:flex; }
 .station-book__leaf-back>.station-book__slice { left:calc(var(--reverse-strip) * -100%); }
 .station-book__end-cover { flex:1; background:linear-gradient(90deg,#0b2015,#254332 12%,#142c20); }
 .station-book__leaf-front { background:linear-gradient(90deg,#322e1e12,transparent 15%),var(--book-paper); }
@@ -88,10 +88,10 @@
   .station-book__page--left { display: none; }
   .station-book__page--right { grid-row: 1; grid-column: 1; z-index: 1; }
   .station-book__leaf { inset: 0; transform-origin: top center; transform: rotateX(var(--book-turn)); }
-  .station-book__strip { left: 0; top: 0; width: 100%; height: 12.5%; transform-origin: top center; transform: rotateX(var(--book-bend)); }
+  .station-book__strip { left: 0; top: 0; width: 100%; height: calc(100% / var(--book-strips,4)); transform-origin: top center; transform: rotateX(var(--book-bend)); }
   .station-book__strip>.station-book__strip { left: 0; top: 100%; height:100%; }
   .station-book__leaf-face { inset: -.5px 0 0 0; }
-  .station-book__slice { left: 0; top: calc(var(--strip) * -100%); width: 100%; height: 800%; flex-direction: column; }
+  .station-book__slice { left: 0; top: calc(var(--strip) * -100%); width: 100%; height: calc(100% * var(--book-strips,4)); flex-direction: column; }
   .station-book__leaf-back { transform:rotateX(180deg); }
   .station-book__leaf-back>.station-book__slice { left:0; top:calc(var(--reverse-strip) * -100%); }
   .station-book__leaf-front { background: var(--book-paper); }

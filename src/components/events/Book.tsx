@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowDown, ArrowLeft, ArrowRight, CalendarDays, MapPin, X } from 'lucide-react';
 import type { ClubEvent, EventPhoto } from '../../types';
@@ -25,7 +25,26 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
   const dialog = useRef<HTMLDialogElement>(null), closed = useRef(false);
   const instructions = useId();
   const wrapper = useRef<HTMLDivElement>(null), content = useRef<HTMLDivElement>(null);
-  const { cursor, reduced, turn } = useBookScroll(wrapper, content, count + 1);
+  const book = useRef<HTMLDivElement>(null), surface = useRef<HTMLDivElement>(null);
+  const leaf = useRef<HTMLDivElement>(null), progressBar = useRef<HTMLElement>(null);
+  const strips = isMobile ? 4 : 8;
+  function paint(value: number) {
+    const index = Math.min(count - 1, Math.floor(value + .00001));
+    const progress = Math.min(1, Math.max(0, value - index));
+    const shade = Math.sin(progress * Math.PI);
+    if (book.current) book.current.dataset.bookProgress = value.toFixed(3);
+    if (leaf.current) {
+      leaf.current.style.setProperty('--book-turn', `${(isMobile ? 180 : -180) * progress}deg`);
+      leaf.current.style.setProperty('--book-bend', `${shade * (isMobile ? 2.8 : -1.4)}deg`);
+      leaf.current.style.setProperty('--book-shade', String(shade * .22));
+    }
+    surface.current?.style.setProperty('--book-close', String(index === count - 1 && !reduced ? progress : 0));
+    if (progressBar.current) progressBar.current.style.transform = `scaleX(${Math.min(1, (value + 1) / count)})`;
+  }
+  const { cursor, current, reduced, turn } = useBookScroll(wrapper, content, count + 1, isMobile, paint);
+  // A boundary can mount a new leaf after the frame callback. Give it the
+  // latest pose before paint, without routing every animation frame via React.
+  useLayoutEffect(() => paint(current.current));
   const page = Math.min(count - 1, Math.floor(cursor + .00001));
   const progress = Math.min(1, Math.max(0, cursor - page));
   const turning = progress > .0001 && progress < .9999;
@@ -72,10 +91,10 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
     const end = <div className="station-book__end-cover" />;
     const front = isMobile ? report(page, true) : item(page * 2 + 1, true);
     const back = closing ? end : isMobile ? <div className="station-book__reverse-paper" /> : item(page * 2 + 2, true);
-    const strip = (index: number): ReactNode => <div className="station-book__strip" key={index} style={{ '--strip': index, '--reverse-strip': 7 - index } as CSSProperties}>
+    const strip = (index: number): ReactNode => <div className="station-book__strip" key={index} style={{ '--strip': index, '--reverse-strip': strips - 1 - index } as CSSProperties}>
       <div className="station-book__leaf-face station-book__leaf-front"><div className="station-book__slice">{front}</div></div>
       <div className="station-book__leaf-face station-book__leaf-back"><div className="station-book__slice">{back}</div></div>
-      {index < 7 && strip(index + 1)}
+      {index < strips - 1 && strip(index + 1)}
     </div>;
     return {
       spread: <div className={`station-book__spread ${page === 0 ? 'station-book__cover' : 'station-book__photos'}`}>
@@ -84,12 +103,12 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
       </div>,
       leaf: strip(0),
     };
-  }, [page, closing, reduced, showNext, isMobile, imageList, event, name, stationNumber]);
+  }, [page, closing, reduced, showNext, isMobile, strips, imageList, event, name, stationNumber]);
   const links = [{ url: event?.albumUrl, label: 'View photo album' }, { url: event?.registrationUrl, label: 'Register for event' }].filter(link => link.url && /^https?:\/\//i.test(link.url));
 
   return createPortal(<dialog ref={dialog} className="nx-dialog nx-book-dialog" aria-label={name} data-lenis-prevent onCancel={event => { event.preventDefault(); onClose(); }}>
     <button className="nx-close" aria-label="Close event" onClick={onClose}><X size={18} /></button>
-    <div className="station-book" data-layout={isMobile ? 'report' : 'spread'} data-workshop={workshopFolder} data-station-number={stationNumber} data-book-page={page + 1} data-book-turning={turning} data-book-closing={closing} data-book-progress={cursor.toFixed(3)} data-scroll-engine="lenis" onKeyDown={event => {
+    <div className="station-book" ref={book} style={{ '--book-strips': strips } as CSSProperties} data-layout={isMobile ? 'report' : 'spread'} data-workshop={workshopFolder} data-station-number={stationNumber} data-book-page={page + 1} data-book-turning={turning} data-book-closing={closing} data-scroll-engine="lenis" onKeyDown={event => {
       if (event.altKey || event.ctrlKey || event.metaKey) return;
       const story = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-book-scroll]') : null;
       if (story && ((event.key === 'ArrowDown' && story.scrollTop + story.clientHeight < story.scrollHeight - 1) || (event.key === 'ArrowUp' && story.scrollTop > 1))) return;
@@ -100,14 +119,14 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
       <h2 className="sr-only">{name}</h2>
       <div className="station-book__scroller" ref={wrapper}>
         <div className="station-book__scroll-track" ref={content} style={{ height: `calc(var(--book-height, 500px) + ${count * BOOK_SCROLL_STEP}px)` }}>
-          <div className="station-book__surface" tabIndex={0} role="region" aria-label={`${name} event book`} aria-describedby={instructions} style={{ '--book-turn': `${reduced ? 0 : (isMobile ? 180 : -180) * progress}deg`, '--book-bend': `${Math.sin(progress * Math.PI) * (isMobile ? 1.4 : -1.4)}deg`, '--book-shade': Math.sin(progress * Math.PI) * .22, '--book-close': closing && !reduced ? progress : 0 } as CSSProperties}>
+          <div className="station-book__surface" ref={surface} tabIndex={0} role="region" aria-label={`${name} event book`} aria-describedby={instructions}>
             {pages.spread}
-            {!reduced && <div className="station-book__leaf" aria-hidden="true" inert style={{ visibility: turning ? 'visible' : 'hidden' }}>{pages.leaf}</div>}
+            {!reduced && <div className="station-book__leaf" ref={leaf} aria-hidden="true" inert style={{ visibility: turning ? 'visible' : 'hidden' }}>{pages.leaf}</div>}
           </div>
         </div>
       </div>
       <footer className="station-book__footer">
-        <div className="station-book__progress" aria-hidden="true"><i style={{ transform: `scaleX(${Math.min(1, (cursor + 1) / count)})` }} /></div>
+        <div className="station-book__progress" aria-hidden="true"><i ref={progressBar} /></div>
         <div className="station-book__navigation">
           <button type="button" onClick={() => turn(-1)} disabled={cursor <= .0001} aria-label="Previous book page"><ArrowLeft size={18} /></button>
           <span role="status" aria-live="polite">Page {page + 1} / {count}</span>

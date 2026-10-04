@@ -6,18 +6,13 @@ const assets = import.meta.glob<string>('../../assets/loading/frame-*.webp', {
   eager: true, query: '?url', import: 'default',
 });
 export const LOADING_FRAME_URLS = Object.keys(assets).sort().map(key => assets[key]);
-const mobileAssets = import.meta.glob<string>('../../assets/loading/mobile/frame-*.webp', {
-  eager: true, query: '?url', import: 'default',
-});
-export const MOBILE_LOADING_FRAME_URLS = Object.keys(mobileAssets).sort().map(key => mobileAssets[key]);
 
-const prepared = new Map<boolean, Promise<string[]>>();
+let prepared: Promise<string[]> | undefined;
 
 /** Cache decoded artwork across overlay mounts, including Strict Mode. */
-export function prepareLoadingFrames(compact = false) {
-  const existing = prepared.get(compact);
-  if (existing) return existing;
-  const urls = compact ? MOBILE_LOADING_FRAME_URLS : LOADING_FRAME_URLS;
+export function prepareLoadingFrames() {
+  if (prepared) return prepared;
+  const urls = LOADING_FRAME_URLS;
   const frames = Array<string>(urls.length).fill('');
   let next = 0;
   // Avoid starting 17 image decodes together during hydration on a phone.
@@ -36,6 +31,5 @@ export function prepareLoadingFrames(compact = false) {
     const fallback = frames.find(Boolean);
     return fallback ? frames.map(frame => frame || fallback) : [];
   });
-  prepared.set(compact, ready);
-  return ready;
+  return prepared = ready;
 }

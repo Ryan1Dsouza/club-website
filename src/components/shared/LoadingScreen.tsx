@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { LOADING_FRAME_URLS, MOBILE_LOADING_FRAME_URLS, prepareLoadingFrames } from './loading-frames';
+import { LOADING_FRAME_URLS, prepareLoadingFrames } from './loading-frames';
+import mobileSequence from '../../assets/loading/mobile/sequence.webp';
+import mobilePoster from '../../assets/loading/mobile/poster.webp';
 import './loading-screen.css';
+
+const compactQueries = ['(max-width: 767px)', '(max-height: 500px) and (max-width: 1024px)', '(pointer: coarse)'];
+const compactMedia = compactQueries.join(', ');
+const compactReducedMedia = compactQueries.map(query => `${query} and (prefers-reduced-motion: reduce)`).join(', ');
+const emptyImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export type LoadingScreenProps = {
   /** Keep the component mounted and toggle active to play the curtain exit. */
@@ -14,10 +21,13 @@ function LoadingOverlay({ message }: { message: string }) {
   const reduced = useReducedMotion() === true;
   const [compact, setCompact] = useState<boolean | null>(null);
   const [frames, setFrames] = useState<string[] | null>(null);
+  const [mobileReady, setMobileReady] = useState(false);
+  const [mobileFailed, setMobileFailed] = useState(false);
   const frameRef = useRef<HTMLDivElement>(null);
+  const mobileRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    const media = matchMedia('(max-width: 767px), (max-height: 500px) and (max-width: 1024px), (pointer: coarse)');
+    const media = matchMedia(compactMedia);
     const update = () => setCompact(media.matches);
     update();
     media.addEventListener('change', update);
@@ -25,10 +35,16 @@ function LoadingOverlay({ message }: { message: string }) {
   }, []);
 
   useEffect(() => {
+    // An SSR image can finish before React attaches its load handler.
+    const image = mobileRef.current;
+    if (compact && image?.complete && image.naturalWidth > 1) setMobileReady(true);
+  }, [compact]);
+
+  useEffect(() => {
     setFrames(null);
-    if (reduced || compact === null) return;
+    if (reduced || compact !== false) return;
     let disposed = false;
-    void prepareLoadingFrames(compact).then(ready => { if (!disposed) setFrames(ready); });
+    void prepareLoadingFrames().then(ready => { if (!disposed) setFrames(ready); });
     return () => { disposed = true; };
   }, [compact, reduced]);
 
@@ -76,7 +92,8 @@ function LoadingOverlay({ message }: { message: string }) {
   return <motion.div
     className="nucleus-loader"
     data-loading-screen=""
-    data-frames-ready={Boolean(frames?.length) && !reduced}
+    data-frames-ready={(compact ? mobileReady && !mobileFailed : Boolean(frames?.length)) && !reduced}
+    data-mobile-failed={mobileFailed}
     data-lenis-prevent=""
     initial={{ x: '0%', clipPath: 'inset(0% 0% 0% 0%)' }}
     exit={compact
@@ -87,9 +104,18 @@ function LoadingOverlay({ message }: { message: string }) {
     <div className="nucleus-loader__art" aria-hidden="true">
       <div ref={frameRef} className="nucleus-loader__frame" style={{
         '--desktop-frame-image': `url("${LOADING_FRAME_URLS[0]}")`,
-        '--mobile-frame-image': `url("${MOBILE_LOADING_FRAME_URLS[0]}")`,
       } as CSSProperties} />
-      {frames?.length === 0 && <span className="nucleus-loader__fallback">Nucleus</span>}
+      <picture className="nucleus-loader__mobile">
+        <source media={compactReducedMedia} srcSet={mobilePoster} />
+        <source media={compactMedia} srcSet={mobileSequence} />
+        <img ref={mobileRef} src={emptyImage} alt="" width={480} height={600} decoding="async" fetchPriority="high"
+          onLoad={event => {
+            if (event.currentTarget.currentSrc.startsWith('data:')) return;
+            setMobileReady(true); setMobileFailed(false);
+          }}
+          onError={() => setMobileFailed(true)} />
+      </picture>
+      {(compact ? mobileFailed : frames?.length === 0) && <span className="nucleus-loader__fallback">Nucleus</span>}
     </div>
     <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{message}</span>
   </motion.div>;

@@ -12,36 +12,32 @@
 # Error details
 
 ```
-Error: expect(locator).toHaveCSS(expected) failed
+Error: expect(locator).toHaveAttribute(expected) failed
 
-Locator:  locator('.nx-book-dialog')
-Expected: "none"
-Received: "matrix(1, 0, 0, 1, 0, 0)"
+Locator:  locator('.station-book')
+Expected: "12"
+Received: "8"
 Timeout:  5000ms
 
 Call log:
-  - Expect "toHaveCSS" locator('.nx-book-dialog') with timeout 5000ms
-  - waiting for locator('.nx-book-dialog')
-    - locator resolved to <dialog open="" aria-label="Inauguration" data-lenis-prevent="true" class="nx-dialog nx-book-dialog">…</dialog>
-    - unexpected value "matrix(0.97, 0, 0, 0.97, 0, 20)"
-    - locator resolved to <dialog open="" aria-label="Inauguration" data-lenis-prevent="true" class="nx-dialog nx-book-dialog">…</dialog>
-    - unexpected value "matrix(0.982328, 0, 0, 0.982328, 0, 11.7816)"
-    - locator resolved to <dialog open="" aria-label="Inauguration" data-lenis-prevent="true" class="nx-dialog nx-book-dialog">…</dialog>
-    - unexpected value "matrix(0.995191, 0, 0, 0.995191, 0, 3.20586)"
-    - locator resolved to <dialog open="" aria-label="Inauguration" data-lenis-prevent="true" class="nx-dialog nx-book-dialog">…</dialog>
-    - unexpected value "matrix(0.999504, 0, 0, 0.999504, 0, 0.330413)"
-    10 × locator resolved to <dialog open="" aria-label="Inauguration" data-lenis-prevent="true" class="nx-dialog nx-book-dialog">…</dialog>
-       - unexpected value "matrix(1, 0, 0, 1, 0, 0)"
+  - Expect "toHaveAttribute" locator('.station-book') with timeout 5000ms
+  - waiting for locator('.station-book')
+    13 × locator resolved to <div data-book-page="8" class="station-book" data-layout="report" data-station-number="01" data-book-turning="true" data-book-closing="false" data-scroll-engine="lenis" data-book-progress="7.060" data-workshop="inauguration">…</div>
+       - unexpected value "8"
 
 ```
 
 ```yaml
-- dialog "Inauguration":
-  - button "Close event"
-  - banner: NUCLEUS STATION / 01
-  - heading "Inauguration" [level=2]
-  - region "Inauguration event book"
-  - contentinfo
+- banner: NUCLEUS STATION / 01
+- heading "Inauguration" [level=2]
+- region "Inauguration event book":
+  - figure
+- contentinfo:
+  - button "Previous book page"
+  - status: Page 8 / 12
+  - button "Next book page"
+  - paragraph
+  - button "Back to Events"
 ```
 
 # Test source
@@ -57,8 +53,8 @@ Call log:
   8  |   for (let i = 1; i <= 12; i++) {
   9  |     await cdp.send('Input.dispatchTouchEvent', { type:'touchMove', touchPoints:[{ x:from.x + (to.x-from.x)*i/12, y:from.y + (to.y-from.y)*i/12 }] });
   10 |     await page.waitForTimeout(16);
-  11 |   }
-  12 |   await onPull?.();
+  11 |     if (i === (to.y > from.y ? 11 : 6)) await onPull?.();
+  12 |   }
   13 |   await cdp.send('Input.dispatchTouchEvent', { type:'touchEnd', touchPoints:[] });
   14 |   await cdp.detach();
   15 | }
@@ -74,8 +70,7 @@ Call log:
   25 |       await page.goto('/events');
   26 |       await expect(page.locator('[data-loading-screen]')).toHaveCount(0, {timeout:20000});
   27 |       await page.getByRole('button',{name:'Open Inauguration event book',exact:true}).click();
-> 28 |       await expect(page.locator('.nx-book-dialog')).toHaveCSS('transform','none');
-     |                                                     ^ Error: expect(locator).toHaveCSS(expected) failed
+  28 |       await page.locator('.nx-book-dialog').evaluate(async element => { await Promise.all(element.getAnimations().map(animation => animation.finished)); });
   29 |       const book = page.locator('.station-book'), spread = book.locator('.station-book__spread'), surface = book.locator('.station-book__surface');
   30 |       await expect(book).toHaveAttribute('data-layout', mobile ? 'report' : 'spread');
   31 |       await expect(spread.locator('img')).toHaveCount(1);
@@ -108,9 +103,26 @@ Call log:
   58 |       else await page.mouse.wheel(0,-280);
   59 |       await expect(book).toHaveAttribute('data-book-progress','0.000');
   60 |       await expect(spread.locator('.station-book__story')).toBeVisible();
-  61 |       expect(errors).toEqual([]);
-  62 |     } finally { await context.close(); }
-  63 |   });
-  64 | }
-  65 | 
+  61 |       if (viewport.width === 390) {
+  62 |         await page.emulateMedia({reducedMotion:'reduce'});
+  63 |         for (let pageNumber=2;pageNumber<=12;pageNumber++) {
+  64 |           await page.getByRole('button',{name:'Next book page',exact:true}).click();
+  65 |           await expect(book).toHaveAttribute('data-book-page',String(pageNumber));
+  66 |         }
+  67 |         const lastPhoto=await spread.locator('img').getAttribute('src');
+  68 |         await page.setViewportSize({width:1440,height:900});
+  69 |         await expect(book).toHaveAttribute('data-layout','spread');
+  70 |         await expect(book).toHaveAttribute('data-book-page','7');
+  71 |         await expect(spread.locator('img')).toHaveAttribute('src',lastPhoto);
+  72 |         await page.setViewportSize(viewport);
+> 73 |         await expect(book).toHaveAttribute('data-book-page','12');
+     |                            ^ Error: expect(locator).toHaveAttribute(expected) failed
+  74 |         await page.getByRole('button',{name:'Close book after last page'}).click();
+  75 |         await expect(book).toHaveCount(0);
+  76 |       }
+  77 |       expect(errors).toEqual([]);
+  78 |     } finally { await context.close(); }
+  79 |   });
+  80 | }
+  81 | 
 ```

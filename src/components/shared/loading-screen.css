@@ -21,6 +21,8 @@
   pointer-events: none;
 }
 
+.nucleus-loader__mobile { display: none; }
+
 .nucleus-loader__frame {
   --initial-frame-image: var(--desktop-frame-image);
   background: currentColor;
@@ -39,7 +41,7 @@
   font: italic 24px/1 var(--serif, Georgia, serif);
 }
 
-/* Fit the complete composition on phones, tablets and short landscape screens. */
+/* A portrait composition enlarges the subject, not the empty widescreen margins. */
 @media (max-width: 767px), (max-height: 500px) and (max-width: 1024px), (pointer: coarse) {
   .nucleus-loader__art {
     top: max(16px, env(safe-area-inset-top));
@@ -48,9 +50,23 @@
     left: max(16px, env(safe-area-inset-left));
   }
   .nucleus-loader__frame {
-    --initial-frame-image: var(--mobile-frame-image);
-    mask-size: contain;
+    display: none;
+    mask-image: none;
   }
+  .nucleus-loader__mobile {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  .nucleus-loader__mobile img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .nucleus-loader[data-mobile-failed='true'] .nucleus-loader__mobile { visibility: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {

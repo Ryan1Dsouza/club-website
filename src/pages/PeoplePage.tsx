@@ -1,121 +1,67 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { ArrowDown, RotateCcw } from 'lucide-react';
+import { Component, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ArrowLeft, ArrowUpRight, Layers3 } from 'lucide-react';
 import type { Member } from '../types';
-import { memberProgress, sortTowerMembers } from '../lib/people-tower-motion';
-import { createTowerPortraits } from '../lib/people-tower-portraits';
-import './showcase.css';
-import './people-tower.css';
+import { createTeamProfiles, type TeamProfile } from '../lib/team-profiles';
+import SocialCards from '../components/ui/card-fan-carousel';
+import TeamProfileOverlay from '../components/people/TeamProfileOverlay';
+import './people-page.css';
+
+// The module, portrait cache, CSS, WebGL and physics all stay behind this boundary.
+const PeopleTower = lazy(() => import('../components/people/PeopleTower'));
+class TowerBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    return this.state.failed ? <p className="people-view-status" role="alert">The tower could not load. Return to Quick view to meet the team.</p> : this.props.children;
+  }
+}
 
 export default function PeoplePage({ members }: { members: Member[] }) {
-  const sorted = useMemo(
-    () => sortTowerMembers(members),
-    [members],
-  );
-  const story = useRef<HTMLDivElement>(null), host = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'still' | 'fallback'>('loading');
-  const [active, setActive] = useState(-1);
-  const memberKey = useMemo(() => JSON.stringify(sorted), [sorted]);
-  const controller = useRef<{ rebuild: () => void } | null>(null);
+  const [view, setView] = useState<'carousel' | 'tower'>('carousel');
+  const [towerStatus, setTowerStatus] = useState<'loading' | 'ready' | 'still' | 'fallback'>('loading');
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [selected, setSelected] = useState<TeamProfile | null>(null);
+  const [choosing, setChoosing] = useState(false);
+  const page = useRef<HTMLElement>(null);
+  const profiles = useMemo(() => createTeamProfiles(members), [members]);
+  const cards = useMemo(() => profiles.map(person => ({
+    id: person.id, name: person.name, role: person.role, initials: person.initials, imgUrl: person.cardImage,
+  })), [profiles]);
+  const closeProfile = useCallback(() => setSelected(null), []);
+  const currentIndex = profiles.length ? activeIndex % profiles.length : 0;
+
   useEffect(() => {
-    const element = host.current, section = story.current;
-    if (!element || !section || !sorted.length) { setStatus('still'); return; }
-    const media = matchMedia('(prefers-reduced-motion: reduce)');
-    const portraits = createTowerPortraits(sorted, matchMedia('(max-width: 768px), (pointer: coarse)').matches);
-    // Start the first portraits before importing/compiling the 3D scene.
-    if (!media.matches) portraits.prepare(0);
-    let disposed = false, generation = 0;
-    let idle = 0, timer = 0;
-    let cleanup: (() => void) | undefined;
-    function stop() {
-      controller.current = null;
-      const dispose = cleanup; cleanup = undefined; dispose?.();
-    }
-    async function start() {
-      if (disposed) return;
-      if (idle) { cancelIdleCallback(idle); idle = 0; }
-      window.clearTimeout(timer);
-      const current = ++generation;
-      stop(); setActive(-1);
-      if (media.matches) { setStatus('still'); return; }
-      portraits.prepare(0);
-      if (matchMedia('(max-width: 768px), (pointer: coarse)').matches) {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }
-      setStatus('loading');
-      try {
-        const { createPeopleTower } = await import('../lib/people-tower');
-        if (disposed || current !== generation) return;
-        const tower = await createPeopleTower(element!, section!, sorted, {
-          onMember: index => { if (!disposed && current === generation) setActive(index); },
-          onError: () => {
-            if (!disposed && current === generation) {
-              generation++;
-              stop(); setStatus('fallback'); setActive(-1);
-            }
-          },
-        }, portraits);
-        // Navigation or a motion preference change may finish while the GPU is
-        // compiling. Release that obsolete scene instead of reviving it.
-        if (disposed || current !== generation) { tower.dispose(); return; }
-        cleanup = tower.dispose; controller.current = tower;
-        setStatus('ready');
-      } catch {
-        if (!disposed && current === generation) { stop(); setStatus('fallback'); setActive(-1); }
-      }
-    }
-    if (typeof requestIdleCallback !== 'undefined') idle = requestIdleCallback(() => void start(), { timeout: 2000 });
-    else timer = window.setTimeout(() => void start(), 100);
-    media.addEventListener('change', start);
-    return () => {
-      disposed = true; generation++;
-      if (idle) cancelIdleCallback(idle);
-      window.clearTimeout(timer);
-      media.removeEventListener('change', start); stop(); portraits.dispose();
-    };
-    // Equivalent API refreshes should preserve the current scene.
-  }, [memberKey]);
-  function revealMember(index: number) {
-    const section = story.current;
-    if (!section || status !== 'ready') return;
-    const stage = section.querySelector<HTMLElement>('.people-tower__stage');
-    if (!stage) return;
-    const header = parseFloat(getComputedStyle(stage).top) || 0;
-    const shell = section.closest<HTMLElement>('.site-shell');
-    const scroller = shell && matchMedia('(max-width: 768px), (pointer: coarse)').matches ? shell : window;
-    const scrollTop = scroller instanceof Window ? scrollY : scroller.scrollTop;
-    const top = section.getBoundingClientRect().top + scrollTop - header;
-    scroller.scrollTo({ top: top + memberProgress(index, sorted.length) * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
-    section.querySelector<HTMLSelectElement>('select')?.focus({ preventScroll: true });
-  }
-  return <section className="people-page" aria-labelledby="people-title" data-tower-status={status}>
-    <h1 id="people-title" className="sr-only">The people behind Nucleus</h1>
-    <div className="people-tower" ref={story} style={{
-      '--tower-length': `${sorted.length * 55 + 120}svh`,
-    } as CSSProperties}>
-      <div className="people-tower__stage">
-        <div className="people-tower__world" ref={host} aria-hidden="true" />
-        <div className="people-tower__topline"><span className="eyebrow">02 / The people</span></div>
-        <div className="people-tower__finish" aria-hidden="true"><p>The<br /><em>whole team.</em></p><span>Meet everyone <ArrowDown size={15} /></span></div>
-        <p className="people-tower__hint" hidden={status !== 'ready'}>
-          <span className="people-tower__hint-mouse">Click a block to pull it out. Drag to play. Scroll to meet the team.</span>
-          <span className="people-tower__hint-touch">Tap a block to pull it out. Drag sideways to play. Swipe up to meet the team.</span>
-        </p>
-        <div className="people-tower__hud" hidden={status !== 'ready'}>
-          <div className="people-tower__counter"><span>{active < 0 ? '—' : String(active + 1).padStart(2, '0')}</span><span>/ {String(sorted.length).padStart(2, '0')}</span></div>
+    // The tower uses the shell as its mobile scroller; the quick view uses the page.
+    page.current?.closest('.site-shell')?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [view]);
 
-          <label className="people-tower__picker"><span className="sr-only">Jump to a member</span><select value={active < 0 ? '' : active} onChange={event => revealMember(Number(event.target.value))}><option value="" disabled>Meet the members</option>{sorted.map((member, index) => <option key={member.id} value={index}>{member.name}</option>)}</select></label>
-          <button className="people-tower__rebuild" onClick={() => controller.current?.rebuild()}><RotateCcw size={14} /><span>Rebuild tower</span></button>
-        </div>
-      </div>
+  return <section ref={page} className="people-page" aria-labelledby="people-title" data-view={view} data-tower-status={view === 'tower' ? towerStatus : undefined}>
+    <div className="people-toolbar">
+      {view === 'carousel' && <span className="eyebrow">02 / The people</span>}
+      <button type="button" className="people-view-toggle" aria-pressed={view === 'tower'} disabled={!profiles.length}
+        onClick={() => { setTowerStatus('loading'); setView(current => current === 'carousel' ? 'tower' : 'carousel'); }}>
+        {view === 'carousel' ? <><Layers3 size={16} />Play Interactive Tower<ArrowUpRight size={15} /></> : <><ArrowLeft size={16} />Back to Quick view</>}
+      </button>
     </div>
-
-
-
-
-
-
-
-
-
+    {view === 'carousel' ? <div key="carousel" className="people-quick-view people-view">
+      <div className="people-intro">
+        <div><h1 id="people-title">Many minds.<br /><em>One nucleus.</em></h1><p>The people turning curiosity into something real.</p></div>
+        {!!profiles.length && <label className="people-member-picker"><span>Meet the team <span>({String(profiles.length).padStart(2, '0')})</span></span>
+          <select aria-label="Find a team member" value={currentIndex} onChange={event => setActiveIndex(Number(event.target.value))}
+            onFocus={() => setChoosing(true)} onBlur={() => setChoosing(false)}>
+            {profiles.map((person, index) => <option key={person.id} value={index}>{person.name} / {person.role}</option>)}
+          </select>
+        </label>}
+      </div>
+      <SocialCards cards={cards} activeIndex={currentIndex} onActiveIndexChange={setActiveIndex} paused={!!selected || choosing}
+        onCardClick={(_, index) => setSelected(profiles[index])} />
+    </div> : <div key="tower" className="people-view">
+      <h1 id="people-title" className="sr-only">The people behind Nucleus</h1>
+      <TowerBoundary><Suspense fallback={<p className="people-view-status" role="status">Building the interactive tower...</p>}>
+        <PeopleTower members={members} onStatusChange={setTowerStatus} />
+      </Suspense></TowerBoundary>
+    </div>}
+    {selected && <TeamProfileOverlay person={selected} onClose={closeProfile} />}
   </section>;
 }

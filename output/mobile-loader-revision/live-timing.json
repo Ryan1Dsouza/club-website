@@ -1,0 +1,80 @@
+{
+  "samples": [
+    {
+      "time": 3142
+    },
+    {
+      "time": 4901.600000000093,
+      "stage": "idle",
+      "ready": "false"
+    },
+    {
+      "time": 5122.899999999907,
+      "stage": "loading",
+      "ready": "false"
+    },
+    {
+      "time": 6495.5,
+      "stage": "exiting",
+      "ready": "false"
+    },
+    {
+      "time": 6861.100000000093,
+      "stage": "done"
+    }
+  ],
+  "resources": [
+    {
+      "name": "https://club-website-peach-zeta.vercel.app/assets/index-DMC4kFHV.js",
+      "start": 3135.899999999907,
+      "end": 4413.300000000279,
+      "bytes": 156474
+    },
+    {
+      "name": "https://club-website-peach-zeta.vercel.app/assets/EventsPage-CMXqKKWZ.js",
+      "start": 4526.399999999907,
+      "end": 4789.5,
+      "bytes": 9289
+    },
+    {
+      "name": "https://club-website-peach-zeta.vercel.app/assets/arrow-left-CKU8vhcD.js",
+      "start": 4527.300000000279,
+      "end": 4711.300000000279,
+      "bytes": 161
+    },
+    {
+      "name": "https://club-website-peach-zeta.vercel.app/assets/arrow-down-sZ23-R4W.js",
+      "start": 4527.399999999907,
+      "end": 4697.5,
+      "bytes": 161
+    },
+    {
+      "name": "https://club-website-peach-zeta.vercel.app/assets/frame-00-DAmG83sn.webp",
+      "start": 4907.399999999907,
+      "end": 5234,
+      "bytes": 11170
+    },
+    {
+      "name": "https://club-website-peach-zeta.vercel.app/assets/frame-00-DAmG83sn.webp",
+      "start": 5151,
+      "end": 5359.700000000186,
+      "bytes": 11170
+    },
+    {
+      "name": "https://club-website-peach-zeta.vercel.app/assets/frame-01-CaC9ox3C.webp",
+      "start": 5151.399999999907,
+      "end": 5642.800000000279,
+      "bytes": 5980
+    },
+    {
+      "name": "https://club-website-peach-zeta.vercel.app/assets/frame-02-JPrdgf7R.webp",
+      "start": 5373.700000000186,
+      "end": 5879,
+      "bytes": 7234
+    }
+  ],
+  "initial": {
+    "time": 4538,
+    "loader": false
+  }
+}

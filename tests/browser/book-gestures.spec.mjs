@@ -8,8 +8,8 @@ async function swipe(page, from, to, onPull) {
   for (let i = 1; i <= 12; i++) {
     await cdp.send('Input.dispatchTouchEvent', { type:'touchMove', touchPoints:[{ x:from.x + (to.x-from.x)*i/12, y:from.y + (to.y-from.y)*i/12 }] });
     await page.waitForTimeout(16);
+    if (i === (to.y > from.y ? 11 : 6)) await onPull?.();
   }
-  await onPull?.();
   await cdp.send('Input.dispatchTouchEvent', { type:'touchEnd', touchPoints:[] });
   await cdp.detach();
 }
@@ -58,6 +58,22 @@ for (const viewport of [{width:390,height:844},{width:320,height:568},{width:144
       else await page.mouse.wheel(0,-280);
       await expect(book).toHaveAttribute('data-book-progress','0.000');
       await expect(spread.locator('.station-book__story')).toBeVisible();
+      if (viewport.width === 390) {
+        await page.emulateMedia({reducedMotion:'reduce'});
+        for (let pageNumber=2;pageNumber<=12;pageNumber++) {
+          await page.getByRole('button',{name:'Next book page',exact:true}).click();
+          await expect(book).toHaveAttribute('data-book-page',String(pageNumber));
+        }
+        const lastPhoto=await spread.locator('img').getAttribute('src');
+        await page.setViewportSize({width:1440,height:900});
+        await expect(book).toHaveAttribute('data-layout','spread');
+        await expect(book).toHaveAttribute('data-book-page','7');
+        await expect(spread.locator('img')).toHaveAttribute('src',lastPhoto);
+        await page.setViewportSize(viewport);
+        await expect(book).toHaveAttribute('data-book-page','12');
+        await page.getByRole('button',{name:'Close book after last page'}).click();
+        await expect(book).toHaveCount(0);
+      }
       expect(errors).toEqual([]);
     } finally { await context.close(); }
   });
