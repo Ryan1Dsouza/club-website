@@ -33,7 +33,7 @@ async function recordTiming(page) {
   });
 }
 
-test('the full-screen sequence cuts every 50 ms, loops without blank frames, and wipes away once', async ({ page }, info) => {
+test('native desktop playback advances without a JS clock and the opaque curtain exits once', async ({ page }, info) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await freezeStartup(page);
   const release = await holdInitialRequest(page);
@@ -46,23 +46,20 @@ test('the full-screen sequence cuts every 50 ms, loops without blank frames, and
   await expect(page.getByRole('status')).toHaveText('Connecting the dots…');
   expect(await page.locator('.site-shell').evaluate(element => element.inert)).toBe(true);
   await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
-  await expect(loader.locator('.nucleus-loader__frame')).toHaveCount(1);
-
-  const frame = loader.locator('.nucleus-loader__frame');
-  await page.clock.runFor(40);
-  await expect(frame).toHaveAttribute('data-frame', '0');
-  for (let index = 1; index <= 17; index++) {
-    await page.clock.runFor(50);
-    await expect(frame).toHaveAttribute('data-frame', String(index % 17));
-    await expect(frame).toHaveCSS('visibility', 'visible');
-    if (index === 6) await page.screenshot({ path: info.outputPath('loader-nucleus-wordmark.png') });
+  const video = loader.locator('video');
+  expect(await video.evaluate(video => video.duration)).toBeCloseTo(.85, 2);
+  const snapshots = [];
+  for (let index = 0; index < 4; index++) {
+    snapshots.push((await loader.screenshot({ animations: 'allow' })).toString('base64'));
+    await new Promise(resolve => setTimeout(resolve, 125));
   }
+  expect(new Set(snapshots).size).toBeGreaterThan(2);
   await page.screenshot({ path: info.outputPath('loader-desktop.png') });
   release();
-  await page.clock.runFor(600);
+  await page.clock.runFor(1500);
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'exiting');
   await page.clock.runFor(120);
-  await expect(loader).not.toHaveCSS('clip-path', 'inset(0%)');
+  await expect(loader).toHaveCSS('clip-path', 'none');
   const exit = await loader.evaluate(element => ({
     x: new DOMMatrixReadOnly(getComputedStyle(element).transform).m41,
     opacity: getComputedStyle(element).opacity,
@@ -86,6 +83,24 @@ test('the full-screen sequence cuts every 50 ms, loops without blank frames, and
   expect(errors).toEqual([]);
 });
 
+test('native video advances its media pipeline during a blocked JavaScript task', async ({ page }, info) => {
+  const release = await holdInitialRequest(page);
+  await page.goto('/recruitment', { waitUntil: 'domcontentloaded' });
+  await expect(screen(page)).toHaveAttribute('data-frames-ready', 'true');
+  const sample = await screen(page).locator('video').evaluate(video => {
+    const before = video.getVideoPlaybackQuality();
+    const start = performance.now(), until = start + 600;
+    while (performance.now() < until) { /* Simulate synchronous parsing/work. */ }
+    const after = video.getVideoPlaybackQuality();
+    return { blockedMs: performance.now() - start, frames: after.totalVideoFrames - before.totalVideoFrames,
+      dropped: after.droppedVideoFrames - before.droppedVideoFrames };
+  });
+  release();
+  await info.attach('blocked-js-playback', { body: JSON.stringify(sample), contentType: 'application/json' });
+  expect(sample.blockedMs).toBeGreaterThanOrEqual(600);
+  expect(sample.frames - sample.dropped).toBeGreaterThanOrEqual(6);
+});
+
 for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }, { width: 844, height: 390 }]) {
   test(`brief startup timing and artwork fit at ${viewport.width}x${viewport.height}`, async ({ page }, info) => {
     await recordTiming(page);
@@ -96,8 +111,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     await expect(loader).toBeVisible();
     const box = await loader.boundingBox();
     expect(box).toEqual({ x: 0, y: 0, ...viewport });
-    if (viewport.width <= 767 || viewport.height <= 500) await expect(loader.locator('.nucleus-loader__mobile img')).toHaveCSS('object-fit', 'contain');
-    else await expect(loader.locator('.nucleus-loader__frame')).toHaveCSS('mask-size', 'cover');
+    await expect(loader.locator('video')).toHaveCSS('object-fit', viewport.width <= 767 || viewport.height <= 500 ? 'contain' : 'cover');
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
     await page.screenshot({ path: info.outputPath(`loader-${viewport.width}.png`) });
     await expect(loader).toHaveCount(0, { timeout: 3000 });
@@ -144,13 +158,17 @@ test('desktop logo waits until the loading curtain has exited', async ({ page })
 });
 
 test('reduced motion keeps one static frame and removes the artificial wait and wipe', async ({ page }) => {
+  const mediaRequests = [];
+  page.on('request', request => { if (/\.mp4$/.test(request.url()) && request.resourceType() !== 'script') mediaRequests.push(request.url()); });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const release = await holdInitialRequest(page);
   await page.goto('/recruitment');
   const loader = screen(page);
   await expect(loader).toBeVisible();
-  await expect(loader.locator('.nucleus-loader__frame')).toHaveCount(1);
-  await expect(loader.locator('.nucleus-loader__frame')).toHaveCSS('animation-name', 'none');
+  await expect(loader.locator('.nucleus-loader__poster')).toBeVisible();
+  await expect(loader.locator('video')).toBeHidden();
+  expect(await loader.locator('video').evaluate(video => video.paused)).toBe(true);
+  expect(mediaRequests).toEqual([]);
   const started = Date.now();
   release();
   await expect(loader).toHaveCount(0, { timeout: 1000 });
@@ -158,20 +176,17 @@ test('reduced motion keeps one static frame and removes the artificial wait and 
   expect(await page.locator('.site-shell').evaluate(element => element.inert)).toBe(false);
 });
 
-test('a failed frame uses a decoded replacement instead of a blank beat', async ({ page }) => {
+test('failed video playback keeps the branded poster and never blocks startup', async ({ page }) => {
   await freezeStartup(page);
-  await page.route('**/frame-05.webp', route => route.abort());
+  await page.route('**/*.mp4', route => route.abort());
   const release = await holdInitialRequest(page);
   await page.goto('/recruitment');
-  await expect(screen(page)).toHaveAttribute('data-frames-ready', 'true');
-  const frames = screen(page).locator('.nucleus-loader__frame');
-  await page.clock.runFor(40);
-  const firstMask = await frames.evaluate(element => getComputedStyle(element).maskImage);
-  await page.clock.runFor(250);
-  await expect(frames).toHaveAttribute('data-frame', '5');
-  expect(await frames.evaluate(element => getComputedStyle(element).maskImage)).toBe(firstMask);
+  await expect(screen(page)).toHaveAttribute('data-frames-ready', 'false');
+  const poster = screen(page).locator('.nucleus-loader__poster img');
+  await expect(poster).toBeVisible();
+  expect(await poster.evaluate(image => image.complete && image.naturalWidth > 1)).toBe(true);
   release();
-  await page.clock.runFor(1200);
+  await page.clock.runFor(1500);
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'exiting');
   await page.clock.runFor(500);
   await expect(screen(page)).toHaveCount(0);
@@ -180,16 +195,17 @@ test('a failed frame uses a decoded replacement instead of a blank beat', async 
 test.describe('mobile artwork', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
 
-  test('one native image animates with JS paused and keeps the mobile artwork prominent', async ({ page }, info) => {
+  test('native video animates with JS paused and keeps the mobile artwork prominent', async ({ page }, info) => {
     await freezeStartup(page);
     const requests = [];
-    page.on('request', request => { if (request.resourceType() === 'image' && /loading/.test(request.url())) requests.push(request.url()); });
+    page.on('request', request => { if (['image', 'media', 'fetch', 'other'].includes(request.resourceType()) && /loading/.test(request.url())) requests.push(request.url()); });
     const release = await holdInitialRequest(page);
     await page.goto('/events');
     await expect(screen(page)).toHaveAttribute('data-frames-ready', 'true');
-    const image = screen(page).locator('.nucleus-loader__mobile img');
+    const image = screen(page).locator('.nucleus-loader__poster img');
     await expect(image).toBeVisible();
-    expect(requests.filter(url => /sequence\.webp/.test(url))).toHaveLength(1);
+    expect(new Set(requests.filter(url => /sequence\.mp4/.test(url))).size).toBe(1);
+    expect(requests.filter(url => /desktop\/sequence/.test(url))).toHaveLength(0);
     expect(requests.filter(url => /frame-\d+/.test(url))).toHaveLength(0);
     // Native decoding advances even while the test has frozen all JS timers/RAF.
     const snapshots = [];
@@ -198,10 +214,9 @@ test.describe('mobile artwork', () => {
       await new Promise(resolve => setTimeout(resolve, 125));
     }
     expect(new Set(snapshots).size).toBeGreaterThan(2);
-    await expect(screen(page).locator('.nucleus-loader__frame')).not.toHaveAttribute('data-frame');
     // The static branded frame also makes screenshot comparisons deterministic.
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await expect.poll(() => image.evaluate(element => element.currentSrc)).toContain('/poster.webp');
+    await expect(screen(page).locator('video')).toBeHidden();
     for (const viewport of [{ width: 320, height: 568 }, { width: 360, height: 640 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 844, height: 390 }]) {
       await page.setViewportSize(viewport);
       await expect(image).toHaveCSS('object-fit', 'contain');
@@ -223,7 +238,7 @@ test.describe('mobile artwork', () => {
     release();
     await page.clock.runFor(1500);
     await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'exiting');
-    await expect(screen(page)).toHaveCSS('clip-path', 'inset(0%)');
+    await expect(screen(page)).toHaveCSS('clip-path', 'none');
     await page.clock.runFor(500);
     await expect(screen(page)).toHaveCount(0);
   });
@@ -231,7 +246,7 @@ test.describe('mobile artwork', () => {
   test('all failed images leave a readable fallback', async ({ page }) => {
     await freezeStartup(page);
     const release = await holdInitialRequest(page);
-    await page.route('**/loading/mobile/sequence.webp', route => route.request().resourceType() === 'image' ? route.abort() : route.continue());
+    await page.route('**/loading/**', route => ['image', 'media', 'fetch', 'other'].includes(route.request().resourceType()) ? route.abort() : route.continue());
     await page.goto('/recruitment');
     await expect(page.locator('.nucleus-loader__fallback')).toHaveText('Nucleus');
     release();
@@ -278,9 +293,9 @@ test('slow fonts and decorative frames never delay a ready page', async ({ page 
   await recordTiming(page);
   let release;
   const assetsReady = new Promise(resolve => { release = resolve; });
-  await page.route(/\.(?:webp|woff2)(?:\?.*)?$/, async route => {
+  await page.route(/\.(?:webp|woff2|mp4)(?:\?.*)?$/, async route => {
     // Vite also serves asset URLs as JavaScript modules; keep those imports usable.
-    if (!['image', 'font'].includes(route.request().resourceType())) { await route.continue(); return; }
+    if (!['image', 'font', 'media', 'fetch', 'other'].includes(route.request().resourceType())) { await route.continue(); return; }
     await assetsReady;
     await route.continue().catch(() => {});
   });

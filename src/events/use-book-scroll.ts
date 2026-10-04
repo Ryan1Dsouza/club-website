@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { useReducedMotion } from 'framer-motion';
+import { flushSync } from 'react-dom';
 import { createCinematicLenis } from '../lib/cinematic-lenis';
 
 export const BOOK_SCROLL_STEP = 420;
-export const BOOK_TURN_DURATION = .72;
-const turnEasing = (t: number) => t * t * (3 - 2 * t);
+export const BOOK_TURN_DURATION = .52;
+const turnEasing = (t: number) => 1 - Math.pow(1 - t, 3);
 // React only needs a new tree at a leaf boundary or when a turn starts/ends.
-const phase = (value: number) => `${Math.floor(value + .00001)}:${Math.abs(value - Math.round(value)) > .0001}`;
+const phase = (value: number) => `${Math.floor(value)}:${value !== Math.floor(value)}`;
 
-/** One gesture pulls one leaf. Lenis owns the scroll position and settling motion. */
+/** Touch pulls one leaf; wheel gestures flow through pages with Lenis interpolation. */
 export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content: RefObject<HTMLDivElement | null>, count: number, singlePage = false, onFrame?: (value: number) => void) {
   const reduced = !!useReducedMotion();
   const [cursor, setCursor] = useState(0);
@@ -18,30 +19,38 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
   const remap = (value: number) => {
     if (format.current.singlePage !== singlePage) {
       const page = Math.round(value);
-      value = singlePage ? Math.max(0, page * 2 - 1) : Math.floor((page + 1) / 2);
+      value = singlePage ? page * 2 : Math.floor(page / 2);
     }
     return format.current.singlePage !== singlePage || format.current.count !== count ? Math.min(value, Math.max(0, count - 2)) : value;
   };
   const displayedCursor = remap(cursor);
-  useEffect(() => {
+  useLayoutEffect(() => {
     current.current = remap(current.current);
     format.current = { singlePage, count }; setCursor(current.current);
     const element = wrapper.current!, track = content.current!;
+    // Rebuild dimensions and restore the remapped photo before a native scroll
+    // event can report the old layout's clamped position after rotation.
+    element.style.setProperty('--book-height', `${element.clientHeight}px`);
     // Route normalized gestures ourselves so touch inertia cannot skip photos.
     const lenis = createCinematicLenis({ wrapper: element, content: track, eventsTarget: document.createElement('div'), autoResize: false, duration: BOOK_TURN_DURATION, easing: turnEasing });
     const clamp = (value: number) => Math.max(0, Math.min(count - 1, value));
+    lenis.scrollTo(clamp(current.current) * BOOK_SCROLL_STEP, { immediate: true });
     let frame = 0, last = 0, clock = 0, snapTimer = 0;
     let renderedPhase = phase(current.current), touchPending = false, touchDistance = 1;
-    let target = clamp(current.current), anchor = Math.round(target), direction = 0, gesturing = false;
+    let target = clamp(current.current), anchor = Math.round(target), direction = 0, gesturing = false, touchGesture = false;
     let touchY = 0, touchStartY = 0, touchId: number | null = null, pulled = false;
     let touchStory: HTMLElement | null = null;
     const update = () => {
       const raw = clamp(Number(lenis.scroll) / BOOK_SCROLL_STEP);
       // Keep the leaf and its underlying photo on the same side of a boundary.
       const value = Math.abs(raw - Math.round(raw)) < .0001 ? Math.round(raw) : raw;
-      current.current = value; paint.current?.(value);
+      current.current = value;
       const next = phase(value);
-      if (next !== renderedPhase) { renderedPhase = next; setCursor(value); }
+      // Commit the photo, leaf visibility and angle in the SAME animation frame.
+      // Painting a reset angle against the previous React tree exposed the old
+      // photograph for one frame at every completed (or reversed) turn.
+      if (next !== renderedPhase) { renderedPhase = next; flushSync(() => setCursor(value)); }
+      paint.current?.(value);
     };
     const flushTouch = () => {
       if (!touchPending) return;
@@ -58,20 +67,26 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
       if (lenis.isScrolling || touchPending) frame = requestAnimationFrame(tick); else last = 0;
     };
     const wake = () => { if (!frame && !document.hidden) frame = requestAnimationFrame(tick); };
-    const scroll = (value: number, duration = BOOK_TURN_DURATION, immediate = reduced) => {
-      lenis.scrollTo(clamp(value) * BOOK_SCROLL_STEP, { duration, immediate });
+    const scroll = (value: number, duration = BOOK_TURN_DURATION, immediate = reduced, follow = false) => {
+      lenis.scrollTo(clamp(value) * BOOK_SCROLL_STEP, { duration, immediate, lerp: follow ? .26 : 0 });
       if (immediate) update();
       wake();
     };
     const go = (page: number) => {
       clearTimeout(snapTimer); gesturing = false; touchPending = false;
-      target = clamp(page); anchor = Math.round(target); scroll(target);
+      target = clamp(page); anchor = Math.round(target);
+      // A short pull should not spend a full turn's duration settling.
+      const distance = Math.abs(target - current.current);
+      scroll(target, Math.max(.18, BOOK_TURN_DURATION * Math.min(1, distance + .25)));
     };
     navigate.current = delta => go(Math.round(gesturing ? current.current : target) + delta);
     const settle = () => {
       const fraction = target - Math.floor(target);
-      const page = direction > 0 && fraction > .32 ? Math.ceil(target)
-        : direction < 0 && fraction < .68 ? Math.floor(target) : Math.round(target);
+      // A mouse-wheel notch is usually only 80–120px. Let it commit a page
+      // instead of repeatedly pulling the leaf a little and snapping it back.
+      const threshold = touchGesture ? .28 : .1;
+      const page = direction > 0 && fraction > threshold ? Math.ceil(target)
+        : direction < 0 && fraction < 1 - threshold ? Math.floor(target) : Math.round(target);
       go(page);
     };
     const begin = () => {
@@ -82,6 +97,7 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
     };
     const pull = (pixels: number, touch = false) => {
       if (!gesturing) begin();
+      touchGesture = touch;
       clearTimeout(snapTimer);
       const nextDirection = Math.sign(pixels);
       if (!nextDirection) return;
@@ -89,9 +105,14 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
       // visible page instead of first spending the gesture cancelling that lead.
       if (!touch && direction && direction !== nextDirection) target = current.current;
       direction = nextDirection;
-      target = clamp(Math.max(anchor - 1, Math.min(anchor + 1, target + pixels / BOOK_SCROLL_STEP)));
+      const next = target + pixels / BOOK_SCROLL_STEP;
+      // Only direct touch is bounded to one leaf. A trackpad can continue
+      // through a boundary without waiting for an artificial gesture timeout.
+      target = clamp(touch ? Math.max(anchor - 1, Math.min(anchor + 1, next)) : next);
       if (touch) { touchPending = true; wake(); }
-      else scroll(target, .24);
+      // Lenis' exponential interpolation is time-corrected and can be retargeted
+      // without restarting a zero-velocity ease on every trackpad packet.
+      else scroll(target, 0, reduced, true);
     };
     const storyCanScroll = (target: EventTarget | null, delta: number) => {
       const story = target instanceof Element ? target.closest<HTMLElement>('[data-book-scroll]') : null;
@@ -102,7 +123,7 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
       if (storyCanScroll(event.target, event.deltaY)) { event.stopPropagation(); return; }
       event.preventDefault(); event.stopPropagation();
       pull(event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? element.clientHeight : 1));
-      snapTimer = window.setTimeout(settle, 180);
+      snapTimer = window.setTimeout(settle, 110);
     };
     const start = (event: PointerEvent) => {
       if (event.pointerType !== 'touch') return;
@@ -138,9 +159,12 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
       element.style.setProperty('--book-height', `${element.clientHeight}px`);
       lenis.resize();
       touchPending = false;
-      target = clamp(current.current); scroll(target, 0, true);
+      // Keep the intended page when a layout temporarily clamps native scroll.
+      // A content resize follows the wrapper resize once its CSS height resolves.
+      target = clamp(gesturing ? current.current : target); scroll(target, 0, true);
     });
     resize.observe(element);
+    resize.observe(track);
     lenis.on('scroll', update);
     element.addEventListener('wheel', wheel, { passive: false });
     element.addEventListener('pointerdown', start);

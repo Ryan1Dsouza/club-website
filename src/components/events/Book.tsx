@@ -1,35 +1,48 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowDown, ArrowLeft, ArrowRight, CalendarDays, MapPin, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, CalendarDays, MapPin, Scan, X } from 'lucide-react';
 import type { ClubEvent, EventPhoto } from '../../types';
 import { bookSpreads } from '../../events/photo-order';
 import { BOOK_SCROLL_STEP, useBookScroll } from '../../events/use-book-scroll';
 import { WORKSHOP_STATIONS, workshopStory } from '../../events/stations';
 import { eventDate } from './EventFlipCard';
 import EventArtwork from './EventArtwork';
+import RailwayTrack from './RailwayTrack';
 import './station-book.css';
 
 type Props = { workshopFolder: string; imageList: EventPhoto[]; event?: ClubEvent | null; title?: string; stationNumber?: string; onClose: () => void; continueLabel?: string; galleryOnly?: boolean };
+const mobileBook = '(max-width: 620px), (max-height: 500px) and (pointer: coarse)';
 
 export default function Book({ workshopFolder, imageList, event, title, stationNumber = '01', onClose, continueLabel = 'Back to Events', galleryOnly = false }: Props) {
   const name = title ?? WORKSHOP_STATIONS.find(item => item.id === workshopFolder)?.title ?? workshopFolder;
-  const [isMobile, setIsMobile] = useState(() => matchMedia('(max-width: 620px)').matches);
+  const [isMobile, setIsMobile] = useState(() => matchMedia(mobileBook).matches);
+  const [fitPhoto, setFitPhoto] = useState(false);
   useEffect(() => {
-    const media = matchMedia('(max-width: 620px)');
+    const media = matchMedia(mobileBook);
     const listener = () => setIsMobile(media.matches);
     media.addEventListener('change', listener);
     return () => media.removeEventListener('change', listener);
   }, []);
   const spreads = useMemo(() => bookSpreads(imageList), [imageList]);
-  const count = isMobile ? Math.max(1, imageList.length) : spreads.length;
+  const count = isMobile ? imageList.length + 1 : spreads.length;
   const dialog = useRef<HTMLDialogElement>(null), closed = useRef(false);
   const instructions = useId();
   const wrapper = useRef<HTMLDivElement>(null), content = useRef<HTMLDivElement>(null);
   const book = useRef<HTMLDivElement>(null), surface = useRef<HTMLDivElement>(null);
-  const leaf = useRef<HTMLDivElement>(null), progressBar = useRef<HTMLElement>(null);
+  const leaf = useRef<HTMLDivElement>(null), progressBar = useRef<HTMLDivElement>(null);
   const strips = isMobile ? 4 : 8;
+  // Open before the scroll hook measures its wrapper: closed dialogs have no
+  // layout and would seed Lenis with a zero-height content range.
+  useLayoutEffect(() => {
+    const element = dialog.current!;
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    element.showModal(); element.querySelector<HTMLElement>('.station-book__surface')?.focus({ preventScroll:true });
+    return () => { element.close(); document.body.style.overflow = overflow; if (previous?.isConnected) previous.focus({ preventScroll:true }); };
+  }, []);
   function paint(value: number) {
-    const index = Math.min(count - 1, Math.floor(value + .00001));
+    const index = Math.min(count - 1, Math.floor(value));
     const progress = Math.min(1, Math.max(0, value - index));
     const shade = Math.sin(progress * Math.PI);
     if (book.current) book.current.dataset.bookProgress = value.toFixed(3);
@@ -39,31 +52,24 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
       leaf.current.style.setProperty('--book-shade', String(shade * .22));
     }
     surface.current?.style.setProperty('--book-close', String(index === count - 1 && !reduced ? progress : 0));
-    if (progressBar.current) progressBar.current.style.transform = `scaleX(${Math.min(1, (value + 1) / count)})`;
+    progressBar.current?.style.setProperty('--rail-progress', String(Math.min(1, value / count)));
   }
   const { cursor, current, reduced, turn } = useBookScroll(wrapper, content, count + 1, isMobile, paint);
   // A boundary can mount a new leaf after the frame callback. Give it the
   // latest pose before paint, without routing every animation frame via React.
   useLayoutEffect(() => paint(current.current));
-  const page = Math.min(count - 1, Math.floor(cursor + .00001));
+  const page = Math.min(count - 1, Math.floor(cursor));
   const progress = Math.min(1, Math.max(0, cursor - page));
   const turning = progress > .0001 && progress < .9999;
   const closing = page === count - 1 && turning;
   const showNext = turning && !reduced;
 
   useEffect(() => {
-    const element = dialog.current!;
-    const previous = document.activeElement as HTMLElement | null;
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    element.showModal(); element.querySelector<HTMLElement>('.station-book__surface')?.focus({ preventScroll:true });
-    return () => { element.close(); document.body.style.overflow = overflow; if (previous?.isConnected) previous.focus({ preventScroll:true }); };
-  }, []);
-  useEffect(() => {
     if (cursor >= count - .0001 && !closed.current) { closed.current = true; onClose(); }
   }, [cursor, count, onClose]);
   useEffect(() => {
-    const photos = isMobile ? imageList.slice(page, page + 3) : (spreads[page + 1] ?? []).filter(photo => photo !== null);
+    // Warm both directions, including the reverse face of the next leaf.
+    const photos = isMobile ? imageList.slice(Math.max(0, page - 2), page + 2) : imageList.slice(Math.max(0, page * 2 - 3), page * 2 + 5);
     photos.forEach(photo => { const image = new Image(); image.src = photo.url; void image.decode().catch(() => {}); });
   }, [page, spreads, imageList, isMobile]);
 
@@ -82,14 +88,13 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
     const photo = (index: number, duplicate = false) => {
       const item = imageList[index];
       if (!item) return index === 0 ? <figure className="station-book__cover-art nx-event-artwork"><EventArtwork variant={Number(stationNumber) % 3} /></figure> : <div className="station-book__blank" />;
-      return <figure className={index === 0 ? 'station-book__cover-art' : 'station-book__panel'}>
-        {duplicate ? <img src={item.url} alt="" decoding="async" draggable={false} /> : <a href={item.url} target="_blank" rel="noreferrer" aria-label={`Open ${name} photograph ${index + 1}`}><img src={item.url} alt={`${name} — photograph ${index + 1}`} decoding="async" draggable={false} /></a>}
+      return <figure className={!isMobile && index === 0 ? 'station-book__cover-art' : 'station-book__panel'}>
+        {duplicate ? <img src={item.url} alt="" decoding="sync" draggable={false} /> : <a href={item.url} target="_blank" rel="noreferrer" aria-label={`Open ${name} photograph ${index + 1}`}><img src={item.url} alt={`${name} — photograph ${index + 1}`} decoding="sync" draggable={false} /></a>}
       </figure>;
     };
     const item = (index: number, duplicate = false) => index === 0 ? story(duplicate) : photo(index - 1, duplicate);
-    const report = (index: number, duplicate = false) => index === 0 ? <div className="station-book__report">{story(duplicate)}{photo(0, duplicate)}</div> : photo(index, duplicate);
     const end = <div className="station-book__end-cover" />;
-    const front = isMobile ? report(page, true) : item(page * 2 + 1, true);
+    const front = isMobile ? item(page, true) : item(page * 2 + 1, true);
     const back = closing ? end : isMobile ? <div className="station-book__reverse-paper" /> : item(page * 2 + 2, true);
     const strip = (index: number): ReactNode => <div className="station-book__strip" key={index} style={{ '--strip': index, '--reverse-strip': strips - 1 - index } as CSSProperties}>
       <div className="station-book__leaf-face station-book__leaf-front"><div className="station-book__slice">{front}</div></div>
@@ -99,7 +104,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
     return {
       spread: <div className={`station-book__spread ${page === 0 ? 'station-book__cover' : 'station-book__photos'}`}>
         {!isMobile && <div className="station-book__page station-book__page--left">{item(page * 2)}</div>}
-        <div className="station-book__page station-book__page--right">{closing && !reduced ? end : isMobile ? report(showNext ? page + 1 : page) : item(showNext ? page * 2 + 3 : page * 2 + 1)}</div>
+        <div className="station-book__page station-book__page--right">{closing && !reduced ? end : isMobile ? item(showNext ? page + 1 : page) : item(showNext ? page * 2 + 3 : page * 2 + 1)}</div>
       </div>,
       leaf: strip(0),
     };
@@ -108,7 +113,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
 
   return createPortal(<dialog ref={dialog} className="nx-dialog nx-book-dialog" aria-label={name} data-lenis-prevent onCancel={event => { event.preventDefault(); onClose(); }}>
     <button className="nx-close" aria-label="Close event" onClick={onClose}><X size={18} /></button>
-    <div className="station-book" ref={book} style={{ '--book-strips': strips } as CSSProperties} data-layout={isMobile ? 'report' : 'spread'} data-workshop={workshopFolder} data-station-number={stationNumber} data-book-page={page + 1} data-book-turning={turning} data-book-closing={closing} data-scroll-engine="lenis" onKeyDown={event => {
+    <div className="station-book" ref={book} style={{ '--book-strips': strips } as CSSProperties} data-layout={isMobile ? 'mobile' : 'spread'} data-photo-fit={fitPhoto ? 'contain' : 'cover'} data-workshop={workshopFolder} data-station-number={stationNumber} data-book-page={page + 1} data-book-turning={turning} data-book-closing={closing} data-scroll-engine="lenis" onKeyDown={event => {
       if (event.altKey || event.ctrlKey || event.metaKey) return;
       const story = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-book-scroll]') : null;
       if (story && ((event.key === 'ArrowDown' && story.scrollTop + story.clientHeight < story.scrollHeight - 1) || (event.key === 'ArrowUp' && story.scrollTop > 1))) return;
@@ -126,11 +131,12 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
         </div>
       </div>
       <footer className="station-book__footer">
-        <div className="station-book__progress" aria-hidden="true"><i ref={progressBar} /></div>
+        <div className="station-book__progress" ref={progressBar} aria-hidden="true"><RailwayTrack className="railway-track--horizontal" /></div>
         <div className="station-book__navigation">
           <button type="button" onClick={() => turn(-1)} disabled={cursor <= .0001} aria-label="Previous book page"><ArrowLeft size={18} /></button>
           <span role="status" aria-live="polite">Page {page + 1} / {count}</span>
           <button type="button" onClick={() => turn(1)} aria-label={page === count - 1 ? 'Close book after last page' : 'Next book page'}><ArrowRight size={18} /></button>
+          {isMobile && page > 0 && <button type="button" className="station-book__fit" onClick={() => setFitPhoto(value => !value)} aria-label="Show full photograph" aria-pressed={fitPhoto}><Scan size={15} /><span>Fit</span></button>}
           <p id={instructions}><ArrowDown size={13} />{page === count - 1 ? 'Scroll to close this chapter' : isMobile ? 'Pull up to turn. Pull down to return.' : 'Scroll to turn · arrow keys work too'}</p>
         </div>
         <div className="station-book__actions"><div className="station-book__links">{links.map(link => <a key={link.label} href={link.url} target="_blank" rel="noreferrer">{link.label}<ArrowRight size={12} /></a>)}</div><button className="nx-continue" onClick={onClose}>{continueLabel}<ArrowRight size={16} /></button></div>

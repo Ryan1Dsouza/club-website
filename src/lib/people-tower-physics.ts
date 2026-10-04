@@ -1,5 +1,6 @@
 import { AABB, Body, Box, ContactMaterial, Cylinder, GSSolver, Material, Plane, PointToPointConstraint, Quaternion as CannonQuat, SAPBroadphase, Vec3, World } from 'cannon-es';
 import { BLOCK_SIZE, LAYER_HEIGHT, towerSlots } from './people-tower-motion.ts';
+import type { TowerDetail } from './people-tower-quality.ts';
 
 export const PHYSICS_STEP = 1 / 120;
 export const PHYSICS_STEP_MOBILE = 1 / 60;
@@ -9,20 +10,22 @@ type Slots = ReturnType<typeof towerSlots>;
 
 /** Fixed-step rigid bodies for play, with one collidable kinematic story block.
  * Scroll poses resolve contacts before rendering, including large/reverse seeks. */
-export function createTowerPhysics(slots: Slots, simplified = false) {
-  const physicsStep = simplified ? PHYSICS_STEP_MOBILE : PHYSICS_STEP;
+export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDetail = false) {
+  let detail: TowerDetail = typeof simplified === 'boolean' ? simplified ? 1 : 2 : simplified;
+  let physicsStep = detail < 2 ? PHYSICS_STEP_MOBILE : PHYSICS_STEP;
+  let maxSubSteps = detail === 0 ? 2 : detail === 1 ? 3 : 6;
   const floorY = -(Math.ceil(slots.length / 3) - 1) * LAYER_HEIGHT / 2 - BLOCK_SIZE[1] / 2;
   const world = new World({ gravity: new Vec3(0, -9.82, 0), allowSleep: true });
   world.broadphase = new SAPBroadphase(world);
   const solver = world.solver as GSSolver;
-  solver.iterations = simplified ? 10 : 24; solver.tolerance = 1e-6;
+  solver.iterations = detail === 0 ? 6 : detail === 1 ? 10 : 24; solver.tolerance = 1e-6;
   const wood = new Material('tower-block'), stone = new Material('tower-foundation');
   const contact = { friction: .38, restitution: 0, contactEquationStiffness: 1e8, contactEquationRelaxation: 4 };
   world.addContactMaterial(new ContactMaterial(wood, wood, contact));
   world.addContactMaterial(new ContactMaterial(wood, stone, { ...contact, friction: .55 }));
   const floor = new Body({ mass: 0, material: stone, shape: new Plane(), position: new Vec3(0, floorY - .28, 0) });
   floor.quaternion.setFromEuler(-Math.PI / 2, 0, 0); world.addBody(floor);
-  const plinth = new Body({ mass: 0, material: stone, shape: new Cylinder(2.6, 2.75, .28, 24), position: new Vec3(0, floorY - .14, 0) });
+  const plinth = new Body({ mass: 0, material: stone, shape: new Cylinder(2.6, 2.75, .28, detail === 0 ? 8 : 24), position: new Vec3(0, floorY - .14, 0) });
   world.addBody(plinth);
   const shape = new Box(new Vec3(BLOCK_SIZE[0] / 2, BLOCK_SIZE[1] / 2, BLOCK_SIZE[2] / 2));
   const bodies = slots.map(slot => {
@@ -44,6 +47,19 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
   type PendingReturn = { delay: number; fromPos: Vec3; fromQuat: CannonQuat; toPos: Vec3; toQuat: CannonQuat };
   const pendingReturns = new Map<number, PendingReturn>();
   const storyOrigins = new Map<number, { position: Vec3; quaternion: CannonQuat }>();
+
+  function setDetail(value: TowerDetail) {
+    if (detail === value) return;
+    detail = value;
+    physicsStep = value < 2 ? PHYSICS_STEP_MOBILE : PHYSICS_STEP;
+    maxSubSteps = value === 0 ? 2 : value === 1 ? 3 : 6;
+    solver.iterations = value === 0 ? 6 : value === 1 ? 10 : 24;
+    accumulator = 0;
+    // Only the fixed foundation changes shape; preserve all block poses/joints.
+    plinth.removeShape(plinth.shapes[0]);
+    plinth.addShape(new Cylinder(2.6, 2.75, .28, value === 0 ? 8 : 24));
+    plinth.aabbNeedsUpdate = true; world.broadphase.dirty = true;
+  }
 
   const wake = () => bodies.forEach(body => { if (body.world) body.wakeUp(); });
   // Story order removes the top first. Losing a top block does not require
@@ -85,7 +101,7 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
     const wasStory = story === index;
     if (wasStory) story = -1;
     const body = bodies[index];
-    if (body?.world) { world.removeBody(body); }
+    if (body?.world) { world.removeBody(body); if (!wasStory) wakeSupported(body); }
   }
   function beginStory(index: number) {
     release();
@@ -195,6 +211,7 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
         if (before === lift) break;
       }
       body.position.y += lift;
+      position.y = body.position.y;
     }
     body.previousPosition.copy(body.position); body.interpolatedPosition.copy(body.position);
     body.previousQuaternion.copy(body.quaternion); body.interpolatedQuaternion.copy(body.quaternion);
@@ -303,7 +320,7 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
     // Returning blocks follow authored arcs. They do not need contact solving
     // while every dynamic block is asleep, even during a staggered rebuild.
     const simulating = held >= 0 || bodies.some(body => body.world && body.type === Body.DYNAMIC && body.sleepState !== Body.SLEEPING);
-    if (simulating) accumulator += Math.min(.05, Math.max(0, delta));
+    if (simulating) accumulator = Math.min(physicsStep * maxSubSteps, accumulator + Math.max(0, delta));
     else accumulator = 0;
     let changed = false;
     while (accumulator >= physicsStep) {
@@ -374,5 +391,5 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
   }
   const isPending = (index: number) => pendingReturns.has(index);
   const isFlying = (index: number) => isPending(index) || !!(bodies[index] as any).transition;
-  return { world, bodies, floorY, step, moving, isPending, isFlying, grab, move, release, pull, remove, beginStory, placeStory, reset, returnBody, dispose };
+  return { world, bodies, floorY, step, moving, setDetail, isPending, isFlying, grab, move, release, pull, remove, beginStory, placeStory, reset, returnBody, dispose };
 }

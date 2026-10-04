@@ -14,9 +14,9 @@ async function swipe(page, from, to, onPull) {
   await cdp.detach();
 }
 
-for (const viewport of [{width:390,height:844},{width:320,height:568},{width:1440,height:900}]) {
+for (const viewport of [{width:390,height:844},{width:320,height:568},{width:844,height:390},{width:1440,height:900}]) {
   test(`book images and reversible gestures at ${viewport.width}px`, async ({ browser }, info) => {
-    const mobile = viewport.width < 620;
+    const mobile = viewport.width < 620 || viewport.height < 500;
     const context = await browser.newContext({ viewport, isMobile:mobile, hasTouch:mobile });
     const page = await context.newPage(), errors=[];
     page.on('pageerror', error => errors.push(error.message));
@@ -27,20 +27,22 @@ for (const viewport of [{width:390,height:844},{width:320,height:568},{width:144
       await page.getByRole('button',{name:'Open Inauguration event book',exact:true}).click();
       await page.locator('.nx-book-dialog').evaluate(async element => { await Promise.all(element.getAnimations().map(animation => animation.finished)); });
       const book = page.locator('.station-book'), spread = book.locator('.station-book__spread'), surface = book.locator('.station-book__surface');
-      await expect(book).toHaveAttribute('data-layout', mobile ? 'report' : 'spread');
-      await expect(spread.locator('img')).toHaveCount(1);
-      await expect(spread.locator('img')).toHaveCSS('object-fit','contain');
-      await spread.locator('img').evaluate(img => img.decode());
+      await expect(book).toHaveAttribute('data-layout', mobile ? 'mobile' : 'spread');
+      await expect(spread.locator('img')).toHaveCount(mobile ? 0 : 1);
+      if (!mobile) {
+        await expect(spread.locator('img')).toHaveCSS('object-fit','contain');
+        await spread.locator('img').evaluate(img => img.decode());
+      }
       if (mobile) {
-        const story = await spread.locator('.station-book__story').boundingBox(), photo = await spread.locator('figure').boundingBox();
-        expect(photo.y).toBeGreaterThanOrEqual(story.y + story.height - 1);
-        expect(photo.width).toBeGreaterThan(viewport.width - 40);
-        expect(photo.height).toBeGreaterThan((await surface.boundingBox()).height * .5);
+        const story = await spread.locator('.station-book__story').boundingBox();
+        expect(story.width).toBeGreaterThanOrEqual(viewport.width - 2);
+        expect(story.height).toBeGreaterThan((await surface.boundingBox()).height * .95);
       }
       await page.screenshot({path:info.outputPath('opening.png')});
       const box = await surface.boundingBox(), x=box.x+box.width*.8;
       if (mobile) {
-        await swipe(page,{x,y:box.y+box.height*.88},{x,y:box.y+box.height*.48},async()=>{
+        const pull = Math.max(240, box.height * .8) * .45;
+        await swipe(page,{x,y:box.y+box.height*.9},{x,y:box.y+box.height*.9-pull},async()=>{
           await expect(book).toHaveAttribute('data-book-turning','true');
           const strips=await book.locator('.station-book__strip').evaluateAll(items=>items.map(item=>item.offsetHeight));
           expect(Math.max(...strips)-Math.min(...strips)).toBeLessThanOrEqual(1);
@@ -50,8 +52,21 @@ for (const viewport of [{width:390,height:844},{width:320,height:568},{width:144
       await expect(book).toHaveAttribute('data-book-progress','1.000');
       await expect(spread.locator('img')).toHaveCount(mobile?1:2);
       expect(await spread.innerText()).toBe('');
+      if (mobile) {
+        await expect(spread.locator('img')).toHaveAttribute('src', /inauguration\/.*1\.avif/);
+        await expect(spread.locator('img')).toHaveCSS('object-fit', 'cover');
+        const image = await spread.locator('img').boundingBox();
+        expect(image.width).toBeGreaterThanOrEqual(viewport.width - 2);
+        expect(image.height).toBeGreaterThanOrEqual(box.height - 2);
+        expect((await page.locator('.nx-book-dialog').boundingBox()).height).toBe(viewport.height);
+      }
       await page.screenshot({path:info.outputPath('photos.png')});
-      if(mobile) await swipe(page,{x,y:box.y+box.height*.25},{x,y:box.y+box.height*.65},async()=>{
+      if (mobile) {
+        await page.getByRole('button', { name: 'Show full photograph' }).click();
+        await expect(spread.locator('img')).toHaveCSS('object-fit', 'contain');
+        await page.getByRole('button', { name: 'Show full photograph' }).click();
+      }
+      if(mobile) await swipe(page,{x,y:box.y+box.height*.2},{x,y:box.y+box.height*.2+Math.max(240,box.height*.8)*.45},async()=>{
         await expect(book).toHaveAttribute('data-book-turning','true');
         await page.screenshot({path:info.outputPath('pull-back.png')});
       });
@@ -60,17 +75,20 @@ for (const viewport of [{width:390,height:844},{width:320,height:568},{width:144
       await expect(spread.locator('.station-book__story')).toBeVisible();
       if (viewport.width === 390) {
         await page.emulateMedia({reducedMotion:'reduce'});
-        for (let pageNumber=2;pageNumber<=12;pageNumber++) {
+        const sources = [];
+        for (let pageNumber=2;pageNumber<=13;pageNumber++) {
           await page.getByRole('button',{name:'Next book page',exact:true}).click();
           await expect(book).toHaveAttribute('data-book-page',String(pageNumber));
+          sources.push(await spread.locator('img').getAttribute('src'));
         }
+        expect(new Set(sources).size).toBe(12);
         const lastPhoto=await spread.locator('img').getAttribute('src');
         await page.setViewportSize({width:1440,height:900});
         await expect(book).toHaveAttribute('data-layout','spread');
         await expect(book).toHaveAttribute('data-book-page','7');
         await expect(spread.locator('img')).toHaveAttribute('src',lastPhoto);
         await page.setViewportSize(viewport);
-        await expect(book).toHaveAttribute('data-book-page','12');
+        await expect(book).toHaveAttribute('data-book-page','13');
         await page.getByRole('button',{name:'Close book after last page'}).click();
         await expect(book).toHaveCount(0);
       }

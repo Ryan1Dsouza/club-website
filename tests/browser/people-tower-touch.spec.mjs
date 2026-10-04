@@ -19,6 +19,7 @@ test.beforeEach(async ({ page }) => {
 async function openTower(page) {
   await page.goto('/team');
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
+  await page.getByRole('button', { name: 'Play Interactive Tower' }).click();
   await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'ready');
   await expect.poll(() => page.evaluate(() => Boolean(window.__towerTouchView))).toBe(true);
 }

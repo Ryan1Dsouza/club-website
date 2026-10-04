@@ -30,7 +30,7 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
   app.disable('x-powered-by');
   app.use(compression({ threshold: 1024 }));
   if (process.env.TRUST_PROXY === '1') app.set('trust proxy', 1);
-  app.use(helmet({ contentSecurityPolicy: production ? { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:'], connectSrc: ["'self'"], fontSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"] } } : false, strictTransportSecurity: production }));
+  app.use(helmet({ contentSecurityPolicy: production ? { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:'], mediaSrc: ["'self'", 'blob:'], connectSrc: ["'self'"], fontSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"] } } : false, strictTransportSecurity: production }));
   const smallJson = express.json({ limit: '48kb' });
   app.use('/api', (req, res, next) => /^\/admin\/experience-events\//.test(req.path) ? next() : smallJson(req, res, next));
   app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });

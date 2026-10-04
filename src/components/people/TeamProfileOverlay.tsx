@@ -46,7 +46,17 @@ export default function TeamProfileOverlay({ person, onClose }: { person: TeamPr
   }, []);
 
   return createPortal(<dialog ref={dialog} className="team-profile" aria-labelledby="team-profile-name" aria-describedby="team-profile-tagline" data-lenis-prevent
-    onCancel={event => { event.preventDefault(); close(); }}>
+    onCancel={event => { event.preventDefault(); close(); }}
+    onKeyDown={event => {
+      if (event.key !== 'Tab') return;
+      const controls = event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled), a[href]');
+      const first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first?.focus();
+      }
+    }}>
     <button type="button" className="team-profile__back" onClick={close}><ArrowLeft size={16} /><span>Back to the constellation</span><X size={16} /></button>
     <div className="team-profile__layout">
       <div className="team-profile__details">

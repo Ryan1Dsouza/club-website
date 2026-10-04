@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { advanceTowerScroll, towerExit, towerSlots, towerFrame, memberProgress, sortTowerMembers, BLOCK_SIZE, TOWER_INTRO, TOWER_OUTRO } from '../src/lib/people-tower-motion.ts';
-import { towerPixelRatio, towerQuality } from '../src/lib/people-tower-quality.ts';
+import { createTowerQualityController, towerPixelRatio, towerQuality } from '../src/lib/people-tower-quality.ts';
 import { createTowerPhysics } from '../src/lib/people-tower-physics.ts';
 import { AABB, Body, Quaternion, Vec3 } from 'cannon-es';
 
@@ -77,7 +77,56 @@ test('older phones start at native resolution and may reduce only the 3D buffer 
   const quality = towerQuality(390, 844, 3, { coarsePointer: true, cores: 2, memory: 2 });
   assert.equal(quality.lowEnd, true);
   assert.equal(quality.pixelRatio, 1);
-  assert.equal(towerPixelRatio(quality.pixelRatio, .6, quality.minPixelRatio), .75);
+  assert.equal(quality.detail, 0);
+  assert.equal(towerPixelRatio(quality.pixelRatio, .6, quality.minPixelRatio), .6);
+  assert.equal(towerPixelRatio(quality.pixelRatio, .25, quality.minPixelRatio), .5);
+});
+
+test('quality ignores idle pauses and isolated stalls, then sheds detail and resolution under sustained load', () => {
+  const adaptive = createTowerQualityController(2);
+  for (let i = 0; i < 300; i++) adaptive.sample(1 / 60);
+  adaptive.sample(.2);
+  for (let i = 0; i < 180; i++) adaptive.sample(1 / 60);
+  assert.equal(adaptive.detail, 2);
+  for (let i = 0; i < 100; i++) adaptive.sample(3);
+  assert.equal(adaptive.detail, 2);
+  for (let i = 0; i < 160; i++) adaptive.sample(1 / 30);
+  assert.equal(adaptive.detail, 0);
+  assert.equal(adaptive.scale, 1, 'intentional 30fps does not reduce resolution');
+  for (let i = 0; i < 100; i++) adaptive.sample(1 / 15);
+  assert.equal(adaptive.scale, .5);
+  adaptive.reset();
+  for (let i = 0; i < 1000; i++) adaptive.sample(1 / 60);
+  assert.equal(adaptive.detail, 0, 'does not oscillate during this scene');
+  const overwhelmed = createTowerQualityController(2);
+  for (let i = 0; i < 8; i++) overwhelmed.sample(.7);
+  assert.equal(overwhelmed.detail, 0, 'repeated sub-2fps frames are real load, not discarded pauses');
+});
+
+test('the extreme tier preserves play and rebuild with a bounded solver, including a live downshift', () => {
+  for (const initial of [0, 2]) {
+    const slots = fixtureSlots(), physics = createTowerPhysics(slots, initial);
+    try {
+      const body = physics.bodies[12];
+      physics.grab(12, body.position);
+      physics.move({ x: 5, y: 2, z: 0 });
+      simulate(physics, .2);
+      const before = body.position.clone();
+      physics.setDetail(0);
+      assert.deepEqual(body.position.toArray(), before.toArray(), 'quality changes preserve the held pose');
+      assert.equal(physics.world.constraints.length, 1);
+      assert.equal(physics.world.solver.iterations, 6);
+      const time = physics.world.time; physics.step(30);
+      assert.ok(physics.world.time - time <= 1 / 30 + 1e-9);
+      simulate(physics, 1.5, 1 / 30);
+      assert.ok(body.position.x > 3, 'dragging still moves the block');
+      physics.release(); simulate(physics, 4, 1 / 30);
+      assert.equal(physics.world.constraints.length, 0);
+      physics.reset(); simulate(physics, 1, 1 / 30);
+      physics.bodies.forEach((item, index) => assert.deepEqual(item.position.toArray(), [...slots[index].position]));
+      assert.equal(physics.moving(), false);
+    } finally { physics.dispose(); }
+  }
 });
 
 test('staggered reverse-scroll returns animate without stepping an idle physics solver', () => {

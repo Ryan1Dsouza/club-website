@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type Lenis from '@studio-freight/lenis';
 import { createCinematicLenis } from './cinematic-lenis';
 
 /** Smooth wheel input while keeping touch scrolling on the browser compositor. */
-export function useCinematicScroll(enabled: boolean, syncScenes = false) {
+export function useCinematicScroll(enabled: boolean, syncScenes = false, onScroll?: (scroll: number, limit: number) => void) {
+  const paint = useRef(onScroll);
+  paint.current = onScroll;
   useEffect(() => {
     if (!enabled) return;
     // ScrollTrigger temporarily repositions the document when measuring scenes.
@@ -14,6 +16,15 @@ export function useCinematicScroll(enabled: boolean, syncScenes = false) {
     let frame = 0, lastTick = 0, animationTime = 0;
     let disposed = false;
     let stopTracking: (() => void) | undefined;
+    let scrollLimit = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const publish = () => paint.current?.(lenis?.scroll ?? window.scrollY, scrollLimit);
+    const nativeScroll = () => { if (!lenis) publish(); };
+    const measure = () => {
+      scrollLimit = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      publish();
+    };
+    const resize = new ResizeObserver(measure);
+    resize.observe(document.documentElement);
 
     if (syncScenes) void import('./scroll-motion').then(({ ScrollTrigger }) => {
       if (disposed) return;
@@ -65,6 +76,7 @@ export function useCinematicScroll(enabled: boolean, syncScenes = false) {
       // Duration mode uses time-based easing instead of frame-rate-dependent lerp,
       // eliminating micro-stutters caused by WebGL frame drops on the team page.
       lenis = createCinematicLenis();
+      lenis.on('scroll', publish);
       animationTime = 0;
       wake();
     };
@@ -80,6 +92,9 @@ export function useCinematicScroll(enabled: boolean, syncScenes = false) {
       else wake();
     };
     sync();
+    measure();
+    window.addEventListener('scroll', nativeScroll, { passive: true });
+    window.addEventListener('resize', measure, { passive: true });
     preference.addEventListener('change', sync);
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('pointerdown', settle);
@@ -89,6 +104,9 @@ export function useCinematicScroll(enabled: boolean, syncScenes = false) {
     return () => {
       disposed = true;
       stopTracking?.();
+      resize.disconnect();
+      window.removeEventListener('scroll', nativeScroll);
+      window.removeEventListener('resize', measure);
       destroy();
       document.documentElement.classList.remove('cinematic-page');
       preference.removeEventListener('change', sync);

@@ -1,4 +1,4 @@
-.nucleus-loader {
+﻿.nucleus-loader {
   position: fixed;
   inset: 0;
   height: 100%;
@@ -13,26 +13,22 @@
   touch-action: none;
   will-change: transform;
 }
-
 .nucleus-loader__art,
-.nucleus-loader__frame {
+.nucleus-loader__poster,
+.nucleus-loader__poster img,
+.nucleus-loader__video {
   position: absolute;
   inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
-
-.nucleus-loader__mobile { display: none; }
-
-.nucleus-loader__frame {
-  --initial-frame-image: var(--desktop-frame-image);
-  background: currentColor;
-  mask-image: var(--frame-image, var(--initial-frame-image));
-  mask-mode: alpha;
-  mask-position: center;
-  mask-repeat: no-repeat;
-  mask-size: cover;
-}
-
+.nucleus-loader__poster img,
+.nucleus-loader__video { object-fit: cover; }
+.nucleus-loader__video { opacity: 0; }
+.nucleus-loader[data-frames-ready='true'] .nucleus-loader__video { opacity: 1; }
+.nucleus-loader[data-art-failed='true'] .nucleus-loader__poster { visibility: hidden; }
 .nucleus-loader__fallback {
   position: absolute;
   inset: 50% 0 auto;
@@ -40,35 +36,20 @@
   text-align: center;
   font: italic 24px/1 var(--serif, Georgia, serif);
 }
-
-/* A portrait composition enlarges the subject, not the empty widescreen margins. */
+/* Portrait artwork keeps its aspect ratio and clears notches in either orientation. */
 @media (max-width: 767px), (max-height: 500px) and (max-width: 1024px), (pointer: coarse) {
   .nucleus-loader__art {
     top: max(16px, env(safe-area-inset-top));
     right: max(16px, env(safe-area-inset-right));
     bottom: max(16px, env(safe-area-inset-bottom));
     left: max(16px, env(safe-area-inset-left));
+    width: auto;
+    height: auto;
   }
-  .nucleus-loader__frame {
-    display: none;
-    mask-image: none;
-  }
-  .nucleus-loader__mobile {
-    position: absolute;
-    inset: 0;
-    display: block;
-  }
-  .nucleus-loader__mobile img {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-  .nucleus-loader[data-mobile-failed='true'] .nucleus-loader__mobile { visibility: hidden; }
+  .nucleus-loader__poster img,
+  .nucleus-loader__video { object-fit: contain; }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .nucleus-loader { will-change: auto; }
+  .nucleus-loader__video { display: none; }
 }

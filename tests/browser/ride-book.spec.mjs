@@ -32,7 +32,7 @@ async function openRide(page, data = site) {
 for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 851 }, { width: 851, height: 393 }]) {
   test(`station books turn pages, stay in bounds, and continue the ride at ${viewport.width}x${viewport.height}`, async ({ browser }, info) => {
     const mobile = viewport.width !== 1440;
-    const report = viewport.width <= 620;
+    const report = mobile;
     const context = await browser.newContext({ viewport, isMobile: mobile, hasTouch: mobile });
     const page = await context.newPage(), errors = [];
     page.on('pageerror', error => errors.push(error.message));
@@ -68,7 +68,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 851 
       await expect(dialog).toBeVisible();
       await page.getByRole('button', { name: 'Next book page' }).click();
       await expect(book).toHaveAttribute('data-book-page', '4');
-      const lastPage = report ? 12 : 7;
+      const lastPage = report ? 13 : 7;
       for (let next = 5; next <= lastPage; next++) {
         await page.getByRole('button', { name: 'Next book page' }).click();
         await expect(book).toHaveAttribute('data-book-page', String(next));

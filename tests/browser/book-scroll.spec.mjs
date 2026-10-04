@@ -3,6 +3,26 @@ import { readFile } from 'node:fs/promises';
 
 const site = JSON.parse(await readFile(new URL('../../shared/public-data.json', import.meta.url), 'utf8'));
 
+test('wheel notches commit a turn and sustained scrolling crosses page boundaries', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.route('**/api/site', route => route.fulfill({ json: site }));
+  await page.goto('/events');
+  await expect(page.locator('[data-loading-screen]')).toHaveCount(0, { timeout: 20_000 });
+  await page.getByRole('button', { name: 'Open Inauguration event book', exact: true }).click();
+  await page.locator('.nx-book-dialog').evaluate(async dialog => { await Promise.all(dialog.getAnimations().map(animation => animation.finished)); });
+  const book = page.locator('.station-book');
+  await book.locator('.station-book__page--right').hover();
+  await page.mouse.wheel(0, 80);
+  await expect(book).toHaveAttribute('data-book-progress', '1.000');
+  for (let packet = 0; packet < 8; packet++) {
+    await page.mouse.wheel(0, 84);
+    await page.waitForTimeout(24);
+  }
+  await expect(book).toHaveAttribute('data-book-progress', '3.000');
+  await page.mouse.wheel(0, -80);
+  await expect(book).toHaveAttribute('data-book-progress', '2.000');
+});
+
 for (const slow of [false, true]) {
   test.describe(slow ? 'CPU-throttled mobile book' : 'mobile book', () => {
     test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -19,7 +39,7 @@ for (const slow of [false, true]) {
       await page.getByRole('button', { name: 'Open Inauguration event book', exact: true }).click();
       const book = page.locator('.station-book');
       await page.locator('.nx-book-dialog').evaluate(async element => { await Promise.all(element.getAnimations().map(animation => animation.finished)); });
-      await book.locator('.station-book__spread img').evaluate(image => image.decode());
+      await expect(book.locator('.station-book__spread img')).toHaveCount(0);
       const box = await book.locator('.station-book__surface').boundingBox();
       const x = box.x + box.width * .8, distance = Math.max(240, box.height * .8);
       const cdp = await page.context().newCDPSession(page);

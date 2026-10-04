@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo, type CSSProperties } from 'react';
 import gsap from 'gsap';
-import { ArrowLeft, ArrowRight, Pause, Play } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import './card-fan-carousel.css';
 
 export interface CardItem {
@@ -22,13 +22,13 @@ interface SocialCardsProps {
 }
 const MAX_VISIBLE = 7;
 const FAN_POSITIONS = [
-  { rot: -21, scale: .7756, x: -30, y: 7.3, zIndex: 1 },
-  { rot: -14, scale: .8498, x: -22, y: 4, zIndex: 2 },
-  { rot: -7, scale: .9346, x: -11, y: 1.3, zIndex: 3 },
-  { rot: 0, scale: 1, x: 0, y: 0, zIndex: 10 },
-  { rot: 7, scale: .9346, x: 11, y: 1.3, zIndex: 3 },
-  { rot: 14, scale: .8498, x: 22, y: 4, zIndex: 2 },
-  { rot: 21, scale: .7756, x: 30, y: 7.3, zIndex: 1 },
+  { rot: -21, scale: .7756, x: -30, y: 7.3 },
+  { rot: -14, scale: .8498, x: -22, y: 4 },
+  { rot: -7, scale: .9346, x: -11, y: 1.3 },
+  { rot: 0, scale: 1, x: 0, y: 0 },
+  { rot: 7, scale: .9346, x: 11, y: 1.3 },
+  { rot: 14, scale: .8498, x: 22, y: 4 },
+  { rot: 21, scale: .7756, x: 30, y: 7.3 },
 ];
 function getResponsiveMultiplier(width: number) {
   return width < 480 ? .28 : width < 640 ? .38 : width < 768 ? .5 : width < 1024 ? .75 : 1;
@@ -41,21 +41,29 @@ function getSlotConfig(count: number, slot: number) {
   if (count >= MAX_VISIBLE) return FAN_POSITIONS[slot];
   const center = count >> 1;
   const distance = count > 1 ? (slot - center) / center : 0;
-  return { rot: distance * 21, scale: 1 - .2244 * distance ** 2, x: distance * 30, y: distance ** 2 * 7.3, zIndex: 10 - Math.abs(slot - center) };
+  return { rot: distance * 21, scale: 1 - .2244 * distance ** 2, x: distance * 30, y: distance ** 2 * 7.3 };
+}
+function getCardPose(count: number, slot: number, width: number, height: number) {
+  const { x, y, rot, scale } = getSlotConfig(count, slot);
+  // Tilting away from the center lets overlapping card planes pass gradually.
+  // A stepped z-index would replace the entire overlap in a single frame.
+  const depth = rot / 7;
+  // Keep hit-test ranks in sync as well: Chromium can otherwise target a back
+  // card's flattened contents even though it paints the front card above it.
+  return { x: `${x * width}rem`, y: `${y * height}rem`, z: -12 * depth ** 2, rotation: rot, rotationY: -depth * 6, scale, opacity: 1, zIndex: 10 - Math.abs(depth) };
 }
 
-/** The supplied GSAP fan, with bounded image mounting and idle-only autoplay. */
-export default function SocialCards({ cards, activeIndex, onActiveIndexChange, onCardClick, autoPlayInterval = 3000, paused = false }: SocialCardsProps) {
+/** Continuous motion with only the visible fan and outgoing card mounted. */
+export default function SocialCards({ cards, activeIndex, onActiveIndexChange, onCardClick, autoPlayInterval = 3600, paused = false }: SocialCardsProps) {
   const root = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isAnimating = useRef(false);
   const hasEntered = useRef(false);
   const directionRef = useRef<'left' | 'right'>('right');
   const prevVisible = useRef(new Set<number>());
+  const motion = useRef<{ timeline: gsap.core.Timeline; kind: 'entry' | 'auto' | 'manual' } | null>(null);
+  const requestedMotion = useRef<{ index: number; kind: 'auto' | 'manual' } | null>(null);
   const [internalIndex, setInternalIndex] = useState(0);
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const [manualPause, setManualPause] = useState(false);
   const [visible, setVisible] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [reduced, setReduced] = useState<boolean | null>(null);
@@ -72,10 +80,12 @@ export default function SocialCards({ cards, activeIndex, onActiveIndexChange, o
   const mounted = new Set([...visibleMap.keys(), ...settledMap.keys()]);
   const settled = settledMap === visibleMap;
 
-  const cycle = useCallback((direction: 'left' | 'right') => {
-    if (isAnimating.current || totalCards < 2) return;
+  const cycle = useCallback((direction: 'left' | 'right', automatic = false) => {
+    // A deliberate selection can interrupt autoplay, including a frozen frame.
+    if (totalCards < 2 || (isAnimating.current && (automatic || motion.current?.kind !== 'auto'))) return;
     directionRef.current = direction;
     const next = (centerIndex + (direction === 'right' ? 1 : -1) + totalCards) % totalCards;
+    requestedMotion.current = { index: next, kind: automatic ? 'auto' : 'manual' };
     isAnimating.current = true;
     if (activeIndex === undefined) setInternalIndex(next);
     onActiveIndexChange?.(next);
@@ -93,14 +103,10 @@ export default function SocialCards({ cards, activeIndex, onActiveIndexChange, o
     return () => { observer.disconnect(); media.removeEventListener('change', preference); document.removeEventListener('visibilitychange', visibility); };
   }, []);
 
-  const playing = totalCards > 1 && !paused && !manualPause && !hidden && reduced === false && visible;
-  useEffect(() => {
-    if (!playing || autoPlayInterval <= 0) return;
-    const timer = window.setInterval(() => cycle('right'), autoPlayInterval);
-    return () => window.clearInterval(timer);
-  }, [playing, autoPlayInterval, cycle]);
+  const suspended = paused || hidden || !visible;
+  const playing = totalCards > 1 && autoPlayInterval > 0 && !suspended && reduced === false;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = containerRef.current;
     if (!container || !totalCards || reduced === null) return;
     const elements = Array.from(container.querySelectorAll<HTMLElement>('.fan-card'));
@@ -108,100 +114,88 @@ export default function SocialCards({ cards, activeIndex, onActiveIndexChange, o
     const first = !hasEntered.current;
     const multiplier = getResponsiveMultiplier(container.clientWidth);
     const heightMultiplier = getHeightMultiplier(container.clientWidth);
-    let hoverSlot: number | null = null;
-    let completed = 0;
+    const kind = first ? 'entry' : requestedMotion.current?.index === centerIndex ? requestedMotion.current.kind : 'manual';
+    requestedMotion.current = null;
+    const duration = kind === 'auto' ? autoPlayInterval / 1000 : .65;
+    // The wheel keeps moving at a steady pace through successive passes.
+    const ease = kind === 'auto' ? 'none' : 'power3.inOut';
+    const edgePose = (side: number) => ({
+      x: `${side * 40 * multiplier}rem`, y: `${12.5 * heightMultiplier}rem`,
+      z: -192, rotation: side * 28, rotationY: -side * 24, scale: .66, opacity: 0, zIndex: 0,
+    });
     const done = () => {
-      if (++completed < visibleMap.size) return;
       isAnimating.current = false;
       hasEntered.current = true;
       setSettledMap(visibleMap);
     };
+    const timeline = gsap.timeline({ paused: true, onComplete: done });
+    motion.current = { timeline, kind };
     isAnimating.current = !reduced;
     {
       for (const element of elements) {
         const index = Number(element.dataset.index);
         const slot = visibleMap.get(index);
         if (slot === undefined) {
-          gsap.to(element, { x: `${(directionRef.current === 'right' ? -40 : 40) * multiplier}rem`, opacity: 0, scale: .5, duration: reduced ? 0 : .3, ease: 'power2.in' });
+          timeline.to(element, { ...edgePose(directionRef.current === 'right' ? -1 : 1), duration: reduced ? 0 : duration, ease }, 0);
           continue;
         }
-        const { x, y, rot, scale, zIndex } = getSlotConfig(slotCount, slot);
-        const target = { x: `${x * multiplier}rem`, y: `${y * heightMultiplier}rem`, rotation: rot, scale, opacity: 1, zIndex };
-        if (reduced) { gsap.set(element, target); done(); }
+        const target = getCardPose(slotCount, slot, multiplier, heightMultiplier);
+        if (reduced) gsap.set(element, target);
         else if (first) {
-          gsap.set(element, { x: 0, y: `${12 * heightMultiplier}rem`, rotation: 0, scale: .5, opacity: 0 });
-          gsap.to(element, { ...target, duration: .85, ease: 'elastic.out(1.05,.78)', delay: slot * .04, onComplete: done });
+          gsap.set(element, { x: 0, y: `${12 * heightMultiplier}rem`, z: -192, rotation: 0, rotationY: 0, scale: .66, opacity: 0 });
+          timeline.to(element, { ...target, duration: 1, ease: 'power3.out' }, slot * .035);
         } else if (!previous.has(index)) {
-          gsap.set(element, { x: `${(directionRef.current === 'right' ? 40 : -40) * multiplier}rem`, y: `${y * heightMultiplier}rem`, rotation: directionRef.current === 'right' ? 30 : -30, scale: .5, opacity: 0 });
-          gsap.to(element, { ...target, duration: .5, ease: 'power2.out', onComplete: done });
-        } else gsap.to(element, { ...target, duration: .45, ease: 'power2.out', onComplete: done });
+          gsap.set(element, edgePose(directionRef.current === 'right' ? 1 : -1));
+          timeline.to(element, { ...target, duration, ease }, 0);
+        } else timeline.to(element, { ...target, duration, ease }, 0);
       }
     }
     prevVisible.current = new Set(visibleMap.keys());
 
-    const hoverLayout = (active: number | null, immediate = false) => {
+    const resize = () => {
+      timeline.kill();
       const mult = getResponsiveMultiplier(container.clientWidth);
       const height = getHeightMultiplier(container.clientWidth);
-      const center = slotCount >> 1;
       for (const element of elements) {
         const slot = visibleMap.get(Number(element.dataset.index));
         if (slot === undefined) continue;
-        const base = getSlotConfig(slotCount, slot);
-        let x = base.x * mult, y = base.y * height, rot = base.rot, scale = base.scale;
-        if (active !== null) {
-          if (active === slot) { y -= 2.5 * height; scale *= 1.08; }
-          else {
-            const distance = Math.abs(slot - active);
-            const normalized = center ? (slot - center) / center : 0;
-            const push = 8 * (1 - Math.abs(normalized)) * (1 + .2 * Math.max(0, 3 - distance));
-            x += (slot < active ? -1 : 1) * push * mult;
-            rot += (slot < active ? -3 : 3) / (distance + 1);
-          }
-        }
-        gsap.to(element, { x: `${x}rem`, y: `${y}rem`, rotation: rot, scale, opacity: 1, zIndex: active === slot ? 20 : base.zIndex, duration: reduced || immediate ? 0 : .4, ease: 'elastic.out(1,.75)', overwrite: 'auto' });
+        gsap.set(element, getCardPose(slotCount, slot, mult, height));
       }
+      done();
     };
-    const enter = (event: PointerEvent) => {
-      if (event.pointerType !== 'mouse' || isAnimating.current || reduced) return;
-      const element = (event.target as Element).closest<HTMLElement>('.fan-card');
-      const slot = element ? visibleMap.get(Number(element.dataset.index)) : undefined;
-      if (slot === undefined || slot === hoverSlot) return;
-      hoverSlot = slot; hoverLayout(slot);
-    };
-    const leave = () => { hoverSlot = null; if (!isAnimating.current) hoverLayout(null); };
-    const resize = () => {
-      // Always settle after rotation, even if it interrupts the entry animation.
-      isAnimating.current = false; hasEntered.current = true;
-      gsap.killTweensOf(elements);
-      hoverLayout(null, true);
-      setSettledMap(visibleMap);
-    };
-    container.addEventListener('pointerover', enter);
-    container.addEventListener('pointerleave', leave);
+    if (reduced) done();
+    else timeline.play();
     window.addEventListener('resize', resize);
     return () => {
-      container.removeEventListener('pointerover', enter);
-      container.removeEventListener('pointerleave', leave);
       window.removeEventListener('resize', resize);
-      gsap.killTweensOf(elements);
+      timeline.kill();
+      motion.current = null;
       // Keep the current transforms between cycles so the next tween starts
       // where the card is. React removes the inline styles on unmount.
       isAnimating.current = false;
     };
-  }, [centerIndex, totalCards, visibleMap, slotCount, reduced]);
+  }, [centerIndex, totalCards, visibleMap, slotCount, reduced, autoPlayInterval]);
+
+  useLayoutEffect(() => {
+    const current = motion.current;
+    if (!current) return;
+    // Pause the existing playhead; rebuilding a tween here would snap the fan.
+    current.timeline.paused(current.kind === 'manual' ? hidden || !visible : current.kind === 'entry' ? suspended : !playing);
+  }, [playing, suspended, hidden, visible, centerIndex, reduced, settledMap, autoPlayInterval]);
+
+  useEffect(() => {
+    // Each completed pass starts the next immediately, with no interval or dwell.
+    if (playing && hasEntered.current && !isAnimating.current) cycle('right', true);
+  }, [playing, cycle, settledMap]);
 
   if (!totalCards) return <section ref={root}><p className="fan-empty">The team will be announced here soon.</p></section>;
   return <section ref={root} className="fan-carousel" aria-label="Team members" aria-roledescription="carousel"
     data-active-index={centerIndex} data-autoplay={playing ? 'playing' : 'paused'}
-    onPointerEnter={event => { if (event.pointerType === 'mouse') setHovered(true); }}
-    onPointerLeave={() => setHovered(false)}
-    onFocusCapture={() => setFocused(true)}
-    onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }}
     onKeyDown={event => {
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); cycle(event.key === 'ArrowRight' ? 'right' : 'left'); }
     }}>
     <div className="fan-viewport">
-      <div ref={containerRef} className="fan-layout" data-settled={settled}>
+      <div ref={containerRef} className="fan-layout" data-settled={settled} data-ready={hasEntered.current}>
         {cards.map((card, index) => {
           if (!mounted.has(index)) return null;
           const slot = visibleMap.get(index);
@@ -228,7 +222,6 @@ export default function SocialCards({ cards, activeIndex, onActiveIndexChange, o
       <button className="fan-arrow" onClick={() => cycle('left')} disabled={totalCards < 2} aria-label="Previous team member"><ArrowLeft size={18} /></button>
       <span className="fan-counter" aria-live={playing ? 'off' : 'polite'}><strong>{String(centerIndex + 1).padStart(2, '0')}</strong><span>/ {String(totalCards).padStart(2, '0')}</span></span>
       <button className="fan-arrow" onClick={() => cycle('right')} disabled={totalCards < 2} aria-label="Next team member"><ArrowRight size={18} /></button>
-      <button className="fan-pause" disabled={reduced !== false || totalCards < 2} aria-label={manualPause ? 'Start automatic rotation' : 'Pause automatic rotation'} aria-pressed={manualPause || reduced === true} onClick={() => setManualPause(value => !value)}>{manualPause || reduced ? <Play size={14} /> : <Pause size={14} />}</button>
     </div>
     <p className="fan-hint">Choose a card to meet the person behind it.</p>
   </section>;

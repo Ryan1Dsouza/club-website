@@ -1,30 +1,22 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { LOADING_FRAME_URLS, prepareLoadingFrames } from './loading-frames';
-import mobileSequence from '../../assets/loading/mobile/sequence.webp';
-import mobilePoster from '../../assets/loading/mobile/poster.webp';
+import desktopSequence from '../../assets/loading/desktop/sequence.mp4';
+import desktopPoster from '../../assets/loading/desktop/still.webp';
+import mobileSequence from '../../assets/loading/mobile/sequence.mp4';
+import mobilePoster from '../../assets/loading/mobile/still.webp';
 import './loading-screen.css';
 
 const compactQueries = ['(max-width: 767px)', '(max-height: 500px) and (max-width: 1024px)', '(pointer: coarse)'];
 const compactMedia = compactQueries.join(', ');
-const compactReducedMedia = compactQueries.map(query => `${query} and (prefers-reduced-motion: reduce)`).join(', ');
-const emptyImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-export type LoadingScreenProps = {
-  /** Keep the component mounted and toggle active to play the curtain exit. */
-  active?: boolean;
-  message?: string;
-  onExitComplete?: () => void;
-};
+export type LoadingScreenProps = { active?: boolean; message?: string; onExitComplete?: () => void };
 
 function LoadingOverlay({ message }: { message: string }) {
   const reduced = useReducedMotion() === true;
-  const [compact, setCompact] = useState<boolean | null>(null);
-  const [frames, setFrames] = useState<string[] | null>(null);
-  const [mobileReady, setMobileReady] = useState(false);
-  const [mobileFailed, setMobileFailed] = useState(false);
-  const frameRef = useRef<HTMLDivElement>(null);
-  const mobileRef = useRef<HTMLImageElement>(null);
+  const [compact, setCompact] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const media = matchMedia(compactMedia);
@@ -35,47 +27,46 @@ function LoadingOverlay({ message }: { message: string }) {
   }, []);
 
   useEffect(() => {
-    // An SSR image can finish before React attaches its load handler.
-    const image = mobileRef.current;
-    if (compact && image?.complete && image.naturalWidth > 1) setMobileReady(true);
-  }, [compact]);
-
-  useEffect(() => {
-    setFrames(null);
-    if (reduced || compact !== false) return;
+    const video = videoRef.current!;
     let disposed = false;
-    void prepareLoadingFrames().then(ready => { if (!disposed) setFrames(ready); });
-    return () => { disposed = true; };
-  }, [compact, reduced]);
-
-  useEffect(() => {
-    if (reduced || !frames?.length) return;
-    const element = frameRef.current!;
-    let request = 0, started = 0, previous = -1;
-    const paint = (time: number) => {
-      if (!started) started = time;
-      // Skip missed beats on a busy device; never queue frame updates or React renders.
-      const index = Math.floor((time - started) / 50) % frames.length;
-      if (index !== previous) {
-        element.style.setProperty('--frame-image', `url("${frames[index]}")`);
-        element.dataset.frame = String(index);
-        previous = index;
-      }
-      request = requestAnimationFrame(paint);
+    const preference = matchMedia('(prefers-reduced-motion: reduce)');
+    const compactPreference = matchMedia(compactMedia);
+    let request: AbortController | undefined, objectUrl = '', selected = '';
+    // The browser media pipeline owns decode/playback, without a JS frame clock.
+    const playback = () => {
+      if (document.hidden || preference.matches) { video.pause(); return; }
+      void video.play().catch(() => { if (!disposed) setReady(false); });
     };
-    const visibility = () => {
-      cancelAnimationFrame(request);
-      if (!document.hidden) request = requestAnimationFrame(paint);
+    const select = async () => {
+      const source = preference.matches ? '' : compactPreference.matches ? mobileSequence : desktopSequence;
+      if (source === selected) { playback(); return; }
+      selected = source; request?.abort(); video.pause(); setReady(false);
+      video.removeAttribute('src'); video.load();
+      if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = ''; }
+      if (!source) return;
+      const pending = request = new AbortController();
+      try {
+        // Reuse the high-priority HTML fetch preload. Native media requests have
+        // low network priority and otherwise lose the entire intro to page assets.
+        const response = await fetch(source, { signal: pending.signal });
+        if (!response.ok) throw new Error('Loading artwork unavailable');
+        const blob = await response.blob();
+        if (disposed || pending.signal.aborted) return;
+        objectUrl = URL.createObjectURL(blob); video.src = objectUrl; playback();
+      } catch { /* The branded poster remains available; startup never waits. */ }
     };
-    visibility();
-    document.addEventListener('visibilitychange', visibility);
+    void select();
+    document.addEventListener('visibilitychange', playback);
+    preference.addEventListener('change', select);
+    compactPreference.addEventListener('change', select);
     return () => {
-      cancelAnimationFrame(request);
-      document.removeEventListener('visibilitychange', visibility);
-      element.style.removeProperty('--frame-image');
-      delete element.dataset.frame;
+      disposed = true; request?.abort(); video.pause(); video.removeAttribute('src'); video.load();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      document.removeEventListener('visibilitychange', playback);
+      preference.removeEventListener('change', select);
+      compactPreference.removeEventListener('change', select);
     };
-  }, [frames, reduced]);
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement, body = document.body;
@@ -89,33 +80,19 @@ function LoadingOverlay({ message }: { message: string }) {
     };
   }, []);
 
-  return <motion.div
-    className="nucleus-loader"
-    data-loading-screen=""
-    data-frames-ready={(compact ? mobileReady && !mobileFailed : Boolean(frames?.length)) && !reduced}
-    data-mobile-failed={mobileFailed}
-    data-lenis-prevent=""
-    initial={{ x: '0%', clipPath: 'inset(0% 0% 0% 0%)' }}
-    exit={compact
-      ? { x: reduced ? '0%' : '-100%' }
-      : { x: reduced ? '0%' : '-20%', clipPath: 'inset(0% 100% 0% 0%)' }}
-    transition={{ type: 'tween', duration: reduced ? 0 : compact ? .35 : .45, ease: [.77, 0, .175, 1] }}
-  >
+  return <motion.div className="nucleus-loader" data-loading-screen=""
+    data-frames-ready={ready && !reduced} data-art-failed={failed} data-lenis-prevent=""
+    initial={{ x: '0%' }} exit={{ x: reduced ? '0%' : '-100%' }}
+    transition={{ type: 'tween', duration: reduced ? 0 : compact ? .35 : .45, ease: [.77, 0, .175, 1] }}>
     <div className="nucleus-loader__art" aria-hidden="true">
-      <div ref={frameRef} className="nucleus-loader__frame" style={{
-        '--desktop-frame-image': `url("${LOADING_FRAME_URLS[0]}")`,
-      } as CSSProperties} />
-      <picture className="nucleus-loader__mobile">
-        <source media={compactReducedMedia} srcSet={mobilePoster} />
-        <source media={compactMedia} srcSet={mobileSequence} />
-        <img ref={mobileRef} src={emptyImage} alt="" width={480} height={600} decoding="async" fetchPriority="high"
-          onLoad={event => {
-            if (event.currentTarget.currentSrc.startsWith('data:')) return;
-            setMobileReady(true); setMobileFailed(false);
-          }}
-          onError={() => setMobileFailed(true)} />
+      <picture className="nucleus-loader__poster">
+        <source media={compactMedia} srcSet={mobilePoster} />
+        <img src={desktopPoster} alt="" width={1440} height={810} decoding="async" fetchPriority="high"
+          onError={() => setFailed(true)} onLoad={() => setFailed(false)} />
       </picture>
-      {(compact ? mobileFailed : frames?.length === 0) && <span className="nucleus-loader__fallback">Nucleus</span>}
+      <video ref={videoRef} className="nucleus-loader__video" autoPlay muted loop playsInline preload="auto"
+        disablePictureInPicture tabIndex={-1} onPlaying={() => setReady(true)} onError={() => setReady(false)} />
+      {failed && !ready && <span className="nucleus-loader__fallback">Nucleus</span>}
     </div>
     <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{message}</span>
   </motion.div>;

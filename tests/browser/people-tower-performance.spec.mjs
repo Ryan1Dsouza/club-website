@@ -20,17 +20,21 @@ test.beforeEach(async ({ page }) => {
 async function seek(page, progress) {
   await page.locator('.people-tower').evaluate((element, progress) => {
     const stage = element.querySelector('.people-tower__stage');
-    const start = element.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(stage).top) || 0);
+    const scroller = matchMedia('(max-width: 768px), (pointer: coarse)').matches ? element.closest('.site-shell') : window;
+    const current = scroller === window ? scrollY : scroller.scrollTop;
+    const start = element.getBoundingClientRect().top + current - (parseFloat(getComputedStyle(stage).top) || 0);
     const range = element.offsetHeight - stage.offsetHeight;
-    window.scrollTo({ top: start + progress * range, behavior: 'instant' });
+    scroller.scrollTo({ top: start + progress * range, behavior: 'instant' });
   }, progress);
   // ResizeObserver can settle after a viewport change. Compare against the live
   // layout and actual scroll position, rather than an earlier rounded range.
   await expect.poll(() => page.locator('.people-tower').evaluate(element => {
     const stage = element.querySelector('.people-tower__stage');
-    const start = element.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(stage).top) || 0);
+    const scroller = matchMedia('(max-width: 768px), (pointer: coarse)').matches ? element.closest('.site-shell') : window;
+    const current = scroller === window ? scrollY : scroller.scrollTop;
+    const start = element.getBoundingClientRect().top + current - (parseFloat(getComputedStyle(stage).top) || 0);
     const range = element.offsetHeight - stage.offsetHeight;
-    return Math.abs(Number(element.style.getPropertyValue('--tower-progress')) * range - (scrollY - start));
+    return Math.abs(Number(element.style.getPropertyValue('--tower-progress')) * range - (current - start));
   })).toBeLessThan(.05);
 }
 
@@ -38,6 +42,7 @@ test('rendered blocks and DOM profiles reach zero together, including reverse se
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/team');
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
+  await page.getByRole('button', { name: 'Play Interactive Tower' }).click();
   await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'ready');
   await seek(page, memberProgress(0, site.team.length));
   await expect(page.locator('.tower-profile')).toHaveCSS('opacity', '1');
@@ -61,7 +66,7 @@ test('rendered blocks and DOM profiles reach zero together, including reverse se
   for (const local of [.99, 1.01, .99]) {
     await seek(page, (TOWER_INTRO + local) / duration);
     expect(await size()).toBe(0);
-    await expect(page.locator('.tower-profile')).toBeHidden();
+    await expect(page.locator('.tower-profile')).toHaveCSS('opacity', '0');
   }
   await seek(page, (TOWER_INTRO + .9) / duration);
   expect(await size()).toBeGreaterThan(0);
@@ -73,14 +78,15 @@ test('rendered blocks and DOM profiles reach zero together, including reverse se
 
 test.describe('low-end touch devices', () => {
   test.use({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
-  test('cap resolution, sleep while idle, resize and release GPU resources on context loss', async ({ page }) => {
+  test('cap resolution, sleep while idle, resize and release GPU resources on context loss', async ({ page }, info) => {
     const errors = []; page.on('pageerror', error => errors.push(error.message));
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 2 });
       Object.defineProperty(navigator, 'deviceMemory', { get: () => 2 });
     });
     await page.goto('/team');
-  await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
+    await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
+    await page.getByRole('button', { name: 'Play Interactive Tower' }).click();
     await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'ready');
     const metrics = () => page.evaluate(() => {
       const { renderer, scene } = window.__towerView;
@@ -90,9 +96,10 @@ test.describe('low-end touch devices', () => {
     });
     await expect.poll(() => page.evaluate(() => Boolean(window.__towerView))).toBe(true);
     const initial = await metrics();
-    expect(initial.ratio).toBeGreaterThanOrEqual(1);
-    expect(initial.ratio).toBeLessThanOrEqual(1.25); expect(initial.pixels).toBeLessThanOrEqual(900_000);
+    expect(initial.ratio).toBeGreaterThanOrEqual(.5);
+    expect(initial.ratio).toBeLessThanOrEqual(1); expect(initial.pixels).toBeLessThanOrEqual(450_000);
     expect(initial.shadows).toBe(false); expect(initial.bump).toBe(false);
+    await page.screenshot({ path: info.outputPath('extreme-phone-tower.png') });
     await expect.poll(async () => {
       const before = (await metrics()).frame; await page.waitForTimeout(200);
       return (await metrics()).frame === before;
@@ -102,7 +109,7 @@ test.describe('low-end touch devices', () => {
     expect((await metrics()).frame).toBeGreaterThan(initial.frame);
     await page.setViewportSize({ width: 844, height: 390 });
     await seek(page, memberProgress(2, site.team.length));
-    expect((await metrics()).pixels).toBeLessThanOrEqual(900_000);
+    expect((await metrics()).pixels).toBeLessThanOrEqual(450_000);
     expect((await metrics()).shadows).toBe(false);
     for (let i = 0; i < 2; i++) {
       await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -121,13 +128,19 @@ test.describe('low-end touch devices', () => {
 });
 
 test('a failure partway through mounting removes the scene and releases its resources', async ({ page }) => {
-  await page.addInitScript(() => {
-    window.IntersectionObserver = class { constructor() { throw new Error('Simulated setup failure'); } };
-  });
   await page.goto('/team');
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
+  await page.evaluate(() => {
+    const dispatch = window.__THREE_DEVTOOLS__.dispatchEvent;
+    window.__THREE_DEVTOOLS__.dispatchEvent = event => {
+      dispatch(event);
+      if (event.detail?.isWebGLRenderer) event.detail.compileAsync = async () => { throw new Error('Simulated compilation failure'); };
+    };
+  });
+  await page.getByRole('button', { name: 'Play Interactive Tower' }).click();
   await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'fallback');
   await expect(page.locator('.people-tower__world canvas, .people-tower__labels')).toHaveCount(0);
   expect(await page.evaluate(() => window.__towerDisposed)).toEqual({ geometries: 0, textures: 0 });
-  await expect(page.locator('.people-roster__member')).toHaveCount(site.team.length);
+  await page.getByRole('button', { name: 'Back to Quick view' }).click();
+  await expect(page.getByLabel('Find a team member').locator('option')).toHaveCount(site.team.length);
 });

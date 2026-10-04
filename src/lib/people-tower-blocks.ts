@@ -3,6 +3,7 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { Member } from '../types';
 import { BLOCK_SIZE } from './people-tower-motion';
+import type { TowerDetail } from './people-tower-quality';
 
 export const TOWER_PALETTES = [
   { paper: '#2e2224', ink: '#e9e1e2', wood: '#7a718d' },
@@ -45,7 +46,8 @@ function woodTexture() {
 }
 
 /** Two instanced draws: rounded timber and inset identity plates on all four sides. */
-export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxTextureSize: number, simplified = false, maxAnisotropy = 4) {
+export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxTextureSize: number, detail: TowerDetail = 2, maxAnisotropy = 4) {
+  const simplified = detail < 2;
   const columns = Math.max(1, Math.ceil(Math.sqrt(members.length * 3 / 16)));
   const rows = Math.max(1, Math.ceil(members.length / columns));
   const tileWidth = Math.floor(Math.min(simplified ? 768 : 1024, Math.floor(maxTextureSize / columns), Math.floor(maxTextureSize / rows) * 16 / 3));
@@ -77,11 +79,16 @@ export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxText
   const atlas = new THREE.CanvasTexture(canvas); atlas.colorSpace = THREE.SRGBColorSpace; atlas.anisotropy = 4;
   // Build the bevel at real plank dimensions, then normalize for instance transforms.
   // This keeps the edge radius consistent on the long and short sides.
-  const geometry = new RoundedBoxGeometry(...BLOCK_SIZE, simplified ? 1 : 2, .055);
-  geometry.scale(1 / BLOCK_SIZE[0], 1 / BLOCK_SIZE[1], 1 / BLOCK_SIZE[2]); geometry.clearGroups();
+  function blockGeometry(level: TowerDetail) {
+    const result = level === 0 ? new THREE.BoxGeometry(...BLOCK_SIZE) : new RoundedBoxGeometry(...BLOCK_SIZE, level, .055);
+    result.scale(1 / BLOCK_SIZE[0], 1 / BLOCK_SIZE[1], 1 / BLOCK_SIZE[2]); result.clearGroups();
+    return result;
+  }
+  let geometry = blockGeometry(detail);
   const grain = woodTexture();
-  const material = new THREE.MeshStandardMaterial({ map: grain, bumpMap: grain, bumpScale: .012, roughness: .62, metalness: 0 });
-  const blocks = new THREE.InstancedMesh(geometry, material, members.length);
+  const material = new THREE.MeshStandardMaterial({ map: grain, bumpMap: simplified ? null : grain, bumpScale: .012, roughness: .62, metalness: 0 });
+  const leanMaterial = new THREE.MeshLambertMaterial({ map: grain });
+  const blocks = new THREE.InstancedMesh(geometry, detail === 0 ? leanMaterial : material, members.length);
   blocks.instanceMatrix.setUsage(THREE.DynamicDrawUsage); blocks.castShadow = true; blocks.receiveShadow = true;
   blocks.frustumCulled = false;
   members.forEach((_, index) => blocks.setColorAt(index, new THREE.Color(TOWER_PALETTES[index % TOWER_PALETTES.length].wood)));
@@ -103,13 +110,14 @@ export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxText
   const labelMaterial = new THREE.MeshStandardMaterial({
     map: atlas, roughness: .68, metalness: 0, emissiveMap: atlas, emissive: 0xffffff, emissiveIntensity: .08,
   });
-  labelMaterial.onBeforeCompile = shader => {
+  const leanLabel = new THREE.MeshLambertMaterial({ map: atlas });
+  for (const surface of [labelMaterial, leanLabel]) surface.onBeforeCompile = shader => {
     shader.uniforms.atlasScale = { value: new THREE.Vector2(1 / columns, 1 / rows) };
     shader.vertexShader = 'attribute vec2 atlasOffset;\nuniform vec2 atlasScale;\n' + shader.vertexShader.replace(
-      '#include <uv_vertex>', '#include <uv_vertex>\nvMapUv = (vMapUv + atlasOffset) * atlasScale;\nvEmissiveMapUv = vMapUv;',
+      '#include <uv_vertex>', '#include <uv_vertex>\nvMapUv = (vMapUv + atlasOffset) * atlasScale;' + (surface === labelMaterial ? '\nvEmissiveMapUv = vMapUv;' : ''),
     );
   };
-  const labels = new THREE.InstancedMesh(labelGeometry, labelMaterial, members.length);
+  const labels = new THREE.InstancedMesh(labelGeometry, detail === 0 ? leanLabel : labelMaterial, members.length);
   labels.instanceMatrix.setUsage(THREE.DynamicDrawUsage); labels.frustumCulled = false;
   scene.add(blocks, labels);
   const pose = new THREE.Object3D(), hidden = new THREE.Matrix4().makeScale(0, 0, 0);
@@ -122,20 +130,26 @@ export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxText
     // Frustum culling is disabled; only an actual pointer raycast needs bounds.
     blocks.boundingSphere = null;
   }
-  let currentSimplified: boolean | undefined;
-  function setSimplified(value: boolean) {
-    if (currentSimplified === value) return;
-    currentSimplified = value;
-    material.bumpMap = value ? null : grain; material.needsUpdate = true;
+  let currentDetail: TowerDetail | undefined;
+  function setDetail(value: TowerDetail) {
+    if (currentDetail === value) return;
+    if (currentDetail !== undefined) {
+      geometry.dispose(); geometry = blockGeometry(value); blocks.geometry = geometry;
+      blocks.boundingSphere = null; blocks.boundingBox = null;
+    }
+    currentDetail = value;
+    blocks.material = value === 0 ? leanMaterial : material;
+    labels.material = value === 0 ? leanLabel : labelMaterial;
+    material.bumpMap = value < 2 ? null : grain; material.needsUpdate = true;
     for (const texture of [grain, atlas]) {
-      texture.anisotropy = Math.min(maxAnisotropy, value ? 4 : 8); texture.needsUpdate = true;
+      texture.anisotropy = Math.min(maxAnisotropy, value === 0 ? 1 : value === 1 ? 4 : 8); texture.needsUpdate = true;
     }
   }
-  setSimplified(simplified);
+  setDetail(detail);
   function dispose() {
     blocks.removeFromParent(); labels.removeFromParent(); blocks.dispose(); labels.dispose();
-    geometry.dispose(); labelGeometry.dispose(); material.dispose(); labelMaterial.dispose(); atlas.dispose(); grain.dispose();
+    geometry.dispose(); labelGeometry.dispose(); material.dispose(); labelMaterial.dispose(); leanMaterial.dispose(); leanLabel.dispose(); atlas.dispose(); grain.dispose();
   }
-  return { blocks, pose, update, commit, setSimplified, dispose };
+  return { blocks, pose, update, commit, setDetail, dispose };
 }
 

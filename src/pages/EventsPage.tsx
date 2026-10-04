@@ -6,6 +6,7 @@ import { createEventStations } from '../lib/event-stations';
 import { populateWorkshopStation } from '../events/workshop-content';
 import EventFlipCard from '../components/events/EventFlipCard';
 import Book from '../components/events/Book';
+import RailwayTrack from '../components/events/RailwayTrack';
 import { useCinematicScroll } from '../lib/use-cinematic-scroll';
 import './events-page.css';
 
@@ -24,10 +25,13 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
   const dialog = useRef<HTMLDialogElement>(null);
   const portalButtons = useRef<(HTMLButtonElement | null)[]>([]);
   const lastPortal = useRef(0);
+  const archive = useRef<HTMLElement>(null);
   const stations = useMemo(() => createEventStations(events).map(populateWorkshopStation), [events]);
   const station = stations.find(item => item.id === selected);
 
-  useCinematicScroll(mode === 'grid');
+  useCinematicScroll(mode === 'grid' && !station && portal === null, false, (scroll, limit) => {
+    archive.current?.style.setProperty('--rail-progress', String(limit > 0 ? Math.max(0, Math.min(1, scroll / limit)) : 0));
+  });
 
   useEffect(() => {
     if (!flying) return;
@@ -62,8 +66,11 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
     requestAnimationFrame(() => portalButtons.current[lastPortal.current]?.focus({ preventScroll: false }));
   };
 
-  return <section className={`events-page events-page--${mode}`} data-event-mode={mode} aria-label="Nucleus events">
+  return <section ref={archive} className={`events-page events-page--${mode}`} data-event-mode={mode} aria-label="Nucleus events">
     {mode === 'grid' ? <div className={`events-archive${flying ? ' events-archive--departing' : ''}`} inert={flying}>
+      <div className="events-railway-backdrop" aria-hidden="true">
+        <svg viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice"><path className="events-railway-backdrop__sleepers" d="M-160 820C280 820 190 100 620 100S1020 780 1600 390" /><path className="events-railway-backdrop__bed" d="M-160 820C280 820 190 100 620 100S1020 780 1600 390" /><path className="events-railway-backdrop__line" d="M-160 820C280 820 190 100 620 100S1020 780 1600 390" /><circle cx="620" cy="100" r="28" /><circle cx="620" cy="100" r="7" /><text x="665" y="107">NUCLEUS / JUNCTION 01</text></svg>
+      </div>
       <header className="events-heading">
         <p className="events-eyebrow">THE NUCLEUS ARCHIVE / {String(stations.length).padStart(2, '0')} CHAPTERS</p>
         <h1>Events<span>.</span></h1>
@@ -78,12 +85,12 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
         
         <div className="events-portal-lane events-portal-lane--left">
           <button ref={element => { portalButtons.current[0] = element; }} type="button" className="events-portal" onClick={() => setPortal(0)} aria-haspopup="dialog" aria-label="The Nucleus Ride">
-            <span className="events-portal__signal" /><span className="events-portal__label"><span className="events-portal__type">The Nucleus Ride</span><span className="events-portal__sub">Step inside the story</span></span><ArrowUpRight size={18} />
+            <RailwayTrack /><span className="events-portal__label"><span className="events-portal__type">The Nucleus Ride</span><span className="events-portal__sub">Board the journey <ArrowUpRight size={12} /></span></span>
           </button>
         </div>
         <div className="events-portal-lane events-portal-lane--right">
           <button ref={element => { portalButtons.current[1] = element; }} type="button" className="events-portal" onClick={() => setPortal(1)} aria-haspopup="dialog" aria-label="The Nucleus Ride">
-            <span className="events-portal__signal" /><span className="events-portal__label"><span className="events-portal__type">The Nucleus Ride</span><span className="events-portal__sub">Seven stops. All connected.</span></span><ArrowUpRight size={18} />
+            <RailwayTrack /><span className="events-portal__label"><span className="events-portal__type">The Nucleus Ride</span><span className="events-portal__sub">Every stop, a story <ArrowUpRight size={12} /></span></span>
           </button>
         </div>
       </div>

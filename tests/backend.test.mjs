@@ -227,6 +227,7 @@ test('production sessions use secure host-only cookies and authentication is rat
     const response = await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'correct-horse-battery-2026' });
     assert.match(response.headers.get('set-cookie'), /^__Host-nucleus_session=/); assert.match(response.headers.get('set-cookie'), /Secure/);
     assert.ok(response.headers.get('content-security-policy').includes("frame-ancestors 'none'"));
+    assert.ok(response.headers.get('content-security-policy').includes("media-src 'self' blob:"));
     for (let i = 0; i < 7; i++) assert.equal((await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'wrong' })).status, 401);
     assert.equal((await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'wrong' })).status, 429);
   }, { production: true, origin: 'https://nucleussjec.in', limits: true });

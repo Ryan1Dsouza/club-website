@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 async function openTeam(page) {
   await page.goto('/team');
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
-  await expect(page.locator('.fan-layout')).toHaveAttribute('data-settled', 'true');
+  await expect(page.locator('.fan-layout')).toHaveAttribute('data-ready', 'true');
 }
 
 test('default view fetches only visible small portraits and never starts the tower', async ({ page }) => {
@@ -32,53 +32,59 @@ test('default view fetches only visible small portraits and never starts the tow
   expect(errors).toEqual([]);
 });
 
-test('idle autoplay pauses on hover, focus, explicit pause and profiles, then resumes', async ({ page }) => {
+test('autoplay continues through hover and focus and resumes after reading a profile', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await openTeam(page);
   const carousel = page.locator('.fan-carousel');
   await expect(carousel).toHaveAttribute('data-autoplay', 'playing');
   const initial = await carousel.getAttribute('data-active-index');
   await expect(carousel).not.toHaveAttribute('data-active-index', initial, { timeout: 5000 });
-  await page.locator('.fan-card[data-active="true"]').hover();
-  await expect(carousel).toHaveAttribute('data-autoplay', 'paused');
+  const movingCard = page.locator(`.fan-card[data-index="${await carousel.getAttribute('data-active-index')}"]`);
+  const movingTransform = await movingCard.evaluate(card => card.style.transform);
+  await page.waitForTimeout(150);
+  expect(await movingCard.evaluate(card => card.style.transform)).not.toBe(movingTransform);
+  await page.locator('.fan-card[data-active="true"]').hover({ force: true });
+  await expect(carousel).toHaveAttribute('data-autoplay', 'playing');
   const hovered = await carousel.getAttribute('data-active-index');
-  await page.waitForTimeout(3200);
-  await expect(carousel).toHaveAttribute('data-active-index', hovered);
-  await page.mouse.move(5, 5);
-  await expect(carousel).toHaveAttribute('data-autoplay', 'playing');
-  await page.getByLabel('Pause automatic rotation').click();
-  await page.getByRole('heading', { level: 1 }).click();
-  await expect(carousel).toHaveAttribute('data-autoplay', 'paused');
-  await page.getByLabel('Start automatic rotation').click();
-  await page.getByRole('heading', { level: 1 }).click();
-  await expect(carousel).toHaveAttribute('data-autoplay', 'playing');
+  await expect(carousel).not.toHaveAttribute('data-active-index', hovered, { timeout: 5000 });
+  await expect(page.getByRole('button', { name: /(?:Pause|Start) automatic rotation/ })).toHaveCount(0);
   await page.getByLabel('Find a team member').focus();
+  await expect(carousel).toHaveAttribute('data-autoplay', 'playing');
+  await page.locator('.fan-card[data-active="true"]').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog')).toBeVisible();
   await expect(carousel).toHaveAttribute('data-autoplay', 'paused');
-  await page.getByLabel('Find a team member').selectOption('0');
-  await expect(page.locator('.fan-layout')).toHaveAttribute('data-settled', 'true');
-  await page.locator('.fan-card[data-active="true"]').click();
-  await expect(carousel).toHaveAttribute('data-autoplay', 'paused');
-  await page.waitForTimeout(3200);
-  await expect(carousel).toHaveAttribute('data-active-index', '0');
+  const selected = await carousel.getAttribute('data-active-index');
+  await page.waitForTimeout(200);
+  await expect(carousel).toHaveAttribute('data-active-index', selected);
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('heading', { level: 1 }).click();
   await expect(carousel).toHaveAttribute('data-autoplay', 'playing');
-  await expect(carousel).toHaveAttribute('data-active-index', '1', { timeout: 5000 });
+  await expect(carousel).not.toHaveAttribute('data-active-index', selected, { timeout: 5000 });
 });
 
 for (const viewport of [{ width: 1440, height: 1000 }, { width: 393, height: 851 }, { width: 320, height: 568 }, { width: 851, height: 393 }]) {
   test.describe(`${viewport.width}x${viewport.height}`, () => {
     test.use({ viewport, isMobile: viewport.width < 900, hasTouch: viewport.width < 900 });
     test('fan and fullscreen profile fit, contain focus, and restore the card', async ({ page }, info) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       const requests = [], errors = [];
       page.on('request', request => requests.push(request.url()));
       page.on('pageerror', error => errors.push(error.message));
       await openTeam(page);
+      await page.getByLabel('Find a team member').focus();
       await page.getByLabel('Find a team member').selectOption('0');
       await expect(page.locator('.fan-layout')).toHaveAttribute('data-settled', 'true');
       await page.screenshot({ path: info.outputPath('carousel.png'), fullPage: true });
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
+      const carouselBox = await page.locator('.fan-carousel').boundingBox();
+      const towerButtonBox = await page.getByRole('button', { name: 'Play Interactive Tower' }).boundingBox();
+      expect(towerButtonBox.y).toBeGreaterThan(carouselBox.y + carouselBox.height);
+      expect(towerButtonBox.width).toBeGreaterThan(Math.min(900, viewport.width * .8));
+      const cardSize = await page.locator('.fan-card[data-active="true"]').evaluate(card => ({ width: card.offsetWidth, height: card.offsetHeight }));
+      expect(cardSize.width).toBeGreaterThanOrEqual(viewport.width === 1440 ? 330 : 200);
+      expect(cardSize.height).toBeGreaterThanOrEqual(viewport.width === 1440 ? 432 : 246);
       const trigger = page.locator('.fan-card[data-index="0"]');
       await trigger.click();
       const dialog = page.getByRole('dialog', { name: 'Poorvik Kuthyala' });
@@ -114,7 +120,9 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 393, height: 851
 }
 
 test('direct navigation, rapid cycling, resize and reduced motion keep a bounded usable fan', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await openTeam(page);
+  await page.getByLabel('Find a team member').focus();
   await page.getByLabel('Find a team member').selectOption('14');
   await expect(page.locator('.fan-layout')).toHaveAttribute('data-settled', 'true');
   await page.getByLabel('Next team member', { exact: true }).click();

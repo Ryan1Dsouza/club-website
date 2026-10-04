@@ -40,16 +40,16 @@ test('cold Android Chrome events startup has its animation ready before the curt
     await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done', { timeout: 20_000 });
     const report = await page.evaluate(() => ({
       times: window.startupTimes,
-      images: performance.getEntriesByType('resource').filter(resource => /\/(sequence-|frame-).*\.webp/.test(resource.name))
+      images: performance.getEntriesByType('resource').filter(resource => /\/sequence-.*\.mp4/.test(resource.name))
         .map(resource => ({ url: resource.name, start: resource.startTime, end: resource.responseEnd, initiator: resource.initiatorType })),
     }));
+    await info.attach('cold-mobile-startup', { body: JSON.stringify(report, null, 2), contentType: 'application/json' });
     // The old implementation spent the entire intro waiting for 17 image downloads.
     expect(report.times.ready).toBeLessThan(report.times.exiting - 500);
     expect(report.times.done - report.times.loading).toBeLessThan(2800);
-    expect(report.images).toHaveLength(1);
+    expect(new Set(report.images.map(image => image.url)).size).toBe(1);
     expect(report.images[0].initiator).toBe('link');
     expect(report.images[0].start).toBeLessThan(report.times.loading);
-    await info.attach('cold-mobile-startup', { body: JSON.stringify(report, null, 2), contentType: 'application/json' });
     await expect(page.getByRole('heading', { level: 1, name: 'Events.' })).toBeVisible();
   } finally { await context.close(); }
 });

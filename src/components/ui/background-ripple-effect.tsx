@@ -3,7 +3,7 @@ import { cn } from '../../lib/utils';
 import './background-ripple-effect.css';
 
 type Cell = { row: number; col: number };
-type Wave = { started: number; cells: { x: number; y: number; delay: number; strength: number }[] };
+type Wave = { started: number; cells: Float32Array; count: number; active: boolean };
 const PULSE_MS = 420;
 const MAX_WAVES = 2;
 const CLICK_INTERVAL_MS = 120;
@@ -27,9 +27,14 @@ export const BackgroundRippleEffect = ({ className, rows, cols, cellSize = 56 }:
     if (!context) return;
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     const touch = matchMedia('(pointer: coarse)');
+    const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+    const lowEnd = (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4) || (memory !== undefined && memory > 0 && memory <= 4);
     let width = 0, height = 0, gridRows = 0, gridCols = 0;
     let frame = 0, lastPaint = 0, lastClick = -Infinity;
-    let waves: Wave[] = [];
+    // Reuse both waves and their shared radial stencil. Clicks fill existing
+    // buffers; neither clicks nor paints allocate arrays of cell objects.
+    const waves: Wave[] = Array.from({ length: MAX_WAVES }, () => ({ started: 0, cells: new Float32Array(25 * 25 * 4), count: 0, active: false }));
+    let stencil = new Float32Array(0), radius = 12, nextWave = 0;
     let hovered: Cell | null = null;
     let bounds: DOMRect | undefined;
 
@@ -40,7 +45,8 @@ export const BackgroundRippleEffect = ({ className, rows, cols, cellSize = 56 }:
     const stop = () => {
       cancelAnimationFrame(frame);
       frame = 0;
-      waves = [];
+      for (const wave of waves) wave.active = false;
+      nextWave = 0; lastPaint = 0;
       lastClick = -Infinity;
       context.clearRect(0, 0, width, height);
       container.dataset.activeWaves = '0';
@@ -53,8 +59,20 @@ export const BackgroundRippleEffect = ({ className, rows, cols, cellSize = 56 }:
       height = container.clientHeight;
       gridRows = rows ?? Math.ceil(height / cellSize);
       gridCols = cols ?? Math.ceil(width / cellSize);
+      const nextRadius = lowEnd ? 5 : touch.matches ? 7 : 12;
+      if (!stencil.length || nextRadius !== radius) {
+        radius = nextRadius;
+        const values: number[] = [];
+        for (let row = -radius; row <= radius; row++) {
+          for (let col = -radius; col <= radius; col++) {
+            const distance = Math.hypot(row, col);
+            if (distance <= radius) values.push(col * cellSize, row * cellSize, distance * 45, 1 - distance / (radius + 1));
+          }
+        }
+        stencil = new Float32Array(values);
+      }
       // One small backing surface, including on Retina and 4K displays.
-      const scale = Math.min(devicePixelRatio || 1, touch.matches ? 1 : 1.5, Math.sqrt(1_500_000 / Math.max(1, width * height)));
+      const scale = Math.min(devicePixelRatio || 1, lowEnd ? .75 : touch.matches ? 1 : 1.5, Math.sqrt((lowEnd ? 350_000 : 1_500_000) / Math.max(1, width * height)));
       canvas.width = Math.max(1, Math.floor(width * scale));
       canvas.height = Math.max(1, Math.floor(height * scale));
       context.setTransform(scale, 0, 0, scale, 0, 0);
@@ -62,27 +80,30 @@ export const BackgroundRippleEffect = ({ className, rows, cols, cellSize = 56 }:
     const paint = (time: number) => {
       frame = 0;
       if (document.hidden || motion.matches) { stop(); return; }
-      if (time - lastPaint < (touch.matches ? 1000 / 30 : 1000 / 60) - 1) {
+      if (time - lastPaint < 1000 / (lowEnd ? 24 : touch.matches ? 30 : 60) - 1) {
         frame = requestAnimationFrame(paint);
         return;
       }
       lastPaint = time;
       context.clearRect(0, 0, width, height);
-      waves = waves.filter(wave => time - wave.started < wave.cells.at(-1)!.delay + PULSE_MS);
       context.fillStyle = '#c3e5c8';
+      let activeCount = 0;
       for (const wave of waves) {
+        if (!wave.active) continue;
         const elapsed = time - wave.started;
-        for (const cell of wave.cells) {
-          const progress = (elapsed - cell.delay) / PULSE_MS;
+        if (elapsed >= radius * 45 + PULSE_MS) { wave.active = false; continue; }
+        activeCount++;
+        for (let index = 0; index < wave.count; index += 4) {
+          const progress = (elapsed - wave.cells[index + 2]) / PULSE_MS;
           if (progress <= 0 || progress >= 1) continue;
-          context.globalAlpha = Math.sin(progress * Math.PI) * cell.strength * .22;
-          context.fillRect(cell.x + 1, cell.y + 1, cellSize - 2, cellSize - 2);
+          context.globalAlpha = Math.sin(progress * Math.PI) * wave.cells[index + 3] * .22;
+          context.fillRect(wave.cells[index] + 1, wave.cells[index + 1] + 1, cellSize - 2, cellSize - 2);
         }
       }
       context.globalAlpha = 1;
-      const count = String(waves.length);
+      const count = String(activeCount);
       if (container.dataset.activeWaves !== count) container.dataset.activeWaves = count;
-      if (waves.length) frame = requestAnimationFrame(paint);
+      if (activeCount) frame = requestAnimationFrame(paint);
     };
     const getCell = (event: MouseEvent): Cell | null => {
       if (motion.matches || document.hidden || surface.closest('[inert]')) return null;
@@ -108,18 +129,19 @@ export const BackgroundRippleEffect = ({ className, rows, cols, cellSize = 56 }:
       const origin = getCell(event);
       if (!origin) return;
       lastClick = now;
-      const radius = touch.matches ? 7 : 12;
-      const cells: Wave['cells'] = [];
-      for (let row = Math.max(0, origin.row - radius); row < Math.min(gridRows, origin.row + radius + 1); row++) {
-        for (let col = Math.max(0, origin.col - radius); col < Math.min(gridCols, origin.col + radius + 1); col++) {
-          const distance = Math.hypot(row - origin.row, col - origin.col);
-          if (distance > radius) continue;
-          cells.push({ x: col * cellSize, y: row * cellSize, delay: distance * 45, strength: 1 - distance / (radius + 1) });
-        }
+      const wave = waves[nextWave]; nextWave = (nextWave + 1) % (lowEnd ? 1 : MAX_WAVES);
+      wave.started = now; wave.active = true; wave.count = 0;
+      const edgeX = Math.min(width, gridCols * cellSize), edgeY = Math.min(height, gridRows * cellSize);
+      // Cull once per click into the reusable buffer, not on every paint.
+      for (let index = 0; index < stencil.length; index += 4) {
+        const x = origin.col * cellSize + stencil[index], y = origin.row * cellSize + stencil[index + 1];
+        if (x < 0 || y < 0 || x >= edgeX || y >= edgeY) continue;
+        wave.cells[wave.count++] = x; wave.cells[wave.count++] = y;
+        wave.cells[wave.count++] = stencil[index + 2]; wave.cells[wave.count++] = stencil[index + 3];
       }
-      cells.sort((a, b) => a.delay - b.delay);
-      waves = [...waves.slice(-(MAX_WAVES - 1)), { started: now, cells }];
-      container.dataset.activeWaves = String(waves.length);
+      let activeCount = 0;
+      for (const item of waves) if (item.active) activeCount++;
+      container.dataset.activeWaves = String(activeCount);
       if (!frame) frame = requestAnimationFrame(paint);
     };
     const invalidate = () => { bounds = undefined; clearHover(); };

@@ -1,5 +1,7 @@
 ﻿import * as THREE from 'three';
 
+import type { TowerDetail } from './people-tower-quality';
+
 /** Shared timber grain and a small felt weave keep the setting tactile at low cost. */
 function surfaceTextures() {
   const woodCanvas = document.createElement('canvas'); woodCanvas.width = woodCanvas.height = 512;
@@ -33,7 +35,8 @@ function surfaceTextures() {
 }
 
 /** A quiet timber tabletop and felt-lined board, using three scenery draws. */
-export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeight: number, simplified: boolean) {
+export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeight: number, detail: TowerDetail) {
+  const simplified = detail < 2;
   const group = new THREE.Group(); group.name = 'people-tower-scenery'; scene.add(group);
   const materials: THREE.Material[] = [], geometries: THREE.BufferGeometry[] = [];
   const { wood, felt } = surfaceTextures();
@@ -69,13 +72,14 @@ export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeig
   }), floorY - .28);
   floor.rotation.x = -Math.PI / 2;
 
-  const board = mesh('wooden-board', new THREE.CylinderGeometry(2.6, 2.75, .28, simplified ? 32 : 64), material({
+  const segments = detail === 0 ? 12 : simplified ? 32 : 64;
+  const board = mesh('wooden-board', new THREE.CylinderGeometry(2.6, 2.75, .28, segments), material({
     color: 0xa58e6b, map: wood, bumpMap: wood, bumpScale: .004, roughness: .63, metalness: 0,
   }), floorY - .14);
 
   // A narrow timber border frames the green playing surface. The weave only
   // changes the normal; it adds no polygons or lighting passes.
-  const inset = new THREE.CircleGeometry(2.48, simplified ? 32 : 64), insetUV = inset.getAttribute('uv');
+  const inset = new THREE.CircleGeometry(2.48, segments), insetUV = inset.getAttribute('uv');
   for (let i = 0; i < insetUV.count; i++) insetUV.setXY(i, insetUV.getX(i) * 18, insetUV.getY(i) * 18);
   const mat = mesh('green-felt-inset', inset, material({
     color: 0x1c382b, bumpMap: felt, bumpScale: .003, roughness: 1, metalness: 0,
@@ -87,23 +91,40 @@ export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeig
   // Keep the tower out of the haze, including the more distant portrait camera.
   scene.fog = new THREE.Fog(backdrop, 24, 52);
 
-  let currentSimplified: boolean | undefined;
-  function setSimplified(value: boolean) {
-    if (currentSimplified === value) return;
-    currentSimplified = value; key.castShadow = !value;
-    if (value) { key.shadow.dispose(); key.shadow.map = null; }
-    for (const [object, texture] of [[board, wood], [mat, felt]] as const) {
-      const surface = object.material as THREE.MeshStandardMaterial;
-      surface.bumpMap = value ? null : texture; surface.needsUpdate = true;
+  const surfaces = [floor, board, mat].map(object => {
+    const standard = object.material as THREE.MeshStandardMaterial;
+    const lean = new THREE.MeshLambertMaterial({ color: standard.color, map: standard.map });
+    materials.push(lean);
+    return { object, standard, lean, bump: standard.bumpMap };
+  });
+  let currentDetail: TowerDetail | undefined;
+  function setDetail(value: TowerDetail) {
+    if (currentDetail === value) return;
+    const previous = currentDetail;
+    currentDetail = value; key.castShadow = value === 2;
+    if (value < 2) { key.shadow.dispose(); key.shadow.map = null; }
+    rim.visible = value !== 0;
+    if (previous !== undefined) {
+      const count = value === 0 ? 12 : value === 1 ? 32 : 64;
+      board.geometry.dispose(); mat.geometry.dispose();
+      board.geometry = new THREE.CylinderGeometry(2.6, 2.75, .28, count);
+      mat.geometry = new THREE.CircleGeometry(2.48, count);
+      const uv = mat.geometry.getAttribute('uv');
+      for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * 18, uv.getY(i) * 18);
+      geometries.push(board.geometry, mat.geometry);
     }
-    wood.anisotropy = value ? 2 : 4; wood.needsUpdate = true;
+    for (const { object, standard, lean, bump } of surfaces) {
+      object.material = value === 0 ? lean : standard;
+      standard.bumpMap = value < 2 ? null : bump; standard.needsUpdate = true;
+    }
+    wood.anisotropy = value === 0 ? 1 : value === 1 ? 2 : 4; wood.needsUpdate = true;
   }
-  setSimplified(simplified);
+  setDetail(detail);
   function dispose() {
     group.removeFromParent(); geometries.forEach(geometry => geometry.dispose());
     materials.forEach(surface => surface.dispose()); wood.dispose(); felt.dispose(); key.shadow.dispose();
     scene.background = null; scene.fog = null;
   }
-  return { setSimplified, dispose };
+  return { setDetail, dispose };
 }
 

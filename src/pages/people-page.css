@@ -1,5 +1,13 @@
 .people-page { --mint: #c3e5c8; --mint-rgb: 195 229 200; --muted: #93ac97; --line: rgb(195 229 200 / .14); --line-strong: rgb(195 229 200 / .34); --surface: #080e09; --wash: rgb(195 229 200 / .05); position: relative; min-height: 100svh; color: var(--mint); background: #050b07; }
-.people-page[data-view='carousel'] { padding: 112px 0 32px; }
+.people-page[data-view='carousel'] { --mint: #243d2e; --mint-rgb: 36 61 46; --muted: #51634e; --line: #71856733; --line-strong: #65795b66; padding: 112px 0 48px; isolation: isolate; background: radial-gradient(ellipse at 50% 38%, #f2f1df 0, #e2e7d2 38%, transparent 75%), #cddbc1; }
+.people-jenga-backdrop { position: absolute; z-index: -1; inset: 0; overflow: hidden; pointer-events: none; color: #698363; }
+.people-jenga-backdrop > svg { width: 100%; height: 100%; }
+.people-jenga-backdrop__tower { opacity: .38; }
+.people-jenga-backdrop__loose { fill: #d9ddbf; stroke: #879c75; opacity: .5; }
+.people-jenga-backdrop__guide { fill: none; stroke: #819374; opacity: .35; }
+.people-quick-view .people-member-picker select { background: #f2f2e4a6; color: var(--mint); color-scheme: light; }
+.people-quick-view .fan-card { box-shadow: 0 16px 28px #32452830; }
+.people-quick-view .fan-card:hover { border-color: #f0f4d6; }
 .people-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-inline: var(--gutter); }
 .people-view-toggle { display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-height: 44px; padding: 11px 16px; border: 1px solid var(--line-strong); border-radius: 30px; background: #0d1a11; color: var(--mint); font: 11px/1.5 var(--mono); cursor: pointer; }
 .people-view-toggle:hover { background: #1b3022; border-color: var(--mint); }
@@ -21,6 +29,8 @@
   @keyframes people-view-enter { from { opacity: 0; } to { opacity: 1; } }
 }
 @media (max-width: 767px) {
+  .people-jenga-backdrop__tower--left { transform: translate(430px, 80px) rotate(-12deg); opacity: .2; }
+  .people-jenga-backdrop__tower--right { transform: translate(770px, 630px) rotate(14deg); opacity: .25; }
   .people-page[data-view='carousel'] { padding-top: 100px; }
   .people-toolbar { gap: 10px; }
   .people-toolbar .eyebrow { font-size: 9px; }
