@@ -11,8 +11,8 @@ export const GLIMPSE_FADE = .9;
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const smooth = (value: number) => { const t = clamp(value); return t * t * (3 - 2 * t); };
 
-export const ARRIVAL_TIME_SCALE = .22;
-export const STATION_PAN_SECONDS = .4;
+export const ARRIVAL_TIME_SCALE = .72;
+export const STATION_PAN_SECONDS = .36;
 export const stationPanAngle = (progress: number) => progress <= 0 ? 0 : -Math.PI / 2 * (1 - Math.pow(1 - clamp(progress), 3));
 
 /** One proximity curve coordinates the station reveal and the final slow coast. */

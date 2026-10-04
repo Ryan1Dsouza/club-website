@@ -16,7 +16,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     await page.setViewportSize(viewport);
     await page.route('**/api/site', route => route.fulfill({ json: site }));
     await page.goto('/events');
-    await page.getByRole('button', { name: 'Ride Immersive Experience', exact: true }).first().click();
+    await page.getByRole('button', { name: 'The Nucleus Ride', exact: true }).first().click();
     await page.getByRole('button', { name: "Yes, Let's Go" }).click();
     await expect(page.locator('.nx-map-button')).toBeEnabled({ timeout: 30_000 });
     await expect(page.locator('[data-loading-screen]')).toHaveCount(0, { timeout: 15_000 });

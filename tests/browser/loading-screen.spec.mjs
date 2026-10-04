@@ -33,18 +33,6 @@ async function recordTiming(page) {
   });
 }
 
-async function seekFrame(page, time) {
-  return screen(page).locator('.nucleus-loader__frame').evaluateAll((frames, time) => {
-    frames.forEach(frame => {
-      for (const animation of frame.getAnimations()) {
-        animation.pause();
-        animation.currentTime = time;
-      }
-    });
-    return frames.flatMap((frame, index) => getComputedStyle(frame).visibility === 'visible' ? [index] : []);
-  }, time);
-}
-
 test('the full-screen sequence cuts every 50 ms, loops without blank frames, and wipes away once', async ({ page }, info) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await freezeStartup(page);
@@ -58,24 +46,20 @@ test('the full-screen sequence cuts every 50 ms, loops without blank frames, and
   await expect(page.getByRole('status')).toHaveText('Connecting the dots…');
   expect(await page.locator('.site-shell').evaluate(element => element.inert)).toBe(true);
   await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
-  await expect(loader.locator('.nucleus-loader__frame')).toHaveCount(17);
+  await expect(loader.locator('.nucleus-loader__frame')).toHaveCount(1);
 
-  for (let index = 0; index < 17; index++) {
-    // Test real browser animation output on both sides of every cut, including wrap.
-    expect(await seekFrame(page, 850 + index * 50 + 1)).toEqual([index]);
-    expect(await seekFrame(page, 850 + index * 50 + 49)).toEqual([index]);
+  const frame = loader.locator('.nucleus-loader__frame');
+  await page.clock.runFor(40);
+  await expect(frame).toHaveAttribute('data-frame', '0');
+  for (let index = 1; index <= 17; index++) {
+    await page.clock.runFor(50);
+    await expect(frame).toHaveAttribute('data-frame', String(index % 17));
+    await expect(frame).toHaveCSS('visibility', 'visible');
+    if (index === 6) await page.screenshot({ path: info.outputPath('loader-nucleus-wordmark.png') });
   }
-  expect(await seekFrame(page, 1701)).toEqual([0]);
   await page.screenshot({ path: info.outputPath('loader-desktop.png') });
-  await seekFrame(page, 1175);
-  await page.screenshot({ path: info.outputPath('loader-nucleus-wordmark.png') });
-  // Resume to verify that the sequence advances on its own, too.
-  await loader.locator('.nucleus-loader__frame').evaluateAll(frames => frames.forEach(frame => frame.getAnimations().forEach(animation => animation.play())));
-  const visible = () => loader.locator('.nucleus-loader__frame').evaluateAll(frames => frames.findIndex(frame => getComputedStyle(frame).visibility === 'visible'));
-  const current = await visible();
-  await expect.poll(visible).not.toBe(current);
   release();
-  await page.clock.runFor(400);
+  await page.clock.runFor(600);
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'exiting');
   await page.clock.runFor(120);
   await expect(loader).not.toHaveCSS('clip-path', 'inset(0%)');
@@ -103,7 +87,7 @@ test('the full-screen sequence cuts every 50 ms, loops without blank frames, and
 });
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }, { width: 844, height: 390 }]) {
-  test(`brief startup timing and artwork crop at ${viewport.width}x${viewport.height}`, async ({ page }, info) => {
+  test(`brief startup timing and artwork fit at ${viewport.width}x${viewport.height}`, async ({ page }, info) => {
     await recordTiming(page);
     await page.route('**/api/site', route => route.fulfill({ json: site }));
     await page.setViewportSize(viewport);
@@ -112,17 +96,17 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     await expect(loader).toBeVisible();
     const box = await loader.boundingBox();
     expect(box).toEqual({ x: 0, y: 0, ...viewport });
-    await expect(loader.locator('.nucleus-loader__frame').first()).toHaveCSS('mask-size', viewport.width <= 480 ? '400% auto' : 'cover');
+    await expect(loader.locator('.nucleus-loader__frame').first()).toHaveCSS('mask-size', viewport.width <= 767 || viewport.height <= 500 ? 'contain' : 'cover');
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
     await page.screenshot({ path: info.outputPath(`loader-${viewport.width}.png`) });
     await expect(loader).toHaveCount(0, { timeout: 3000 });
     const times = await page.evaluate(() => window.loaderTimes);
-    expect(times.exiting - times.loading).toBeGreaterThanOrEqual(350);
-    expect(times.exiting - times.loading).toBeLessThan(850);
-    const exitDuration = viewport.width <= 480 ? 350 : 450;
+    expect(times.exiting - times.loading).toBeGreaterThanOrEqual(1350);
+    expect(times.exiting - times.loading).toBeLessThan(1900);
+    const exitDuration = viewport.width <= 767 || viewport.height <= 500 ? 350 : 450;
     expect(times.done - times.exiting).toBeGreaterThanOrEqual(exitDuration - 60);
     expect(times.done - times.exiting).toBeLessThan(exitDuration + 450);
-    expect(times.done - times.loading).toBeLessThan(1600);
+    expect(times.done - times.loading).toBeLessThan(2500);
     await info.attach('startup-timing', { body: JSON.stringify(times), contentType: 'application/json' });
   });
 }
@@ -180,13 +164,89 @@ test('a failed frame uses a decoded replacement instead of a blank beat', async 
   await page.goto('/recruitment');
   await expect(screen(page)).toHaveAttribute('data-frames-ready', 'true');
   const frames = screen(page).locator('.nucleus-loader__frame');
-  expect(await frames.nth(5).evaluate(element => getComputedStyle(element).maskImage)).toBe(await frames.first().evaluate(element => getComputedStyle(element).maskImage));
-  expect(await seekFrame(page, 1125)).toEqual([5]);
+  await page.clock.runFor(40);
+  const firstMask = await frames.evaluate(element => getComputedStyle(element).maskImage);
+  await page.clock.runFor(250);
+  await expect(frames).toHaveAttribute('data-frame', '5');
+  expect(await frames.evaluate(element => getComputedStyle(element).maskImage)).toBe(firstMask);
   release();
-  await page.clock.runFor(400);
+  await page.clock.runFor(1200);
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'exiting');
   await page.clock.runFor(500);
   await expect(screen(page)).toHaveCount(0);
+});
+
+test.describe('mobile artwork', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
+
+  test('small phones, tablets and rotation fit every frame and only fetch small masks', async ({ page }, info) => {
+    await freezeStartup(page);
+    const requests = [];
+    page.on('request', request => { if (request.resourceType() === 'image' && /frame-\d+\.webp/.test(request.url())) requests.push(request.url()); });
+    const release = await holdInitialRequest(page);
+    await page.goto('/recruitment');
+    await expect(screen(page)).toHaveAttribute('data-frames-ready', 'true');
+    await page.clock.runFor(40);
+    expect(requests.length).toBeGreaterThanOrEqual(17);
+    expect(requests.every(url => url.includes('/loading/mobile/'))).toBe(true);
+    for (const viewport of [{ width: 320, height: 568 }, { width: 360, height: 640 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 844, height: 390 }]) {
+      await page.setViewportSize(viewport);
+      const frame = screen(page).locator('.nucleus-loader__frame');
+      await expect(frame).toHaveCSS('mask-size', 'contain');
+      await expect(screen(page)).toHaveCSS('height', `${viewport.height}px`);
+      const box = await frame.boundingBox();
+      expect(box.x).toBeGreaterThanOrEqual(16);
+      expect(box.y).toBeGreaterThanOrEqual(16);
+      expect(box.x + box.width).toBeLessThanOrEqual(viewport.width - 16);
+      expect(box.y + box.height).toBeLessThanOrEqual(viewport.height - 16);
+      for (let index = 0; index < 17; index++) {
+        // Every source aspect ratio (including frame 15) fits inside this box.
+        const size = await frame.evaluate(async (element, index) => {
+          const url = getComputedStyle(element).maskImage.match(/url\("?(.*?)"?\)/)[1].replace(/frame-\d+/, `frame-${String(index).padStart(2, '0')}`);
+          const image = new Image(); image.src = url; await image.decode();
+          return { width: image.naturalWidth, height: image.naturalHeight };
+        }, index);
+        expect(size.width).toBe(640);
+        const scale = Math.min(box.width / size.width, box.height / size.height);
+        expect(size.width * scale).toBeLessThanOrEqual(box.width + .01);
+        expect(size.height * scale).toBeLessThanOrEqual(box.height + .01);
+      }
+      await page.screenshot({ path: info.outputPath(`loader-fit-${viewport.width}.png`) });
+    }
+    release();
+    await page.clock.runFor(1450);
+    await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'exiting');
+    // Mobile exit only translates the curtain, avoiding an animated viewport mask.
+    await expect(screen(page)).toHaveCSS('clip-path', 'inset(0%)');
+    await page.clock.runFor(500);
+    await expect(screen(page)).toHaveCount(0);
+  });
+
+  test('all failed images leave a readable fallback', async ({ page }) => {
+    await freezeStartup(page);
+    const release = await holdInitialRequest(page);
+    await page.route('**/loading/mobile/frame-*.webp', route => route.request().resourceType() === 'image' ? route.abort() : route.continue());
+    await page.goto('/recruitment');
+    await expect(page.locator('.nucleus-loader__fallback')).toHaveText('Nucleus');
+    release();
+    await page.clock.runFor(1500);
+    await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'exiting');
+    await page.clock.runFor(500);
+    await expect(screen(page)).toHaveCount(0);
+  });
+
+  test('a slower mobile CPU still reveals the usable page promptly', async ({ page }) => {
+    const session = await page.context().newCDPSession(page);
+    await session.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+    await recordTiming(page);
+    await page.route('**/api/site', route => route.fulfill({ json: site }));
+    await page.goto('/recruitment', { waitUntil: 'domcontentloaded' });
+    await expect(screen(page)).toHaveCount(0, { timeout: 5000 });
+    await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
+    const times = await page.evaluate(() => window.loaderTimes);
+    expect(times.done - times.loading).toBeLessThan(2800);
+    await expect(page.getByRole('button', { name: 'Open menu', exact: true })).toBeEnabled();
+  });
 });
 
 test('stalled startup still reveals the usable page at the deadline', async ({ page }) => {
@@ -223,9 +283,9 @@ test('slow fonts and decorative frames never delay a ready page', async ({ page 
     await page.goto('/recruitment', { waitUntil: 'domcontentloaded' });
     await expect(screen(page)).toBeVisible();
     await expect(screen(page)).toHaveAttribute('data-frames-ready', 'false');
-    await expect(screen(page)).toHaveCount(0, { timeout: 2000 });
+    await expect(screen(page)).toHaveCount(0, { timeout: 3000 });
     const times = await page.evaluate(() => window.loaderTimes);
-    expect(times.done - times.loading).toBeLessThan(1500);
+    expect(times.done - times.loading).toBeLessThan(2500);
     await expect(page.locator('.site-shell')).not.toHaveAttribute('inert');
     await expect(page.getByRole('button', { name: 'Open menu', exact: true })).toBeEnabled();
   } finally { release(); }

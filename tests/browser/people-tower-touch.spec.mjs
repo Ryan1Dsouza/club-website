@@ -73,7 +73,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
       await touch('touchEnd');
       await expect(world).not.toHaveAttribute('data-dragging');
       await expect.poll(() => displacement(page, initial)).toBeGreaterThan(1);
-      expect(await page.evaluate(() => scrollY)).toBe(0);
+      expect(await page.locator('.site-shell').evaluate(element => element.scrollTop)).toBe(0);
       await rebuild();
 
       const dragged = await blockPoint(page);
@@ -84,7 +84,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
       }
       await expect(world).toHaveAttribute('data-dragging', 'true');
       await expect.poll(() => displacement(page, dragged)).toBeGreaterThan(.5);
-      expect(await page.evaluate(() => scrollY)).toBe(0);
+      expect(await page.locator('.site-shell').evaluate(element => element.scrollTop)).toBe(0);
       await page.screenshot({ path: info.outputPath('touch-drag.png') });
       await touch('touchEnd');
       await expect(world).not.toHaveAttribute('data-dragging');
@@ -103,7 +103,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
         await page.evaluate(() => new Promise(requestAnimationFrame));
       }
       await touch('touchEnd');
-      await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(80);
+      await expect.poll(() => page.locator('.site-shell').evaluate(element => element.scrollTop)).toBeGreaterThan(80);
       await expect(world).not.toHaveAttribute('data-dragging');
       expect(errors).toEqual([]);
       await cdp.detach();
@@ -132,8 +132,9 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
       await page.evaluate(() => new Promise(requestAnimationFrame));
       const seekStart = () => page.locator('.people-tower').evaluate((section, progress) => {
         const stage = section.querySelector('.people-tower__stage');
-        const start = section.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(stage).top) || 0);
-        window.scrollTo({ top: start + progress * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
+        const shell = section.closest('.site-shell');
+        const start = section.getBoundingClientRect().top + shell.scrollTop - (parseFloat(getComputedStyle(stage).top) || 0);
+        shell.scrollTo({ top: start + progress * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
       }, (TOWER_INTRO + flung.index + .003) / (TOWER_INTRO + site.team.length + TOWER_OUTRO));
       await seekStart();
       await expect.poll(() => page.evaluate(() => window.__handoff.first)).not.toBeNull();
@@ -145,12 +146,12 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
       await page.screenshot({ path: info.outputPath('flung-reveal-start.png') });
 
       await page.getByLabel('Jump to a member').selectOption(String(flung.index));
-      await expect(page.locator('.tower-profile').nth(flung.index)).toHaveCSS('opacity', '1');
+      await expect(page.locator('.tower-profile')).toHaveCSS('opacity', '1');
       await page.screenshot({ path: info.outputPath('flung-reveal-profile.png') });
       // Cross a member boundary before reversing: a queued tower return must
       // not replace the source of this member's already established flight.
       await page.getByLabel('Jump to a member').selectOption(String(flung.index + 1));
-      await expect(page.locator('.tower-profile').nth(flung.index + 1)).toHaveCSS('opacity', '1');
+      await expect(page.locator('.tower-profile')).toHaveCSS('opacity', '1');
       await seekStart();
       await expect.poll(() => page.evaluate(({ index, before }) => {
         const blocks = window.__towerTouchView.scene.children.find(object => object.isInstancedMesh && object.castShadow);

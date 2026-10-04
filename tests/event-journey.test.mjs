@@ -36,19 +36,21 @@ test('cinematic arrival coasts to an exact stop with a visible card at different
     const stops = [{ distance: direction > 0 ? 10 : 490, radius: 22, name: 'Arrival' }];
     let state = initialCoasterJourney(direction > 0 ? 360 : 140), dilation = 1;
     state.motion.speed = speed * direction;
-    let revealedCoast = 0;
+    let revealedCoast = 0, arrivalSeconds = 0;
     for (let tick = 0; tick < fps * 30 && state.phase !== 'stopped'; tick++) {
       const { remaining } = nextCoasterStop(state.motion.distance, stops, 500, direction);
       const reveal = stationArrivalFrame(remaining, stops[0].radius);
       const scale = Math.min(approachScale(state.motion.distance, stops, 500, direction), reveal.timeScale);
       dilation += (scale - dilation) * (1 - Math.exp(-4 / fps));
-      if (reveal.opacity > .9 && dilation < .4 && Math.abs(state.motion.speed) * dilation < 4) revealedCoast += 1 / fps;
+      if (remaining < stops[0].radius) arrivalSeconds += 1 / fps;
+      if (reveal.opacity > .9 && Math.abs(state.motion.speed) * dilation < 4) revealedCoast += 1 / fps;
       state = stepCoasterJourney(state, direction, 0, dilation / fps, 500, stops, false, { loop: true, boost: true });
     }
     assert.equal(state.phase, 'stopped');
     assert.equal(state.motion.distance, stops[0].distance);
     assert.equal(state.motion.speed, 0);
-    assert.ok(revealedCoast > 2 && revealedCoast < 12, `bounded, readable reveal: ${revealedCoast}s`);
+    assert.ok(arrivalSeconds < 6, `arrival should stay brisk: ${arrivalSeconds}s`);
+    assert.ok(revealedCoast < 2, `no prolonged slow-motion crawl: ${revealedCoast}s`);
     state = departCoasterStation(state);
     assert.equal(approachScale(state.motion.distance, stops, 500, direction, state.dismissed), 1);
     assert.equal(nextCoasterStop(state.motion.distance, stops, 500, direction, state.dismissed).index, null);

@@ -19,7 +19,7 @@ async function connect(page) {
     await route.fulfill({ response });
   });
   await page.goto('/events');
-  await page.getByRole('button', { name: 'Ride Immersive Experience', exact: true }).first().click();
+  await page.getByRole('button', { name: 'The Nucleus Ride', exact: true }).first().click();
     await page.getByRole('button', { name: "Yes, Let's Go" }).click();
 }
 async function ready(page) {

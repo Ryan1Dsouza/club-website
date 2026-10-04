@@ -1,0 +1,13 @@
+import { chromium } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+const site=JSON.parse(await readFile('shared/public-data.json','utf8'));
+const browser=await chromium.launch();
+const page=await browser.newPage({viewport:{width:1440,height:900}});
+page.on('pageerror',e=>console.log('PAGE ERROR',e.message));
+await page.route('**/api/site',r=>r.fulfill({json:site}));
+await page.goto('http://127.0.0.1:3036/events');
+await page.locator('.event-card').first().waitFor();
+await page.waitForTimeout(3500);
+console.log(await page.locator('.events-portal__label').first().evaluate(el=>[el,...el.children].map(el=>({cls:el.className,rect:el.getBoundingClientRect().toJSON(),clip:getComputedStyle(el).clipPath,writing:getComputedStyle(el).writingMode,opacity:getComputedStyle(el).opacity}))));
+await page.locator('.events-portal').first().screenshot({path:'output/events-portal-detail.png'});
+await page.close();await browser.close();

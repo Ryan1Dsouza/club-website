@@ -1,7 +1,8 @@
 .nucleus-loader {
   position: fixed;
   inset: 0;
-  width: 100vw;
+  height: 100%;
+  height: 100dvh;
   z-index: 2147483000;
   overflow: hidden;
   isolation: isolate;
@@ -10,7 +11,7 @@
   color: var(--mint, #c3e5c8);
   overscroll-behavior: none;
   touch-action: none;
-  will-change: transform, clip-path;
+  will-change: transform;
 }
 
 .nucleus-loader__art,
@@ -21,26 +22,13 @@
 }
 
 .nucleus-loader__frame {
+  --initial-frame-image: var(--desktop-frame-image);
   background: currentColor;
-  mask-image: var(--frame-image);
+  mask-image: var(--frame-image, var(--initial-frame-image));
   mask-mode: alpha;
   mask-position: center;
   mask-repeat: no-repeat;
   mask-size: cover;
-  visibility: hidden;
-}
-
-.nucleus-loader__frame:first-child { visibility: visible; }
-
-/* Replace the complete drawing on each beat. No interpolation or draw/erase. */
-.nucleus-loader[data-frames-ready="true"] .nucleus-loader__frame {
-  animation: nucleus-loader-frame 0.85s steps(1, end) infinite;
-  animation-delay: var(--frame-delay);
-}
-
-@keyframes nucleus-loader-frame {
-  0% { visibility: visible; }
-  5.882352941176471%, 100% { visibility: hidden; }
 }
 
 .nucleus-loader__fallback {
@@ -51,13 +39,20 @@
   font: italic 24px/1 var(--serif, Georgia, serif);
 }
 
-/* The reference magnifies the center of the same artwork on narrow screens. */
-@media (max-width: 480px) {
-  .nucleus-loader__frame { mask-size: 400% auto; }
+/* Fit the complete composition on phones, tablets and short landscape screens. */
+@media (max-width: 767px), (max-height: 500px) and (max-width: 1024px), (pointer: coarse) {
+  .nucleus-loader__art {
+    top: max(16px, env(safe-area-inset-top));
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: max(16px, env(safe-area-inset-left));
+  }
+  .nucleus-loader__frame {
+    --initial-frame-image: var(--mobile-frame-image);
+    mask-size: contain;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nucleus-loader { will-change: auto; }
-  .nucleus-loader .nucleus-loader__frame { animation: none; visibility: hidden; }
-  .nucleus-loader .nucleus-loader__frame:first-child { visibility: visible; }
 }

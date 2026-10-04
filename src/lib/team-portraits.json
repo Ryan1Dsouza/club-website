@@ -1,0 +1,62 @@
+{
+  "/team_images/core/Poorvik.avif": {
+    "small": "/team_images/banner/Poorvik-480.webp",
+    "large": "/team_images/banner/Poorvik-800.webp"
+  },
+  "/team_images/core/Dinol.avif": {
+    "small": "/team_images/banner/Dinol-480.webp",
+    "large": "/team_images/banner/Dinol-800.webp"
+  },
+  "/team_images/core/Joylin.avif": {
+    "small": "/team_images/banner/Joylin-480.webp",
+    "large": "/team_images/banner/Joylin-800.webp"
+  },
+  "/team_images/core/Nishanth1.avif": {
+    "small": "/team_images/banner/Nishanth1-480.webp",
+    "large": "/team_images/banner/Nishanth1-800.webp"
+  },
+  "/team_images/core/Karthik.avif": {
+    "small": "/team_images/banner/Karthik-480.webp",
+    "large": "/team_images/banner/Karthik-800.webp"
+  },
+  "/team_images/core/Prajwal.avif": {
+    "small": "/team_images/banner/Prajwal-480.webp",
+    "large": "/team_images/banner/Prajwal-800.webp"
+  },
+  "/team_images/core/Mohit.avif": {
+    "small": "/team_images/banner/Mohit-480.webp",
+    "large": "/team_images/banner/Mohit-800.webp"
+  },
+  "/team_images/core/Rakshith.avif": {
+    "small": "/team_images/banner/Rakshith-480.webp",
+    "large": "/team_images/banner/Rakshith-800.webp"
+  },
+  "/team_images/core/Navya.avif": {
+    "small": "/team_images/banner/Navya-480.webp",
+    "large": "/team_images/banner/Navya-800.webp"
+  },
+  "/team_images/core/Deona.avif": {
+    "small": "/team_images/banner/Deona-480.webp",
+    "large": "/team_images/banner/Deona-800.webp"
+  },
+  "/team_images/core/Sweeden.avif": {
+    "small": "/team_images/banner/Sweeden-480.webp",
+    "large": "/team_images/banner/Sweeden-800.webp"
+  },
+  "/team_images/core/Manvitha.avif": {
+    "small": "/team_images/banner/Manvitha-480.webp",
+    "large": "/team_images/banner/Manvitha-800.webp"
+  },
+  "/team_images/core/Salim.avif": {
+    "small": "/team_images/banner/Salim-480.webp",
+    "large": "/team_images/banner/Salim-800.webp"
+  },
+  "/team_images/core/Nikhitha.avif": {
+    "small": "/team_images/banner/Nikhitha-480.webp",
+    "large": "/team_images/banner/Nikhitha-800.webp"
+  },
+  "/team_images/core/Saniya.avif": {
+    "small": "/team_images/banner/Saniya-480.webp",
+    "large": "/team_images/banner/Saniya-800.webp"
+  }
+}

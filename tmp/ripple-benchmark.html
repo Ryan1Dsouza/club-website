@@ -1,0 +1,7 @@
+<!doctype html><html><head><style>html,body,#root{margin:0;width:100%;height:100%;background:#000}#root>div{position:relative;width:100%;height:100%}</style></head><body><div id="root"></div><script type="module">
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+const path = location.search.includes('before') ? '/tmp/ripple-baseline/background-ripple-effect.tsx' : '/src/components/ui/background-ripple-effect.tsx';
+const { BackgroundRippleEffect } = await import(path);
+createRoot(document.getElementById('root')).render(React.createElement('div', null, React.createElement(BackgroundRippleEffect)));
+</script></body></html>

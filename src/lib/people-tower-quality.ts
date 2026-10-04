@@ -10,15 +10,18 @@ export function towerQuality(width: number, height: number, devicePixelRatio: nu
   // Spend the budget on legible edges first. Lighting and idle motion are cheaper
   // to simplify than stretching a sub-resolution canvas across the screen.
   const maxPixels = lowEnd ? (mobile ? 900_000 : 2_100_000) : mobile ? 1_400_000 : 3_600_000;
-  const maxRatio = lowEnd ? 1.25 : mobile ? 1.75 : 2;
+  const maxRatio = lowEnd && mobile ? 1 : lowEnd ? 1.25 : mobile ? 1.75 : 2;
   return {
-    simplified,
+    simplified, lowEnd,
+    // On a struggling phone only the 3D buffer may downshift below native
+    // resolution. The shared DOM profile and its text stay at full resolution.
+    minPixelRatio: mobile ? .75 : 1,
     pixelRatio: Math.min(devicePixelRatio || 1, maxRatio, Math.sqrt(maxPixels / Math.max(1, width * height))),
     maxTextureSize: lowEnd ? 2048 : 4096,
   };
 }
 
-/** Adaptive rendering must not soften a scene that already fits at CSS resolution. */
-export function towerPixelRatio(baseRatio: number, resolutionScale: number) {
-  return Math.max(Math.min(1, baseRatio), baseRatio * resolutionScale);
+/** Desktop keeps native detail; phones can trade a little 3D detail for latency. */
+export function towerPixelRatio(baseRatio: number, resolutionScale: number, minimum = 1) {
+  return Math.max(Math.min(minimum, baseRatio), baseRatio * resolutionScale);
 }

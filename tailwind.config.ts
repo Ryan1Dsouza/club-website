@@ -26,23 +26,6 @@ export default {
         'line-strong': 'rgba(195, 229, 200, 0.34)',
         wash: 'rgba(195, 229, 200, 0.05)',
       },
-      animation: {
-        'cell-ripple': 'cell-ripple var(--duration, 200ms) ease-out var(--delay, 0ms) 1 none',
-      },
-      keyframes: {
-        'cell-ripple': {
-          '0%, 100%': {
-            opacity: '0.4',
-            backgroundColor: 'var(--cell-fill-color)',
-            boxShadow: 'inset 0 0 24px 1px transparent',
-          },
-          '50%': {
-            opacity: '0.8',
-            backgroundColor: 'var(--cell-pulse-color)',
-            boxShadow: 'inset 0 0 24px 1px color-mix(in srgb, var(--cell-shadow-color) 20%, transparent)',
-          },
-        },
-      },
     },
   },
   plugins: [addVariablesForColors],

@@ -7,7 +7,6 @@ import { createStationPlanner } from './event-layout';
 import { createQualityController, qualityPixelRatio, rideQuality } from './event-quality';
 import { disposeObject } from './event-batching';
 import { cinematicCamera, stationArrivalFrame, stationPanAngle, STATION_PAN_SECONDS, GLIMPSE_EXIT } from './event-cinematics';
-import { stationCardAnchor } from './event-navigation';
 import { createRideMap } from './event-minimap';
 import { createRidePostprocessing } from './event-postprocessing';
 
@@ -49,8 +48,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
   let travelTarget: number | null = null, travelDirection = 1, travelStops: CoasterStop[] = [];
   const scenery = createScenery(scene, track, coarse);
   let markers: HTMLButtonElement[] = [], stopPoints: (THREE.Vector3 | null)[] = [];
-  let cardPoints: (THREE.Vector3 | null)[] = [];
-  let cards: { element: HTMLElement; index: number; opacity: number; width: number }[] = [];
+  let cards: { element: HTMLElement; index: number; opacity: number }[] = [];
   let stationProps: LogoWorldProps['stations'] | null = null;
   let worldStations: LogoWorldProps['stations'] = [];
   const stationSignatures = new Map<string, string>();
@@ -114,12 +112,6 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     if (journey.station === null && journey.phase !== 'riding') { journey = departCoasterStation(journey); motion = journey.motion; }
     notified = journey.station;
     if (travelTarget !== null) setTravel(indexOf(travelingId));
-    cardPoints = placements.map(stop => {
-      if (!stop) return null;
-      const f = sampleTrack(track, stop.distance, length);
-      const anchor = stationCardAnchor(f.point, f.side, f.up);
-      return new THREE.Vector3(anchor.x, anchor.y, anchor.z);
-    });
     focusStation = indexOf(focusedId);
     panStation = indexOf(panId);
     if (focusStation === null) stationFocus = 0;
@@ -129,7 +121,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
 
   function syncCards() {
     cards = Array.from(host.querySelectorAll<HTMLElement>('[data-world-card]')).map(element => ({
-      element, index: worldStations.findIndex(station => station.id === element.dataset.worldCard), opacity: 0, width: element.offsetWidth,
+      element, index: worldStations.findIndex(station => station.id === element.dataset.worldCard), opacity: 0,
     }));
   }
 
@@ -179,7 +171,6 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     renderDirty = true;
     if (contextUnavailable) return;
     width = Math.max(host.clientWidth, 1); height = Math.max(host.clientHeight, 1);
-    cards.forEach(card => { card.width = card.element.offsetWidth; });
     renderer.setPixelRatio(qualityPixelRatio(quality.level, width, height, window.devicePixelRatio, coarse));
     renderer.setSize(width, height, false); scenery.setQuality(quality.level);
     postprocessing.resize(renderer.domElement.width, renderer.domElement.height, quality.level, get().reduced);
@@ -311,7 +302,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     setBoost(driveOptions.boost && (journey.phase === 'riding' || journey.phase === 'approaching'));
     if (props.reduced) dilation = 1;
     const arrival = arrivalFrame(journeyStops);
-    const revealStation = mode === 'explore' && panStation === null && transition >= 1 && (!paused || journey.phase === 'stopped') ? arrival.index : null;
+    const revealStation = mode === 'explore' && !bookRevealed && transition >= 1 && !paused ? (panStation ?? arrival.index) : null;
     if (revealStation !== null && arrival.focus > 0) focusStation = revealStation;
     stationFocus = props.reduced ? 0 : THREE.MathUtils.damp(stationFocus, revealStation === null ? 0 : arrival.focus, 6, dt);
     const visualSpeed = motion.speed * dilation;
@@ -372,31 +363,22 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
         panFrom.copy(camera.quaternion); panStarted = true;
         if (import.meta.env.DEV) { host.dataset.panStartedAt = String(now); delete host.dataset.panCompletedAt; }
       }
-      // Use real elapsed time: a slow GPU must not stretch the 400ms pan.
+      // Use real elapsed time so docking never adds a long camera wait.
       if (!paused) panProgress = props.reduced ? 1 : Math.min(1, panProgress + rawDelta / STATION_PAN_SECONDS);
       panTarget.copy(panFrom).multiply(look.setFromEuler(euler.set(0, stationPanAngle(panProgress), 0)));
       camera.quaternion.copy(panTarget);
     }
     frameMapView(); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
-    // Project fixed world anchors after the final camera update. Never clamp their
-    // screen positions: off-screen / behind-camera cards leave the view naturally.
+    // A stable arrival caption stays in view as the cart approaches. Fade it with
+    // the pan instead of projecting a card that drifts off to the right first.
     for (const card of cards) {
-      const point = cardPoints[card.index];
-      const opacity = card.index === revealStation ? arrival.opacity : 0;
+      const opacity = card.index === revealStation ? arrival.opacity * (panStation === null ? 1 : 1 - panProgress) : 0;
       if (opacity === 0 && card.opacity === 0 && card.element.style.visibility !== 'visible') continue;
       card.opacity = THREE.MathUtils.damp(card.opacity, opacity, 7, dt);
       if (opacity === 0 && card.opacity < .002) card.opacity = 0;
-      let show = !!point && mode === 'explore' && !props.reduced && card.opacity > .002;
+      const show = mode === 'explore' && !props.reduced && card.opacity > .002 && !bookRevealed;
       if (show) {
-        projected.copy(point!).applyMatrix4(camera.matrixWorldInverse);
-        const depth = -projected.z;
-        projected.copy(point!).project(camera);
-        show = depth > camera.near && projected.z >= -1 && projected.z <= 1 && Math.abs(projected.x) <= 1.2 && Math.abs(projected.y) <= 1.2;
-        if (show) {
-          const pixelsPerUnit = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * depth);
-          const scale = Math.min(compactCamera ? 1 : 1.2, pixelsPerUnit * 5.8 / Math.max(1, card.width));
-          card.element.style.transform = `translate(${(projected.x * .5 + .5) * width}px,${(-projected.y * .5 + .5) * height}px) translate(-50%,-50%) scale(${scale})`;
-        }
+        card.element.style.transform = `translate(${width * .5}px,${height * (height <= 500 ? .55 : .66)}px) translate(-50%,-50%)`;
       }
       card.element.style.opacity = String(card.opacity);
       card.element.style.visibility = show ? 'visible' : 'hidden';

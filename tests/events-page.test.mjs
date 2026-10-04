@@ -12,9 +12,8 @@ test('Events renders seven photo cards and two portals without loading the ride'
   for (const route of ['/events', '/events/']) {
     const html = render(data, route);
     assert.match(html, /data-event-mode="grid"/);
-    assert.equal((html.match(/class="flip-card__photo"/g) ?? []).length, 7);
-    assert.equal((html.match(/Ride Immersive Experience/g) ?? []).length, 2);
-    assert.match(html, /data-styled/);
+    assert.equal((html.match(/class="event-card__photo"/g) ?? []).length, 7);
+    assert.equal((html.match(/aria-label="The Nucleus Ride"/g) ?? []).length, 2);
     assert.doesNotMatch(html, /class="nx-world|class="ec-scroll/);
   }
 });
@@ -30,7 +29,7 @@ test('direct production requests serve the Events grid and cannot bypass the por
       const html = await response.text();
       assert.match(html, /data-event-mode="grid"/);
       assert.match(html, /<title>Events/);
-      assert.match(html.split('</head>')[0], /data-styled/);
+      assert.match(html, /class="event-card"/);
     }
   } finally {
     await new Promise(resolve => server.close(resolve));

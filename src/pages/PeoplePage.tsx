@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ArrowDown, RotateCcw } from 'lucide-react';
 import type { Member } from '../types';
 import { memberProgress, sortTowerMembers } from '../lib/people-tower-motion';
+import { createTowerPortraits } from '../lib/people-tower-portraits';
 import './showcase.css';
 import './people-tower.css';
 
@@ -19,6 +20,9 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     const element = host.current, section = story.current;
     if (!element || !section || !sorted.length) { setStatus('still'); return; }
     const media = matchMedia('(prefers-reduced-motion: reduce)');
+    const portraits = createTowerPortraits(sorted, matchMedia('(max-width: 768px), (pointer: coarse)').matches);
+    // Start the first portraits before importing/compiling the 3D scene.
+    if (!media.matches) portraits.prepare(0);
     let disposed = false, generation = 0;
     let idle = 0, timer = 0;
     let cleanup: (() => void) | undefined;
@@ -33,6 +37,7 @@ export default function PeoplePage({ members }: { members: Member[] }) {
       const current = ++generation;
       stop(); setActive(-1);
       if (media.matches) { setStatus('still'); return; }
+      portraits.prepare(0);
       if (matchMedia('(max-width: 768px), (pointer: coarse)').matches) {
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
@@ -48,7 +53,7 @@ export default function PeoplePage({ members }: { members: Member[] }) {
               stop(); setStatus('fallback'); setActive(-1);
             }
           },
-        });
+        }, portraits);
         // Navigation or a motion preference change may finish while the GPU is
         // compiling. Release that obsolete scene instead of reviving it.
         if (disposed || current !== generation) { tower.dispose(); return; }
@@ -65,7 +70,7 @@ export default function PeoplePage({ members }: { members: Member[] }) {
       disposed = true; generation++;
       if (idle) cancelIdleCallback(idle);
       window.clearTimeout(timer);
-      media.removeEventListener('change', start); stop();
+      media.removeEventListener('change', start); stop(); portraits.dispose();
     };
     // Equivalent API refreshes should preserve the current scene.
   }, [memberKey]);
@@ -75,8 +80,11 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     const stage = section.querySelector<HTMLElement>('.people-tower__stage');
     if (!stage) return;
     const header = parseFloat(getComputedStyle(stage).top) || 0;
-    const top = section.getBoundingClientRect().top + scrollY - header;
-    window.scrollTo({ top: top + memberProgress(index, sorted.length) * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
+    const shell = section.closest<HTMLElement>('.site-shell');
+    const scroller = shell && matchMedia('(max-width: 768px), (pointer: coarse)').matches ? shell : window;
+    const scrollTop = scroller instanceof Window ? scrollY : scroller.scrollTop;
+    const top = section.getBoundingClientRect().top + scrollTop - header;
+    scroller.scrollTo({ top: top + memberProgress(index, sorted.length) * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
     section.querySelector<HTMLSelectElement>('select')?.focus({ preventScroll: true });
   }
   return <section className="people-page" aria-labelledby="people-title" data-tower-status={status}>

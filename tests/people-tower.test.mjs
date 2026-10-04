@@ -73,6 +73,31 @@ test('adaptive quality preserves native detail and respects large-screen pixel l
   assert.ok(3840 * 2160 * large.pixelRatio ** 2 <= 3_600_001);
 });
 
+test('older phones start at native resolution and may reduce only the 3D buffer further', () => {
+  const quality = towerQuality(390, 844, 3, { coarsePointer: true, cores: 2, memory: 2 });
+  assert.equal(quality.lowEnd, true);
+  assert.equal(quality.pixelRatio, 1);
+  assert.equal(towerPixelRatio(quality.pixelRatio, .6, quality.minPixelRatio), .75);
+});
+
+test('staggered reverse-scroll returns animate without stepping an idle physics solver', () => {
+  const slots = fixtureSlots(), physics = createTowerPhysics(slots, true);
+  try {
+    for (let index = 0; index < slots.length; index++) physics.remove(index);
+    for (let index = slots.length - 1; index >= 0; index--) physics.returnBody(index);
+    assert.equal(physics.moving(), true);
+    simulate(physics, 3);
+    assert.equal(physics.world.time, 0);
+    assert.equal(physics.moving(), false);
+    physics.bodies.forEach((body, index) => {
+      assert.ok(body.interpolatedPosition.distanceTo(new Vec3(...slots[index].position)) < 1e-10);
+      assert.equal(body.type, Body.DYNAMIC);
+    });
+    physics.pull(0); simulate(physics, .5);
+    assert.ok(physics.world.time > 0, 'direct manipulation still runs real physics');
+  } finally { physics.dispose(); }
+});
+
 test('every member occupies a unique block with repeatable, varied extraction paths', () => {
   const ids = Array.from({ length: 15 }, (_, i) => `member-${i}`);
   const slots = towerSlots(ids);

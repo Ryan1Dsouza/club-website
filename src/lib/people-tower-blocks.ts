@@ -77,7 +77,7 @@ export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxText
   const atlas = new THREE.CanvasTexture(canvas); atlas.colorSpace = THREE.SRGBColorSpace; atlas.anisotropy = 4;
   // Build the bevel at real plank dimensions, then normalize for instance transforms.
   // This keeps the edge radius consistent on the long and short sides.
-  const geometry = new RoundedBoxGeometry(...BLOCK_SIZE, 2, .055);
+  const geometry = new RoundedBoxGeometry(...BLOCK_SIZE, simplified ? 1 : 2, .055);
   geometry.scale(1 / BLOCK_SIZE[0], 1 / BLOCK_SIZE[1], 1 / BLOCK_SIZE[2]); geometry.clearGroups();
   const grain = woodTexture();
   const material = new THREE.MeshStandardMaterial({ map: grain, bumpMap: grain, bumpScale: .012, roughness: .62, metalness: 0 });

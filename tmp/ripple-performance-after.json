@@ -1,0 +1,30 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "addedNodes": 0,
+    "peakAnimations": 0,
+    "descendants": 3,
+    "p95FrameMs": 16.800000000000182,
+    "maxFrameMs": 33.29999999999973,
+    "taskMs": 1093.9889999999998,
+    "styleMs": 0,
+    "layoutMs": 0
+  },
+  {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "addedNodes": 0,
+    "peakAnimations": 0,
+    "descendants": 3,
+    "p95FrameMs": 33.40000000000009,
+    "maxFrameMs": 33.40000000000009,
+    "taskMs": 625.9119999999999,
+    "styleMs": 0,
+    "layoutMs": 0
+  }
+]

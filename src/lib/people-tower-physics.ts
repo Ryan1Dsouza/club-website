@@ -300,7 +300,11 @@ export function createTowerPhysics(slots: Slots, simplified = false) {
         }
       });
     }
-    accumulator += Math.min(.05, Math.max(0, delta));
+    // Returning blocks follow authored arcs. They do not need contact solving
+    // while every dynamic block is asleep, even during a staggered rebuild.
+    const simulating = held >= 0 || bodies.some(body => body.world && body.type === Body.DYNAMIC && body.sleepState !== Body.SLEEPING);
+    if (simulating) accumulator += Math.min(.05, Math.max(0, delta));
+    else accumulator = 0;
     let changed = false;
     while (accumulator >= physicsStep) {
       if (joint) {

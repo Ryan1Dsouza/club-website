@@ -84,7 +84,7 @@ function BoostControl({ input, active, disabled, touch, onFocus }: { input: RefO
   </button>;
 }
 
-export default function EventRollercoaster({ events, onPublished }: { events: ClubEvent[]; onPublished: (event: ClubEvent) => void }) {
+export default function EventRollercoaster({ events, onPublished, onReady }: { events: ClubEvent[]; onPublished: (event: ClubEvent) => void; onReady?: () => void }) {
   // Focus refreshes return fresh arrays even when no event changed. Keep the
   // current journey, book, and station layout intact through those refreshes.
   const eventKey = JSON.stringify(events);
@@ -102,6 +102,7 @@ export default function EventRollercoaster({ events, onPublished }: { events: Cl
   const [mode, setMode] = useState<WorldMode>(typeof window !== 'undefined' && window.innerWidth <= 768 ? 'explore' : 'overview');
   const [ready, setReady] = useState(false), [failed, setFailed] = useState(false), [reduced, setReduced] = useState(false);
   const [recovering, setRecovering] = useState(false);
+  useEffect(() => { if (ready || failed) onReady?.(); }, [ready, failed, onReady]);
   const [selected, setSelected] = useState<number | null>(null);
   const [adding, setAdding] = useState(false), [publishing, setPublishing] = useState(false), [listing, setListing] = useState(false);
   const [touchControls, setTouchControls] = useState(false), [notice, setNotice] = useState('');

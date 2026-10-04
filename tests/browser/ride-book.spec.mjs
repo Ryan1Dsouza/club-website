@@ -23,14 +23,16 @@ async function openRide(page, data = site) {
     } };
   });
   await page.goto('/events');
-  await page.getByRole('button', { name: 'Ride Immersive Experience', exact: true }).first().click();
+  await page.getByRole('button', { name: 'The Nucleus Ride', exact: true }).first().click();
     await page.getByRole('button', { name: "Yes, Let's Go" }).click();
   await expect(page.locator('.nx-map-button')).toBeEnabled({ timeout: 30_000 });
+  await expect(page.locator('.events-flight')).toHaveCount(0);
 }
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 851 }, { width: 851, height: 393 }]) {
   test(`station books turn pages, stay in bounds, and continue the ride at ${viewport.width}x${viewport.height}`, async ({ browser }, info) => {
     const mobile = viewport.width !== 1440;
+    const report = viewport.width <= 620;
     const context = await browser.newContext({ viewport, isMobile: mobile, hasTouch: mobile });
     const page = await context.newPage(), errors = [];
     page.on('pageerror', error => errors.push(error.message));
@@ -57,8 +59,8 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 851 
         await cdp.detach();
       } else { await surface.hover(); await page.mouse.wheel(0, 420); }
       await expect(book).toHaveAttribute('data-book-page', '2');
-      await expect(book.locator('.station-book__panel')).toHaveCount(2);
-      await expect.poll(() => book.locator('.station-book__panel img').evaluateAll(images => images.every(image => image.naturalWidth > 0))).toBe(true);
+      await expect(book.locator('.station-book__spread .station-book__panel')).toHaveCount(report ? 1 : 2);
+      await expect.poll(() => book.locator('.station-book__spread .station-book__panel img').evaluateAll(images => images.every(image => image.naturalWidth > 0))).toBe(true);
       await page.waitForTimeout(500);
       await page.screenshot({ path: info.outputPath('book-photos.png') });
       await surface.focus(); await page.keyboard.press('ArrowRight');
@@ -66,14 +68,15 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 851 
       await expect(dialog).toBeVisible();
       await page.getByRole('button', { name: 'Next book page' }).click();
       await expect(book).toHaveAttribute('data-book-page', '4');
-      for (let next = 5; next <= 7; next++) {
+      const lastPage = report ? 12 : 7;
+      for (let next = 5; next <= lastPage; next++) {
         await page.getByRole('button', { name: 'Next book page' }).click();
         await expect(book).toHaveAttribute('data-book-page', String(next));
       }
-      await expect(book.locator('.station-book__panel')).toHaveCount(1);
+      await expect(book.locator('.station-book__spread .station-book__panel')).toHaveCount(1);
       await expect(page.getByRole('button', { name: 'Close book after last page' })).toBeEnabled();
       await page.getByRole('button', { name: 'Previous book page' }).click();
-      await expect(book).toHaveAttribute('data-book-page', '6');
+      await expect(book).toHaveAttribute('data-book-page', String(lastPage - 1));
       const box = await dialog.boundingBox();
       expect(box.x).toBeGreaterThanOrEqual(0); expect(box.y).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width).toBeLessThanOrEqual(viewport.width); expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);

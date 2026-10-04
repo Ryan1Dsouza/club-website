@@ -1,44 +1,53 @@
 @tailwind base;
-@tailwind utilities;
 
 .background-ripple-effect {
-  --cell-border-color: rgba(195, 229, 200, 0.1);
-  --cell-fill-color: rgba(195, 229, 200, 0.07);
-  --cell-pulse-color: rgba(195, 229, 200, 0.18);
-  --cell-shadow-color: #c3e5c8;
+  --cell-border-color: rgba(195, 229, 200, 0.04);
+  --cell-fill-color: rgba(195, 229, 200, 0.028);
+  --cell-pulse-color: rgba(195, 229, 200, 0.144);
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  contain: strict;
   background: transparent;
   pointer-events: none;
 }
 
 .background-ripple-effect--page {
-  /* One viewport of cells covers the entire home route without a huge grid. */
   position: fixed;
   height: 100vh;
   height: 100dvh;
 }
 
 .background-ripple-effect__grid {
+  position: absolute;
+  inset: 0;
+  background-color: var(--cell-fill-color);
+  background-image:
+    linear-gradient(to right, var(--cell-border-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--cell-border-color) 1px, transparent 1px);
+  background-size: var(--cell-size) var(--cell-size);
   mask-image: radial-gradient(ellipse at 50% 50%, #000 60%, transparent 100%);
 }
 
-.background-ripple-effect__cell {
-  border: 0.5px solid var(--cell-border-color);
+.background-ripple-effect__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .background-ripple-effect__cell[data-hovered='true'] {
-    opacity: 0.8;
-    background-color: var(--cell-pulse-color) !important;
-  }
+.background-ripple-effect__hover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border: 1px solid var(--cell-border-color);
+  background: var(--cell-pulse-color);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .background-ripple-effect__cell {
-    animation: none !important;
-    transition: none !important;
-  }
+  .background-ripple-effect__canvas,
+  .background-ripple-effect__hover { display: none; }
 }
