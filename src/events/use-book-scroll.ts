@@ -16,7 +16,8 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
     const clamp = (value: number) => Math.max(0, Math.min(count - 1, value));
     let frame = 0, last = 0, clock = 0, snapTimer = 0;
     let target = clamp(current.current), anchor = Math.round(target), direction = 0, gesturing = false;
-    let touchY: number | null = null, pulled = false;
+    let touchY = 0, touchStartY = 0, touchId: number | null = null, pulled = false;
+    let touchStory: HTMLElement | null = null;
     const update = () => {
       const value = clamp(Number(lenis.scroll) / BOOK_SCROLL_STEP);
       current.current = value; setCursor(value);
@@ -64,19 +65,30 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
       pull(event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? element.clientHeight : 1));
       snapTimer = window.setTimeout(settle, 180);
     };
-    const start = (event: TouchEvent) => {
-      if (event.touches.length !== 1) { touchY = null; return; }
-      touchY = event.touches[0].clientY; pulled = false;
+    const start = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch') return;
+      if (touchId !== null) { end(); return; }
+      touchId = event.pointerId; touchY = touchStartY = event.clientY; pulled = false;
+      touchStory = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-book-scroll]') : null;
       begin();
     };
-    const move = (event: TouchEvent) => {
-      if (touchY === null || event.touches.length !== 1) return;
-      const y = event.touches[0].clientY, delta = touchY - y; touchY = y;
-      if (storyCanScroll(event.target, delta) && !pulled) { event.stopPropagation(); return; }
-      event.preventDefault(); event.stopPropagation(); pulled = true;
+    const move = (event: PointerEvent) => {
+      if (event.pointerId !== touchId || Math.abs(event.clientY - touchStartY) < 5 && !element.hasPointerCapture(event.pointerId)) return;
+      // Keep receiving the release when the visible page replaces its image DOM.
+      element.setPointerCapture(event.pointerId);
+      const delta = touchY - event.clientY; touchY = event.clientY;
+      event.preventDefault(); event.stopPropagation();
+      if (touchStory && storyCanScroll(touchStory, delta) && !pulled) { touchStory.scrollTop += delta; return; }
+      pulled = true;
       pull(delta * BOOK_SCROLL_STEP / Math.max(240, element.clientHeight * .65), true);
     };
-    const end = () => { touchY = null; if (pulled) settle(); else gesturing = false; pulled = false; };
+    const end = (event?: PointerEvent) => {
+      if (event && event.pointerId !== touchId) return;
+      const id = touchId; touchId = null;
+      if (id !== null && element.hasPointerCapture(id)) element.releasePointerCapture(id);
+      if (pulled) settle(); else gesturing = false;
+      pulled = false; touchStory = null;
+    };
     const resize = new ResizeObserver(() => {
       element.style.setProperty('--book-height', `${element.clientHeight}px`);
       lenis.resize();
@@ -85,10 +97,11 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
     resize.observe(element);
     lenis.on('scroll', update);
     element.addEventListener('wheel', wheel, { passive: false });
-    element.addEventListener('touchstart', start, { passive: true });
-    element.addEventListener('touchmove', move, { passive: false });
-    element.addEventListener('touchend', end);
-    element.addEventListener('touchcancel', end);
+    element.addEventListener('pointerdown', start);
+    element.addEventListener('pointermove', move);
+    element.addEventListener('pointerup', end);
+    element.addEventListener('pointercancel', end);
+    element.addEventListener('lostpointercapture', end);
     const visibility = () => {
       cancelAnimationFrame(frame); frame = 0; last = 0;
       if (!document.hidden) wake();
@@ -97,8 +110,8 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
     return () => {
       clearTimeout(snapTimer); cancelAnimationFrame(frame); resize.disconnect();
       lenis.off('scroll', update); lenis.destroy(); navigate.current = () => {};
-      element.removeEventListener('wheel', wheel); element.removeEventListener('touchstart', start);
-      element.removeEventListener('touchmove', move); element.removeEventListener('touchend', end); element.removeEventListener('touchcancel', end);
+      element.removeEventListener('wheel', wheel); element.removeEventListener('pointerdown', start);
+      element.removeEventListener('pointermove', move); element.removeEventListener('pointerup', end); element.removeEventListener('pointercancel', end); element.removeEventListener('lostpointercapture', end);
       document.removeEventListener('visibilitychange', visibility);
     };
   }, [wrapper, content, count, reduced]);

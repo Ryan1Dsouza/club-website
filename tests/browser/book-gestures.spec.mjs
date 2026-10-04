@@ -25,7 +25,7 @@ for (const viewport of [{width:390,height:844},{width:320,height:568},{width:144
       await page.goto('/events');
       await expect(page.locator('[data-loading-screen]')).toHaveCount(0, {timeout:20000});
       await page.getByRole('button',{name:'Open Inauguration event book',exact:true}).click();
-      await expect(page.locator('.nx-book-dialog')).toHaveCSS('transform','none');
+      await page.locator('.nx-book-dialog').evaluate(async element => { await Promise.all(element.getAnimations().map(animation => animation.finished)); });
       const book = page.locator('.station-book'), spread = book.locator('.station-book__spread'), surface = book.locator('.station-book__surface');
       await expect(book).toHaveAttribute('data-layout', mobile ? 'report' : 'spread');
       await expect(spread.locator('img')).toHaveCount(1);
