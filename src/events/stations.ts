@@ -7,6 +7,7 @@ export const WORKSHOP_STATIONS = [
   { id: 'n8n', title: 'n8n', folders: ['n8n'] },
   { id: 'noesis', title: 'Noesis', folders: ['noesis'] },
   { id: 'unlocked', title: 'Unlocked', folders: ['unlocked'] },
+  { id: 'coding', title: 'Coding', folders: ['coding'] },
 ] as const;
 
 export type WorkshopId = typeof WORKSHOP_STATIONS[number]['id'];
