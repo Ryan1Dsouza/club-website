@@ -11,7 +11,7 @@
 @keyframes logo-text-in { from { opacity: 0; transform: translateY(75%) rotateX(-35deg); } to { opacity: 1; transform: translateY(0) rotateX(0); } }
 .logo-landing__text .mu-morph-wrap { opacity: 0; visibility: hidden; transform-origin: 50% 100%; }
 .logo-landing[data-text-ready='true'] .mu-morph-wrap { visibility: visible; animation: logo-text-in 900ms var(--ease-settle) both; }
-.mu-morph-wrap { position: relative; margin: 0 auto; height: 7.5rem; width: 100%; max-width: 56rem; text-align: center; font-family: 'Bebas Neue', 'Space Grotesk', sans-serif; font-size: clamp(2rem, 7.8vw, 6.5rem); line-height: 1.2; padding-bottom: .15em; font-weight: 400; letter-spacing: .12em; padding-left: .12em; text-transform: uppercase; color: #ffffff; }
+.mu-morph-wrap { position: relative; margin: 0 auto; height: 7.5rem; width: 100%; max-width: 56rem; text-align: center; font-family: 'Bebas Neue', 'Space Grotesk', sans-serif; font-size: clamp(2rem, 7.8vw, 6.5rem); line-height: 1.2; padding-bottom: .15em; font-weight: 400; letter-spacing: .12em; padding-left: .12em; text-transform: uppercase; color: var(--mint); }
 .mu-morph-layers { position: absolute; inset: 0; isolation: isolate; }
 .mu-layer { position: absolute; inset-inline: 0; top: 0; margin: auto; width: 100%; text-align: center; white-space: nowrap; }
 @media (min-width: 768px) { .mu-morph-wrap { height: 10rem; } }
