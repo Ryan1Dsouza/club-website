@@ -16,6 +16,11 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
   const [playMode, setPlayMode] = useState(false);
   useEffect(() => { onStatusChange(status); }, [status, onStatusChange]);
   const memberKey = useMemo(() => JSON.stringify(sorted), [sorted]);
+  useEffect(() => {
+    if (playMode) { document.body.style.overflow = 'hidden'; }
+    else { document.body.style.overflow = ''; }
+    return () => { document.body.style.overflow = ''; };
+  }, [playMode]);
   const controller = useRef<{ rebuild: () => void } | null>(null);
   useEffect(() => {
     const element = host.current, section = story.current;
