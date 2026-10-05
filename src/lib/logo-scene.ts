@@ -154,7 +154,7 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
   let renderWidth = 0, renderHeight = 0, outlineSize = 0;
   let pointerDirty = false, pointerX = 0, pointerY = 0;
   const style = getComputedStyle(host);
-  const mint = new THREE.Color(style.getPropertyValue('--mint').trim());
+  const mint = new THREE.Color(0xffffff);
   renderer.setClearColor(style.getPropertyValue('--bg').trim(), 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.domElement.setAttribute('aria-hidden', 'true');
