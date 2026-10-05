@@ -57,7 +57,7 @@ export default function TeamProfileOverlay({ person, onClose }: { person: TeamPr
         event.preventDefault(); first?.focus();
       }
     }}>
-    <button type="button" className="team-profile__back" onClick={close}><ArrowLeft size={16} /><span>Back to the constellation</span><X size={16} /></button>
+    <button type="button" className="team-profile__back" onClick={close}><ArrowLeft size={16} /><span>Back to the team</span><X size={16} /></button>
     <div className="team-profile__layout">
       <div className="team-profile__details">
         <div className="team-profile__copy">
@@ -76,10 +76,10 @@ export default function TeamProfileOverlay({ person, onClose }: { person: TeamPr
         </div>
         <p className="team-profile__signature"><span>NUCLEUS / SJEC</span><span>Made of many minds.</span></p>
       </div>
-      <div className="team-profile__photo">
-        <span className="team-profile__initials" aria-hidden="true">{person.initials}</span>
+      <div className="team-profile__photo" style={person.previewImage ? { backgroundImage: `url("${person.previewImage}")`, backgroundSize: 'cover', backgroundPosition: 'center 22%' } : undefined}>
+        {!person.previewImage && <span className="team-profile__initials" aria-hidden="true">{person.initials}</span>}
         {person.cardImage && <img className="team-profile__preview" src={person.cardImage} alt="" aria-hidden="true" onError={event => { event.currentTarget.style.visibility = 'hidden'; }} />}
-        {person.profileImage && <img className="team-profile__portrait" src={person.profileImage} alt={person.name} decoding="async"
+        {person.profileImage && <img className="team-profile__portrait" src={person.profileImage} alt={person.name} decoding="async" fetchPriority="high"
           onError={event => { event.currentTarget.style.visibility = 'hidden'; }} />}
       </div>
     </div>

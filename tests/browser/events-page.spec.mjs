@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import AxeBuilder from '@axe-core/playwright';
+import { workshops } from '../fixtures/workshops.mjs';
 
 const site = JSON.parse(await readFile(new URL('../../shared/public-data.json', import.meta.url), 'utf8'));
-const folders = ['inauguration', 'dev', 'khoj', 'linkedin', 'n8n', 'noesis', 'unlocked'];
-const titles = ['Inauguration', 'Dev', 'Khoj', 'LinkedIn', 'n8n', 'Noesis', 'Unlocked'];
-const counts = [12, 2, 4, 1, 4, 7, 6];
+const folders = workshops.map(workshop => workshop.id);
+const titles = workshops.map(workshop => workshop.title);
+const counts = workshops.map(workshop => workshop.photos);
 
 async function open(page, data = site) {
   await page.route('**/api/site', route => route.fulfill({ json: data }));
@@ -20,14 +21,14 @@ for (const [width, columns] of [[2560, 3], [1440, 3], [820, 2], [390, 1]]) {
     await open(page, width === 2560 ? { ...site, events:[] } : site);
     await expect(page).toHaveTitle(/Events/);
     const cards = page.locator('.event-card');
-    await expect(cards).toHaveCount(7);
+    await expect(cards).toHaveCount(workshops.length);
     expect(await cards.evaluateAll(elements => elements.map(element => element.dataset.workshop))).toEqual(folders);
     const boxes = await cards.evaluateAll(elements => elements.map(element => { const box = element.getBoundingClientRect(); return { x:box.x, y:box.y, width:box.width, height:box.height }; }));
     expect(new Set(boxes.map(box => box.x)).size).toBe(columns);
     for (const box of boxes) { expect(box.width).toBeGreaterThan(250); expect(box.height).toBeGreaterThan(300); expect(box.x).toBeGreaterThanOrEqual(0); expect(box.x + box.width).toBeLessThanOrEqual(width); }
     if (columns > 1) expect(boxes[1].x - boxes[0].x - boxes[0].width).toBeLessThanOrEqual(81);
     if (columns === 3) expect((await page.locator('.events-archive').boundingBox()).width).toBeLessThanOrEqual(1440);
-    for (let index = 0; index < 7; index++) {
+    for (let index = 0; index < workshops.length; index++) {
       await cards.nth(index).scrollIntoViewIfNeeded();
       const photo = cards.nth(index).locator('img');
       await expect(photo).toHaveAttribute('src', new RegExp(`/workshops/${folders[index]}/.*1\\.avif`));
@@ -44,7 +45,7 @@ for (const [width, columns] of [[2560, 3], [1440, 3], [820, 2], [390, 1]]) {
 test('every card opens its own sequential, edge-to-edge book and the last turn dismisses it', async ({ page }, info) => {
   await page.emulateMedia({ reducedMotion:'reduce' });
   await open(page);
-  for (let index = 0; index < 7; index++) {
+  for (let index = 0; index < workshops.length; index++) {
     const card = page.getByRole('button', { name:`Open ${titles[index]} event book`, exact:true });
     await card.click();
     const dialog = page.getByRole('dialog', { name:titles[index], exact:true }), book = dialog.locator('.station-book');

@@ -1,18 +1,15 @@
-.people-page { --mint: #c3e5c8; --mint-rgb: 195 229 200; --muted: #93ac97; --line: rgb(195 229 200 / .14); --line-strong: rgb(195 229 200 / .34); --surface: #080e09; --wash: rgb(195 229 200 / .05); --tower-ink: #c3e5c8; --tower-paper: #0d2b1f; color: var(--mint); background: var(--bg, #000); }
+.people-page[data-view='tower'] { --tower-ink: var(--mint); --tower-paper: #0d2b1f; }
 .people-tower { position: relative; }
 .people-tower__stage { position: relative; height: 100svh; height: 100dvh; min-height: 280px; overflow: hidden; isolation: isolate; background: linear-gradient(#020d07, #030f08 72%, #040c07); }
 [data-tower-status='ready'] .people-tower { height: var(--tower-length); }
 [data-tower-status='ready'] .people-tower__stage { position: sticky; top: 0; }
-@media (max-width: 768px), (pointer: coarse) {
-  .people-page { background: var(--bg, #020d07); }
-  [data-tower-status='ready'] .people-tower { background: #020d07; }
-  /* Use sticky positioning to match desktop and prevent address bar layout shifts */
-  html:has(.people-page[data-tower-status='ready']), html:has(.people-page[data-tower-status='ready']) body { overscroll-behavior-y: none; overflow: hidden; height: 100%; }
-  .site-shell:has(.people-page[data-tower-status='ready']) { height: 100dvh; overflow-y: scroll; overscroll-behavior-y: none; }
-}
+/* One native document scroller at every viewport size, including hybrid devices. */
 .people-tower__world { position: absolute; inset: 0; }
 .people-tower__world > canvas, .people-tower__labels { position: absolute; inset: 0; display: block; pointer-events: none; }
 .people-tower__world > canvas { width: 100%; height: 100%; pointer-events: auto; touch-action: pan-y; cursor: grab; }
+.people-tower__world[data-interaction='play'] > canvas { touch-action: none; }
+.people-tower__mode { min-height: 44px; padding: 10px 13px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--surface); font: 11px/1.5 var(--mono); }
+.people-tower__mode[aria-pressed='true'] { background: var(--mint); color: var(--bg); }
 .people-tower__world[data-dragging] > canvas { cursor: grabbing; }
 .people-tower__hint { position: absolute; inset: auto var(--gutter) 82px; z-index: 2; max-width: 420px; font: 11px/1.6 var(--mono); color: #d4eadc; opacity: var(--tower-intro, 1); pointer-events: none; }
 .people-tower__hint[hidden] { display: none; }
@@ -24,7 +21,7 @@
 .people-tower__rebuild { margin-left: auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 13px; border: 1px solid var(--line-strong); border-radius: 3px; background: #173225; color: var(--mint); font: 11px var(--mono); }
 .people-tower__rebuild:hover { background: #284936; }
 .people-tower__rebuild:focus-visible, .people-tower__picker select:focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
-.people-tower__topline { position: absolute; z-index: 3; inset: 25px var(--gutter) auto; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.people-tower__topline { position: absolute; z-index: 3; inset: calc(var(--header-height) + 27px) var(--gutter) auto; display: flex; justify-content: space-between; align-items: center; gap: 20px; pointer-events: none; }
 .people-tower__skip { display: inline-flex; align-items: center; gap: 12px; min-height: 40px; font: 11px var(--mono); color: var(--muted); }
 .people-tower__skip:hover { color: var(--mint); }
 .people-tower__hud { position: absolute; z-index: 3; inset: auto var(--gutter) 23px; display: flex; align-items: center; gap: 24px; }
@@ -92,10 +89,13 @@
 .people-roster__reveal { position: absolute; right: 13px; bottom: 16px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: var(--mint); }
 .people-roster__reveal:hover { background: var(--wash); }
 @media (max-width: 760px) {
-  .people-tower__topline { inset-block-start: 85px; }
-  .people-tower__hud { gap: 14px; bottom: 17px; }
+  .people-tower__topline { inset-block-start: calc(var(--header-height) + 27px); }
+  .people-tower__hud { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px 10px; bottom: max(17px, env(safe-area-inset-bottom)); }
+  .people-tower__mode { grid-column: 1 / -1; justify-self: start; font-size: 10px; }
+  .people-tower__picker { min-width: 0; }
+  .people-tower__picker select { width: 100%; margin-top: 0; }
   .people-tower__rebuild { gap: 5px; padding: 8px; font-size: 10px; }
-  .people-tower__hint { max-width: 300px; font-size: 10px; }
+  .people-tower__hint { bottom: 126px; max-width: 300px; font-size: 10px; }
   .people-tower__picker select { max-width: 175px; font-size: 10px; }
   .tower-profile { color: #fff; }
   .tower-profile::before, .tower-profile::after { display: none; }
@@ -117,6 +117,12 @@
   .people-roster__member p { font-size: 11px; padding-right: 20px; }
   .people-roster__number { top: 24px; right: 19px; }
   .people-roster__reveal { right: 5px; bottom: 7px; }
+}
+@media (max-height: 500px) and (min-width: 600px) {
+  .people-tower__topline { display: none; }
+  .people-tower__hud { display: flex; gap: 10px; }
+  .people-tower__hint { bottom: 76px; max-width: 350px; font-size: 9px; }
+  .people-tower__picker { flex: 1; }
 }
 @media (max-width: 420px) {
   .people-tower__hud { gap: 8px; }

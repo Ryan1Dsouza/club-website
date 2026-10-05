@@ -1,0 +1,717 @@
+{
+  "/workshops/coding/coding1.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding1-db507c5e3d-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding1-db507c5e3d-1440.webp",
+        "width": 1280
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRtAAAABXRUJQVlA4IMQAAAAwBQCdASogABIAPwFys1GrJqSiqAqpYCAJZQALACwVXFe73qtdByU+o4/oQ5X8vU28AAD+njR9LbMWhTKOYvbFK3erQTws8EysKdFCFkU9J+Em4mKPgUQdfp59bJcui4ZL7dgAGaXkABjoipj5DbQd0ZE8k1AjIgtxTW9VEUixdt4UaXUTQV3OzK3UL52CgOmAMbULMr4KZoTCPqGM3tWHovJcukvu2zpUS3/uFVifhyrfqvqOJZIhpp3E+e5BF64sGAAA"
+  },
+  "/workshops/coding/coding10.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding10-e883bc915b-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding10-e883bc915b-1440.webp",
+        "width": 1280
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRsgAAABXRUJQVlA4ILwAAABwBQCdASogABIAPwFqrE8rJiQiMAgBYCAJYwDOCiAADkGgW0hX43+zVeyAFgaLb3RTqbjYAPnaVSGLDulPH6PsAPYXyQz+cpktyg4kGlu6k+TuiFpdhxwz2rdITW8GR4HNXiW0IWJDI80Ini/GNHQ2Am2bmL9JS0GwMDCshvzR9Plpv4xfMj3l2btOIdCVYHd4VCsujfE2EagFNUFMZmT3ljulOreG5gp3njt2Yy4L+n/fftZl0sNQyCAAAA=="
+  },
+  "/workshops/coding/coding11.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding11-7fea709d04-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding11-7fea709d04-1440.webp",
+        "width": 1280
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRtoAAABXRUJQVlA4IM4AAABwBQCdASogABIAPwForE6rJaQiMAgBYCAJZQDI9Nq/+AZ1XSiyxo7bN/VRjbPGYyZdE3fAAPJi8gKa+qLjVVUjwhYoKtGy3kCWj7YJj9Dee5MY3SG1HBDDtunoKxQXmpwgOHWBlfM9WSLdnRbZLFlscHyEherTnYZWB0WTytcyRTie686Hy0zH+2xpEg1ADhfR93Cj6XR/HBSYpxntqcH5cUDt3YXEqwgd6pa1Rv0z0Q9vT359/8n3nujYaoQhcnQZoMPW2lUMhWpxgIOAAA=="
+  },
+  "/workshops/coding/coding2.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding2-3e14ee4176-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding2-3e14ee4176-1440.webp",
+        "width": 721
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRrQAAABXRUJQVlA4IKgAAAAQBQCdASoSACAAPwFyrVArJyQisBgIAWAgCWMAt7gIpOiXsuG92fXASLom6QzYwEQAAP3Piibm5F52XDg6ITgHutVOUEggu/joz9sEgTDYE8z+sod9+DcBkrYC1ISFgauoh3o8ymiKqehVcMi7JsF7vkB4mec9rI/YO0FXPSYHBEtHZYfUne8ZzDUQrpMF4jDmmXqQruz8cGGmyzY3g19571Mxh/XAAAA="
+  },
+  "/workshops/coding/coding3.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding3-6855b0c38c-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding3-6855b0c38c-1440.webp",
+        "width": 721
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRrwAAABXRUJQVlA4ILAAAAAwBQCdASoSACAAPwF2slOrJySiqAgBYCAJZwDGfq1yDeF7wy1zvxUjk3NepTNgfsqkoAD+qKHQZpOFDGLGFgVUTkISdq7QT09+WRSrhK5ibZFqlQZZLN9rBu3LuzJ8mXa7BO8oLISbBDNQTsTtjnvxG230MfO5lv+7NxHxFaa88gYeDwF++sLr9pBsZeVxlM6tr8dF5qWbBUJUnb88xzeFeHoSbPny1alJxKfd7QAAAA=="
+  },
+  "/workshops/coding/coding4.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding4-167bbcda75-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding4-167bbcda75-1440.webp",
+        "width": 721
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRsoAAABXRUJQVlA4IL4AAAAQBQCdASoSACAAPwF2s1OrJySiqAgBYCAJZwDE2FEtgxm5jRii4ctUhdig1H8Wl2QAANTBqv3C2ZxoYXgOkRsHOClHg6TMxbIv5waEeUCIxpR/BjFPE73+crA1nSTF/vvkqy/0qZA5eLMbeLqmSJ7qyP/hYd+xmm0cRaLUQDn6saWdPLrNcYtlSD+5DoFQxlnyl7eySZ8ma7MnzYUCCFUBCr5bslonxIyrI2bXghbIsruoQyQB45SzWbcJMAAA"
+  },
+  "/workshops/coding/coding5.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding5-16fc2791af-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding5-16fc2791af-1440.webp",
+        "width": 721
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRrwAAABXRUJQVlA4ILAAAAAwBQCdASoSACAAPwF2s1OrJySiqAgBYCAJYwDE+L/Hw2DiwHMbNRdL7zApDJDhTcc5dADxwyb9VWnuCBTsOg9lGPnU3T8XrqrhsoC6IFEZWGkPiDvx5MaoAnttYguaEHC5iyfk5mllsm8BxYu3y47s+Vpxreh1AmTqBDcsfSm3VStwhWGGPlsIHoyhzf6TwSAlGFxtn9DVkJowh+C05w15JsRHdW6JYU7P9S/D2d6wAA=="
+  },
+  "/workshops/coding/coding6.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding6-54d1e8b4c6-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding6-54d1e8b4c6-1440.webp",
+        "width": 721
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRsYAAABXRUJQVlA4ILoAAAAwBQCdASoSACAAPwFyslGrJqSiqAqpYCAJZwAAeAwwUjfIGS6i8dA6mFunnFMlDWNFGADxtt1JethfQvOeinjwNTPd/fBAu6+8tOjZhd/t1YavWGgcNS+Q4XSHNubDblZPix8+ZIgkrf4sQDi3ezfskTC1Jf6xpND6KJFvbInjjcX2Ykvg4LS6zjmV1kIzk95JgLizEgQ/qCvT+FXu8lxbT+xI2XEY5Ji2KlBMYgeWVBoqdquZietAAAA="
+  },
+  "/workshops/coding/coding7.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding7-c26705769b-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding7-c26705769b-1440.webp",
+        "width": 721
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRsIAAABXRUJQVlA4ILYAAAAwBQCdASoSACAAPwF2s1OrJySiqAgBYCAJZwDDNEhmYGkbFKHL/yi/m1p6uDU9PhUmqAD90SmOIhywlpHpsXenzf/Rp+L56IICafuTMzzyq4mHcNSP8XQsdleJoFEADHteEK7RHUpmjPE1FvRVGtidw9++5ZD49PPYr9PsXpuVEktX2mg96p0fUqCebhm/+WIrmGtLNU14JXGk7RL1GrEBE6h3ZHXqpJCvLW58dEONJ8H7iHAAAA=="
+  },
+  "/workshops/coding/coding8.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding8-9ae38e49a1-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding8-9ae38e49a1-1440.webp",
+        "width": 721
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAABQBACdASoSACAAPwFsrE8rJiQiMAgBYCAJZwDLpAjsrbAM8mfdj8rNKN9kAOjKNI5pSOB3dNaP3jOAyMZu1lWmmU2cOEeZRM1y+5JRQIV4etiSDl5bIBzbN7paKbY1Lur4qaPe3oOrtntvsRPwvK9mYZSzOauRdiSvZJcZ+GepbuUwIRsEbyj6LJT9x9AAAAA="
+  },
+  "/workshops/coding/coding9.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/coding-coding9-8135ea67f5-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/coding-coding9-8135ea67f5-1440.webp",
+        "width": 1280
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRqYAAABXRUJQVlA4IJoAAACwBACdASogABIAPvVkqE6qpaOiMAwBUB6JZwAAKSgMS1Vpr5WAMrI/bXr8JXSAAP0cGrnzJxA48/a1yORfvy18Bwz21mWXrEVZms8rPvHcT2HX9vzswMWBrb7wKDoy9vSQ9THSfZJyT9+J1SoVAidKHqSjd/XqeQcj/y0UUbcXxiORQ6NCevDqSRG/vFiJfMtZkhW81Nl+70AA"
+  },
+  "/workshops/dev/d1.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/dev-d1-c2c97deed5-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/dev-d1-c2c97deed5-1440.webp",
+        "width": 720
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRrQAAABXRUJQVlA4IKgAAAAwBQCdASoSACAAPwFwrFGrJiQiqA1RYCAJYgCsEf/qYtQq9b5na1Ylp5gMl5HeqCGyWADQSrHbEPq+0TJef9fMblrBN39aMcrttYjDRoJv2jSXLdmhzLivlq12+wKlp5Hdls2v1D/VC/ZhtWEQLab8tJJniRu/KyVPxi3+yfRYpIw1XfJlgCQfQMNfO8KfcDJ/FX5nM6N+N8onemJrhI74MNYAdqaolAA="
+  },
+  "/workshops/dev/d2.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/dev-d2-6b6d58cd4e-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/dev-d2-6b6d58cd4e-1440.webp",
+        "width": 1280
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRqwAAABXRUJQVlA4IKAAAADQBACdASogABIAPwFysFIrJqSiqAqpYCAJZgCw7Ap6CWQL/pRXM6viY+0tcFevAADKo+Z/5taYQ8zL7GuJ1A1osRId55GtwB5yzZW9Enztt8A0OgAAb3NdVZzcWMcorr/nF5TAm8IN2QioSokKj7jzVPjV1NQdsC73kmyX6czRBsdt9cwDpfbEEpf/kT0RI6W/Z0RQ5bGPzOwxXQ0olgAA"
+  },
+  "/workshops/inauguration/in1.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in1-40774d4797-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in1-40774d4797-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRtwAAABXRUJQVlA4INAAAABwBQCdASogABUAPwFwr1CrJiQisBgIAWAgCWMAthcugpzAIJHeQm0HUoQ3s8WgIIMLfocAAP6pqIsKqLlZqF3/30gWVJ5iM5W57YXc3G9XLY4CJVwTX/KnooHXTrk6gBHvt7VwAq8lD6qV7mUq9yK2CN0falRemtrkkv1WM7KaqEDCRNdXGwhyshSz9HpwDHP5s3UyI0A2OnoHwg37tjJx84RL1I5N+Szp5dZ+56kZSVGRWhv2n2sa25joC/FnqYbKiDEbJTWUVfTKofIZYAAA"
+  },
+  "/workshops/inauguration/in10.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in10-68fd28a695-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in10-68fd28a695-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRuIAAABXRUJQVlA4INYAAABQBQCdASogABUAPwFur1ArJiQiqA1RYCAJYgC+SHtf0j1XtrgkQmoRxNxFqVdoe4qoxgAA/vqJEDGFzqCZqrN0LfsgXpxx24uA7un80T3phtb9iYPHSQ3dL/wMbnbIUvwvhPTJfuNCE1Jr1GpLzvQnm2RiA9R2feJGxpb/yuteVRHw8MfHjgNoWb2d3J8O9LXw2u55Uq0shgfH6L1vSOZH/wddv83DDYyY6XfQW7/uhhZ7dgFDi5o6sQsWMAZvuvRP4HSYgI+K96Ptp9p+riqgxU2QWkAA"
+  },
+  "/workshops/inauguration/in11.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in11-f369e3658c-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in11-f369e3658c-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRqoAAABXRUJQVlA4IJ4AAACwBACdASogABUAPwFwrFErJiQiqA1RYCAJQBWACNPlowFxlMRM3dhfBnQ91WYAAP72ilDe8bT7mimD0y+c1VL8gCcjIHRWmGvX6osBGO04RdA1xVIfFqAW+H+MjE7WBUJbtAeOiTmk0VYNoTHjeSbr4ZVo1Ky5kGj1F70TvlrLoaVVQTj+qk5CtJYQPj6M+WQPNkWZJpSltIz4hwAAAA=="
+  },
+  "/workshops/inauguration/in12.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in12-efc6257242-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in12-efc6257242-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAAAQBQCdASogABUAPwFwr1ArJqQisBgIAWAgCUAToAIgIuZQvaafO1uPmL9yJlULD194AP7r47bXWpuw4+ptDnOCZ52BXUslABnb5EaC7AlKWGQg7ABwjxbrme/LysIsKFlOIwnB5k3D0XCNdIZLXIixbrUCJVlGdUYiwf9zrerFE0DKN1Mj+FfRwz2eFzpoAAA="
+  },
+  "/workshops/inauguration/in2.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in2-57243333da-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in2-57243333da-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRuIAAABXRUJQVlA4INYAAACQBQCdASogABUAPwFurlCrJiQiqA1RYCAJYgCxJUE7MAYJxo9L3anK5bfjcKxs7b+tuPF8AAD+ZdmRgbAf3WwyGrKW60Q+auw4tM/2C9DG4NjIJppoMxO/QS8dCzmOD0o3QTgowUvuX7X6KkFxqK4ZwbjzJQgnbVNKMnrwZBUk/WlqAzvm5inSjdJhL3FzbD0CeL1w0PTdrxdAjZIAWDX3k3o8nvmR1N5zyFEFfPaYDio8n8SSAtyTLl/kO8V+/c35NMTydqXUAeRFRdmceEHxD8h0AAAA"
+  },
+  "/workshops/inauguration/in3.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in3-860214a1e5-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in3-860214a1e5-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRsgAAABXRUJQVlA4ILwAAAAwBQCdASogABUAPwForE6rJaQiMAgBYCAJQBb3O4Aeh/hr6rmRFfSbq46qnM0hJcK2AAD+yArE9Aj4brLsFaxBH1XO85Hv9QsLWyXrKe3Sr5zSjit/aYXPaLRdNmRjhpoPSANgHETuCRfquHzvMDLseKwV9xf6+Hv+dTwT/9roly/7m75Yz4lm0ULBitdyBy1rPoPUoUWB3SP3vZhgxc6iNUI3hgXBmemyR0jhScAdEUXctnlKBSxBYcAAAA=="
+  },
+  "/workshops/inauguration/in4.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in4-351dfe3af1-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in4-351dfe3af1-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRuoAAABXRUJQVlA4IN4AAACQBQCdASogABUAPwFoq06rJaOiMAgBYCAJZQDO7CG7KduaPxo/xmx/dnXVbe4zBbD6aWNNAAD+tf3zuZaHmMvCTeU5yzKYnrZxsHx/aJ4tEuZ6hq2tfGfQOV6c94B82blPVcMKDVmZ/Ek2SodAqDYou3hBjyynTghZXag3kuvC9pOCBglTYlD29QmqAi4HRZ4Fo6F8zUt6TclrY5dgc+pPKFYbqSyIGKMmK0iD5zklxi7tX/pUQNNLGahnzPae3JSmFK+QDcQaqIPcMNbPZY1VWl36Oy0Ki5AQIglwAAA="
+  },
+  "/workshops/inauguration/in5.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in5-6f759f4a86-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in5-6f759f4a86-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRvQAAABXRUJQVlA4IOgAAADwBQCdASogABUAPwF2sVOrJyQiqAgBYCAJZAC9+IBbllq0HDcr4RaKkL36KExpp9QSx40KKiFRAAD+8BJsLVmrQN4w21Rw2wkcsnNzOb3YB5YbFqfTCooDXm8VBunrA8WZJQHL6GIGuLeYMljjMDkyX8GH7mH5keYthBNjmIobvr7vAFHwPTx2ePNhJ5kdaMm5FK0MijaZFqz6sjSGKxAcSPuRkccevKpWQZfbWcLz+vKc7J3tbY5L27w0BGOLSr50cSZEFmZDQRat/XCW0kHQTbuF5myPLWyfSPo5BUTujrEGfspb1AAA"
+  },
+  "/workshops/inauguration/in6.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in6-77a6fe58f0-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in6-77a6fe58f0-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRtoAAABXRUJQVlA4IM4AAADwBQCdASogABUAPwFqqU8rJiOiMBgMAWAgCUAWHbuisQNZtLBJ28cxU4VLiC4gJJgPmJh9eDxhAAD+6nXrmXcX1tXcMb4fI82wsH7ZBMGvXKJ7HJh9tOYnM/Lb5Eiesv5ORjALRPurPH3hALV/vEDsu7PLJuCY69E1DZ/97vrCCHnEqapZbkHNjH8aRugQUFiqpEThwdvln5dLDJRMYstEbvu9ObMBxBA8TAG5tfEZY0Gs42fhVkWcoKt5pnvhF59KNfzlJwCXELqMk8AAAA=="
+  },
+  "/workshops/inauguration/in7.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in7-54b0a89a31-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in7-54b0a89a31-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRvQAAABXRUJQVlA4IOgAAACwBQCdASogABUAPwFyr1CrJyQisBgIAWAgCWUAzNHc+YQCrCf6VdpuHevglS4wBOBoD/IO5QAA+70qfSEgtZKliyyu4izt1GqYBir2kvxFJfmzVx53vj4FBX4cE/2OjRrldtruMOPoANy7SdlB7+VFZKihvgVLZ8CwAFwcOMv1DLfGCKwx08WE7vf7Zrn94wRymnNdjuMs9cMTRfSFm/DsF/DO68zXplQHb2P9aAowlegoH8BdEr0Gg0XA2tm2KwsjxyVHhlX9PvZqqKOvnfgRe2iRzwCAFk2cO6bFF+XTb/14A/KkpgAA"
+  },
+  "/workshops/inauguration/in8.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in8-4e22c6eaf8-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in8-4e22c6eaf8-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRtgAAABXRUJQVlA4IMwAAAAwBQCdASogABUAPwForE6rJiQiMAgBYCAJZwAIFgJsfhvePfpHXfFWokEBWXJl8m3qAAD+zuW4bmYLndN14yMj1HK8/GLpl53oYATIfdlgiRXQ5t7zg+6DtrCZrHolFrsl0zXOL35EuZsdOHOcFvs9f5ZF+KcgNqbmtsaCypFDQH2IgmtgnKmKzT8ZN5k3LGfkFGOtmwaHsh9P5tEYZcVxGAJLZqm+iwsvlqAKQ/VUkjtkwZnb9mT0LYNYsN38rPhW5pNISWZST34AAAA="
+  },
+  "/workshops/inauguration/in9.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/inauguration-in9-70ed7cfc57-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/inauguration-in9-70ed7cfc57-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRn4AAABXRUJQVlA4IHIAAABQBACdASogABUAPvlqp06qpiMiMAwBUB8JQBWABgIUDGPlvCGwhJlbiukAAP7sje7+tgxVNu/Dvy7XpQsQnZzRmMSK+mRah697ZNG1IGtEuJZNxhQ74QiSwNPELlGx0fe9BwNs8p7ZBsqDVZjFVgRBEAA="
+  },
+  "/workshops/khoj/kh1.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/khoj-kh1-e46e83fcd2-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/khoj-kh1-e46e83fcd2-1440.webp",
+        "width": 1280
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRtoAAABXRUJQVlA4IM4AAAAQBQCdASogABgAPwFmqk6rJSOiMAgBYCAJZgCsAd0YzACiuN5DmFHA18dLHgSE3/jEAP0k7OuPgzsDDLaA88Ha+lVD8bJE7JlT+kkR6oSzdBlkHsXVPr8OS57mC74wfZZcocZEGLsDjOBLObMBHubIQRK20/+fCy8zHRDPQRndRTPL6V2D6Yb9BCPMExXVlVcLUSB6VxJ+ha57bJuADZqbZAXBD6pGlamTB4bdIHPLaKAmSeLyZvHlttXz8iHz/EPHe481akjh1VdQHm1cAA=="
+  },
+  "/workshops/khoj/kh2.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/khoj-kh2-d9a1f1300f-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/khoj-kh2-d9a1f1300f-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRuIAAABXRUJQVlA4INYAAADQBQCdASogABgAPwF0r1IrJqQiqAqpYCAJZQC3uYyMs1VP4xixuA0wHU0Qn8DRbea+tMuLuViAAP7vyS+b367IYUKecw6iUpJUuNqZ5lmXBgtCiqnKqjleu3BKI/ubw8iGcBhLxARzZ115OEsp1+VabhF1STsUiwPWyiEzyxGYKhs9w7K/B38kmGoF9L/EGuuWa2TM911V9qBKz/zqGg/MKZgGk4RCV669ajkXRAW13uRNEKwIuju9k055sH4qfXsCHAJhLs73N6ZRVhyJu4gOO8xkrYAA"
+  },
+  "/workshops/khoj/kh3.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/khoj-kh3-0fc2e2081f-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/khoj-kh3-0fc2e2081f-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRu4AAABXRUJQVlA4IOIAAABwBQCdASogABgAPwFwsFCrJqSiqA1RYCAJZQC7AYwmbpAp0wAlOGvgqNSz6PVEiMNYNR6AAP6NUM+7DIcHn0eBJ35iVyhcuyYHvO6uYKZCk4cHSBp90JkgKl+tDC08YMrocKueBZ2slEO0QAc4Vh0ei75YIILzvU+OcbkIhBvif8dVfOBErtJjVqCrXyFesIVz046VqPOskD93d/92I9KUm89Y51DSw5+g5OSRIPtq8u+tWmeQsJEfqFmmJc/xNHKSz/n8mJkOujZbZ1jxK7vw35uTkWe/JjCh5MgETJOLtAAA"
+  },
+  "/workshops/khoj/kh4.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/khoj-kh4-198f67efa5-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/khoj-kh4-198f67efa5-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRvAAAABXRUJQVlA4IOQAAADwBQCdASogABgAPwFys1GrJqSiqAqpYCAJYwC/7y67paPXOod2XyD90CHKtPTrH11vaN7I9KRhoAD+84J17jvTOsZKbUuRf4Xj2tPwslyKFlNM4RUWBVyECC7unjv5zzmZfYIiIcCUsFtb1VPFscn/kTHM574L8h+Uj0SggvSPBUXwbdfG1/+LWesrpZhi5qBLZot9sdww8751BglVGLVnrivWXjbA7mdxBJkMARd5cvX3AODvHnQSAyUhvZJN2f6x2hh/PvxtX0Dvfem0lf5vPYu1nht0ukIopWIajsW8iuwgAAA="
+  },
+  "/workshops/linkedin/linkdin1.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/linkedin-linkdin1-16cef93532-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/linkedin-linkdin1-16cef93532-1440.webp",
+        "width": 960
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRgoBAABXRUJQVlA4IP4AAACwBQCdASoYACAAPwF2slOrJyQiqAgBYCAJYwC06dzdgjAJ4O7m0Ij/jnS/hm1x2CG9LtX8pwAA/RxwMKo+tCh3UIjpTgWAw5SEeILVtZIS0Vdp5BFRCT17vuxLSvbyADV/neIvwd/Jh9yTUKbVUi//DSaGi0eMJMFkmbxGULwKnhs97VEbnNGWNVRmWdhnFaONnYsphivFfAwlnSLPq7a4iZEXtDVVjtwWwQP16dtjOHsQKmMHyWvdd75G1dN3wI25QS1n6gVzFArV2fswCRCDP73qfE3rMyzHZAp3cEQyRa7U0rnvbZKYsec+fYs/lQdf1ArdVSWrgVTe4k2AAA=="
+  },
+  "/workshops/linkedin/linkdin2.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/linkedin-linkdin2-86b2f30f4a-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/linkedin-linkdin2-86b2f30f4a-1440.webp",
+        "width": 960
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRt4AAABXRUJQVlA4INIAAAAQBgCdASoYACAAPwFwrVErJiQiqA1RYCAJQBbfbSHUKdhXVhz5XZ8PFqQQk0pTgx8AkpwnC+vWjwAA/Hp3SK0S14jyHhJaonA+Z8OogZhdOC0BE/9oT2c1JWD/k11D6btc6qY0uRLiM8xdfePml6fNHWtgIgjV5n6UsA17r4FyiYAtxW9HQETcEkv7rccMb5W9q/P3RwNXYwFlda/3A0xPSyxa+oqi9YMc9KBsWowJ4aS8atNIAGanncc1T1PaPGNFGU8wVqQLmPlp4XUsTnpwAAA="
+  },
+  "/workshops/linkedin/linkdin3.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/linkedin-linkdin3-f45f2f81e7-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/linkedin-linkdin3-f45f2f81e7-1440.webp",
+        "width": 960
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRvQAAABXRUJQVlA4IOgAAADwBQCdASoYACAAPwF2s1OrJySiqAgBYCAJYwC/PAgR4Hvtph70YulOqf02l4wLp2fHN5FW17t/AAD+b22i+vCMCr+Ad/QPrBsq/LT7KIh8JhRlAWKH+44KUfOKFvbMLVfyvIIVJgLMS+KsENay43L7XwKsf7v4QUliCC9y0rvbNaHJuTTD8cq3xyE6pLevns7u2DuxNJVEEZEFhcAHdf7FkbWKCDDrmfQRmEfFPOApamp5Rm3hjc5t+fGrXqk9pqWZzYWF4GGJeUVKMA6itQyBsC6TfMzF5sAGYXu2+lnHshYFPSUmTAAA"
+  },
+  "/workshops/linkedin/linkdin4.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/linkedin-linkdin4-410e61b0ab-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/linkedin-linkdin4-410e61b0ab-1440.webp",
+        "width": 960
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRuAAAABXRUJQVlA4INQAAACwBQCdASoYACAAPwFyrlKrJqQiqAqpYCAJQACiZ98+cVN025e2cz5fU/AbCSt2YcJ7Qj9H8oAA/iaQqkc+edC6xJTip5/V/71w7bwq5LKLUXKFxCcv9zdaR7Y6L7VpEdN2r9pwh31OhSh45HWNBqh7A8yRyunm5o/SdFlHowRPUA+IU07CEg/s2dI4LCvT2rxlrMDAr1OPDZQASyfSo6wvux9WkzrwZO6Olg7O8kGxthCj3ntYSKaubOScQjR7l/clv9wB7PcMgNhNDLBZZPgls8AAAA=="
+  },
+  "/workshops/linkedin/linkdin5.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/linkedin-linkdin5-5f263278bb-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/linkedin-linkdin5-5f263278bb-1440.webp",
+        "width": 960
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRvYAAABXRUJQVlA4IOoAAACQBQCdASoYACAAPwF2slOrJyQiqAgBYCAJYwC2zbASABwgpO5m3VRkt9PKf4zZ3YE/8ypoAAD9d2aN6P/OSVWPvAzDSzbhLDUZ8Up4ANe0KAUF5if1Medr0bbvRJDFSnZRMa2Iw0aVDfmBl0Fhtbbe+zT9Rq84xE723ItMW5YkU66iOaOsWiiyNHOy1A0cRk/CiyCViYJg163OcUXjHcbLLyG/twUh/Akiq+yKglDezbp5pjYieZWgDz3HMY6ijO5XKV9lNqkNdr+Klc6xtHjWpo/9oS4fuiqAdh4SJu1OVd4UUqolCGI8AAA="
+  },
+  "/workshops/linkedin/linkdin6.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/linkedin-linkdin6-223859b6d4-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/linkedin-linkdin6-223859b6d4-1440.webp",
+        "width": 960
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRuYAAABXRUJQVlA4INoAAAAwBQCdASoYACAAPwFyrVKrJqOiqAqpYCAJZQCnFYzcnJvy6T8/b3l2+5KgmkP9JrXfAAD8XJ1GL3aRRX7c06wM/x77bCdieySwyyZXCZTZ1ysNek98uMub6YQJmMqd0QjZ5FJNPnyxWSin5xC4UPgoG2fPOymBXGvu21/+cE6Ro0nHwyfSeL5ayea9apJmzJh3bSzQDxOjQXOiKpgL9qS6DJg9qILMUVQa+rsV3ISTcu8fzhS7YXApiAYFDr8C8cTrKdiNpT0ZNosjYk07eHQXbyu1BE7gcUqgAA=="
+  },
+  "/workshops/linkedin/linkdin7.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/linkedin-linkdin7-179040dcff-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/linkedin-linkdin7-179040dcff-1440.webp",
+        "width": 960
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRhgBAABXRUJQVlA4IAwBAADwBQCdASoYACAAPwF2slOrJySiqAgBYCAJYwC7BvA1ohBXvJiydrohCiuG0FPfnerAO0rPYcnMuADNj7juvPrzSGTwitkJzI6ef0phtSbDTzmKvJ5UVJvlFWUHsv6UIehj20J7pTufFwmqQm6m1U7Xq8duAOUB/XekR88rvKQlbM16v+49iOt2J0A30OK1AhpUo+trnlaV5yMpR563kE9SnQhU3ZAqP/nhaX6Wk3t/B9nGdiqVn5R8teE8T1Ht8l1rgO9S3JHGKQTrk5XYLoeCjnnwuTCtYyepzZ6vwHgfdeADcpXqU0ISAwPY5Po+erP/+5ekdingoCmPaN/F3J95bJMvwWQOSt9EAAAA"
+  },
+  "/workshops/linkedin/linkdin8.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/linkedin-linkdin8-cd9c1f6e77-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/linkedin-linkdin8-cd9c1f6e77-1440.webp",
+        "width": 960
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRgYBAABXRUJQVlA4IPoAAAAQBgCdASoYACAAPwF0rlKrJqOiqAqpYCAJQBYeAQI8D38rkTrXI7igx2n+rloyXanTXT/ck0DMmxAA/Ubh3b8K4cZgcZIIn0Nr9o5/DjRgDXrVqATh4TQLl1eBqndy/VB6/rj4iL/CYKxg4ia4n6S9DasHhFbk8GRPJosunocmTaSMFvpJhMukdhMPddDj0nUXbzGND5jN1kU7F7GzAC+vFd6T39R8gFrZ48crVnBKdzPrDQHfdZ8sTMcTfSAG0eJzpw3KbtmRMdJYe/YgcvSP8sMz+3Vm/tKn6wWJnacgehZuTWnqxihjCdGHlEinL/1M3exA1h803gAA"
+  },
+  "/workshops/linkedin/linkdin9.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/linkedin-linkdin9-d8e7058ff0-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/linkedin-linkdin9-d8e7058ff0-1440.webp",
+        "width": 1264
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRswAAABXRUJQVlA4IMAAAABwBQCdASogACAAPwF2s1QrJySjKAgBYCAJZQCDqHlDHKwsN1m7XAAy/ZNcRn8UUqWk1FdwAP7N/YK0zjPOyabfZooZGMxiHmrqa6Cg1A49QoELMR+EH3vXnSY+BGf35gsz7XOGxziF6Oo5yj9b8JS69Y0tZoSTv7M3VK+WRoLLcK7BfPIMzUeCm+1qcyx+rjoAjLedkEy8JLtL9bxlltbfa2Opydq3GX1xKNwwI5zFJ3ZM4b47xFCiBTVNOg6AAAA="
+  },
+  "/workshops/n8n/n8n1.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/n8n-n8n1-549cf44e34-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/n8n-n8n1-549cf44e34-1440.webp",
+        "width": 1280
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRtoAAABXRUJQVlA4IM4AAABQBQCdASogABIAPwFurk8rJqQiMAgBYCAJaABVI/AAPVE5rz6yBdtNDgtrHIlFCRVTAkAA/otOMYewBAraBQO+4dmvKAm9Yay+aIHXSsfT26qonbRz6Dn2/6rJkv/E7THp4pqh5AoXgzCVhHKgGq9apkFYJNROt1yb+DplE9klMHgrpRLFGzdP1/dBndgAEEqHCfURtLh9pfPwvh8B7kMQzXSsjFSXNT7o+PYnp9bvvDX728t+SpklDmDNYMhL29a1xqpQEEd7K0guZAaAAA=="
+  },
+  "/workshops/n8n/n8n2.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/n8n-n8n2-98ea6657de-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/n8n-n8n2-98ea6657de-1440.webp",
+        "width": 1280
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRrwAAABXRUJQVlA4ILAAAAAwBACdASogABIAPwFqrE6rJiQiMAgBYCAJZAAAKcSX275a5h1dOxibfgAA7URF58rxA4RjzMv27vOJZ6PPp+rYWYTSMZb4EE6UInrD2mh9ycw/6G/ZGrfTkikhALVK6ioUR0bdjPe63kN9r6xrkdY1s9XbMtyAiKPmvkbA8+lROSV+QBO4O9p/n7KTraEs7wHThui/HtszeAIAcBz/cr8YkuXSrt+3ROkzXDxKwTgAAA=="
+  },
+  "/workshops/n8n/n8n3.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/n8n-n8n3-6764dcc594-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/n8n-n8n3-6764dcc594-1440.webp",
+        "width": 720
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRpYAAABXRUJQVlA4IIoAAADQBACdASoSACAAPwFwsVIrJiSiqAqpYCAJZQCuHDOSWejheZV0HxdpQkqox2AhQAD+M9kxWxfvsZhyLqfKJBT+g037Sbv5P0u7J3qGsIKhd6eAk8222eMkZ+4MLqJkGZJqh32mUiS0wJBK8ejL+wKBJ33Usn2/GV9w1b9NDnAowAASS8ZVbes/gAA="
+  },
+  "/workshops/n8n/n8n4.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/n8n-n8n4-c9d7b945c3-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/n8n-n8n4-c9d7b945c3-1440.webp",
+        "width": 720
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRqIAAABXRUJQVlA4IJYAAABQBACdASoSACAAPwFsr1ArJaQiqA1RYCAJQBadBwLNe3HlaTs5RJDUj+EAANT4BnZZbShSBCUhlVzdiImWIrh0l0M9+rLT7gqQnYPhifydRJtHepLu0m/b/cnEGB+fnpo3Ft1JUbhRQleG1F9fxCj1aWvM4MsfrNNx0fl5ZsTGa15R5jDNT+7FYm5g5hlrKEQsqKBpAAA="
+  },
+  "/workshops/noesis/no1.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/noesis-no1-799457562d-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/noesis-no1-799457562d-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRrQAAABXRUJQVlA4IKgAAAAwBQCdASogABIAPwFsrU8rJiQiMAgBYCAJZQDE2CPOnBN/5JGKkW9bbLoFczpbDDUjGAD+wGsbr+fqRDKQJR5EBNBEnZpTCndR3Xv8PVQpIibHKtsXgnFZd1anJcx1inTIFX4UOjVur18zTbVprTk6mWsFrTg/KQSpNnV6I3rLm039zVBK50r38iX31T59oKVRbozpaMD70f7Z4/Wz9LB2mgaTQTjmgAA="
+  },
+  "/workshops/noesis/no2.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/noesis-no2-19a83d9d22-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/noesis-no2-19a83d9d22-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRsYAAABXRUJQVlA4ILoAAABwBQCdASogABIAPwFqrE8rJiQiMAgBYCAJYwDKAdwA3D47hBgb7oYuqvAOoe7XUKPRFc3AAPa4FlgHVETTmEA7qlVZiFfiBv/u+m3thfMoyFgKQ8Xul+ec2csafrU6vbhvz1GI5I9D0Bykz1NwfnFFLnrCyQ4CVqa6hYVmCcrmHRPk/v7KHe1Fm3aqvwOX+Z7pPyYfq+z3HmJ6LIh33JcgF1d1RhADqzwVMp5ayTqTUTuqlXS9fUlwAAA="
+  },
+  "/workshops/noesis/no3.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/noesis-no3-4fb9feaa59-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/noesis-no3-4fb9feaa59-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRs4AAABXRUJQVlA4IMIAAABQBQCdASogABUAPwFqqU+rJaOiMBgMAWAgCUAYapf4lZMXOcoFkZa2WpdJAF1u3DEvkQAA/t/4xMTlH9xdrHFh88RMLd7CyuQwwqmQau74j5eukbW3LsgL3FkHt6maQSTXyBScDxVDNYZ11OV7tba/ikDLXxIGnV38XILfbc7iMSchczhQ9kfrBafjFXTqgqlmd5Q7bAGRykaNA1Q3Z/GXQKGedwENjorY+pJhqSeg1u2miygXR/eSEJlwZeunsAAAAA=="
+  },
+  "/workshops/noesis/no4.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/noesis-no4-d80cb170aa-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/noesis-no4-d80cb170aa-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRvgAAABXRUJQVlA4IOwAAAAQBgCdASogABUAPwFqr1ErJaQisBgIAWAgCUAX5zGGDl0l0IthLGjxgq+woGZDI4BkkOtyw8zhjkgA/KxyHFhKhpq2mpMGo8a7xTr9oLqExyCRen1sX2ffl5OjkCtXT71BUTBXfG6dH+/J9vvzadCdXqyk+hZ13TeQYqCuA7uzt8NkFkY3H6cb17mRdFX7FfFR29Atnme9LH1/Sz9qODx/3G645aREkx6dJ3WhwqF3axu4ObQcrhJ64bWF2+VKWTUy9M38oiji3vqznZxeSQTj0Esv3QtnlsVO4kRzv57gjeSksdLigqBxCOgAAA=="
+  },
+  "/workshops/noesis/no5.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/noesis-no5-bb10c09316-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/noesis-no5-bb10c09316-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRs4AAABXRUJQVlA4IMIAAACQBQCdASogABUAPwFqq06rJiOiMAgBYCAJYgCxHt8CbMiq3umV6rtLDu3HKPdVPVp7FLpGwAD+vZ85KJpDsujqqDGfwwjmnZy/96Oj88mq0+gEORW6bmTnMlBKoI5sELUQ37iKxET2CovmjbVbMNOVZDcVVooopqGT8kf8yoqPb6lS9C4DGFfBIblDsJD2jl9XVh7L0d6qbpZFN0zAAkD+8PRgM3u613ZDtRZKq5mgxEoGmhV1JzYn47739ysqH18AAA=="
+  },
+  "/workshops/noesis/no6.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/noesis-no6-8de855448d-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/noesis-no6-8de855448d-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRgABAABXRUJQVlA4IPQAAAAQBgCdASogABIAPwFqrE6rJiQiMAgBYCAJYgC1F4BAMxy+Tx5+/eEe5WfpExb54Z3Rx9rO0qmfVYAA/s0D+ePKCe38loSVKFJKWSwFSFQ6EGQlRowPzL1Dv3hjxdnbrurF0EABsvVTuQrSqDrFyhhdLQFRpILaQ0mpenlPjxXjxNUVfqTomyQycjNvjnfJqRZxFB6KA/OIpZYF5NkhXQQo52ApdyaHQHTLIjY/sjwlMi+Pxpgk18ZI3XQakUw3eoGlFkLwfW1Y0RMn+lanJeY3vlE7KqYv9KaP7hcy8uXJzDfebzGE5Io0UIvi8ulAnJA1QAAA"
+  },
+  "/workshops/noesis/no7.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/noesis-no7-4b09f21a75-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/noesis-no7-4b09f21a75-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRugAAABXRUJQVlA4INwAAACQBQCdASogABIAPwF0rlArJyQisBgIAWAgCUAWIaQAKI8MtDBNHHXZOrqQpwqdrRbiuxF8cAD+6/8JWIHbOOQXZ3fGAqFUWuMNktz7UzF5H8Q3ZwnwWt/cDAwfLgbFB92oN9IQUuJENvGwHUDwUwPUdpTyr26Z3oALbym8xyeZB8mF7Gkdi+GhP87QaXcUykED8CiLp/IzWnZPcHByI25awe4KL1i5hFKknSKt3EiFBMWcCQq9r91wj78BuiIAoMpgvJIxMNJzGs7/8/EVgjMN6dLQ0nOK63jnXMAA"
+  },
+  "/workshops/unlocked/un1.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/unlocked-un1-71da8663e4-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/unlocked-un1-71da8663e4-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRsAAAABXRUJQVlA4ILQAAACQBQCdASogABUAPwFqrE8rJiQiMAgBYCAJZQC84d0Y2L37SDTnDDxsQT7fzm9i0C1ClpUwQAD+zftqdwlFyTRr4P6m0k8xsnnMZoz+rlxUnZ2EubDvYYVy9x/eUgeha804tpINtF3u6SmBpQH9PG6ahA+AsHA14t916tPmGaSqA/4ao3U0G0grjd75Ipj5fgdcOGwbFc2w22OcupmWqMegyCEAjDB/AEcME8DujsgKb9UAAAA="
+  },
+  "/workshops/unlocked/un2.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/unlocked-un2-bd2efdc9c5-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/unlocked-un2-bd2efdc9c5-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRuwAAABXRUJQVlA4IOAAAACQBQCdASogABUAPwF0rlArJyQisBgIAWAgCUAZg7GRaaE/F5dsRtoVa28YUgyfyOC0m2DgAAD2pVuxAgWg+kwx9KNlHHSgokGbnQD8GqCaATyWBnno4ywmTElrQRtsglOyOUV2Z8t0POKW8E7ZvqeVymd1DmHxzyazTFsn8lmVARin9UKISKzhVAbw94XlQ0xteRosMiI49gh/Ze0KYtMMPJnICRQcxRmsQO3tPfA7mT7GmBTrYbiDnpS2hLsFA/FglYADYfjE9KyqNUdb1t0L7lxD/ZbwErAY+dElnuAAAA=="
+  },
+  "/workshops/unlocked/un3.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/unlocked-un3-7adc73d099-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/unlocked-un3-7adc73d099-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRsoAAABXRUJQVlA4IL4AAAAQBQCdASogABUAPwFsrU6rJiQiMAgBYCAJZQDO7CLGof7rJi9fEfbzJXYpduamfKZgAM4apmbAjbV0dGx2n6WjaAnhH38iLJGhV28GyJjtutZ1ICg16jCph5UPs0sjY4E3xXMGOjxaI28fPQKEsFBGEvnVTqCVFBpPwrJzaXK5UTNjwPbx7NYxs4WAacmTRtkBQIvWX1UtHxm0tretlHYx7N7NwbL5dJt38lYBenurZKtn5i8dN1lGRKxxAAAA"
+  },
+  "/workshops/unlocked/un4.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/unlocked-un4-b93b0da629-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/unlocked-un4-b93b0da629-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRgoBAABXRUJQVlA4IP4AAADwBQCdASogABUAPwFqrE8rJiQiMAgBYCAJQBYeNZ/IDesB+zFh/NXAhCEh2TgNQiH+KP3J+NzkgADP6p/uNKthLQf8+roTzh7/9clMa+z+uV4qjKG58087qsKvmZPBS0TFqLiG4HRsB0ufP3vr3PCOqHCRiew976UAKF6AY8t7PJNCWxygh1ninm95xJRHstkL9Ov3Jrv6tlk4kgC5kVKJtlAG0FKG3n2AnjKw7G1Rb5v/l7p+JmR1e7cKdhkA8nZhmpGdKAAA+gxB9KU9VrvgDb5/5inPMinUjXzySN3ozBNzORh63yAviPLwvF17hFiu7JAnGpB1VPpwnEAAAA=="
+  },
+  "/workshops/unlocked/un5.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/unlocked-un5-bed3855d8b-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/unlocked-un5-bed3855d8b-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRggBAABXRUJQVlA4IPwAAACwBQCdASogABUAPwForE6rJaQiMAgBYCAJYgC32SAqdrfUSA+PgLKfPB5mIeJ/l3ToU5O9s4AA/qmVgOy9UbDzx8EhR7I4E0p6UDl54TtOGe/MPiiFcNdqhBzKEekTSMea265dZka7StZAJAcOaSH9kovTMShqTBeOON0r1T6hgNjQVV3XMSTolNfPdam5+zT7sqwGShmvoLg20CeubmN5YaLmIkXXmRrjgdGstXCuc+LMgXaQKKaY3PEeFouZHqGvPrf9KWG/Nx/TNHFwKw619qnZ8v4d5Uf3hg3w0mO8gEQ4vqpJGnkpYQ/qy3QzJWr8WL0AqAZFaAzAAAA="
+  },
+  "/workshops/unlocked/un6.avif": {
+    "images": [
+      {
+        "url": "/workshop_images/unlocked-un6-f04269bfd0-640.webp",
+        "width": 640
+      },
+      {
+        "url": "/workshop_images/unlocked-un6-f04269bfd0-1440.webp",
+        "width": 1440
+      }
+    ],
+    "preview": "data:image/webp;base64,UklGRsgAAABXRUJQVlA4ILwAAAAQBQCdASogABUAPvlopk6qpiMiMAwBUB8JQBTihDwEGzR4fCw+jnJGYCIfS5L3H28AAP7sAzJHjP8N24hkaUmkkt4EyTS+UTk+p33O/rpZ2VxzpxwF86UltcLTCbmgTNjes6bAP8X4SZuYy3skLtjcJXDesXe3QOTZLzJu2IodHamdOCp4NoC73JP0HCn26XZw3nTlKo5/kFYhDcEarZZL4k23Xgb1M8zUyf2uo+HYr9kDc1lJrP5BJ9aQAA=="
+  }
+}

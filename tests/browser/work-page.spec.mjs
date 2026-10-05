@@ -33,16 +33,13 @@ for (const width of [1440, 768, 390, 320]) {
     const dialog = page.getByRole('dialog', { name: 'i Laundroid', exact: true });
     await expect(dialog).toBeVisible();
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    await expect(dialog).toContainText(site.projects[0].description);
-    for (const name of ['Book', 'Track', 'Deliver']) await expect(dialog.getByRole('heading', { name, exact: true })).toBeVisible();
+    await expect(dialog).not.toContainText(site.projects[0].description);
+    for (const name of ['Book', 'Track', 'Deliver']) await expect(dialog.getByRole('heading', { name, exact: true })).toHaveCount(0);
     expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
     expect(await page.evaluate(() => document.body.style.overflow)).toBe('hidden');
     expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
     await page.screenshot({ path: info.outputPath('machine-details.png'), fullPage: true });
-    const contact = dialog.getByRole('link', { name: 'Talk to the team' });
-    await contact.scrollIntoViewIfNeeded();
-    await expect(contact).toBeInViewport();
-    await expect(contact).toHaveAttribute('href', /^mailto:nucleussjec@gmail.com\?subject=/);
+    await expect(dialog.getByRole('link', { name: 'Talk to the team' })).toHaveCount(0);
     await dialog.getByRole('button', { name: 'Close project details' }).click();
     await expect(dialog).toHaveCount(0);
     await expect(trigger).toBeFocused();
@@ -60,7 +57,7 @@ test('keyboard activation, focus containment, Escape, backdrop and repeated open
   const close = dialog.getByRole('button', { name: 'Close project details' });
   await expect(close).toBeFocused();
   await page.keyboard.press('Shift+Tab');
-  await expect(dialog.getByRole('link', { name: 'Talk to the team' })).toBeFocused();
+  await expect(close).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(close).toBeFocused();
   await page.keyboard.press('Escape');

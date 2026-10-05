@@ -1,0 +1,165 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: ride-book.spec.mjs >> station books turn pages, stay in bounds, and continue the ride at 1440x900
+- Location: tests\browser\ride-book.spec.mjs:33:3
+
+# Error details
+
+```
+Test timeout of 60000ms exceeded.
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - link "Skip to content" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner:
+    - navigation "Main navigation":
+      - generic:
+        - generic [ref=e5]:
+          - link "Nucleus home" [ref=e6] [cursor=pointer]:
+            - /url: /
+            - text: Nucleus
+          - button "Open menu" [ref=e7] [cursor=pointer]
+        - generic [aria-hidden]:
+          - generic:
+            - generic:
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /
+                    - generic [aria-hidden]:
+                      - generic: H
+                      - generic: o
+                      - generic: m
+                      - generic: e
+                - listitem:
+                  - link:
+                    - /url: /events
+                    - generic [aria-hidden]:
+                      - generic: E
+                      - generic: v
+                      - generic: e
+                      - generic: "n"
+                      - generic: t
+                      - generic: s
+                - listitem:
+                  - link:
+                    - /url: /projects
+                    - generic [aria-hidden]:
+                      - generic: O
+                      - generic: u
+                      - generic: r
+                      - generic: w
+                      - generic: o
+                      - generic: r
+                      - generic: k
+                - listitem:
+                  - link:
+                    - /url: /team
+                    - generic [aria-hidden]:
+                      - generic: T
+                      - generic: h
+                      - generic: e
+                      - generic: p
+                      - generic: e
+                      - generic: o
+                      - generic: p
+                      - generic: l
+                      - generic: e
+              - list:
+                - listitem:
+                  - link:
+                    - /url: https://www.instagram.com/nucleus_sjec/
+                    - text: Instagram
+                - listitem:
+                  - link:
+                    - /url: https://www.linkedin.com/company/nucleus-sjec/
+                    - text: LinkedIn
+                - listitem:
+                  - link:
+                    - /url: https://github.com/nucleus-sjec
+                    - text: GitHub
+                - listitem:
+                  - link:
+                    - /url: mailto:nucleussjec@gmail.com
+                    - text: Email
+            - generic:
+              - generic:
+                - generic: Made of many minds
+                - generic: © 2026 Nucleus SJEC
+              - generic:
+                - generic: The community
+                - button: Stay connected
+  - main [ref=e11]:
+    - region "Nucleus events" [ref=e12]:
+      - button "Back to Events" [ref=e13] [cursor=pointer]
+      - region "Nucleus roller coaster" [ref=e16]:
+        - heading "Inside Nucleus" [level=1] [ref=e17]
+        - paragraph [ref=e18]: Hold W or D to accelerate. S or A brakes and reverses. Hold Shift or the Boost button to speed up; release to return to cruising speed. Drag the scene to look around. Use the joystick on touchscreens. The track loops back to the start. The cart automatically stops at event stations, including while boosting. Close the event or press a drive key to continue. Click a checkpoint in the top-right route map to travel to that station automatically; a drive control takes over. Open Map to select a station. On the full map, drag to orbit, right-drag or use two fingers to pan, and scroll or pinch to zoom.
+        - group "Nucleus roller coaster. W or D to accelerate, S or A to brake and reverse. Hold Shift to boost. Drag to look. E opens a nearby station." [ref=e19]:
+          - generic "Stations on the map":
+            - 'button "Ride from station 01: Inauguration" [ref=e21] [cursor=pointer]':
+              - generic [ref=e22]: "01"
+              - generic: Inauguration
+            - 'button "Ride from station 02: Dev" [ref=e23] [cursor=pointer]':
+              - generic [ref=e24]: "02"
+              - generic: Dev
+            - 'button "Ride from station 03: Khoj" [ref=e25] [cursor=pointer]':
+              - generic [ref=e26]: "03"
+              - generic: Khoj
+            - 'button "Ride from station 04: LinkedIn" [ref=e27] [cursor=pointer]':
+              - generic [ref=e28]: "04"
+              - generic: LinkedIn
+            - 'button "Ride from station 05: n8n" [ref=e29] [cursor=pointer]':
+              - generic [ref=e30]: "05"
+              - generic: n8n
+            - 'button "Ride from station 06: Noesis" [ref=e31] [cursor=pointer]':
+              - generic [ref=e32]: "06"
+              - generic: Noesis
+            - 'button "Ride from station 07: Unlocked" [ref=e33] [cursor=pointer]':
+              - generic [ref=e34]: "07"
+              - generic: Unlocked
+            - 'button "Ride from station 08: Coding" [ref=e35] [cursor=pointer]':
+              - generic [ref=e36]: "08"
+              - generic: Coding
+        - generic:
+          - generic:
+            - generic: THE LOGO LOOP
+            - generic: Six passages. One endless journey.
+          - generic [ref=e37]:
+            - button "Events 8" [ref=e38] [cursor=pointer]:
+              - text: Events
+              - generic [ref=e39]: "8"
+            - button "Add Event" [ref=e40] [cursor=pointer]
+            - button "Wind sound" [ref=e42] [cursor=pointer]:
+              - generic [ref=e47]: Sound
+        - navigation "Ride route map" [ref=e48]:
+          - generic [ref=e49]:
+            - generic [ref=e50]: THE LOOP
+            - text: LIVE
+          - generic [ref=e52]:
+            - img [aria-hidden] [ref=e53]:
+              - generic [ref=e64]: START
+            - 'button "Travel to station 01: Inauguration" [ref=e65] [cursor=pointer]': "01"
+            - 'button "Travel to station 02: Dev" [ref=e66] [cursor=pointer]': "02"
+            - 'button "Travel to station 03: Khoj" [ref=e67] [cursor=pointer]': "03"
+            - 'button "Travel to station 04: LinkedIn" [ref=e68] [cursor=pointer]': "04"
+            - 'button "Travel to station 05: n8n" [ref=e69] [cursor=pointer]': "05"
+            - 'button "Travel to station 06: Noesis" [ref=e70] [cursor=pointer]': "06"
+            - 'button "Travel to station 07: Unlocked" [ref=e71] [cursor=pointer]': "07"
+            - 'button "Travel to station 08: Coding" [ref=e72] [cursor=pointer]': "08"
+          - paragraph [ref=e73]: Click a station to travel
+        - generic "Ride controls":
+          - paragraph: Your journey starts at any checkpointSelect a station, then drive at your own pace
+          - button "Return to ride" [pressed] [ref=e74] [cursor=pointer]:
+            - generic [ref=e79]: Ride
+```

@@ -1,0 +1,55 @@
+{
+  "conditions": "Headless Chromium, 6x CPU slowdown; local assets; 4 seconds of activity. GPU/host scheduling affects timings.",
+  "samples": [
+    {
+      "target": "ripple",
+      "device": "12-core desktop",
+      "p95FrameMs": 33.30000000000018,
+      "frames": 223,
+      "pixels": 1499432,
+      "taskMs": 2368.783,
+      "scriptMs": 204.32700000000003,
+      "layouts": 0
+    },
+    {
+      "target": "tower",
+      "device": "12-core desktop",
+      "p95FrameMs": 300.10000000000036,
+      "frames": 66,
+      "pixels": 324000,
+      "triangles": 362,
+      "calls": 5,
+      "shadows": false,
+      "antialias": true,
+      "quality": "0",
+      "taskMs": 3840.9320000000002,
+      "scriptMs": 1034.1359999999997,
+      "layouts": 2
+    },
+    {
+      "target": "ripple",
+      "device": "2-core phone",
+      "p95FrameMs": 16.799999999999727,
+      "frames": 251,
+      "pixels": 184836,
+      "taskMs": 603.459,
+      "scriptMs": 127.96399999999997,
+      "layouts": 0
+    },
+    {
+      "target": "tower",
+      "device": "2-core phone",
+      "p95FrameMs": 50,
+      "frames": 143,
+      "pixels": 329160,
+      "triangles": 362,
+      "calls": 5,
+      "shadows": false,
+      "antialias": false,
+      "quality": "0",
+      "taskMs": 3685.205,
+      "scriptMs": 1495.4879999999998,
+      "layouts": 0
+    }
+  ]
+}

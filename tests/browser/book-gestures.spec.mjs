@@ -39,6 +39,9 @@ for (const viewport of [{width:390,height:844},{width:320,height:568},{width:844
         expect(story.height).toBeGreaterThan((await surface.boundingBox()).height * .95);
       }
       await page.screenshot({path:info.outputPath('opening.png')});
+      // Short screens now have readable, scrolling contents. Start this page-
+      // turning check at their bottom; reading gestures have separate coverage.
+      if (mobile) await spread.locator('.station-book__story').evaluate(element => { element.scrollTop = element.scrollHeight; });
       const box = await surface.boundingBox(), x=box.x+box.width*.8;
       if (mobile) {
         const pull = Math.max(240, box.height * .8) * .45;

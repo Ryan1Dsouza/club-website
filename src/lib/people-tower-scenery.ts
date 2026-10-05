@@ -68,13 +68,13 @@ export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeig
   const tabletopUV = tabletop.getAttribute('uv');
   for (let i = 0; i < tabletopUV.count; i++) tabletopUV.setXY(i, tabletopUV.getX(i) * 32, tabletopUV.getY(i) * 32);
   const floor = mesh('timber-tabletop', tabletop, material({
-    color: 0x40352b, map: wood, roughness: .86, metalness: 0,
+    color: 0x172019, map: wood, roughness: .86, metalness: 0,
   }), floorY - .28);
   floor.rotation.x = -Math.PI / 2;
 
   const segments = detail === 0 ? 12 : simplified ? 32 : 64;
   const board = mesh('wooden-board', new THREE.CylinderGeometry(2.6, 2.75, .28, segments), material({
-    color: 0xa58e6b, map: wood, bumpMap: wood, bumpScale: .004, roughness: .63, metalness: 0,
+    color: 0x70856b, map: wood, bumpMap: wood, bumpScale: .004, roughness: .63, metalness: 0,
   }), floorY - .14);
 
   // A narrow timber border frames the green playing surface. The weave only

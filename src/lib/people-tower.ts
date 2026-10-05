@@ -96,8 +96,6 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     let matricesDirty = true, renderedProgress = -1, lastRenderTime = 0;
     let layoutDirty = true, scrollDirty = true, initialized = false;
     let previousUpdate = 0;
-    const shell = section.closest<HTMLElement>('.site-shell');
-    const mobileLayout = matchMedia('(max-width: 768px), (pointer: coarse)');
     const scrollMotion = { value: 0, velocity: 0 };
     const right = new THREE.Vector3(), up = new THREE.Vector3(), forward = new THREE.Vector3();
     const source = new THREE.Vector3(), pulled = new THREE.Vector3(), activeSource = new THREE.Vector3();
@@ -107,6 +105,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     const euler = new THREE.Euler(), curve = new THREE.CubicBezierCurve3();
     const plankScale = new THREE.Vector3(...BLOCK_SIZE);
     const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2(), dragPlane = new THREE.Plane(), dragPoint = new THREE.Vector3();
+    const lastDragPoint = new THREE.Vector3(), throwVelocity = new THREE.Vector3(), pointerVelocity = new THREE.Vector3();
+    let lastDragTime = 0;
     let pointerId = -1, draggedIndex = -1, downX = 0, downY = 0, travelled = 0;
     cleanups.push(() => {
       window.clearTimeout(viewportResizeTimer);
@@ -116,8 +116,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       delete host.dataset.quality;
     });
 
-    function releasePointer() {
-      const id = pointerId; pointerId = -1; draggedIndex = -1; physics.release();
+    function releasePointer(velocity?: THREE.Vector3) {
+      const id = pointerId; pointerId = -1; draggedIndex = -1; physics.release(velocity);
       if (id >= 0 && renderer.domElement.hasPointerCapture(id)) renderer.domElement.releasePointerCapture(id);
       delete host.dataset.dragging;
     }
@@ -272,8 +272,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         // Keep the block and profile on the scroll timeline. Advancing to a
         // speculative landing here gets undone by sampleScroll on the next
         // frame, briefly flashing the open profile during extraction.
-        // Lenis handles scroll smoothing; this response tracks its output.
-        progress = advanceTowerScroll(scrollMotion, target, updateElapsed, 200);
+        // Smooth native wheel/touch samples with a short, frame-independent response.
+        progress = advanceTowerScroll(scrollMotion, target, updateElapsed, 32);
         const state = towerFrame(progress, members.length);
         // The desktop intro orbits; readable profiles and settled mobile scenes rest.
         const idleOrbit = detail === 2 && state.index < 0 && state.completed === 0 && state.outro === 0;
@@ -302,7 +302,6 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       scrollDirty = true; lastInteraction = performance.now(); wake();
     }
     function getScrollPosition() {
-      if (shell && mobileLayout.matches) return shell.scrollTop;
       return window.scrollY;
     }
     function sampleScroll() {
@@ -370,6 +369,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       const hit = raycaster.intersectObject(batch.blocks)[0], index = hit?.instanceId;
       if (index === undefined || !physics.grab(index, hit.point)) return;
       pointerId = event.pointerId; draggedIndex = index; downX = event.clientX; downY = event.clientY; travelled = 0;
+      lastDragPoint.copy(hit.point); throwVelocity.set(0, 0, 0); lastDragTime = performance.now();
       camera.getWorldDirection(forward); dragPlane.setFromNormalAndCoplanarPoint(forward, hit.point);
       renderer.domElement.setPointerCapture(pointerId); host.dataset.dragging = 'true';
       lastInteraction = performance.now(); wake();
@@ -377,13 +377,21 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     function pointerMove(event: PointerEvent) {
       if (event.pointerId !== pointerId) return;
       travelled = Math.max(travelled, Math.hypot(event.clientX - downX, event.clientY - downY));
-      cast(event); if (raycaster.ray.intersectPlane(dragPlane, dragPoint)) physics.move(dragPoint);
+      cast(event);
+      if (raycaster.ray.intersectPlane(dragPlane, dragPoint)) {
+        const now = performance.now(), elapsed = Math.max(.008, (now - lastDragTime) / 1000);
+        pointerVelocity.copy(dragPoint).sub(lastDragPoint).divideScalar(elapsed).clampLength(0, 14);
+        throwVelocity.lerp(pointerVelocity, .65);
+        lastDragPoint.copy(dragPoint); lastDragTime = now;
+        physics.move(dragPoint);
+      }
       lastInteraction = performance.now(); wake();
     }
     function pointerUp(event: PointerEvent) {
       if (event.pointerId !== pointerId) return;
       const index = draggedIndex, click = travelled < 6 && event.type === 'pointerup';
-      releasePointer(); if (click) physics.pull(index);
+      const throwing = !click && event.type === 'pointerup' && performance.now() - lastDragTime < 120;
+      releasePointer(throwing ? throwVelocity : undefined); if (click) physics.pull(index);
       lastInteraction = performance.now(); wake();
     }
     function rebuild() {
@@ -391,11 +399,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       releasePointer(); physics.reset(); storyRemoved = 0; active = -2; progress = target = 0; idleAngle = 0;
       scrollMotion.value = 0; scrollMotion.velocity = 0;
       matricesDirty = true; renderedProgress = -1; lastInteraction = performance.now();
-      if (shell && mobileLayout.matches) {
-        shell.scrollTo({ top: start, behavior: 'instant' });
-      } else {
-        window.scrollTo({ top: start, behavior: 'instant' });
-      }
+      window.scrollTo({ top: start, behavior: 'instant' });
       wake();
     }
 
@@ -416,7 +420,6 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     const contextLost = (event: Event) => { event.preventDefault(); dispose(); callbacks.onError(); };
     cleanups.push(() => {
       window.removeEventListener('scroll', scroll); window.removeEventListener('resize', resize);
-      if (shell) shell.removeEventListener('scroll', scroll);
       document.removeEventListener('visibilitychange', visibility);
       renderer.domElement.removeEventListener('webglcontextlost', contextLost);
       renderer.domElement.removeEventListener('pointerdown', pointerDown); renderer.domElement.removeEventListener('pointermove', pointerMove);
@@ -428,7 +431,6 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     renderer.domElement.addEventListener('pointerup', pointerUp); renderer.domElement.addEventListener('pointercancel', pointerUp);
     renderer.domElement.addEventListener('lostpointercapture', pointerUp);
     window.addEventListener('scroll', scroll, { passive: true }); window.addEventListener('resize', resize, { passive: true });
-    if (shell) shell.addEventListener('scroll', scroll, { passive: true });
     document.addEventListener('visibilitychange', visibility);
     host.append(renderer.domElement, css.domElement);
     await renderer.compileAsync(scene, camera);

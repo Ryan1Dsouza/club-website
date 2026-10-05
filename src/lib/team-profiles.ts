@@ -7,12 +7,14 @@ export type TeamSocial = { platform: SocialPlatform; label: string; url: string 
 export type TeamProfile = Omit<Member, 'tagline' | 'socials'> & {
   cardImage?: string;
   profileImage?: string;
+  previewImage?: string;
   tagline: string;
   socials: TeamSocial[];
 };
 type PortraitMetadata = {
   small: string;
   large: string;
+  preview?: string;
   tagline?: string;
   socials?: Partial<Record<SocialPlatform, string>>;
 };
@@ -37,6 +39,7 @@ export function createTeamProfiles(members: Member[]): TeamProfile[] {
       ...member,
       cardImage: metadata?.small ?? member.image,
       profileImage: metadata?.large ?? member.image,
+      previewImage: metadata?.preview,
       tagline: member.tagline?.trim() || metadata?.tagline?.trim() || 'turning coffee into algorithms',
       socials: socials.length ? socials : (['linkedin', 'github', 'leetcode'] as const).map(platform => ({ platform, label: labels[platform], url: '#' })),
     };

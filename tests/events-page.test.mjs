@@ -5,14 +5,15 @@ import { resolve } from 'node:path';
 import { createApp } from '../server/app.mjs';
 import { openDatabase } from '../server/db.mjs';
 import { render } from '../dist/server/entry-server.js';
+import { workshops } from './fixtures/workshops.mjs';
 
 const data = JSON.parse(await readFile(new URL('../shared/public-data.json', import.meta.url), 'utf8'));
 
-test('Events renders seven photo cards and two portals without loading the ride', () => {
+test('Events renders every workshop photo card and two portals without loading the ride', () => {
   for (const route of ['/events', '/events/']) {
     const html = render(data, route);
     assert.match(html, /data-event-mode="grid"/);
-    assert.equal((html.match(/class="event-card__photo"/g) ?? []).length, 7);
+    assert.equal((html.match(/class="event-card__photo"/g) ?? []).length, workshops.length);
     assert.equal((html.match(/aria-label="The Nucleus Ride"/g) ?? []).length, 2);
     assert.doesNotMatch(html, /class="nx-world|class="ec-scroll/);
   }

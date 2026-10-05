@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { workshops } from '../fixtures/workshops.mjs';
 
 const original = JSON.parse(await readFile(new URL('../../shared/public-data.json', import.meta.url), 'utf8'));
 const site = { ...original, events: original.events.map((event, station) => ({ ...event,
@@ -38,7 +39,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 851 
     page.on('pageerror', error => errors.push(error.message));
     try {
       await openRide(page);
-      await page.getByRole('button', { name: 'Events 7', exact: true }).click();
+      await page.getByRole('button', { name: `Events ${workshops.length}`, exact: true }).click();
       await page.getByRole('dialog', { name: 'Event stations' }).getByRole('button', { name: /Inauguration/ }).click();
       const book = page.locator('.station-book'), dialog = page.getByRole('dialog', { name: 'Inauguration' });
       await expect(book).toHaveAttribute('data-book-page', '1');
@@ -68,7 +69,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 393, height: 851 
       await expect(dialog).toBeVisible();
       await page.getByRole('button', { name: 'Next book page' }).click();
       await expect(book).toHaveAttribute('data-book-page', '4');
-      const lastPage = report ? 13 : 7;
+      const lastPage = report ? workshops[0].photos + 1 : 1 + Math.ceil((workshops[0].photos - 1) / 2);
       for (let next = 5; next <= lastPage; next++) {
         await page.getByRole('button', { name: 'Next book page' }).click();
         await expect(book).toHaveAttribute('data-book-page', String(next));
@@ -155,7 +156,7 @@ test('long event stories remain readable on a small phone with reduced motion', 
   const event = { ...site.events[0], id: 'long-story', trackPosition: .72, title: 'A connection between curious minds, ambitious builders, and future collaborators at the Nucleus community gathering',
     description: 'A community of curious minds came together to explore ideas, share their experiences, and build new connections. '.repeat(14) };
   await openRide(page, { ...site, events: [...site.events, event] });
-  await page.getByRole('button', { name: 'Events 8', exact: true }).click();
+  await page.getByRole('button', { name: `Events ${workshops.length + 1}`, exact: true }).click();
   await page.getByRole('dialog', { name: 'Event stations' }).locator('.nx-station-list button').last().click();
   const book = page.locator('.station-book'), story = page.getByRole('region', { name: 'Event story' });
   await expect(book).toHaveAttribute('data-book-page', '1');

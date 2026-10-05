@@ -20,7 +20,7 @@ test.beforeEach(async ({ page }) => {
 async function seek(page, progress) {
   await page.locator('.people-tower').evaluate((element, progress) => {
     const stage = element.querySelector('.people-tower__stage');
-    const scroller = matchMedia('(max-width: 768px), (pointer: coarse)').matches ? element.closest('.site-shell') : window;
+    const scroller = window;
     const current = scroller === window ? scrollY : scroller.scrollTop;
     const start = element.getBoundingClientRect().top + current - (parseFloat(getComputedStyle(stage).top) || 0);
     const range = element.offsetHeight - stage.offsetHeight;
@@ -30,7 +30,7 @@ async function seek(page, progress) {
   // layout and actual scroll position, rather than an earlier rounded range.
   await expect.poll(() => page.locator('.people-tower').evaluate(element => {
     const stage = element.querySelector('.people-tower__stage');
-    const scroller = matchMedia('(max-width: 768px), (pointer: coarse)').matches ? element.closest('.site-shell') : window;
+    const scroller = window;
     const current = scroller === window ? scrollY : scroller.scrollTop;
     const start = element.getBoundingClientRect().top + current - (parseFloat(getComputedStyle(stage).top) || 0);
     const range = element.offsetHeight - stage.offsetHeight;
@@ -141,6 +141,6 @@ test('a failure partway through mounting removes the scene and releases its reso
   await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'fallback');
   await expect(page.locator('.people-tower__world canvas, .people-tower__labels')).toHaveCount(0);
   expect(await page.evaluate(() => window.__towerDisposed)).toEqual({ geometries: 0, textures: 0 });
-  await page.getByRole('button', { name: 'Back to Quick view' }).click();
+  await page.getByRole('button', { name: 'Back to the team' }).click();
   await expect(page.getByLabel('Find a team member').locator('option')).toHaveCount(site.team.length);
 });

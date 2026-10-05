@@ -67,10 +67,18 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
   const wakeSupported = (support: Body) => bodies.forEach(body => {
     if (body.world && body.type === Body.DYNAMIC && body.position.y > support.position.y + .01) body.wakeUp();
   });
-  function release() {
+  function release(throwVelocity?: Point) {
     // A plank held still in the air can sleep. Removing its constraint must
     // wake it again so gravity takes over immediately after pointer release.
-    if (held >= 0) bodies[held].wakeUp();
+    if (held >= 0) {
+      const body = bodies[held];
+      body.wakeUp();
+      if (throwVelocity) {
+        body.velocity.set(throwVelocity.x, throwVelocity.y, throwVelocity.z);
+        const speed = body.velocity.length();
+        if (speed > 14) body.velocity.scale(14 / speed, body.velocity);
+      }
+    }
     if (joint) world.removeConstraint(joint);
     if (anchor.world) world.removeBody(anchor);
     joint = undefined; held = -1; pullTime = -1; anchor.velocity.setZero();
@@ -330,7 +338,9 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
           pullStart.lerp(pullEnd, Math.min(1, pullTime / .7), target);
         }
         target.vsub(anchor.position, velocity); velocity.scale(18, velocity);
-        const speed = velocity.length(); if (speed > 7) velocity.scale(7 / speed, velocity);
+        const speed = velocity.length();
+        const maxSpeed = pullTime >= 0 ? 7 : 14;
+        if (speed > maxSpeed) velocity.scale(maxSpeed / speed, velocity);
         anchor.velocity.copy(velocity);
       }
       world.step(physicsStep); accumulator -= physicsStep; changed = true;

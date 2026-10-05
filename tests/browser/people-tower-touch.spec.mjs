@@ -58,7 +58,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
       await openTower(page);
       const world = page.locator('.people-tower__world');
       await expect(world.locator('canvas')).toHaveCSS('pointer-events', 'auto');
-      await expect(page.getByText('Tap a block to pull it out.', { exact: false })).toBeVisible();
+      await expect(page.getByText('Swipe up to meet the team.', { exact: false })).toBeVisible();
       await expect(page.locator('.people-tower__hint-mouse')).toBeHidden();
       const cdp = await page.context().newCDPSession(page);
       const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
@@ -74,7 +74,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
       await touch('touchEnd');
       await expect(world).not.toHaveAttribute('data-dragging');
       await expect.poll(() => displacement(page, initial)).toBeGreaterThan(1);
-      expect(await page.locator('.site-shell').evaluate(element => element.scrollTop)).toBe(0);
+      expect(await page.evaluate(() => scrollY)).toBe(0);
       await rebuild();
 
       const dragged = await blockPoint(page);
@@ -85,7 +85,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
       }
       await expect(world).toHaveAttribute('data-dragging', 'true');
       await expect.poll(() => displacement(page, dragged)).toBeGreaterThan(.5);
-      expect(await page.locator('.site-shell').evaluate(element => element.scrollTop)).toBe(0);
+      expect(await page.evaluate(() => scrollY)).toBe(0);
       await page.screenshot({ path: info.outputPath('touch-drag.png') });
       await touch('touchEnd');
       await expect(world).not.toHaveAttribute('data-dragging');
@@ -104,9 +104,45 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
         await page.evaluate(() => new Promise(requestAnimationFrame));
       }
       await touch('touchEnd');
-      await expect.poll(() => page.locator('.site-shell').evaluate(element => element.scrollTop)).toBeGreaterThan(80);
+      await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(80);
       await expect(world).not.toHaveAttribute('data-dragging');
       expect(errors).toEqual([]);
+      await cdp.detach();
+    });
+
+    test('play mode accepts vertical touch throws and returns to native scrolling', async ({ page }, info) => {
+      await openTower(page);
+      await page.evaluate(() => {
+        window.__modeEvents = [];
+        for (const type of ['pointerdown', 'pointerup', 'click', 'touchstart', 'touchend']) document.addEventListener(type, event => {
+          window.__modeEvents.push({ type, target: event.target.className, text: event.target.textContent?.slice(0, 35), time: performance.now() });
+        }, true);
+      });
+      const world = page.locator('.people-tower__world');
+      await page.getByRole('button', { name: 'Drag & throw' }).tap();
+      await expect(world.locator('canvas')).toHaveCSS('touch-action', 'none');
+      const block = await blockPoint(page);
+      const cdp = await page.context().newCDPSession(page);
+      const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [{ x: point.x, y: point.y }] : [] });
+      await touch('touchStart', block);
+      for (let step = 1; step <= 8; step++) {
+        await touch('touchMove', { x: block.x + step * 3, y: block.y - step * 8 });
+        await page.evaluate(() => new Promise(requestAnimationFrame));
+      }
+      await expect(world).toHaveAttribute('data-dragging', 'true');
+      expect(await page.evaluate(() => scrollY)).toBe(0);
+      await touch('touchEnd');
+      await expect(world).not.toHaveAttribute('data-dragging');
+      await expect.poll(() => displacement(page, block)).toBeGreaterThan(.5);
+      await page.screenshot({ path: info.outputPath('throw.png') });
+      await page.getByRole('button', { name: 'Scroll to explore' }).tap();
+      await info.attach('touch-events', { body: JSON.stringify(await page.evaluate(() => window.__modeEvents)), contentType: 'application/json' });
+      await expect(world.locator('canvas')).toHaveCSS('touch-action', 'pan-y');
+      await page.getByRole('button', { name: 'Rebuild tower' }).tap();
+      await touch('touchStart', { x: viewport.width / 2, y: viewport.height * .65 });
+      for (let step = 1; step <= 10; step++) await touch('touchMove', { x: viewport.width / 2, y: viewport.height * .65 - step * 12 });
+      await touch('touchEnd');
+      await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(50);
       await cdp.detach();
     });
 
@@ -133,9 +169,8 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
       await page.evaluate(() => new Promise(requestAnimationFrame));
       const seekStart = () => page.locator('.people-tower').evaluate((section, progress) => {
         const stage = section.querySelector('.people-tower__stage');
-        const shell = section.closest('.site-shell');
-        const start = section.getBoundingClientRect().top + shell.scrollTop - (parseFloat(getComputedStyle(stage).top) || 0);
-        shell.scrollTo({ top: start + progress * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
+        const start = section.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(stage).top) || 0);
+        window.scrollTo({ top: start + progress * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
       }, (TOWER_INTRO + flung.index + .003) / (TOWER_INTRO + site.team.length + TOWER_OUTRO));
       await seekStart();
       await expect.poll(() => page.evaluate(() => window.__handoff.first)).not.toBeNull();

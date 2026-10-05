@@ -13,6 +13,7 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
   const story = useRef<HTMLDivElement>(null), host = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'still' | 'fallback'>('loading');
   const [active, setActive] = useState(-1);
+  const [playMode, setPlayMode] = useState(false);
   useEffect(() => { onStatusChange(status); }, [status, onStatusChange]);
   const memberKey = useMemo(() => JSON.stringify(sorted), [sorted]);
   const controller = useRef<{ rebuild: () => void } | null>(null);
@@ -38,9 +39,6 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
       stop(); setActive(-1);
       if (media.matches) { setStatus('still'); return; }
       portraits.prepare(0);
-      if (matchMedia('(max-width: 768px), (pointer: coarse)').matches) {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }
       setStatus('loading');
       try {
         const { createPeopleTower } = await import('../../lib/people-tower');
@@ -80,29 +78,31 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
     const stage = section.querySelector<HTMLElement>('.people-tower__stage');
     if (!stage) return;
     const header = parseFloat(getComputedStyle(stage).top) || 0;
-    const shell = section.closest<HTMLElement>('.site-shell');
-    const scroller = shell && matchMedia('(max-width: 768px), (pointer: coarse)').matches ? shell : window;
-    const scrollTop = scroller instanceof Window ? scrollY : scroller.scrollTop;
-    const top = section.getBoundingClientRect().top + scrollTop - header;
-    scroller.scrollTo({ top: top + memberProgress(index, sorted.length) * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
+    const top = section.getBoundingClientRect().top + window.scrollY - header;
+    setPlayMode(false);
+    window.scrollTo({ top: top + memberProgress(index, sorted.length) * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
     section.querySelector<HTMLSelectElement>('select')?.focus({ preventScroll: true });
   }
   return <section className="people-tower-view" aria-label="Interactive team tower" data-tower-status={status}>
     {(status === 'loading' || status === 'still' || status === 'fallback') && <p className="people-tower__status" role="status">
-      {status === 'loading' ? 'Building the interactive tower...' : status === 'still' ? 'The tower is paused for reduced motion. Meet everyone in Quick view.' : 'The tower could not start on this device. Meet everyone in Quick view.'}
+      {status === 'loading' ? 'Building the interactive tower...' : status === 'still' ? 'The tower is paused for reduced motion. Go back to the team to meet everyone.' : 'The tower could not start on this device. Go back to the team to meet everyone.'}
     </p>}
     <div className="people-tower" ref={story} style={{
       '--tower-length': `${sorted.length * 55 + 120}svh`,
     } as CSSProperties}>
       <div className="people-tower__stage">
-        <div className="people-tower__world" ref={host} aria-hidden="true" />
+        <div className="people-tower__world" ref={host} data-interaction={playMode ? 'play' : 'scroll'} aria-hidden="true" />
         <div className="people-tower__topline"><span className="eyebrow">02 / The people</span></div>
         <div className="people-tower__finish" aria-hidden="true"><p>The<br /><em>whole team.</em></p><span>Meet everyone <ArrowDown size={15} /></span></div>
         <p className="people-tower__hint" hidden={status !== 'ready'}>
-          <span className="people-tower__hint-mouse">Click a block to pull it out. Drag to play. Scroll to meet the team.</span>
-          <span className="people-tower__hint-touch">Tap a block to pull it out. Drag sideways to play. Swipe up to meet the team.</span>
+          <span className="people-tower__hint-mouse">Click to pull. Grab, drag and release to throw. Scroll to meet the team.</span>
+          <span className="people-tower__hint-touch">{playMode ? 'Grab any block. Drag and release to throw. Switch to Scroll to explore when you’re ready.' : 'Swipe up to meet the team. Tap a block to pull it, or choose Drag & throw to play.'}</span>
         </p>
         <div className="people-tower__hud" hidden={status !== 'ready'}>
+          <button type="button" className="people-tower__mode" aria-pressed={playMode} onClick={() => {
+            if (!playMode) controller.current?.rebuild();
+            setPlayMode(!playMode);
+          }}>{playMode ? 'Scroll to explore' : 'Drag & throw'}</button>
           <div className="people-tower__counter"><span>{active < 0 ? '—' : String(active + 1).padStart(2, '0')}</span><span>/ {String(sorted.length).padStart(2, '0')}</span></div>
 
           <label className="people-tower__picker"><span className="sr-only">Jump to a member</span><select value={active < 0 ? '' : active} onChange={event => revealMember(Number(event.target.value))}><option value="" disabled>Meet the members</option>{sorted.map((member, index) => <option key={member.id} value={index}>{member.name}</option>)}</select></label>

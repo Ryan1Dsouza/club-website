@@ -1,80 +1,103 @@
 import { Component, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowUpRight } from 'lucide-react';
 import type { Member } from '../types';
 import { createTeamProfiles, type TeamProfile } from '../lib/team-profiles';
-import SocialCards from '../components/ui/card-fan-carousel';
+import { preloadImage } from '../lib/preload-image';
+import { useReveal } from '../components/ui/reveal';
 import TeamProfileOverlay from '../components/people/TeamProfileOverlay';
 import TowerPlayButton from '../components/people/TowerPlayButton';
 import './people-page.css';
 
-// The module, portrait cache, CSS, WebGL and physics all stay behind this boundary.
+// WebGL and physics only load when someone chooses to play.
 const PeopleTower = lazy(() => import('../components/people/PeopleTower'));
 class TowerBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
   render() {
-    return this.state.failed ? <p className="people-view-status" role="alert">The tower could not load. Return to Quick view to meet the team.</p> : this.props.children;
+    return this.state.failed ? <p className="people-view-status" role="alert">The tower could not load. Go back to the team to meet everyone.</p> : this.props.children;
   }
 }
 
+function MemberCard({ person, index, onSelect }: { person: TeamProfile; index: number; onSelect: (person: TeamProfile) => void }) {
+  const card = useRef<HTMLLIElement>(null);
+  useReveal(card, { delay: (index % 3) * 60 });
+  const prepare = () => { if (person.profileImage) preloadImage({ src: person.profileImage, priority: 'high' }); };
+  return <li ref={card} className="people-card">
+    <button type="button" onPointerEnter={prepare} onFocus={prepare} onTouchStart={prepare} onClick={() => onSelect(person)} aria-label={`Meet ${person.name}, ${person.role}`}>
+      <span className="people-card__portrait">
+        <span className="people-card__initials" aria-hidden="true">{person.initials}</span>
+        {person.cardImage && <img src={person.cardImage} alt="" loading={index < 3 ? 'eager' : 'lazy'} decoding="async" fetchPriority={index === 0 ? 'high' : 'auto'} style={person.previewImage ? { backgroundImage: `url("${person.previewImage}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+          width="400" height="500" onError={event => { event.currentTarget.style.visibility = 'hidden'; }} />}
+        <span className="people-card__number" aria-hidden="true">{String(index + 1).padStart(2, '0')} / NUCLEUS</span>
+        <span className="people-card__open" aria-hidden="true"><ArrowUpRight size={20} /></span>
+      </span>
+      <span className="people-card__copy"><span className="people-card__role">{person.role}</span><span className="people-card__name">{person.name}</span></span>
+    </button>
+  </li>;
+}
+
 export default function PeoplePage({ members }: { members: Member[] }) {
-  const [view, setView] = useState<'carousel' | 'tower'>('carousel');
+  const [view, setView] = useState<'grid' | 'tower'>('grid');
+  const [group, setGroup] = useState<'member' | 'alumni'>('member');
   const [towerStatus, setTowerStatus] = useState<'loading' | 'ready' | 'still' | 'fallback'>('loading');
-  const [activeIndex, setActiveIndex] = useState(0);
   const [selected, setSelected] = useState<TeamProfile | null>(null);
-  const page = useRef<HTMLElement>(null);
+  const roster = useRef<HTMLElement>(null);
   const profiles = useMemo(() => createTeamProfiles(members), [members]);
-  const cards = useMemo(() => profiles.map(person => ({
-    id: person.id, name: person.name, role: person.role, initials: person.initials, imgUrl: person.cardImage,
-  })), [profiles]);
+  const currentMembers = useMemo(() => members.filter(person => person.status !== 'alumni'), [members]);
+  const visibleProfiles = profiles.filter(person => (person.status ?? 'member') === group);
   const closeProfile = useCallback(() => setSelected(null), []);
-  const currentIndex = profiles.length ? activeIndex % profiles.length : 0;
+  const previousView = useRef(view);
+  const previousGroup = useRef(group);
 
   useEffect(() => {
-    // The tower uses the shell as its mobile scroller; the quick view uses the page.
-    page.current?.closest('.site-shell')?.scrollTo({ top: 0, behavior: 'instant' });
+    if (previousGroup.current === group) return;
+    previousGroup.current = group;
+    meetTeam();
+  }, [group]);
+
+  useEffect(() => {
+    if (previousView.current === view) return;
+    previousView.current = view;
     window.scrollTo({ top: 0, behavior: 'instant' });
+    document.querySelector<HTMLElement>(view === 'grid' ? '#people-title' : '.people-view-toggle')?.focus({ preventScroll: true });
   }, [view]);
 
-  return <section ref={page} className="people-page" aria-labelledby="people-title" data-view={view} data-tower-status={view === 'tower' ? towerStatus : undefined}>
-    {view === 'carousel' && <div className="people-jenga-backdrop" aria-hidden="true">
-      <svg viewBox="0 0 1440 1100" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <g id="people-jenga-tier"><path d="M0 26 112 0 212 36 100 64Z" fill="#e9e6cc" /><path d="M0 26 100 64V92L0 54Z" fill="#b2c0a0" /><path d="M100 64 212 36V64L100 92Z" fill="#93ab8c" /><path d="M0 26 112 0 212 36V64L100 92 0 54ZM0 26 100 64 212 36M100 64V92M34 39V67M67 51V79M37 17 137 55M75 9 175 45" fill="none" stroke="currentColor" /></g>
-        </defs>
-        <g className="people-jenga-backdrop__tower people-jenga-backdrop__tower--left" transform="translate(40 100) rotate(-12 100 300)">
-          {[5, 4, 3, 2, 1, 0].map(level => <use key={level} href="#people-jenga-tier" x={level === 2 ? -26 : 0} y={level * 57} />)}
-        </g>
-        <g className="people-jenga-backdrop__tower people-jenga-backdrop__tower--right" transform="translate(1170 70) rotate(14 100 300)">
-          {[6, 5, 4, 3, 2, 1, 0].map(level => <use key={level} href="#people-jenga-tier" x={level === 3 ? 35 : 0} y={level * 57} />)}
-        </g>
-        <g className="people-jenga-backdrop__loose" transform="translate(1120 820) rotate(-12)"><path d="M0 20 110 0 190 28 80 50Z" /><path d="M0 20V43L80 73 190 51V28M80 50V73" /><path d="M0 20 80 50 190 28" /></g>
-        <path className="people-jenga-backdrop__guide" d="M90 880H370M1070 670H1370M113 866V894M1347 656V684" />
-      </svg>
-    </div>}
+  function meetTeam() {
+    roster.current?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+    roster.current?.focus({ preventScroll: true });
+  }
+
+  return <section className="people-page" aria-labelledby="people-title" data-view={view} data-tower-status={view === 'tower' ? towerStatus : undefined}>
     <div className="people-toolbar">
-      {view === 'carousel' && <span className="eyebrow">02 / The people</span>}
-      {view === 'tower' && <button type="button" className="people-view-toggle" onClick={() => setView('carousel')}>
-        <ArrowLeft size={16} />Back to Quick view
+      {view === 'grid' ? <span className="eyebrow">02 / The people</span> : <button type="button" className="people-view-toggle" onClick={() => setView('grid')}>
+        <ArrowLeft size={16} />Back to the team
       </button>}
     </div>
-    {view === 'carousel' ? <div key="carousel" className="people-quick-view people-view">
+    {view === 'grid' ? <div key="grid" className="people-directory people-view">
       <div className="people-intro">
-        <div><h1 id="people-title">Many minds.<br /><em>One nucleus.</em></h1><p>The people turning curiosity into something real.</p></div>
-        {!!profiles.length && <label className="people-member-picker"><span>Meet the team <span>({String(profiles.length).padStart(2, '0')})</span></span>
-          <select aria-label="Find a team member" value={currentIndex} onChange={event => setActiveIndex(Number(event.target.value))}>
-            {profiles.map((person, index) => <option key={person.id} value={index}>{person.name} / {person.role}</option>)}
-          </select>
-        </label>}
+        <div><h1 id="people-title" tabIndex={-1}>Many minds.<br /><em>One nucleus.</em></h1><p>The people turning curiosity into something real.</p></div>
+        <button type="button" className="people-meet-button" onClick={meetTeam}>Meet the Team <span>{String(profiles.length).padStart(2, '0')}</span><ArrowDown size={17} /></button>
       </div>
-      <SocialCards cards={cards} activeIndex={currentIndex} onActiveIndexChange={setActiveIndex} paused={!!selected}
-        onCardClick={(_, index) => setSelected(profiles[index])} />
-      <TowerPlayButton disabled={!profiles.length} paused={!!selected}
+      <TowerPlayButton disabled={!currentMembers.length} paused={!!selected}
         onClick={() => { setTowerStatus('loading'); setView('tower'); }} />
+      <section ref={roster} id="people-roster" className="people-directory__roster" aria-labelledby="people-roster-title" tabIndex={-1}>
+        <div className="people-directory__heading">
+          <h2 id="people-roster-title">{group === 'member' ? 'The minds behind it.' : 'Always part of the nucleus.'}</h2>
+          <p aria-live="polite">{String(visibleProfiles.length).padStart(2, '0')} {group === 'member' ? 'members' : 'alumni'}<span>Choose a card. Get to know us.</span></p>
+        </div>
+        {visibleProfiles.length ? <ul className="people-grid" aria-label={group === 'member' ? 'Members' : 'Alumni'}>
+          {visibleProfiles.map((person, index) => <MemberCard key={`${group}-${person.id}`} person={person} index={index} onSelect={setSelected} />)}
+        </ul> : <p className="people-empty" role="status">{group === 'member' ? 'The team will be announced here soon.' : 'Alumni profiles are coming soon.'}</p>}
+      </section>
+      <div className="people-groups" role="group" aria-label="Browse the community">
+        <span>Our community, through the years.</span>
+        <div>{(['member', 'alumni'] as const).map(option => <button key={option} type="button" aria-pressed={group === option} aria-controls="people-roster"
+          onClick={() => setGroup(option)}>{option === 'member' ? 'Members' : 'Alumni'}<ArrowUpRight size={16} /></button>)}</div>
+      </div>
     </div> : <div key="tower" className="people-view">
       <h1 id="people-title" className="sr-only">The people behind Nucleus</h1>
       <TowerBoundary><Suspense fallback={<p className="people-view-status" role="status">Building the interactive tower...</p>}>
-        <PeopleTower members={members} onStatusChange={setTowerStatus} />
+        <PeopleTower members={currentMembers} onStatusChange={setTowerStatus} />
       </Suspense></TowerBoundary>
     </div>}
     {selected && <TeamProfileOverlay person={selected} onClose={closeProfile} />}

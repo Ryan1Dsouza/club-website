@@ -37,7 +37,7 @@ export default function TowerPlayButton({ disabled, paused, onClick }: { disable
       <span className="people-tower-button__cta"><span id="people-tower-button-title">Play Interactive Tower</span><ArrowUpRight size={18} strokeWidth={1.8} /></span>
     </span>
     <span className="jenga-preview" aria-hidden="true">
-      <span className="jenga-preview__caption">THE NUCLEUS TOWER <span>01—18</span></span>
+      <span className="jenga-preview__caption">THE NUCLEUS TOWER <span>PULL / PLAY</span></span>
       <span className="jenga-preview__ground" />
       <span className="jenga-preview__stack">
         <span className="jenga-preview__upper">

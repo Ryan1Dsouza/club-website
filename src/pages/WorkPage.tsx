@@ -18,7 +18,7 @@ export default function WorkPage({ projects, settings }: { projects: Project[]; 
   return <section className="showcase-page work-page section-wrap" aria-labelledby="work-title">
     <h1 id="work-title" className="sr-only">Our work</h1>
     <div className="work-list">{projects.map((project, index) => <Reveal key={project.id}>
-      {project.id === 'i-laundroid' ? <LaundroidProject project={project} settings={settings} index={index} /> : <article className="work-feature" aria-labelledby={`project-${project.id}`}>
+      {project.id === 'i-laundroid' ? <LaundroidProject project={project} /> : <article className="work-feature" aria-labelledby={`project-${project.id}`}>
         <ProjectArtwork project={project} index={index} />
         <div className="work-copy">
           <div className="work-meta"><span>{project.domain}</span><span className="status-dot">{project.status}</span></div>

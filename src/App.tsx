@@ -78,7 +78,7 @@ export default function App({ initialData = seed, serverRendered = false }: { in
   const loading = loadingStage === 'loading' || loadingStage === 'exiting';
   const location = useLocation();
   const navigationType = useNavigationType();
-  useCinematicScroll((location.pathname === '/' || location.pathname === '/team') && !loading && !applyOpen && !menuOpen && domain === null);
+  useCinematicScroll(location.pathname === '/' && !loading && !applyOpen && !menuOpen && domain === null);
 
   useEffect(() => {
     const abort = new AbortController();

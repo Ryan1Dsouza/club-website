@@ -6,6 +6,8 @@ import { createCinematicLenis } from '../lib/cinematic-lenis';
 export const BOOK_SCROLL_STEP = 420;
 export const BOOK_TURN_DURATION = .52;
 const turnEasing = (t: number) => 1 - Math.pow(1 - t, 3);
+const WHEEL_LERP = .14;
+const WHEEL_IDLE_MS = 140;
 // React only needs a new tree at a leaf boundary or when a turn starts/ends.
 const phase = (value: number) => `${Math.floor(value)}:${value !== Math.floor(value)}`;
 
@@ -37,9 +39,10 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
     lenis.scrollTo(clamp(current.current) * BOOK_SCROLL_STEP, { immediate: true });
     let frame = 0, last = 0, clock = 0, snapTimer = 0;
     let renderedPhase = phase(current.current), touchPending = false, touchDistance = 1;
-    let target = clamp(current.current), anchor = Math.round(target), direction = 0, gesturing = false, touchGesture = false;
+    let target = clamp(current.current), anchor = Math.round(target), direction = 0, gesturing = false, touchGesture = false, settling = false;
     let touchY = 0, touchStartY = 0, touchId: number | null = null, pulled = false;
     let touchStory: HTMLElement | null = null;
+    let reading = false, storyVelocity = 0, touchTime = 0;
     const update = () => {
       const raw = clamp(Number(lenis.scroll) / BOOK_SCROLL_STEP);
       // Keep the leaf and its underlying photo on the same side of a boundary.
@@ -61,19 +64,27 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
       update();
     };
     const tick = (time: number) => {
-      frame = 0; clock += last ? Math.min(100, time - last) : 1000 / 60; last = time;
+      frame = 0;
+      const elapsed = last ? Math.min(64, time - last) : 1000 / 60;
+      clock += elapsed; last = time;
       if (touchPending) flushTouch();
       lenis.raf(clock);
-      if (lenis.isScrolling || touchPending) frame = requestAnimationFrame(tick); else last = 0;
+      if (touchId === null && touchStory && storyVelocity) {
+        const before = touchStory.scrollTop;
+        touchStory.scrollTop += storyVelocity * elapsed;
+        storyVelocity *= Math.exp(-elapsed / 180);
+        if (Math.abs(storyVelocity) < .02 || touchStory.scrollTop === before) storyVelocity = 0;
+      }
+      if (lenis.isScrolling || touchPending || storyVelocity && touchId === null) frame = requestAnimationFrame(tick); else last = 0;
     };
     const wake = () => { if (!frame && !document.hidden) frame = requestAnimationFrame(tick); };
-    const scroll = (value: number, duration = BOOK_TURN_DURATION, immediate = reduced, follow = false) => {
-      lenis.scrollTo(clamp(value) * BOOK_SCROLL_STEP, { duration, immediate, lerp: follow ? .26 : 0 });
+    const scroll = (value: number, duration = BOOK_TURN_DURATION, immediate = reduced, follow = false, easing = turnEasing) => {
+      lenis.scrollTo(clamp(value) * BOOK_SCROLL_STEP, { duration, immediate, easing, lerp: follow ? WHEEL_LERP : 0 });
       if (immediate) update();
       wake();
     };
     const go = (page: number) => {
-      clearTimeout(snapTimer); gesturing = false; touchPending = false;
+      clearTimeout(snapTimer); gesturing = false; touchPending = false; settling = false; storyVelocity = 0;
       target = clamp(page); anchor = Math.round(target);
       // A short pull should not spend a full turn's duration settling.
       const distance = Math.abs(target - current.current);
@@ -81,17 +92,32 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
     };
     navigate.current = delta => go(Math.round(gesturing ? current.current : target) + delta);
     const settle = () => {
+      if (!touchGesture) {
+        const velocity = (target - current.current) * 60 * WHEEL_LERP;
+        // Keep wheel travel monotonic, including just beyond a leaf boundary.
+        // Rounding 1.05 down to 1 briefly reopened the page that just left.
+        const boundary = Math.round(target);
+        target = clamp(Math.abs(target - boundary) < .0001 ? boundary : direction > 0 ? Math.ceil(target) : Math.floor(target));
+        settling = true;
+        const distance = target - current.current;
+        const duration = Math.max(.22, BOOK_TURN_DURATION * Math.min(1, Math.abs(distance) + .25));
+        // Match the incoming velocity and finish at rest. Moving an exponential
+        // target straight to the boundary produced a sudden second acceleration
+        // in both the cart and leaf after each wheel gesture.
+        const slope = distance ? Math.max(0, Math.min(3, velocity * duration / distance)) : 0;
+        scroll(target, duration, reduced, false, t => t * t * (3 - 2 * t) + slope * t * (1 - t) * (1 - t));
+        return;
+      }
       const fraction = target - Math.floor(target);
-      // A mouse-wheel notch is usually only 80–120px. Let it commit a page
-      // instead of repeatedly pulling the leaf a little and snapping it back.
-      const threshold = touchGesture ? .28 : .1;
+      // A short touch pull can return to rest; wheel travel settles above.
+      const threshold = .28;
       const page = direction > 0 && fraction > threshold ? Math.ceil(target)
         : direction < 0 && fraction < 1 - threshold ? Math.floor(target) : Math.round(target);
       go(page);
     };
     const begin = () => {
       clearTimeout(snapTimer);
-      target = current.current; anchor = Math.round(target); gesturing = true; direction = 0;
+      target = current.current; anchor = Math.round(target); gesturing = true; direction = 0; settling = false;
       // A new gesture takes over exactly where the previous settlement is visible.
       scroll(target, 0, true);
     };
@@ -103,7 +129,8 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
       if (!nextDirection) return;
       // Wheel input may be easing toward a distant target; reverse from the
       // visible page instead of first spending the gesture cancelling that lead.
-      if (!touch && direction && direction !== nextDirection) target = current.current;
+      if (!touch && (settling || direction && direction !== nextDirection)) target = current.current;
+      settling = false;
       direction = nextDirection;
       const next = target + pixels / BOOK_SCROLL_STEP;
       // Only direct touch is bounded to one leaf. A trackpad can continue
@@ -123,23 +150,34 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
       if (storyCanScroll(event.target, event.deltaY)) { event.stopPropagation(); return; }
       event.preventDefault(); event.stopPropagation();
       pull(event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? element.clientHeight : 1));
-      snapTimer = window.setTimeout(settle, 110);
+      snapTimer = window.setTimeout(settle, WHEEL_IDLE_MS);
     };
     const start = (event: PointerEvent) => {
       if (event.pointerType !== 'touch') return;
       if (touchId !== null) { end(); return; }
       touchId = event.pointerId; touchY = touchStartY = event.clientY; pulled = false;
+      reading = false; storyVelocity = 0; touchTime = event.timeStamp;
       touchDistance = Math.max(240, element.clientHeight * .8);
       touchStory = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-book-scroll]') : null;
+      // Transfer implicit capture before any turn replaces the touched story
+      // or image. Waiting for the first move can lose the rest of the swipe.
+      element.setPointerCapture(event.pointerId);
       begin();
     };
     const move = (event: PointerEvent) => {
-      if (event.pointerId !== touchId || Math.abs(event.clientY - touchStartY) < 5 && !element.hasPointerCapture(event.pointerId)) return;
-      // Keep receiving the release when the visible page replaces its image DOM.
-      element.setPointerCapture(event.pointerId);
+      if (event.pointerId !== touchId || Math.abs(event.clientY - touchStartY) < 5 && !pulled && !reading) return;
       const delta = touchY - event.clientY; touchY = event.clientY;
       event.preventDefault(); event.stopPropagation();
-      if (touchStory && storyCanScroll(touchStory, delta) && !pulled) { touchStory.scrollTop += delta; return; }
+      if (touchStory && !pulled && (reading || storyCanScroll(touchStory, delta))) {
+        // Once a swipe starts reading, retain it through the edge. A new swipe
+        // at that edge turns the page; text inertia must never flip a leaf.
+        reading = true;
+        const elapsed = Math.max(8, event.timeStamp - touchTime);
+        storyVelocity = Math.max(-2.5, Math.min(2.5, delta / elapsed));
+        touchTime = event.timeStamp;
+        touchStory.scrollTop += delta;
+        return;
+      }
       pulled = true;
       pull(delta * BOOK_SCROLL_STEP / touchDistance, true);
     };
@@ -149,7 +187,11 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
       if (id !== null && element.hasPointerCapture(id)) element.releasePointerCapture(id);
       flushTouch();
       if (pulled) settle(); else gesturing = false;
-      pulled = false; touchStory = null;
+      if (reading && event?.type !== 'pointercancel' && !reduced) {
+        if (event && event.timeStamp - touchTime > 80) storyVelocity = 0;
+        wake();
+      } else { storyVelocity = 0; touchStory = null; }
+      pulled = false; reading = false;
     };
     const lostCapture = (event: PointerEvent) => {
       // Transferring the image's implicit capture also bubbles this event.

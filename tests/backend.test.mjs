@@ -29,6 +29,24 @@ async function fixture(fn, options = {}) {
 }
 const applicant = { name: 'Test Student', email: 'student@example.com', year: '2', domain: 'aiml', motivation: 'I would like to build practical AI applications with the student community.', portfolio: 'https://github.com/example', consent: true, website: '' };
 
+test('members move to alumni and back without losing their portrait or creation date', () => fixture(async ({ request, login, db }) => {
+  const headers = await login(), member = getSite(db).team[0];
+  const path = `/admin/content/team/${member.id}`;
+  const fields = { name: member.name, role: member.role, initials: member.initials };
+  for (const status of ['alumni', 'member']) {
+    const result = await request(path, 'PUT', { ...fields, status }, headers);
+    assert.equal(result.status, 200);
+    const saved = await result.json();
+    assert.equal(saved.status, status);
+    assert.equal(saved.image, member.image);
+    assert.equal(saved.createdAt, member.createdAt);
+    const published = (await request('/site').then(response => response.json())).team.find(person => person.id === member.id);
+    assert.equal(published.status, status);
+    assert.equal(published.image, member.image);
+  }
+  assert.equal((await request(path, 'PUT', { ...fields, status: 'invalid' }, headers)).status, 400);
+}));
+
 test('new team members get immutable server creation dates and legacy edits preserve foundation ordering', () => fixture(async ({ request, login, db }) => {
   const headers = await login(), member = { name: 'New Member', role: 'Member', initials: 'NM', createdAt: '2000-01-01T00:00:00Z' };
   const before = Date.now();
@@ -58,12 +76,13 @@ test('publishing an experience requires auth and CSRF, persists photos and a saf
   assert.equal(result.status, 201); const saved = await result.json();
   assert.ok(saved.trackPosition > 0 && saved.trackPosition < 1); assert.equal(saved.photos.length, 1);
   const stations = createEventStations(getSite(db).events), placements = planner.forEvents(stations.map(station => station.event));
-  assert.equal(stations.length, 8); assert.equal(stations[7].number, '08'); assert.equal(stations[7].id, id);
-  assert.deepEqual(placements.slice(0, 7).map(stop => stop.distance), originalStations.map(stop => stop.distance));
-  assert.equal(placements[7].distance / track.getLength(), saved.trackPosition);
-  for (const original of placements.slice(0, 7)) {
-    assert.ok(trackSeparation(original.distance, placements[7].distance, track.getLength()) > 48);
-    assert.ok(!original.bounds.intersectsBox(placements[7].bounds));
+  const addedIndex = originalStations.length;
+  assert.equal(stations.length, addedIndex + 1); assert.equal(stations[addedIndex].number, String(addedIndex + 1).padStart(2, '0')); assert.equal(stations[addedIndex].id, id);
+  assert.deepEqual(placements.slice(0, addedIndex).map(stop => stop.distance), originalStations.map(stop => stop.distance));
+  assert.equal(placements[addedIndex].distance / track.getLength(), saved.trackPosition);
+  for (const original of placements.slice(0, addedIndex)) {
+    assert.ok(trackSeparation(original.distance, placements[addedIndex].distance, track.getLength()) > 48);
+    assert.ok(!original.bounds.intersectsBox(placements[addedIndex].bounds));
   }
   assert.equal((await request(path, 'PUT', body, headers)).status, 200);
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM event_photos').get().n, 1);

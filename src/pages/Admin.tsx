@@ -22,6 +22,7 @@ function Editor({ kind, item, session, onSaved, onClose }: { kind: Exclude<Tab, 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); setBusy(true); setError('');
     const raw = new FormData(e.currentTarget), body: Record<string, unknown> = {};
+    if (kind === 'team') body.status = raw.get('status');
     for (const field of definitions[kind]) { const value = String(raw.get(field.key) || '').trim(); body[field.key] = field.type === 'datetime-local' && value ? new Date(value).toISOString() : value; }
     if (kind === 'settings') body.recruitmentOpen = raw.has('recruitmentOpen');
     else if (kind !== 'team') body.published = raw.has('published');
@@ -31,6 +32,7 @@ function Editor({ kind, item, session, onSaved, onClose }: { kind: Exclude<Tab, 
   return <Modal title={kind === 'settings' ? 'Club settings' : `${item.title || item.name ? 'Edit' : 'Add'} ${kind === 'team' ? 'team member' : kind.slice(0, -1)}`} onClose={onClose}><form className="admin-form" onSubmit={submit}>
     {kind === 'settings' && <><label className="checkbox-label"><input type="checkbox" name="recruitmentOpen" defaultChecked={!!item.recruitmentOpen} /><span>Accept applications</span></label><p className="editor-note">This setting controls the entire website. A passed deadline automatically closes applications. Changing the intake identifier allows the same student to apply in a new cycle.</p></>}
     {definitions[kind].map(field => <label key={field.key}>{field.label}{field.optional && <span className="muted"> · optional</span>}{field.type === 'textarea' ? <textarea name={field.key} rows={4} maxLength={1600} minLength={kind === 'settings' ? 10 : 20} required defaultValue={String(item[field.key] || '')} /> : <input type={field.type || 'text'} name={field.key} required={!field.optional} maxLength={field.type === 'url' ? 500 : field.key === 'initials' ? 4 : 254} defaultValue={field.type === 'datetime-local' ? datetime(item[field.key]) : String(item[field.key] || '')} />}</label>)}
+    {kind === 'team' && <label>Community group<select name="status" defaultValue={String(item.status || 'member')}><option value="member">Members</option><option value="alumni">Alumni</option></select></label>}
     {kind !== 'settings' && kind !== 'team' && <label className="checkbox-label"><input type="checkbox" name="published" defaultChecked={item.published !== false} /><span>Published on the public website</span></label>}
     {error && <p className="form-error" role="alert">{error}</p>}<button className="button primary full-width" disabled={busy}>{busy ? <LoaderCircle className="spin" size={17} /> : <Save size={17} />}{busy ? 'Saving…' : 'Save changes'}</button>
   </form></Modal>;

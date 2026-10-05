@@ -8,6 +8,7 @@ import { createRideMap } from '../src/lib/event-minimap.ts';
 import { createQualityController, qualityPixelRatio, rideQuality, shouldShowJoystick } from '../src/lib/event-quality.ts';
 import { createVerticalLogo } from '../src/lib/event-scenery.ts';
 import { disposeObject } from '../src/lib/event-batching.ts';
+import { workshops } from './fixtures/workshops.mjs';
 
 const track = createCoasterTrack(), length = track.getLength(), planner = createStationPlanner(track);
 test('rail, cart, and rider envelopes clear the solid logo over the entire route', () => {
@@ -112,24 +113,28 @@ test('global waypoint search avoids a greedy dead end, including non-neighbour c
   assert.ok(crossed.every((s, i) => crossed.every((o, j) => i === j || !s.bounds.intersectsBox(o.bounds))));
 });
 
-test('zero to seven published events keep seven stations; additions preserve every existing position', () => {
+test('local chapters retain their stations and published additions preserve every existing position', () => {
   const event = { id: 'one', title: 'Opening', published: true };
-  for (let count = 0; count <= 7; count++) {
+  const anchors = planner.defaults();
+  for (let count = 0; count <= workshops.length; count++) {
     const input = Array.from({ length: count }, (_, i) => ({ ...event, id: `event-${i}` }));
     const stations = createEventStations([...input, { ...event, id: 'draft', published: false }]);
-    assert.equal(stations.length, 7);
+    assert.equal(stations.length, workshops.length);
     assert.equal(stations.filter(station => station.event !== null).length, count);
-    assert.deepEqual(stations.map(station => station.number), ['01', '02', '03', '04', '05', '06', '07']);
+    assert.deepEqual(stations.map(station => station.number), workshops.map((_, index) => String(index + 1).padStart(2, '0')));
     assert.ok(stations.every(station => station.name));
-    assert.deepEqual(planner.forEvents(stations.map(station => station.event)), planner.defaults());
+    const placements = planner.forEvents(stations.map(station => station.event));
+    assert.equal(placements.length, workshops.length);
+    assert.ok(placements.every(Boolean), 'every chapter has a safe platform');
+    assert.deepEqual(placements.slice(0, anchors.length), anchors);
   }
   const initial = createEventStations([event]), occupied = planner.forEvents(initial.map(s => s.event));
   const next = planner.next(occupied), newEvent = { ...event, id: 'new', trackPosition: next.distance / length };
   const updated = createEventStations([event, newEvent]);
-  assert.equal(updated.length, 8); assert.deepEqual(updated.slice(0, 7), initial);
+  assert.equal(updated.length, initial.length + 1); assert.deepEqual(updated.slice(0, initial.length), initial);
   const saved = planner.forEvents(updated.map(s => s.event));
-  assert.equal(saved[7].distance, next.distance);
-  assert.deepEqual(saved.slice(0, 7).map(s => s.distance), occupied.map(s => s.distance));
+  assert.equal(saved[initial.length].distance, next.distance);
+  assert.deepEqual(saved.slice(0, initial.length).map(s => s.distance), occupied.map(s => s.distance));
 });
 
 test('retuning default anchors preserves an existing saved station in their new preferred position', () => {
@@ -156,7 +161,7 @@ test('removing a station retains shared resources until the owning world is disp
 });
 
 test('touch and constrained hardware recover detail without enabling the expensive depth pass', () => {
-  for (const device of [{ coarse: true }, { coarse: false, cores: 4 }, { coarse: false, cores: 8, memory: 4 }]) {
+  for (const device of [{ coarse: true }, { coarse: true, cores: 0, memory: 0 }, { coarse: true, cores: 8, memory: 8 }, { coarse: false, cores: 4 }, { coarse: false, cores: 8, memory: 4 }]) {
     const budget = rideQuality(device), controller = createQualityController(budget.initial, budget.maximum);
     assert.equal(controller.level, 0);
     for (let i = 0; i < 2400; i++) controller.sample(1 / 60);

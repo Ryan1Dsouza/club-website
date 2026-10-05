@@ -5,6 +5,25 @@ import { createTowerQualityController, towerPixelRatio, towerQuality } from '../
 import { createTowerPhysics } from '../src/lib/people-tower-physics.ts';
 import { AABB, Body, Quaternion, Vec3 } from 'cannon-es';
 
+test('release transfers bounded throw velocity at every quality tier and rebuild restores play', () => {
+  for (const detail of [0, 1, 2]) {
+    const physics = createTowerPhysics(towerSlots(Array.from({ length: 15 }, (_, i) => String(i))), detail);
+    const block = physics.bodies[0];
+    physics.grab(0, block.position);
+    physics.release({ x: 30, y: 20, z: 0 });
+    assert.ok(Math.abs(block.velocity.length() - 14) < 1e-8);
+    assert.ok(block.velocity.x > 0 && block.velocity.y > 0);
+    assert.equal(physics.world.constraints.length, 0);
+    const before = block.position.clone();
+    for (let i = 0; i < 12; i++) physics.step(1 / 60);
+    assert.ok(block.position.distanceTo(before) > .5);
+    physics.reset();
+    assert.equal(block.velocity.length(), 0);
+    assert.ok(physics.grab(0, block.position));
+    physics.release(); physics.dispose();
+  }
+});
+
 test('scroll smoothing is frame-rate independent, settles exactly and handles noisy reversals without overshoot', () => {
   const samples = [10, 15, 30, 60, 90, 120, 144].map(fps => {
     const scroll = { value: 0, velocity: 0 };

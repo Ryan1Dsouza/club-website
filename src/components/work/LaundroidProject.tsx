@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowRight, ArrowUpRight, CalendarDays, Github, PackageCheck, Route, Sparkles, X } from 'lucide-react';
-import type { Project, SiteSettings } from '../../types';
+import { ArrowUpRight, Github, X } from 'lucide-react';
+import type { Project } from '../../types';
 import './laundroid-project.css';
 
 /** Shared, lightweight vector artwork. Only the drum moves on interaction. */
@@ -76,14 +76,8 @@ function WashingMachine() {
   </svg>;
 }
 
-const features = [
-  { icon: CalendarDays, title: 'Book', copy: 'Simpler laundry bookings for students.' },
-  { icon: Route, title: 'Track', copy: 'Follow an order through the laundry process.' },
-  { icon: PackageCheck, title: 'Deliver', copy: 'Keep campus laundry deliveries organized.' },
-];
-
-function LaundroidDetails({ project, settings, index, trigger, onClose }: {
-  project: Project; settings: SiteSettings; index: number; trigger: RefObject<HTMLButtonElement | null>; onClose: () => void;
+function LaundroidDetails({ project, trigger, onClose }: {
+  project: Project; trigger: RefObject<HTMLButtonElement | null>; onClose: () => void;
 }) {
   const id = useId();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -119,7 +113,7 @@ function LaundroidDetails({ project, settings, index, trigger, onClose }: {
     };
   }, [trigger]);
 
-  return createPortal(<dialog ref={dialog} className="laundroid-details" aria-labelledby={`${id}-title`} aria-describedby={`${id}-description`} data-lenis-prevent
+  return createPortal(<dialog ref={dialog} className="laundroid-details" aria-labelledby={`${id}-title`} data-lenis-prevent
     onCancel={event => { event.preventDefault(); close(); }}
     onClick={event => {
       if (event.target !== event.currentTarget) return;
@@ -134,61 +128,45 @@ function LaundroidDetails({ project, settings, index, trigger, onClose }: {
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
     }}>
     <header className="laundroid-details__controls">
-      <div className="laundroid-details__drawer"><span>NUCLEUS</span><span>Campus care, connected.</span></div>
+      <div className="laundroid-details__drawer"><span>NUCLEUS</span></div>
       <div className="laundroid-details__dial" aria-hidden="true"><span /></div>
-      <div className="laundroid-details__display"><span>PROJECT {String(index + 1).padStart(2, '0')}</span><span><i />Inside the project</span></div>
       <button className="laundroid-details__close" type="button" onClick={close} aria-label="Close project details"><X size={20} /></button>
     </header>
     <div className="laundroid-details__body">
       <div className="laundroid-details__porthole">
-        <span className="laundroid-details__edition">A FRESH SPIN ON THE EVERYDAY</span>
         <svg className="laundroid-details__drum" viewBox="0 0 300 300" aria-hidden="true"><WashDrum id={id} /></svg>
-        <p>One platform.<br /><strong>A lighter laundry day.</strong></p>
-        <span className="laundroid-details__care" aria-hidden="true"><Sparkles size={17} /><span>MADE FOR CAMPUS LIFE</span></span>
       </div>
       <div className="laundroid-details__copy">
         <span className="laundroid-details__category">{project.domain} / {project.status}</span>
         <h2 id={`${id}-title`}>{project.title}</h2>
-        <p id={`${id}-description`}>{project.description}</p>
-        <ol className="laundroid-details__features">{features.map(({ icon: Icon, title, copy }, featureIndex) => <li key={title}>
-          <span className="laundroid-details__feature-icon"><Icon size={20} strokeWidth={1.5} /></span>
-          <div><h3>{title}</h3><p>{copy}</p></div><span className="laundroid-details__feature-number">0{featureIndex + 1}</span>
-        </li>)}</ol>
-        <div className="laundroid-details__links">
+        {(project.url || project.repositoryUrl) && <div className="laundroid-details__links">
           {project.url && <a href={project.url} target="_blank" rel="noreferrer">Explore project <ArrowUpRight size={16} /></a>}
           {project.repositoryUrl && <a href={project.repositoryUrl} target="_blank" rel="noreferrer">Source code <Github size={16} /></a>}
-          {!project.url && !project.repositoryUrl && <a href={`mailto:${settings.contactEmail}?subject=${encodeURIComponent(`Tell me about ${project.title}`)}`}>Talk to the team <ArrowUpRight size={16} /></a>}
-        </div>
+        </div>}
       </div>
     </div>
-    <footer className="laundroid-details__base"><span>DESIGNED FOR STUDENTS & CAMPUS ADMINISTRATORS</span><span className="laundroid-details__vent" aria-hidden="true" /></footer>
+    <div className="laundroid-details__base" aria-hidden="true"><span className="laundroid-details__vent" /></div>
   </dialog>, document.body);
 }
 
-export default function LaundroidProject({ project, settings, index }: { project: Project; settings: SiteSettings; index: number }) {
+export default function LaundroidProject({ project }: { project: Project }) {
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   return <>
     <article className="work-feature laundroid-card" aria-labelledby={`project-${project.id}`}>
-      <div className="laundroid-card__topline"><span><Sparkles size={14} /> A fresh spin on campus life</span><span>NUCLEUS / {String(index + 1).padStart(2, '0')}</span></div>
       <div className="laundroid-card__scene" aria-hidden="true">
         <span className="laundroid-card__orbit laundroid-card__orbit--one" /><span className="laundroid-card__orbit laundroid-card__orbit--two" />
         <span className="laundroid-card__bubble laundroid-card__bubble--one" /><span className="laundroid-card__bubble laundroid-card__bubble--two" /><span className="laundroid-card__bubble laundroid-card__bubble--three" />
         <WashingMachine />
-        <span className="laundroid-card__scene-label"><span /> LESS HASSLE. FRESHER STARTS.</span>
       </div>
       <div className="laundroid-card__copy">
-        <span className="laundroid-card__category">THE CAMPUS LAUNDRY PROJECT</span>
         <h2 id={`project-${project.id}`}>{project.title}</h2>
-        <p className="laundroid-card__headline">Laundry day.<br /><span>Minus the hassle.</span></p>
-        <p className="laundroid-card__description">Booking, tracking, and delivery.<br />Your campus laundry, all in one place.</p>
-        <div className="laundroid-card__flow"><span>Book</span><ArrowRight size={13} /><span>Track</span><ArrowRight size={13} /><span>Deliver</span></div>
       </div>
       <div className="laundroid-card__footer"><span>{project.domain}<i />{project.status}</span></div>
       <button ref={trigger} type="button" className="laundroid-card__open" aria-label={`Explore ${project.title}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>
-        <span className="laundroid-card__cta">Open the machine <span><ArrowUpRight size={20} /></span></span>
+        <span className="laundroid-card__cta">View project <span><ArrowUpRight size={20} /></span></span>
       </button>
     </article>
-    {open && <LaundroidDetails project={project} settings={settings} index={index} trigger={trigger} onClose={() => setOpen(false)} />}
+    {open && <LaundroidDetails project={project} trigger={trigger} onClose={() => setOpen(false)} />}
   </>;
 }

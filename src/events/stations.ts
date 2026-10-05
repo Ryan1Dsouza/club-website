@@ -1,4 +1,4 @@
-/** Ride content follows the seven existing platforms in forward travel order. */
+/** Archive order; chapters beyond the seven fixed platforms receive another safe stop. */
 export const WORKSHOP_STATIONS = [
   { id: 'inauguration', title: 'Inauguration', folders: ['inauguration'] },
   { id: 'dev', title: 'Dev', folders: ['dev'] },
