@@ -1,4 +1,4 @@
-﻿import * as THREE from 'three';
+import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { Member } from '../types';
@@ -6,11 +6,21 @@ import { BLOCK_SIZE } from './people-tower-motion';
 import type { TowerDetail } from './people-tower-quality';
 
 export const TOWER_PALETTES = [
-  { paper: '#0d2117', ink: '#c3e5c8', wood: '#8caa89' },
-  { paper: '#14261b', ink: '#c3e5c8', wood: '#a2b49a' },
-  { paper: '#10241d', ink: '#c3e5c8', wood: '#729580' },
-  { paper: '#182a20', ink: '#c3e5c8', wood: '#b0c6a6' },
-  { paper: '#0c1b12', ink: '#c3e5c8', wood: '#839c75' }
+  { paper: '#0d2117', ink: '#c3e5c8', wood: '#7a718d' },
+  { paper: '#14261b', ink: '#c3e5c8', wood: '#9b8663' },
+  { paper: '#10241d', ink: '#c3e5c8', wood: '#71768d' },
+  { paper: '#182a20', ink: '#c3e5c8', wood: '#83708e' },
+  { paper: '#0c1b12', ink: '#c3e5c8', wood: '#8a8274' },
+  { paper: '#0d2117', ink: '#c3e5c8', wood: '#85797b' },
+  { paper: '#14261b', ink: '#c3e5c8', wood: '#8d8171' },
+  { paper: '#10241d', ink: '#c3e5c8', wood: '#7f7e80' },
+  { paper: '#182a20', ink: '#c3e5c8', wood: '#6b8493' },
+  { paper: '#0c1b12', ink: '#c3e5c8', wood: '#7a7d84' },
+  { paper: '#0d2117', ink: '#c3e5c8', wood: '#797688' },
+  { paper: '#14261b', ink: '#c3e5c8', wood: '#a56b59' },
+  { paper: '#10241d', ink: '#c3e5c8', wood: '#817d7d' },
+  { paper: '#182a20', ink: '#c3e5c8', wood: '#a55971' },
+  { paper: '#0c1b12', ink: '#c3e5c8', wood: '#8e8470' }
 ];
 
 /** One small, shared grain map adds surface detail without extra meshes. */
@@ -58,7 +68,7 @@ export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxText
     let size = 44; ctx.font = `500 ${size}px Arial`;
     while (size > 16 && ctx.measureText(member.name).width > 686) ctx.font = `500 ${size -= 1}px Arial`;
     ctx.fillStyle = palette.ink; ctx.fillText(member.name, 38, 111, 686);
-    ctx.fillStyle = '#c7ceba'; ctx.font = '17px monospace'; ctx.fillText(member.role.toUpperCase(), 39, 140, 684);
+    ctx.fillStyle = '#c7ceba'; ctx.font = '24px monospace'; ctx.fillText(member.role.toUpperCase(), 39, 140, 684);
     // Monogram end caps identify blocks even when their long face is turned away.
     ctx.strokeStyle = '#c4b28a65'; ctx.strokeRect(808, 20, 200, 152);
     ctx.textAlign = 'center'; ctx.fillStyle = palette.ink; ctx.font = '500 60px Georgia';

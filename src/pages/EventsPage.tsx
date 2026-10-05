@@ -69,12 +69,10 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
   return <section ref={archive} className={`events-page events-page--${mode}`} data-event-mode={mode} aria-label="Nucleus events">
     {mode === 'grid' ? <div className={`events-archive${flying ? ' events-archive--departing' : ''}`} inert={flying}>
       <div className="events-railway-backdrop" aria-hidden="true">
-        <svg viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice"><path className="events-railway-backdrop__sleepers" d="M-160 820C280 820 190 100 620 100S1020 780 1600 390" /><path className="events-railway-backdrop__bed" d="M-160 820C280 820 190 100 620 100S1020 780 1600 390" /><path className="events-railway-backdrop__line" d="M-160 820C280 820 190 100 620 100S1020 780 1600 390" /><circle cx="620" cy="100" r="28" /><circle cx="620" cy="100" r="7" /><text x="665" y="107">NUCLEUS / JUNCTION 01</text></svg>
+        <svg viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice"><path className="events-railway-backdrop__sleepers" d="M-160 820C280 820 190 100 620 100S1020 780 1600 390" /><path className="events-railway-backdrop__bed" d="M-160 820C280 820 190 100 620 100S1020 780 1600 390" /><path className="events-railway-backdrop__line" d="M-160 820C280 820 190 100 620 100S1020 780 1600 390" /><circle cx="620" cy="100" r="28" /><circle cx="620" cy="100" r="7" /></svg>
       </div>
       <header className="events-heading">
-        <p className="events-eyebrow">THE NUCLEUS ARCHIVE / {String(stations.length).padStart(2, '0')} CHAPTERS</p>
         <h1>Events<span>.</span></h1>
-        <p className="events-heading__intro">Good ideas bring us together. These are the moments that stay.</p>
       </header>
       <div className="events-grid">
         {stations.map((item) => (

@@ -11,3 +11,4 @@ const server = createApp(db, { render }).listen(port, host, () => console.log(`\
 setInterval(() => {}, 1 << 30); // Prevent Node from exiting prematurely
 function shutdown() { server.close(() => { db.close(); process.exit(0); }); }
 process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);
+// Trigger restart
