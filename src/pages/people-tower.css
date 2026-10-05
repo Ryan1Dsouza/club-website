@@ -1,4 +1,4 @@
-.people-page[data-view='tower'] { --tower-ink: var(--mint); --tower-paper: #0d2b1f; }
+.people-page[data-view='tower'] { --tower-ink: var(--mint); --tower-paper: #0d2b1f; margin-top: calc(var(--header-height) * -1); }
 .people-tower { position: relative; }
 .people-tower__stage { position: relative; height: 100svh; height: 100dvh; min-height: 280px; overflow: hidden; isolation: isolate; background: linear-gradient(#020d07, #030f08 72%, #040c07); }
 [data-tower-status='ready'] .people-tower { height: var(--tower-length); }
