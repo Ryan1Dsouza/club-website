@@ -28,7 +28,10 @@ export function createTowerPortraits(members: Member[], small: boolean) {
     if (disposed || active !== index || cache.get(index) !== portrait || !host) return;
     const ready = portrait.full?.loaded ? portrait.full : portrait.thumbnail.loaded ? portrait.thumbnail : undefined;
     if (!ready || host.querySelector('.tower-profile__photo') === ready.image) return;
-    host.querySelector('.tower-profile__photo')?.remove();
+    host.querySelectorAll('.tower-profile__photo, .tower-profile__photo-bg').forEach(el => el.remove());
+    const bgImg = ready.image.cloneNode() as HTMLImageElement;
+    bgImg.className = 'tower-profile__photo-bg';
+    host.insertBefore(bgImg, host.querySelector('.tower-profile__photo-fade'));
     host.insertBefore(ready.image, host.querySelector('.tower-profile__photo-fade'));
   }
   function start(index: number, portrait: Portrait, item: Request) {
@@ -89,13 +92,16 @@ export function createTowerPortraits(members: Member[], small: boolean) {
   }
   function show(index: number, element: HTMLElement) {
     active = index; host = element;
-    host.querySelector('.tower-profile__photo')?.remove();
+    host.querySelectorAll('.tower-profile__photo, .tower-profile__photo-bg').forEach(el => el.remove());
     prepare(index);
     const portrait = cache.get(index);
     if (portrait?.preview) {
       const preview = new Image();
       preview.className = 'tower-profile__photo'; preview.alt = '';
       preview.dataset.preview = 'true'; preview.src = portrait.preview;
+      const bgPreview = preview.cloneNode() as HTMLImageElement;
+      bgPreview.className = 'tower-profile__photo-bg';
+      host.insertBefore(bgPreview, host.querySelector('.tower-profile__photo-fade'));
       host.insertBefore(preview, host.querySelector('.tower-profile__photo-fade'));
     }
     if (portrait) attach(index, portrait);

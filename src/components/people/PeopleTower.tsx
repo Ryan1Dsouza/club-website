@@ -92,7 +92,6 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
     } as CSSProperties}>
       <div className="people-tower__stage">
         <div className="people-tower__world" ref={host} data-interaction={playMode ? 'play' : 'scroll'} aria-hidden="true" />
-        <div className="people-tower__topline"><span className="eyebrow">02 / The people</span></div>
         <div className="people-tower__finish" aria-hidden="true"><p>The<br /><em>whole team.</em></p><span>Meet everyone <ArrowDown size={15} /></span></div>
         <p className="people-tower__hint" hidden={status !== 'ready'}>
           <span className="people-tower__hint-mouse">Click to pull. Grab, drag and release to throw. Scroll to meet the team.</span>
