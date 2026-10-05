@@ -67,15 +67,14 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     roster.current?.focus({ preventScroll: true });
   }
 
-  return <section className="people-page" aria-labelledby="people-title" data-view={view} data-tower-status={view === 'tower' ? towerStatus : undefined}>
+  return <section className="people-page" data-view={view} data-tower-status={view === 'tower' ? towerStatus : undefined}>
     <div className="people-toolbar">
-      {view === 'grid' ? <span className="eyebrow">02 / The people</span> : <button type="button" className="people-view-toggle" onClick={() => setView('grid')}>
+      {view === 'grid' ? null : <button type="button" className="people-view-toggle" onClick={() => setView('grid')}>
         <ArrowLeft size={16} />Back to the team
       </button>}
     </div>
     {view === 'grid' ? <div key="grid" className="people-directory people-view">
       <div className="people-intro">
-        <div><h1 id="people-title" tabIndex={-1}>Many minds.<br /><em>One nucleus.</em></h1><p>The people turning curiosity into something real.</p></div>
         <button type="button" className="people-meet-button" onClick={meetTeam}>Meet the Team <span>{String(profiles.length).padStart(2, '0')}</span><ArrowDown size={17} /></button>
       </div>
       <TowerPlayButton disabled={!currentMembers.length} paused={!!selected}
