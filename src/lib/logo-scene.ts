@@ -253,7 +253,7 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
     outlines.push({ canvas, context, texture, width, mesh: line });
     return material;
   }
-  const edge = makeContour(2);
+  const edge = makeContour(6);
 
   const resizeBuffer = () => {
     const level = coarsePointer.matches && completed ? 2 : quality.level;

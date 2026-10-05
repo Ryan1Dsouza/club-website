@@ -1,7 +1,7 @@
-.team-profile { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: #080e09; color: #c3e5c8; overflow: auto; overscroll-behavior: contain; color-scheme: dark; }
-.team-profile::backdrop { background: #080e09; }
+.team-profile { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: var(--page-backdrop); color: var(--mint); overflow: auto; overscroll-behavior: contain; color-scheme: dark; }
+.team-profile::backdrop { background: var(--page-backdrop); }
 .team-profile__layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 100%; }
-.team-profile__back { position: fixed; top: max(25px, env(safe-area-inset-top)); left: max(30px, env(safe-area-inset-left)); z-index: 2; display: flex; align-items: center; gap: 12px; min-height: 44px; max-width: calc(100% - 40px); border: 1px solid #c3e5c842; border-radius: 30px; padding: 10px 16px; background: #080e09; color: #c3e5c8; font: 11px/1.5 var(--mono); cursor: pointer; }
+.team-profile__back { position: fixed; top: max(25px, env(safe-area-inset-top)); left: max(30px, env(safe-area-inset-left)); z-index: 2; display: flex; align-items: center; gap: 12px; min-height: 44px; max-width: calc(100% - 40px); border: 1px solid #c3e5c842; border-radius: 30px; padding: 10px 16px; background: var(--surface); color: var(--mint); font: 11px/1.5 var(--mono); cursor: pointer; }
 .team-profile__back:hover { background: #18291d; }
 .team-profile__back:focus-visible, .team-profile__socials a:focus-visible { outline: 2px solid #c3e5c8; outline-offset: 4px; }
 .team-profile__details { position: relative; display: flex; flex-direction: column; justify-content: center; padding: 110px clamp(28px, 5vw, 90px) 35px; min-width: 0; }
@@ -20,7 +20,7 @@
 @media (max-width: 760px), (max-height: 540px) and (pointer: coarse) {
   .team-profile { padding-top: calc(72px + env(safe-area-inset-top)); }
   .team-profile__layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; align-content: start; min-height: 0; }
-  .team-profile__photo { grid-row: 1; width: 100%; min-height: 0; aspect-ratio: 3 / 4; max-height: calc(100svh - 72px - env(safe-area-inset-top)); background-color: #080e09; background-size: contain; background-position: center; }
+  .team-profile__photo { grid-row: 1; width: 100%; min-height: 0; aspect-ratio: 3 / 4; max-height: calc(100svh - 72px - env(safe-area-inset-top)); background-color: var(--page-backdrop); background-size: contain; background-position: center; }
   .team-profile__photo img { object-fit: contain; object-position: center; }
   .team-profile__details { padding: 24px 24px max(24px, env(safe-area-inset-bottom)); }
   .team-profile__copy { margin: 0; padding-block: 0 20px; }

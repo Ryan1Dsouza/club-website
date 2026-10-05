@@ -129,7 +129,7 @@ export default function App({ initialData = seed, serverRendered = false }: { in
 
   return <>
     <LoadingScreen active={loadingStage === 'idle' || loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
-    <div className={`site-shell${pagePath === '/' ? ' site-shell--home' : pagePath === '/projects' ? ' site-shell--work' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
+    <div className={`site-shell${['/', '/team'].includes(pagePath) ? ' site-shell--home' : pagePath === '/projects' ? ' site-shell--work' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
     {location.pathname === '/' && <BackgroundRippleEffect className="background-ripple-effect--page" />}
     <a href="#main-content" className="skip-link">Skip to content</a>
     <header className={`site-header${pagePath === '/events' ? ' site-header--events' : ['/', '/team'].includes(pagePath) ? ' site-header--home' : ''}`}>
