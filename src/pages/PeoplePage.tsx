@@ -75,6 +75,10 @@ export default function PeoplePage({ members }: { members: Member[] }) {
     </div>
     {view === 'grid' ? <div key="grid" className="people-directory people-view">
       <div className="people-intro">
+        <div className="people-groups" role="group" aria-label="Browse the community" style={{ margin: 0, padding: 0, border: 'none' }}>
+          <div>{(['member', 'alumni'] as const).map(option => <button key={option} type="button" aria-pressed={group === option} aria-controls="people-roster"
+            onClick={() => setGroup(option)}>{option === 'member' ? 'Members' : 'Alumni'}<ArrowUpRight size={16} /></button>)}</div>
+        </div>
         <button type="button" className="people-meet-button" onClick={meetTeam}>Meet the Team <span>{String(profiles.length).padStart(2, '0')}</span><ArrowDown size={17} /></button>
       </div>
       <TowerPlayButton disabled={!currentMembers.length} paused={!!selected}
@@ -88,11 +92,7 @@ export default function PeoplePage({ members }: { members: Member[] }) {
           {visibleProfiles.map((person, index) => <MemberCard key={`${group}-${person.id}`} person={person} index={index} onSelect={setSelected} />)}
         </ul> : <p className="people-empty" role="status">{group === 'member' ? 'The team will be announced here soon.' : 'Alumni profiles are coming soon.'}</p>}
       </section>
-      <div className="people-groups" role="group" aria-label="Browse the community">
-        <span>Our community, through the years.</span>
-        <div>{(['member', 'alumni'] as const).map(option => <button key={option} type="button" aria-pressed={group === option} aria-controls="people-roster"
-          onClick={() => setGroup(option)}>{option === 'member' ? 'Members' : 'Alumni'}<ArrowUpRight size={16} /></button>)}</div>
-      </div>
+
     </div> : <div key="tower" className="people-view">
       <h1 id="people-title" className="sr-only">The people behind Nucleus</h1>
       <TowerBoundary><Suspense fallback={<p className="people-view-status" role="status">Building the interactive tower...</p>}>
