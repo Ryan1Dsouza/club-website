@@ -1,17 +1,15 @@
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { preloadPage } from './route-pages';
 import './styles.css';
 
-const Admin = lazy(() => import('./pages/Admin'));
+
 const root = document.getElementById('root')!;
 const initial = document.getElementById('nucleus-data');
 function boot() {
-  const element = <React.StrictMode>{window.location.pathname.startsWith('/admin')
-    ? <Suspense fallback={<div className="page-loading">Opening the control room…</div>}><Admin /></Suspense>
-    : <BrowserRouter><App initialData={initial ? JSON.parse(initial.textContent || '{}') : undefined} serverRendered={Boolean(initial)} /></BrowserRouter>}</React.StrictMode>;
+  const element = <React.StrictMode><BrowserRouter><App initialData={initial ? JSON.parse(initial.textContent || '{}') : undefined} serverRendered={Boolean(initial)} /></BrowserRouter></React.StrictMode>;
   if (initial) hydrateRoot(root, element);
   else createRoot(root).render(element);
 }

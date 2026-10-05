@@ -44,7 +44,7 @@ function SiteFooter({ settings }: { settings: SiteSettings }) {
         <a href={`mailto:${settings.contactEmail}`} aria-label="Email Nucleus"><Mail size={18} /></a>
       </div>
     </div>
-    <div className="footer-bottom"><span>© {new Date().getFullYear()} Nucleus SJEC</span><span>Made of many minds.</span><a href="/admin">Admin <ArrowUpRight size={13} /></a></div>
+    <div className="footer-bottom"><span>© {new Date().getFullYear()} Nucleus SJEC</span><span>Made of many minds.</span></div>
   </footer>;
 }
 
