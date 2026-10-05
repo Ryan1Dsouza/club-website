@@ -287,7 +287,7 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
       context.clearRect(0, 0, canvas.width, canvas.height);
       context.setTransform(outlinePixelsPerUnit, 0, 0, -outlinePixelsPerUnit, canvas.width / 2, canvas.height / 2);
       context.strokeStyle = '#fff';
-      context.lineWidth = outline.width * LOGO_WIDTH / logoPixels;
+      context.lineWidth = outline.width * LOGO_WIDTH / 480;
       context.lineCap = 'round';
       context.lineJoin = 'round';
       context.beginPath();
