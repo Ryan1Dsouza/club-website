@@ -68,6 +68,7 @@ export default function PeoplePage({ members }: { members: Member[] }) {
   }
 
   return <section className="people-page" data-view={view} data-tower-status={view === 'tower' ? towerStatus : undefined}>
+    <h1 id="people-title" className="sr-only">The people behind Nucleus</h1>
     <div className="people-toolbar">
       {view === 'grid' ? null : <button type="button" className="people-view-toggle" onClick={() => setView('grid')}>
         <ArrowLeft size={16} />Back to the team
@@ -79,10 +80,8 @@ export default function PeoplePage({ members }: { members: Member[] }) {
           <div>{(['member', 'alumni'] as const).map(option => <button key={option} type="button" aria-pressed={group === option} aria-controls="people-roster"
             onClick={() => setGroup(option)}>{option === 'member' ? 'Members' : 'Alumni'}<ArrowUpRight size={16} /></button>)}</div>
         </div>
-        <button type="button" className="people-meet-button" onClick={meetTeam}>Meet the Team <span>{String(profiles.length).padStart(2, '0')}</span><ArrowDown size={17} /></button>
+
       </div>
-      <TowerPlayButton disabled={!currentMembers.length} paused={!!selected}
-        onClick={() => { setTowerStatus('loading'); setView('tower'); }} />
       <section ref={roster} id="people-roster" className="people-directory__roster" aria-labelledby="people-roster-title" tabIndex={-1}>
         <div className="people-directory__heading">
           <h2 id="people-roster-title">{group === 'member' ? 'The minds behind it.' : 'Always part of the nucleus.'}</h2>
@@ -92,9 +91,9 @@ export default function PeoplePage({ members }: { members: Member[] }) {
           {visibleProfiles.map((person, index) => <MemberCard key={`${group}-${person.id}`} person={person} index={index} onSelect={setSelected} />)}
         </ul> : <p className="people-empty" role="status">{group === 'member' ? 'The team will be announced here soon.' : 'Alumni profiles are coming soon.'}</p>}
       </section>
-
+      <TowerPlayButton disabled={!currentMembers.length} paused={!!selected}
+        onClick={() => { setTowerStatus('loading'); setView('tower'); }} />
     </div> : <div key="tower" className="people-view">
-      <h1 id="people-title" className="sr-only">The people behind Nucleus</h1>
       <TowerBoundary><Suspense fallback={<p className="people-view-status" role="status">Building the interactive tower...</p>}>
         <PeopleTower members={currentMembers} onStatusChange={setTowerStatus} />
       </Suspense></TowerBoundary>

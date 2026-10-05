@@ -21,7 +21,7 @@ test('Events renders every workshop photo card and two portals without loading t
 
 test('direct production requests serve the Events grid and cannot bypass the portal', async () => {
   const db = openDatabase(':memory:');
-  const server = createApp(db, { production: true, limits: false, dist: resolve('dist/client'), render }).listen(0, '127.0.0.1');
+  const server = createApp(db, { production: true, origin: 'https://nucleussjec.in', limits: false, dist: resolve('dist/client'), render }).listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
   try {
     for (const route of ['/events', '/events/', '/events?view=ride']) {

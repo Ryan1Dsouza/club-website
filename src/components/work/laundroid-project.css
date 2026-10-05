@@ -1,6 +1,6 @@
 .work-page.showcase-page { padding-top: clamp(28px, 4.5vw, 64px); }
-.laundroid-card, .laundroid-details { --laundry-ink: #203c2d; --laundry-muted: #506a58; --laundry-line: #b5c8b5; color: var(--laundry-ink); font-family: 'Space Grotesk', Inter, sans-serif; }
-.work-feature.laundroid-card { position: relative; isolation: isolate; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto; width: 100%; min-height: 500px; border: 1px solid #c8d8c5; border-radius: 24px; overflow: hidden; background: #dce8d6; box-shadow: 0 16px 60px #0002; }
+.laundroid-card, .laundroid-details { --laundry-ink: var(--surface); --laundry-muted: color-mix(in srgb, var(--surface) 72%, var(--mint)); --laundry-line: color-mix(in srgb, var(--surface) 22%, var(--mint)); --laundry-paper: color-mix(in srgb, var(--mint) 65%, white); color: var(--laundry-ink); font-family: 'Space Grotesk', Inter, sans-serif; }
+.work-feature.laundroid-card { position: relative; isolation: isolate; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto; width: 100%; min-height: 500px; border: 1px solid var(--laundry-line); border-radius: 24px; overflow: hidden; background: var(--mint); box-shadow: 0 16px 60px #0002; }
 .laundroid-card__scene { position: relative; display: grid; place-items: center; min-width: 0; min-height: 433px; padding: 3px 24px 36px; }
 .laundroid-card__scene::before { content: ''; position: absolute; inset: 8% 8% 0; background: radial-gradient(ellipse, #f6faf095, transparent 68%); }
 .laundroid-machine { position: relative; z-index: 1; display: block; width: min(100%, 360px); overflow: visible; }
@@ -16,23 +16,23 @@
 .laundroid-card__footer > span { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: var(--laundry-muted); font-size: 10px; }
 .laundroid-card__footer i { width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
 .laundroid-card__open { position: absolute; z-index: 3; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; border-radius: inherit; background: transparent; color: inherit; text-align: left; }
-.laundroid-card__open:focus-visible { outline: 3px solid #284c36; outline-offset: -7px; }
+.laundroid-card__open:focus-visible { outline: 3px solid var(--laundry-ink); outline-offset: -7px; }
 .laundroid-card__cta { position: absolute; right: 36px; bottom: 20px; display: flex; align-items: center; gap: 20px; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 500; }
-.laundroid-card__cta > span { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #476d4c; border-radius: 50%; background: #254a34; color: #e1efda; }
+.laundroid-card__cta > span { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--laundry-ink); border-radius: 50%; background: var(--laundry-ink); color: var(--mint); }
 .laundroid-drum__load { transform-box: view-box; transform-origin: 150px 150px; }
 
 /* The opened card is the appliance: a control panel, porthole and lower plinth. */
-.laundroid-details { position: fixed; inset: 0; width: min(760px, calc(100% - 40px)); max-width: none; max-height: calc(100dvh - 48px); margin: auto; padding: 0; border: 1px solid #c6d1c1; border-radius: 27px; background: linear-gradient(115deg, #f3f6ee, #e5ebdf); box-shadow: 0 30px 120px #0008, inset 0 0 0 6px #ffffff45; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #a7b9a6 #e5ebdf; color-scheme: light; }
+.laundroid-details { position: fixed; inset: 0; width: min(760px, calc(100% - 40px)); max-width: none; max-height: calc(100dvh - 48px); margin: auto; padding: 0; border: 1px solid var(--laundry-line); border-radius: 27px; background: linear-gradient(115deg, var(--laundry-paper), var(--mint)); box-shadow: 0 30px 120px #0008, inset 0 0 0 6px #ffffff45; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--muted) var(--mint); color-scheme: light; }
 .laundroid-details::backdrop { background: #07130de0; backdrop-filter: blur(8px); }
-.laundroid-details :focus-visible { outline: 2px solid #254a34; outline-offset: 4px; }
-.laundroid-details__controls { display: flex; align-items: center; gap: 28px; min-height: 112px; padding: 22px 32px; border-bottom: 1px solid #bbcbb7; box-shadow: 0 2px 0 #fff9; }
-.laundroid-details__drawer { display: flex; flex-direction: column; align-self: stretch; justify-content: center; gap: 9px; min-width: 190px; padding: 9px 24px 18px 0; border-right: 1px solid #bbcbb7; }
+.laundroid-details :focus-visible { outline: 2px solid var(--laundry-ink); outline-offset: 4px; }
+.laundroid-details__controls { display: flex; align-items: center; gap: 28px; min-height: 112px; padding: 22px 32px; border-bottom: 1px solid var(--laundry-line); box-shadow: 0 2px 0 #fff9; }
+.laundroid-details__drawer { display: flex; flex-direction: column; align-self: stretch; justify-content: center; gap: 9px; min-width: 190px; padding: 9px 24px 18px 0; border-right: 1px solid var(--laundry-line); }
 .laundroid-details__drawer > span:first-child { font-size: 16px; font-weight: 700; letter-spacing: .17em; }
 .laundroid-details__dial { display: grid; place-items: center; width: 64px; height: 64px; flex-shrink: 0; margin-left: auto; border: 1px solid #afc1ab; border-radius: 50%; background: repeating-conic-gradient(from -2deg, #74916c 0deg 2deg, transparent 2deg 36deg); }
 .laundroid-details__dial > span { position: relative; width: 51px; height: 51px; border: 1px solid #c5d0be; border-radius: 50%; background: linear-gradient(130deg, #fff, #d4dfcd); box-shadow: 2px 3px 5px #37532c20; transform: rotate(36deg); }
 .laundroid-details__dial > span::before { content: ''; position: absolute; top: 5px; left: 23px; width: 3px; height: 11px; border-radius: 2px; background: #45693c; }
-.laundroid-details__close { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; margin-left: 8px; padding: 0; border: 1px solid #a7bba2; border-radius: 50%; color: #2c4e32; background: #f1f5ec; }
-.laundroid-details__close:hover { background: #d6e3ce; }
+.laundroid-details__close { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; margin-left: 8px; padding: 0; border: 1px solid var(--laundry-line); border-radius: 50%; color: var(--laundry-ink); background: var(--laundry-paper); }
+.laundroid-details__close:hover { background: var(--mint); }
 .laundroid-details__body { display: grid; grid-template-columns: .95fr 1.05fr; padding: 34px 36px 30px; gap: 36px; }
 .laundroid-details__porthole { display: flex; flex-direction: column; align-items: center; align-self: center; min-width: 0; text-align: center; }
 .laundroid-details__drum { display: block; width: 100%; max-width: 345px; }
@@ -40,9 +40,9 @@
 .laundroid-details__category { display: block; color: var(--laundry-muted); font: 9px/1.6 var(--mono); }
 .laundroid-details__copy h2 { margin: 14px 0 18px; font-size: clamp(34px, 4vw, 52px); line-height: 1; font-weight: 600; letter-spacing: -.065em; overflow-wrap: anywhere; }
 .laundroid-details__links { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 12px; }
-.laundroid-details__links > a { display: inline-flex; align-items: center; gap: 20px; min-height: 44px; border-bottom: 1px solid #708c66; font-size: 12px; }
-.laundroid-details__links > a:hover { color: #426e36; }
-.laundroid-details__base { display: flex; align-items: center; justify-content: flex-end; min-height: 40px; margin: 0 30px 10px; padding: 12px 5px; border-top: 1px solid #bfceba; }
+.laundroid-details__links > a { display: inline-flex; align-items: center; gap: 20px; min-height: 44px; border-bottom: 1px solid var(--laundry-muted); font-size: 12px; }
+.laundroid-details__links > a:hover { color: var(--laundry-muted); }
+.laundroid-details__base { display: flex; align-items: center; justify-content: flex-end; min-height: 40px; margin: 0 30px 10px; padding: 12px 5px; border-top: 1px solid var(--laundry-line); }
 .laundroid-details__vent { flex-shrink: 0; width: 70px; height: 15px; border-radius: 2px; background: repeating-linear-gradient(0deg, #a8bca2 0 1px, transparent 1px 4px); }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -62,12 +62,12 @@
   @keyframes laundroid-copy { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 }
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-  .work-feature.laundroid-card:hover { translate: 0 -3px; border-color: #c8d8c5; box-shadow: 0 22px 65px #0003; }
+  .work-feature.laundroid-card:hover { translate: 0 -3px; border-color: var(--laundry-line); box-shadow: 0 22px 65px #0003; }
   .laundroid-card:hover .laundroid-drum__load { transform: rotate(32deg); }
   .laundroid-card:hover .laundroid-card__bubble--one { transform: translate(-3px, -10px); }
   .laundroid-card:hover .laundroid-card__bubble--two { transform: translate(3px, -7px); }
   .laundroid-card:hover .laundroid-card__bubble--three { transform: translate(-2px, -5px); }
-  .laundroid-card:hover .laundroid-card__cta > span { transform: rotate(45deg); background: #39623c; }
+  .laundroid-card:hover .laundroid-card__cta > span { transform: rotate(45deg); background: var(--page-backdrop); }
 }
 @media (min-width: 1600px) { .work-page.showcase-page { padding-top: 85px; } }
 @media (max-width: 900px) {
@@ -96,7 +96,7 @@
   .laundroid-card__footer > span { font-size: 9px; }
   .laundroid-card__cta { left: 24px; right: 22px; bottom: 16px; justify-content: space-between; }
   .laundroid-details { width: calc(100% - 24px); max-height: calc(100dvh - 24px); border-radius: 21px; }
-  .laundroid-details__controls { position: sticky; z-index: 2; top: 0; gap: 12px; min-height: 90px; padding: 17px 18px; background: #edf2e7; border-radius: 20px 20px 0 0; }
+  .laundroid-details__controls { position: sticky; z-index: 2; top: 0; gap: 12px; min-height: 90px; padding: 17px 18px; background: var(--laundry-paper); border-radius: 20px 20px 0 0; }
   .laundroid-details__drawer { min-width: 0; padding: 0; border: 0; margin-right: auto; gap: 6px; }
   .laundroid-details__drawer > span:first-child { font-size: 13px; }
   .laundroid-details__dial { width: 45px; height: 45px; margin: 0; }

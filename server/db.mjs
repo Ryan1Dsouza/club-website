@@ -1,16 +1,28 @@
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import { randomBytes, scrypt, scryptSync, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
+
+const deriveKey = promisify(scrypt);
+const passwordOptions = { N: 32768, maxmem: 64 * 1024 * 1024 };
 
 export function hashPassword(password, salt = randomBytes(16).toString('hex')) {
-  return `${salt}:${scryptSync(password, salt, 64).toString('hex')}`;
+  return `scrypt:${salt}:${scryptSync(password, salt, 64, passwordOptions).toString('hex')}`;
+}
+function passwordParts(stored) {
+  if (typeof stored !== 'string' || !/^(scrypt:)?[a-f0-9]{32}:[a-f0-9]{128}$/.test(stored)) return null;
+  const modern = stored.startsWith('scrypt:');
+  const [salt, key] = (modern ? stored.slice(7) : stored).split(':');
+  return { salt, key: Buffer.from(key, 'hex'), options: modern ? passwordOptions : {} };
 }
 export function verifyPassword(password, stored) {
-  const [salt, key] = stored.split(':');
-  const actual = scryptSync(password, salt, 64);
-  const expected = Buffer.from(key, 'hex');
-  return actual.length === expected.length && timingSafeEqual(actual, expected);
+  const parts = passwordParts(stored);
+  return !!parts && timingSafeEqual(scryptSync(password, parts.salt, 64, parts.options), parts.key);
+}
+export async function verifyPasswordAsync(password, stored) {
+  const parts = passwordParts(stored);
+  return !!parts && timingSafeEqual(await deriveKey(password, parts.salt, 64, parts.options), parts.key);
 }
 
 export function openDatabase(path = process.env.DATABASE_PATH || './data/nucleus.sqlite') {
@@ -27,6 +39,26 @@ export function openDatabase(path = process.env.DATABASE_PATH || './data/nucleus
     CREATE INDEX IF NOT EXISTS application_date ON applications(created_at DESC);
     CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY);
     INSERT OR IGNORE INTO schema_version VALUES(1);`);
+  // Additive migrations preserve existing applications and club content.
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    const columns = db.prepare('PRAGMA table_info(applications)').all().map(column => column.name);
+    for (const name of ['linkedin', 'github', 'leetcode']) {
+      if (!columns.includes(name)) db.exec(`ALTER TABLE applications ADD COLUMN ${name} TEXT NOT NULL DEFAULT ''`);
+    }
+    if (!db.prepare('PRAGMA table_info(sessions)').all().some(column => column.name === 'last_seen')) {
+      db.exec('ALTER TABLE sessions ADD COLUMN last_seen INTEGER NOT NULL DEFAULT 0');
+      // Older sessions lack an activity timestamp; require a fresh sign-in.
+      db.exec('DELETE FROM sessions');
+    }
+    db.exec(`CREATE TABLE IF NOT EXISTS member_photos (
+      id TEXT PRIMARY KEY, kind TEXT NOT NULL DEFAULT 'team' CHECK(kind='team'), member_id TEXT NOT NULL UNIQUE,
+      mime TEXT NOT NULL, data BLOB NOT NULL,
+      FOREIGN KEY(kind,member_id) REFERENCES content(kind,id) ON DELETE CASCADE);
+      CREATE INDEX IF NOT EXISTS session_expiry ON sessions(expires_at);
+      INSERT OR IGNORE INTO schema_version VALUES(2);`);
+    db.exec('COMMIT');
+  } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   if (!db.prepare('SELECT id FROM settings WHERE id=1').get()) {
     const seed = JSON.parse(readFileSync(new URL('../shared/public-data.json', import.meta.url), 'utf8'));
     db.exec('BEGIN');

@@ -2,10 +2,9 @@
   --menu-surface: #202823;
   --menu-text: #f4f7f4;
   --menu-gutter: clamp(20px, 2.71vw, 52px);
-  position: fixed;
+  position: absolute;
   z-index: 100;
   inset: 0;
-  overflow: clip;
   pointer-events: none;
 }
 
@@ -17,14 +16,15 @@
 .morph-nav__pill {
   position: absolute;
   z-index: 3;
-  top: 16px;
+  top: calc(12px + env(safe-area-inset-top, 0px));
   left: 50%;
   translate: -50% 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 58px;
-  padding: 8px;
+  height: 54px;
+  max-width: calc(100vw - 24px);
+  padding: 4px;
   border: 1px solid rgb(var(--mint-rgb) / .2);
   border-radius: 48px;
   background: var(--mint);
@@ -36,8 +36,8 @@
 .morph-nav__brand {
   display: grid;
   place-items: center;
-  width: 150px;
-  height: 40px;
+  width: clamp(96px, 12vw, 130px);
+  height: 44px;
   border-radius: 32px;
   background: rgb(0 0 0 / .06);
   font-size: 16px;
@@ -50,9 +50,9 @@
 .morph-nav__toggle {
   display: grid;
   place-items: center;
-  flex: 0 0 40px;
-  width: 40px;
-  height: 40px;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 1px solid rgb(0 0 0 / .12);
   border-radius: 50%;
@@ -106,8 +106,11 @@
 }
 
 .morph-nav__overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  height: 100dvh;
+  padding-top: var(--header-height);
+  overflow: clip;
   color: var(--menu-text);
   pointer-events: none;
 }
@@ -136,10 +139,10 @@
   justify-content: space-between;
   gap: 12px;
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: clip;
   overscroll-behavior: contain;
-  padding: 106px var(--menu-gutter) max(var(--menu-gutter), env(safe-area-inset-bottom));
+  padding: 20px var(--menu-gutter) max(var(--menu-gutter), env(safe-area-inset-bottom));
 }
 
 .morph-nav__main {
@@ -164,7 +167,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: .1em;
-  font-size: min(7.275vw, 11.65dvh, 140px);
+  font-size: min(6.4vw, 10dvh, 96px);
 }
 
 .morph-nav__links>li {
@@ -322,13 +325,15 @@
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .morph-nav__pill {
-    top: max(8px, env(safe-area-inset-top));
+    top: calc(8px + env(safe-area-inset-top, 0px));
+    height: 52px;
+    padding: 3px;
   }
 
   .morph-nav__content {
-    padding-top: 82px;
+    padding-top: 12px;
     gap: 24px;
   }
 
@@ -340,7 +345,7 @@
   }
 
   .morph-nav__links {
-    font-size: min(12.4vw, calc((100vw - var(--menu-gutter) * 2) / 7.25), 9dvh, 72px);
+    font-size: min(10vw, calc((100vw - var(--menu-gutter) * 2) / 7.25), 8dvh, 64px);
     gap: .14em;
   }
 
@@ -380,9 +385,9 @@
   }
 }
 
-@media (max-height: 520px) and (min-width: 761px) {
+@media (max-height: 520px) {
   .morph-nav__content {
-    padding-top: 84px;
+    padding-top: 8px;
     padding-bottom: 16px;
   }
 

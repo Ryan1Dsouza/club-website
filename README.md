@@ -32,12 +32,14 @@ The command prompts for an email and a password (12+ characters, hidden while ty
 
 The dashboard supports:
 
-- Add, edit, publish/unpublish, and delete events and projects.
-- Add, edit, and remove team members.
-- Open or close recruitment, set a deadline and intake identifier, and edit contact links.
+- Add, edit, publish/unpublish, and delete events and projects; upload or replace event photo albums.
+- Add, edit, and remove team members, including portraits, roles, and member/alumni status.
+- Open or close recruitment, set a deadline, next-intake announcement and intake identifier, and edit contact links.
 - Review paginated applications, update their internal status, and delete personal data.
 
 An open intake is required before applications are accepted. A passed deadline closes applications automatically. The same email can apply once per intake. Internal review status changes **do not send email**; contact applicants through the club's normal process. No email provider is configured.
+
+The recruitment page and join dialog check the current backend settings before accepting applications. The form accepts first-, second-, and third-year students, with name, email, preferred domain, motivation, consent, and optional LinkedIn, GitHub, LeetCode and other portfolio URLs. Applications and their profile links are visible only to authenticated administrators. When closed, the page shows the configured next-intake timing or states that dates have not been announced.
 
 ## The event ride
 
@@ -69,6 +71,12 @@ Public routes:
 - `POST /api/applications` — validated application submission
 
 Admin routes under `/api/admin` require an authenticated session. Mutations require the session CSRF token. Passwords are salted with scrypt; only hashed session tokens are persisted. Cookies are HttpOnly and SameSite=Strict, and are Secure with a `__Host-` prefix in production. Origin checks, request size limits, rate limits, prepared database statements, and a production CSP are configured.
+
+Login is the only unauthenticated admin endpoint. Sessions rotate on login, expire after 30 minutes of inactivity or 12 hours total, and are invalidated on logout. New passwords use scrypt with N=32768; existing hashes remain compatible. Password verification runs asynchronously. Production rejects a missing or invalid HTTPS `APP_ORIGIN`.
+
+Database migrations run automatically at startup without dropping existing applications. The new profile columns default to empty for older submissions. The session migration signs out sessions created by the previous schema once. Back up the SQLite database before deploying changes.
+
+Event albums and member portraits are uploaded as files and stored inside SQLite. The server validates and decodes raster images, limits size and pixel count, and re-encodes them to WebP without metadata. Photo replacement is atomic with the content update; deleting a record removes its uploaded photos. Draft event photos are available only through the authenticated admin endpoint. Dashboard edits override the legacy workshop display content, and new events reserve separate ride stations, including while in draft.
 
 `PUT /api/admin/experience-events/:uuid` atomically publishes an event, reserves a station and saves its photo album. Request retries reuse the UUID. `GET /api/event-photos/:id` serves only photos belonging to published events. Existing admin edits preserve station positions and albums; deleting an event cascades to its photos. The `event_photos` table is created automatically on startup and is included in the SQLite backup.
 

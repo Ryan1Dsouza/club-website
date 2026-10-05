@@ -57,7 +57,7 @@ for (const viewport of [{width:390,height:844},{width:320,height:568},{width:844
       expect(await spread.innerText()).toBe('');
       if (mobile) {
         await expect(spread.locator('img')).toHaveAttribute('src', /inauguration\/.*1\.avif/);
-        await expect(spread.locator('img')).toHaveCSS('object-fit', 'cover');
+        await expect(spread.locator('img')).toHaveCSS('object-fit', 'contain');
         const image = await spread.locator('img').boundingBox();
         expect(image.width).toBeGreaterThanOrEqual(viewport.width - 2);
         expect(image.height).toBeGreaterThanOrEqual(box.height - 2);
@@ -65,9 +65,13 @@ for (const viewport of [{width:390,height:844},{width:320,height:568},{width:844
       }
       await page.screenshot({path:info.outputPath('photos.png')});
       if (mobile) {
-        await page.getByRole('button', { name: 'Show full photograph' }).click();
+        const fit = page.getByRole('button', { name: 'Fit full photo' });
+        await expect(fit).toHaveAttribute('aria-pressed', 'true');
+        await fit.click();
+        await expect(spread.locator('img')).toHaveCSS('object-fit', 'cover');
+        await expect(fit).toHaveAttribute('aria-pressed', 'false');
+        await fit.click();
         await expect(spread.locator('img')).toHaveCSS('object-fit', 'contain');
-        await page.getByRole('button', { name: 'Show full photograph' }).click();
       }
       if(mobile) await swipe(page,{x,y:box.y+box.height*.2},{x,y:box.y+box.height*.2+Math.max(240,box.height*.8)*.45},async()=>{
         await expect(book).toHaveAttribute('data-book-turning','true');

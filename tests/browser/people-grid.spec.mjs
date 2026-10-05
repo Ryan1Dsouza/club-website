@@ -23,7 +23,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 820, height: 118
       await openTeam(page);
       await expect(page.locator('.people-card')).toHaveCount(site.team.length);
       const columns = await page.locator('.people-grid').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length);
-      expect(columns).toBe(viewport.width > 900 ? 3 : viewport.width > 480 ? 2 : 1);
+      expect(columns).toBe(viewport.width > 900 ? 3 : viewport.width > 600 ? 2 : 1);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
       await page.screenshot({ path: info.outputPath('people-intro.png') });
       for (let i = 0; i < 2; i++) {
@@ -77,14 +77,16 @@ test('alumni cards filter real data and empty teams remain usable', async ({ pag
 
 test('normal motion finishes entrances, pauses offscreen preview and navigates smoothly', async ({ page }, info) => {
   await openTeam(page);
+  await expect(page.locator('.people-tower-button')).toHaveAttribute('data-animating', 'false');
+  await page.locator('.people-tower-button').scrollIntoViewIfNeeded();
   await expect(page.locator('.people-tower-button')).toHaveAttribute('data-animating', 'true');
   await page.getByRole('button', { name: 'Meet the Team' }).click();
   await expect(page.getByRole('heading', { name: 'The minds behind it.' })).toBeInViewport();
   await expect(page.locator('.people-card').first()).toHaveCSS('opacity', '1');
+  await expect(page.locator('.people-tower-button')).toHaveAttribute('data-animating', 'false');
   await page.screenshot({ path: info.outputPath('animated-grid.png') });
   await page.locator('.people-card').last().scrollIntoViewIfNeeded();
   await expect(page.locator('.people-card').last()).toHaveCSS('opacity', '1');
-  await expect(page.locator('.people-tower-button')).toHaveAttribute('data-animating', 'false');
   expect((await new AxeBuilder({ page }).include('.people-page').analyze()).violations).toEqual([]);
 });
 

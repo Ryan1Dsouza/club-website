@@ -1,6 +1,6 @@
-import { Suspense, useEffect, useRef, useState, type FormEvent } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Routes, Route, Link, useLocation, useNavigationType } from 'react-router-dom';
-import { ArrowUpRight, ArrowRight, BrainCircuit, Code2, Network, Github, Instagram, Linkedin, Mail, Check, LoaderCircle } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, BrainCircuit, Code2, Network, Github, Instagram, Linkedin, Mail } from 'lucide-react';
 import { MorphingNavbar } from './components/ui/morphing-navbar';
 import { Logo } from './components/shared/Logo';
 import Modal from './components/shared/Modal';
@@ -8,6 +8,7 @@ import PageBoundary from './components/shared/PageBoundary';
 import LoadingScreen from './components/shared/LoadingScreen';
 import { LOADER_MINIMUM_MS, LOADER_MAXIMUM_MS } from './components/shared/loading-frames';
 import { api } from './api';
+import RecruitmentApplication from './components/recruitment/RecruitmentApplication';
 import type { SiteData, SiteSettings } from './types';
 import seed from '../shared/public-data.json';
 import LogoLanding from './components/home/LogoLanding';
@@ -26,29 +27,8 @@ const domains = [
   { id: 'dsa', num: '03', title: 'Data Structures', subtitle: '& Algorithms', icon: Network, whatsappUrl: 'https://chat.whatsapp.com/LPTqGQdnGRo24BEZyrk9vy', tags: ['Logic', 'Patterns', 'Problem-solving'], description: 'Find the patterns, solve hard problems, and build a stronger foundation.', detail: 'Develop problem-solving habits through data structures, algorithmic thinking, peer practice, and competitive programming. Learn to explain both your solution and why it works.' },
 ] as const;
 
-function ApplyForm({ settings, online, onClose }: { settings: SiteSettings; online: boolean; onClose: () => void }) {
-  const [busy, setBusy] = useState(false), [error, setError] = useState(''), [reference, setReference] = useState('');
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setBusy(true); setError('');
-    const fields = Object.fromEntries(new FormData(event.currentTarget));
-    try { const result = await api<{ id: string }>('/applications', { method: 'POST', body: JSON.stringify({ ...fields, consent: fields.consent === 'on' }) }); setReference(result.id); }
-    catch (e) { setError((e as Error).message); } finally { setBusy(false); }
-  }
-  return <Modal title={reference ? 'You’re in the conversation.' : settings.recruitmentOpen ? 'Your next connection starts here.' : 'Good things are ahead.'} onClose={onClose}>
-    {reference ? <div className="success-panel"><span className="success-icon"><Check /></span><p>Your application is saved. The team will review it and contact you using the email you provided.</p><span className="eyebrow">Your application reference</span><code>{reference}</code><p className="muted small">Save this number if you need to follow up.</p><button className="button primary" onClick={onClose}>Back to exploring <ArrowRight size={17} /></button></div>
-      : !settings.recruitmentOpen ? <><p className="modal-lead">{settings.recruitmentMessage}</p><p className="muted">You can still explore our domains and projects, or reach out to introduce yourself.</p><a className="button primary" href={settings.instagramUrl} target="_blank" rel="noreferrer">Follow Nucleus <Instagram size={18} /></a><a className="text-link" href={`mailto:${settings.contactEmail}`}>Contact the team <ArrowUpRight size={16} /></a></>
-      : <><p className="modal-lead">Curiosity matters more than knowing everything. Tell us a little about yourself.</p><form onSubmit={submit} className="application-form">
-        <div className="form-grid"><label>Your name<input name="name" autoComplete="name" required minLength={2} maxLength={100} placeholder="Full name" /></label><label>Email address<input name="email" type="email" autoComplete="email" required maxLength={254} placeholder="you@example.com" /></label></div>
-        <div className="form-grid"><label>Year of study<select name="year" required defaultValue=""><option value="" disabled>Select year</option>{[1, 2, 3, 4].map(year => <option key={year} value={year}>Year {year}</option>)}</select></label><label>Your domain<select name="domain" required defaultValue=""><option value="" disabled>What interests you?</option><option value="aiml">AI & Machine Learning</option><option value="web">Web Development</option><option value="dsa">Data Structures & Algorithms</option></select></label></div>
-        <label>What would you like to learn or build?<textarea name="motivation" rows={4} minLength={30} maxLength={1600} required placeholder="Tell us what makes you curious. No perfect answers needed. (30+ characters)" /></label>
-        <label>Portfolio or GitHub <span className="muted">(optional)</span><input name="portfolio" type="url" placeholder="https://" maxLength={500} /></label>
-        <label className="honeypot" aria-hidden="true">Leave this empty<input name="website" tabIndex={-1} autoComplete="off" /></label>
-        <label className="checkbox-label"><input type="checkbox" name="consent" required /><span>I agree that the Nucleus team may use these details to review my application and contact me about recruitment.</span></label>
-        <p className="small muted">Only the club’s administrators can access applications. To request correction or deletion, email {settings.contactEmail}.</p>
-        {error && <p className="form-error" role="alert">{error}</p>}{!online && <p className="form-error">Applications are temporarily unavailable. Please reconnect and try again.</p>}
-        <button className="button primary full-width" disabled={busy || !online}>{busy ? <><LoaderCircle className="spin" size={18} /> Sending application…</> : <>Send application <ArrowUpRight size={18} /></>}</button>
-      </form></>}
-  </Modal>;
+function ApplyForm({ settings, onClose }: { settings: SiteSettings; onClose: () => void }) {
+  return <Modal title="Your next connection starts here." onClose={onClose}><RecruitmentApplication initialSettings={settings} /></Modal>;
 }
 
 function SiteFooter({ settings }: { settings: SiteSettings }) {
@@ -69,7 +49,7 @@ function SiteFooter({ settings }: { settings: SiteSettings }) {
 }
 
 export default function App({ initialData = seed, serverRendered = false }: { initialData?: SiteData; serverRendered?: boolean }) {
-  const [data, setData] = useState<SiteData>(initialData), [online, setOnline] = useState(true);
+  const [data, setData] = useState<SiteData>(initialData);
   const [applyOpen, setApplyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [domain, setDomain] = useState<number | null>(null);
@@ -77,6 +57,7 @@ export default function App({ initialData = seed, serverRendered = false }: { in
   const [loadingStage, setLoadingStage] = useState<'idle' | 'loading' | 'exiting' | 'done'>('idle');
   const loading = loadingStage === 'loading' || loadingStage === 'exiting';
   const location = useLocation();
+  const pagePath = location.pathname.replace(/\/+$/, '') || '/';
   const navigationType = useNavigationType();
   useCinematicScroll(location.pathname === '/' && !loading && !applyOpen && !menuOpen && domain === null);
 
@@ -96,8 +77,8 @@ export default function App({ initialData = seed, serverRendered = false }: { in
     // The existing seed/SSR data stays available if startup requests stall.
     const deadline = window.setTimeout(dismiss, LOADER_MAXIMUM_MS);
     const refresh = () => api<SiteData>('/site', { signal: abort.signal }).then(site => {
-      if (!disposed) { setData(site); setOnline(true); }
-    }).catch(error => { if (!disposed && error.name !== 'AbortError') setOnline(false); });
+      if (!disposed) { setData(site); }
+    }).catch(() => { /* Recruitment verifies availability before accepting input. */ });
     const firstRequest = refresh();
     // Fonts and decorative frames load independently. SSR already has usable data.
     void (serverRendered ? Promise.resolve() : firstRequest).then(() => {
@@ -148,17 +129,17 @@ export default function App({ initialData = seed, serverRendered = false }: { in
 
   return <>
     <LoadingScreen active={loadingStage === 'idle' || loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
-    <div className={`site-shell${location.pathname === '/' ? ' site-shell--home' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
+    <div className={`site-shell${pagePath === '/' ? ' site-shell--home' : pagePath === '/projects' ? ' site-shell--work' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
     {location.pathname === '/' && <BackgroundRippleEffect className="background-ripple-effect--page" />}
     <a href="#main-content" className="skip-link">Skip to content</a>
-    <header className={`site-header${['/', '/team', '/events'].includes(location.pathname) ? ' site-header--home' : ''}`}>
+    <header className={`site-header${pagePath === '/events' ? ' site-header--events' : ['/', '/team'].includes(pagePath) ? ' site-header--home' : ''}`}>
       <MorphingNavbar items={navItems} settings={settings} open={menuOpen} onOpenChange={setMenuOpen} onApply={() => setApplyOpen(true)} />
     </header>
     <main id="main-content" tabIndex={-1} inert={menuOpen}>
       <PageBoundary key={location.pathname}><Suspense fallback={<div className="page-loading" role="status">Opening page…</div>}><Routes>
         <Route path="/" element={<><LogoLanding active={loadingStage === 'done'} /><DomainParallax domains={domainItems} /><CommunityCTA isOpen={settings.recruitmentOpen} /><VoicesMarquee /></>} />
         <Route path="/about" element={<><div className="about-heading section-wrap"><span className="eyebrow">Nucleus · SJEC</span><h1>A meeting<br /><em>of minds.</em></h1></div><DomainParallax domains={domainItems} /></>} />
-        <Route path="/recruitment" element={<Recruitment settings={settings} onApply={() => setApplyOpen(true)} />} />
+        <Route path="/recruitment" element={<Recruitment settings={settings} />} />
         <Route path="/events" element={<EventsPage events={data.events} onPublished={event => setData(current => ({ ...current, events: [...current.events.filter(item => item.id !== event.id), event] }))} />} />
         <Route path="/projects" element={<WorkPage projects={data.projects} settings={settings} />} />
         <Route path="/team" element={<PeoplePage members={data.team} />} />
@@ -166,7 +147,7 @@ export default function App({ initialData = seed, serverRendered = false }: { in
       </Routes></Suspense></PageBoundary>
     </main>
     {location.pathname === '/' && <SiteFooter settings={settings} />}
-    {applyOpen && <ApplyForm settings={settings} online={online} onClose={() => setApplyOpen(false)} />}
+    {applyOpen && <ApplyForm settings={settings} onClose={() => setApplyOpen(false)} />}
     {domain !== null && <Modal title={`${domains[domain].title} ${domains[domain].subtitle}`} onClose={() => setDomain(null)}><p className="modal-lead">{domains[domain].detail}</p><div className="domain-tags">{domains[domain].tags.map(tag => <span key={tag}>{tag}</span>)}</div><button className="button primary" onClick={() => { setDomain(null); setApplyOpen(true); }}>Get involved <ArrowUpRight size={17} /></button></Modal>}
     </div>
   </>;

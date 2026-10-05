@@ -1,21 +1,6 @@
 .showcase-page { padding-block: clamp(45px, 6vw, 90px) 80px; }
-.work-page { position: relative; isolation: isolate; width: 100%; min-height: 100vh; }
-.work-page::before {
-  content: '';
-  position: absolute;
-  inset: -50px;
-  z-index: -1;
-  background-image: 
-    radial-gradient(circle at 15% 20%, rgb(var(--mint-rgb) / 0.3), transparent 60%),
-    radial-gradient(circle at 85% 80%, rgb(var(--mint-rgb) / 0.3), transparent 60%),
-    linear-gradient(to right, rgb(var(--mint-rgb) / 0.2) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(var(--mint-rgb) / 0.2) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 60px 60px, 60px 60px;
-  background-position: 0 0, 0 0, center center, center center;
-  mask-image: radial-gradient(ellipse at 50% 50%, black 60%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 60%, transparent 100%);
-  opacity: 1;
-}
+.work-page { position: relative; isolation: isolate; width: 100%; min-height: calc(100svh - var(--header-height)); }
+.work-page .empty-state { background: var(--surface-raised); border-radius: 24px; }
 .page-eyebrow { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
 .page-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; margin-block: 46px 64px; }
 .page-heading h1 { font-size: clamp(60px, 8.5vw, 124px); }

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import sharp from 'sharp';
 import { openDatabase, hashPassword, verifyPassword, getSite } from '../server/db.mjs';
 import { createApp } from '../server/app.mjs';
 import { pageMeta } from '../shared/page-meta.ts';
@@ -28,6 +29,7 @@ async function fixture(fn, options = {}) {
   finally { await new Promise(resolve => server.close(resolve)); db.close(); }
 }
 const applicant = { name: 'Test Student', email: 'student@example.com', year: '2', domain: 'aiml', motivation: 'I would like to build practical AI applications with the student community.', portfolio: 'https://github.com/example', consent: true, website: '' };
+const image = { name: 'workshop.png', mime: 'image/png', data: (await sharp({ create: { width: 16, height: 16, channels: 3, background: '#79af84' } }).png().toBuffer()).toString('base64') };
 
 test('members move to alumni and back without losing their portrait or creation date', () => fixture(async ({ request, login, db }) => {
   const headers = await login(), member = getSite(db).team[0];
@@ -66,7 +68,6 @@ test('publishing an experience requires auth and CSRF, persists photos and a saf
   const originalStations = planner.forEvents(createEventStations(getSite(db).events).map(station => station.event));
   const id = 'baf123c4-e81b-43df-831d-e85916d1ad80', path = `/admin/experience-events/${id}`;
   const event = { ...getSite(db).events[0], title: 'Photo workshop' };
-  const image = { name: 'workshop.png', mime: 'image/png', data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aN4sAAAAASUVORK5CYII=' };
   const body = { event, photos: [image] };
   assert.equal((await request(path, 'PUT', body)).status, 401);
   const headers = await login();
@@ -86,8 +87,8 @@ test('publishing an experience requires auth and CSRF, persists photos and a saf
   }
   assert.equal((await request(path, 'PUT', body, headers)).status, 200);
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM event_photos').get().n, 1);
-  const photo = await fetch(base + saved.photos[0].url); assert.equal(photo.status, 200); assert.match(photo.headers.get('content-type'), /image\/png/);
-  assert.equal(Buffer.from(await photo.arrayBuffer()).toString('base64'), image.data);
+  const photo = await fetch(base + saved.photos[0].url); assert.equal(photo.status, 200); assert.match(photo.headers.get('content-type'), /image\/webp/);
+  const metadata = await sharp(Buffer.from(await photo.arrayBuffer())).metadata(); assert.equal(metadata.width, 16); assert.equal(metadata.format, 'webp');
   const publicEvent = (await request('/site').then(r => r.json())).events.find(e => e.id === id);
   assert.deepEqual(publicEvent.photos, saved.photos);
   await request(`/admin/content/events/${id}`, 'PUT', { ...event, published: false }, headers);
@@ -250,4 +251,106 @@ test('production sessions use secure host-only cookies and authentication is rat
     for (let i = 0; i < 7; i++) assert.equal((await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'wrong' })).status, 401);
     assert.equal((await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'wrong' })).status, 429);
   }, { production: true, origin: 'https://nucleussjec.in', limits: true });
+});
+
+test('all profile links are private, validated, normalized and saved on the existing application', () => fixture(async ({ request, login, db }) => {
+  const headers = await login();
+  await request('/admin/settings', 'PUT', { ...getSite(db).settings, recruitmentOpen: true, recruitmentNextOpening: 'November 2026' }, headers);
+  const links = { linkedin: 'https://linkedin.com/in/student', github: 'https://github.com/student', leetcode: 'https://leetcode.com/u/student', portfolio: 'https://student.example.com' };
+  const result = await request('/applications', 'POST', { ...applicant, ...links, email: ' STUDENT@EXAMPLE.COM ' });
+  assert.equal(result.status, 201);
+  const row = db.prepare('SELECT * FROM applications').get();
+  assert.equal(row.email, 'student@example.com');
+  for (const [key, value] of Object.entries(links)) assert.equal(row[key], value);
+  const inbox = await request('/admin/applications', 'GET', undefined, headers).then(response => response.json());
+  for (const [key, value] of Object.entries(links)) assert.equal(inbox.items[0][key], value);
+  assert.ok(!(await request('/site').then(response => response.text())).includes('student@example.com'));
+  for (const patch of [{ year: '4' }, { linkedin: 'javascript:alert(1)' }, { github: 'data:text/html,x' }, { leetcode: 'https://user:password@example.com' }, { portfolio: 'https://example.com/' + 'x'.repeat(500) }]) {
+    assert.equal((await request('/applications', 'POST', { ...applicant, ...patch })).status, 400);
+  }
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM applications').get().n, 1);
+}));
+
+test('admin route guard protects all content, media and application endpoints including unknown routes', () => fixture(async ({ request, login, db }) => {
+  const headers = await login(), event = getSite(db).events[0], member = getSite(db).team[0];
+  const mutations = [
+    ['/admin/settings', 'PUT', getSite(db).settings], ['/admin/content/events/example', 'PUT', event],
+    ['/admin/content/team/example', 'PUT', member], ['/admin/content/projects/example', 'PUT', {}],
+    ['/admin/content/events/example', 'DELETE'], ['/admin/applications/example', 'PATCH', { status: 'accepted' }],
+    ['/admin/applications/example', 'DELETE'], ['/admin/logout', 'POST'],
+  ];
+  for (const [path, method, body] of mutations) {
+    assert.equal((await request(path, method, body)).status, 401, path);
+    assert.equal((await request(path, method, body, { Cookie: headers.Cookie })).status, 403, path);
+  }
+  for (const path of ['/admin/site', '/admin/applications', '/admin/event-photos/example', '/admin/unknown']) {
+    assert.equal((await request(path)).status, 401, path);
+  }
+  for (const kind of ['__proto__', 'constructor', 'unknown']) assert.equal((await request(`/admin/content/${kind}/id`, 'PUT', {}, headers)).status, 400);
+  assert.equal((await request('/admin/settings', 'PUT', getSite(db).settings, { ...headers, 'Sec-Fetch-Site': 'cross-site' })).status, 403);
+  assert.equal((await request('/admin/login', 'POST', {}, { 'Content-Type': 'text/plain' })).status, 415);
+  assert.equal(verifyPassword('anything', 'broken:hash'), false);
+}));
+
+test('sessions are hashed, rotate on sign-in, and expire on inactivity or absolute lifetime', () => fixture(async ({ request, login, db }) => {
+  let headers = await login();
+  const stored = db.prepare('SELECT * FROM sessions').get();
+  assert.ok(!headers.Cookie.includes(stored.token_hash));
+  const signedIn = await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'correct-horse-battery-2026' }, { Cookie: headers.Cookie });
+  assert.equal(signedIn.status, 200);
+  assert.equal((await request('/admin/session', 'GET', undefined, headers)).status, 401);
+  headers = await login();
+  db.prepare('UPDATE sessions SET last_seen=?').run(Date.now() - 31 * 60_000);
+  assert.equal((await request('/admin/session', 'GET', undefined, headers)).status, 401);
+  headers = await login();
+  db.prepare('UPDATE sessions SET expires_at=?').run(Date.now() - 1);
+  assert.equal((await request('/admin/settings', 'PUT', getSite(db).settings, headers)).status, 401);
+}));
+
+test('admin photo updates persist, preserve metadata, reject corrupt images atomically and remove obsolete blobs', () => fixture(async ({ request, login, db, base }) => {
+  const headers = await login(), event = getSite(db).events[0], member = getSite(db).team[0];
+  const eventPath = `/admin/content/events/${event.id}`, memberPath = `/admin/content/team/${member.id}`;
+  let response = await request(eventPath, 'PUT', { ...event, photos: [image] }, headers);
+  assert.equal(response.status, 200); const album = await response.json();
+  const portrait = await request(memberPath, 'PUT', { ...member, role: 'New lead', photo: image }, headers).then(response => response.json());
+  assert.match(portrait.image, /^\/api\/member-photos\//);
+  assert.equal((await fetch(base + portrait.image)).status, 200);
+  assert.equal(portrait.createdAt, member.createdAt);
+  assert.equal(getSite(db).team.find(item => item.id === member.id).role, 'New lead');
+  assert.equal((await request(memberPath, 'PUT', { ...member, role: 'Updated lead' }, headers).then(response => response.json())).image, portrait.image);
+  for (const invalid of [{ ...image, data: Buffer.from('RIFFxxxxWEBPnot an actual image').toString('base64'), mime: 'image/webp' }, { ...image, mime: 'image/jpeg' }]) {
+    assert.equal((await request(eventPath, 'PUT', { ...event, title: 'Should not save', photos: [invalid] }, headers)).status, 400);
+    assert.equal((await request(memberPath, 'PUT', { ...member, role: 'Should not save', photo: invalid }, headers)).status, 400);
+  }
+  assert.equal(getSite(db).events.find(item => item.id === event.id).title, event.title);
+  assert.equal(getSite(db).team.find(item => item.id === member.id).role, 'Updated lead');
+  await request(eventPath, 'PUT', { ...event, published: false }, headers);
+  assert.equal((await fetch(base + album.photos[0].url)).status, 404);
+  assert.equal((await request(`/admin/event-photos/${album.photos[0].id}`, 'GET', undefined, headers)).status, 200);
+  const replaced = await request(eventPath, 'PUT', { ...event, photos: [image, image] }, headers).then(response => response.json());
+  assert.equal(replaced.photos.length, 2);
+  assert.equal((await fetch(base + album.photos[0].url)).status, 404);
+  await request(memberPath, 'PUT', { ...member, photo: null }, headers);
+  assert.equal(getSite(db).team.find(item => item.id === member.id).image, '');
+  assert.equal((await fetch(base + portrait.image)).status, 404);
+  await request(eventPath, 'PUT', { ...event, photos: [] }, headers);
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM event_photos').get().n, 0);
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM member_photos').get().n, 0);
+}));
+
+test('legacy database migrates without losing applications, content, or stored profile links on reopen', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'nucleus-migration-')), path = join(directory, 'site.sqlite');
+  let db;
+  try {
+    db = openDatabase(path);
+    db.prepare('INSERT INTO applications(id,name,email,year,domain,motivation,portfolio,cycle,created_at) VALUES(?,?,?,?,?,?,?,?,?)').run('old', 'Legacy Student', 'old@example.com', '4', 'web', 'A previous application', 'https://example.com', 'old-intake', new Date().toISOString());
+    for (const name of ['linkedin', 'github', 'leetcode']) db.exec(`ALTER TABLE applications DROP COLUMN ${name}`);
+    db.exec('ALTER TABLE sessions DROP COLUMN last_seen');
+    db.close(); db = openDatabase(path);
+    let row = db.prepare('SELECT * FROM applications WHERE id=?').get('old');
+    assert.equal(row.year, '4'); assert.equal(row.portfolio, 'https://example.com'); assert.equal(row.linkedin, '');
+    db.prepare('UPDATE applications SET linkedin=? WHERE id=?').run('https://linkedin.com/in/old', 'old');
+    db.close(); db = openDatabase(path); row = db.prepare('SELECT * FROM applications WHERE id=?').get('old');
+    assert.equal(row.linkedin, 'https://linkedin.com/in/old'); assert.equal(getSite(db).events.length, 3);
+  } finally { db?.close(); rmSync(directory, { recursive: true, force: true }); }
 });

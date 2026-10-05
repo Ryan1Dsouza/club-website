@@ -17,7 +17,7 @@ const mobileBook = '(max-width: 620px), (max-height: 500px) and (pointer: coarse
 export default function Book({ workshopFolder, imageList, event, title, stationNumber = '01', onClose, continueLabel = 'Back to Events', galleryOnly = false }: Props) {
   const name = title ?? WORKSHOP_STATIONS.find(item => item.id === workshopFolder)?.title ?? workshopFolder;
   const [isMobile, setIsMobile] = useState(() => matchMedia(mobileBook).matches);
-  const [fitPhoto, setFitPhoto] = useState(false);
+  const [fitPhoto, setFitPhoto] = useState(true);
   useEffect(() => {
     const media = matchMedia(mobileBook);
     const listener = () => setIsMobile(media.matches);
@@ -98,8 +98,11 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
     const photo = (index: number, duplicate = false) => {
       const item = imageList[index];
       if (!item) return index === 0 ? <figure className="station-book__cover-art nx-event-artwork"><EventArtwork variant={Number(stationNumber) % 3} /></figure> : <div className="station-book__blank" />;
-      return <figure className={!isMobile && index === 0 ? 'station-book__cover-art' : 'station-book__panel'}>
-        {duplicate ? <img key={item.url} {...eventImageAttributes(item, isMobile ? 'mobile' : 'spread')} src={item.url} alt="" decoding="async" draggable={false} /> : <a href={item.url} target="_blank" rel="noreferrer" aria-label={`Open ${name} photograph ${index + 1}`}><img key={item.url} {...eventImageAttributes(item, isMobile ? 'mobile' : 'spread')} src={item.url} alt={`${name} — photograph ${index + 1}`} fetchPriority="high" decoding="async" draggable={false} /></a>}
+      const image = eventImageAttributes(item, isMobile ? 'mobile' : 'spread');
+      // Reuse the tiny preview when available; uploaded photos share their cached source.
+      const backdrop = isMobile ? { '--book-photo-backdrop': image.style?.backgroundImage ?? `url(${JSON.stringify(item.url)})` } as CSSProperties : undefined;
+      return <figure className={!isMobile && index === 0 ? 'station-book__cover-art' : 'station-book__panel'} style={backdrop}>
+        {duplicate ? <img key={item.url} {...image} src={item.url} alt="" decoding="async" draggable={false} /> : <a href={item.url} target="_blank" rel="noreferrer" aria-label={`Open ${name} photograph ${index + 1}`}><img key={item.url} {...image} src={item.url} alt={`${name} — photograph ${index + 1}`} fetchPriority="high" decoding="async" draggable={false} /></a>}
       </figure>;
     };
     const item = (index: number, duplicate = false) => index === 0 ? story(duplicate) : photo(index - 1, duplicate);
@@ -130,7 +133,12 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
       const delta = ['ArrowRight', 'ArrowDown', 'PageDown'].includes(event.key) ? 1 : ['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key) ? -1 : 0;
       if (delta) { event.preventDefault(); event.stopPropagation(); turn(delta); }
     }}>
-      <header className="station-book__masthead"><span>NUCLEUS <b>FIELD NOTES</b></span><span>STATION / {stationNumber}</span></header>
+      <header className="station-book__masthead">
+        <span>NUCLEUS <b>FIELD NOTES</b></span>
+        {isMobile && page > 0 ? <button type="button" className="station-book__fit" onClick={() => setFitPhoto(value => !value)} aria-pressed={fitPhoto}>
+          <Scan size={18} /><span>Fit full photo</span>
+        </button> : <span>STATION / {stationNumber}</span>}
+      </header>
       <h2 className="sr-only">{name}</h2>
       <div className="station-book__scroller" ref={wrapper}>
         <div className="station-book__scroll-track" ref={content} style={{ height: `calc(var(--book-height, 500px) + ${count * BOOK_SCROLL_STEP}px)` }}>
@@ -146,7 +154,6 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
           <button type="button" onClick={() => turn(-1)} disabled={cursor <= .0001} aria-label="Previous book page"><ArrowLeft size={18} /></button>
           <span role="status" aria-live="polite">Page {page + 1} / {count}</span>
           <button type="button" onClick={() => turn(1)} aria-label={page === count - 1 ? 'Close book after last page' : 'Next book page'}><ArrowRight size={18} /></button>
-          {isMobile && page > 0 && <button type="button" className="station-book__fit" onClick={() => setFitPhoto(value => !value)} aria-label="Show full photograph" aria-pressed={fitPhoto}><Scan size={15} /><span>Fit</span></button>}
           <p id={instructions}><ArrowDown size={13} />{page === count - 1 ? 'Scroll to close this chapter' : isMobile ? 'Pull up to turn. Pull down to return.' : 'Scroll to turn · arrow keys work too'}</p>
         </div>
         <div className="station-book__actions"><div className="station-book__links">{links.map(link => <a key={link.label} href={link.url} target="_blank" rel="noreferrer">{link.label}<ArrowRight size={12} /></a>)}</div><button className="nx-continue" onClick={onClose}>{continueLabel}<ArrowRight size={16} /></button></div>

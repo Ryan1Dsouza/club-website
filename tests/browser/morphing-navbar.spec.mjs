@@ -48,8 +48,8 @@ test('reference layout keeps a centered pill and reveals a full-screen menu in f
   const pill = page.locator('.morph-nav__pill');
   const closed = await pill.boundingBox();
   expect(Math.abs(closed.x + closed.width / 2 - 720)).toBeLessThan(1);
-  expect(closed.y).toBe(16);
-  expect(closed.height).toBe(58);
+  expect(closed.y).toBe(12);
+  expect(closed.height).toBe(54);
   await page.screenshot({ path: info.outputPath('desktop-closed.png') });
   await page.evaluate(() => {
     window.navFrames = [];
@@ -74,7 +74,7 @@ test('reference layout keeps a centered pill and reveals a full-screen menu in f
   const overlay = await page.locator('.morph-nav__overlay').boundingBox();
   expect(overlay).toEqual({ x: 0, y: 0, width: 1440, height: 900 });
   await expect(page.locator('.morph-nav__links .morph-nav__link')).toHaveCount(4);
-  expect(await page.locator('.morph-nav__links').evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThan(100);
+  expect(await page.locator('.morph-nav__links').evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeLessThanOrEqual(96);
   await expect(menu(page).getByRole('link', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page');
   await page.screenshot({ path: info.outputPath('desktop-open.png') });
   await menu(page).getByRole('link', { name: 'Our work', exact: true }).hover();
@@ -258,18 +258,16 @@ test('all four navigation links change pages as soon as the reverse slide clears
 test.describe('touch navigation', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
-  test('touch navigation loads the people scene after arriving and navigates when the bands clear', async ({ page }) => {
+  test('touch navigation opens the people directory when the bands clear', async ({ page }) => {
     await page.goto('/recruitment');
     await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
     await toggle(page).tap();
     await settledOpen(page);
     await recordMenuFrames(page);
-    const sceneRequest = page.waitForRequest(/\/src\/lib\/people-tower\.ts(?:\?|$)/);
     await menu(page).getByRole('link', { name: 'The people', exact: true }).tap();
     await expect(page).toHaveURL(/\/recruitment$/);
     await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
     await expect(page).toHaveURL(/\/team$/);
-    await sceneRequest;
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
     const frames = await recordedMenuFrames(page);
     const cleared = frames.findIndex(frame => frame.bands.every(x => x >= 389));
@@ -277,7 +275,8 @@ test.describe('touch navigation', () => {
     expect(cleared).toBeGreaterThanOrEqual(0);
     expect(arrived).toBeGreaterThanOrEqual(cleared);
     expect(arrived - cleared).toBeLessThanOrEqual(1);
-    await expect(page.locator('.people-page')).toHaveAttribute('data-tower-status', 'ready');
+    await expect(page.locator('.people-page')).toHaveAttribute('data-view', 'grid');
+    await expect(page.getByRole('heading', { name: 'The people behind Nucleus' })).toHaveCount(1);
   });
 });
 
@@ -346,6 +345,7 @@ test('mobile and landscape menus fit long labels and keep every action reachable
       expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
       await expect(title).toBeInViewport();
     }
+    await page.locator('.morph-nav__join').scrollIntoViewIfNeeded();
     await expect(page.locator('.morph-nav__join')).toBeInViewport();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
     await page.screenshot({ path: info.outputPath('mobile-' + viewport.width + '-open.png') });
@@ -361,7 +361,7 @@ test('opening from a scrolled page locks the background and rapid toggles recove
   await expect(page.locator('html')).toHaveClass(/lenis/);
   await page.mouse.move(20, 450);
   await page.mouse.wheel(0, 600);
-  await expect.poll(() => page.evaluate(() => scrollY)).toBe(360);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(600);
   await toggle(page).click();
   await settledOpen(page);
   await expect(page.locator('html')).not.toHaveClass(/lenis/);

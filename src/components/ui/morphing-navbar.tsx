@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useRef, type CSSProperties, type MouseEvent } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useAnimationControls, useReducedMotion } from 'framer-motion';
 import type { SiteSettings } from '../../types';
 import { preloadPage } from '../../route-pages';
 import { useLightweightGraphics } from '../../lib/graphics-preference';
@@ -19,6 +19,9 @@ type Props = {
 const sweepEase = [.16, 1, .3, 1] as const;
 const reverseSweepEase = [.7, 0, .84, 0] as const;
 const CLOSE_SECONDS = 1.2;
+const sweepVariants = { open: { x: '0%' }, closed: { x: '100%' } };
+// Keep the bands on the same frame clock as the wrapper's onUpdate callback.
+const followSweepFrame = () => {};
 
 export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }: Props) {
   const navigate = useNavigate();
@@ -26,8 +29,11 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
   const toggle = useRef<HTMLButtonElement>(null);
   const pendingNavigation = useRef<string | null>(null);
   const closing = useRef(false);
+  const reopening = useRef(false);
   const contentId = useId();
   const reducedMotion = useReducedMotion();
+  const sweepControls = useAnimationControls();
+  useEffect(() => { void sweepControls.start(open ? 'open' : 'closed'); }, [open, sweepControls]);
   const socials = [
     { title: 'Instagram', href: settings.instagramUrl },
     { title: 'LinkedIn', href: settings.linkedinUrl },
@@ -99,7 +105,9 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
   // Mirror the opening timeline and easing, playing the same poses back faster.
   const sequenceTransition = (delay = 0) => ({
     duration: reducedMotion ? 0 : open ? 1 : closeScale,
-    delay: reducedMotion ? 0 : open ? delay : Math.max(0, sequenceDuration - delay - 1) * closeScale,
+    // An interrupted exit must reverse immediately. Reapplying the opening
+    // delays lets the old exit keep moving before the new animation starts.
+    delay: reducedMotion ? 0 : open ? (reopening.current ? 0 : delay) : Math.max(0, sequenceDuration - delay - 1) * closeScale,
     ease: open ? sweepEase : reverseSweepEase,
   });
 
@@ -117,7 +125,13 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
           onClick={() => {
             pendingNavigation.current = null;
             if (open) closeMenu();
-            else { closing.current = false; onOpenChange(true); }
+            else {
+              reopening.current = closing.current;
+              // Freeze the exit before the parent rerenders; a delayed frame
+              // must not advance it before the new opening pose is committed.
+              if (closing.current) sweepControls.stop();
+              closing.current = false; onOpenChange(true);
+            }
           }}
         >
           <span className="morph-nav__glyph" aria-hidden="true">
@@ -133,9 +147,9 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
         data-lenis-prevent
         aria-hidden={!open}
         inert={!open}
-        initial={false}
-        variants={{ open: { x: '0%' }, closed: { x: '100%' } }}
-        animate={open ? 'open' : 'closed'}
+        initial="closed"
+        variants={sweepVariants}
+        animate={sweepControls}
         transition={sequenceTransition()}
         onUpdate={latest => {
           // The wrapper and last visible (top) band share the same translation.
@@ -148,8 +162,10 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
           {Array.from({ length: 5 }, (_, index) => <motion.div
             key={index}
             className="morph-nav__band"
-            initial={false}
-            animate={{ x: open ? '0%' : '100%' }}
+            initial="closed"
+            variants={sweepVariants}
+            animate={sweepControls}
+            onUpdate={followSweepFrame}
             transition={sequenceTransition(index * .075)}
           />)}
         </div>

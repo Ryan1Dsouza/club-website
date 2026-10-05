@@ -3,40 +3,47 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
-import { randomBytes, randomUUID, createHash } from 'node:crypto';
+import { randomBytes, randomUUID, createHash, timingSafeEqual } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { getSite, hashPassword, verifyPassword } from './db.mjs';
+import { getSite, hashPassword, verifyPasswordAsync } from './db.mjs';
+import { photoSchema, decodePhotos } from './photos.mjs';
 import { createCoasterTrack } from '../src/lib/event-coaster.ts';
 import { createStationPlanner } from '../src/lib/event-layout.ts';
 import { createEventStations } from '../src/lib/event-stations.ts';
 import { pageMeta } from '../shared/page-meta.ts';
 import { routeAssets } from '../shared/route-assets.mjs';
 
-const safeUrl = z.union([z.literal(''), z.url().refine(value => ['https:', 'http:'].includes(new URL(value).protocol), 'Use an https:// URL')]);
+const safeUrl = z.union([z.literal(''), z.string().trim().max(500).pipe(z.url()).refine(value => {
+  const url = new URL(value);
+  return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password;
+}, 'Use an http:// or https:// URL without credentials')]);
 const isoDate = z.union([z.literal(''), z.iso.datetime({ offset: true })]);
 const eventSchema = z.object({ title: z.string().trim().min(2).max(120), description: z.string().trim().min(20).max(1600), startsAt: z.iso.datetime({ offset: true }), endsAt: isoDate, location: z.string().trim().min(2).max(200), category: z.string().trim().min(2).max(60), registrationUrl: safeUrl, albumUrl: safeUrl.optional(), published: z.boolean() }).refine(e => !e.endsAt || new Date(e.endsAt) >= new Date(e.startsAt), 'End date must follow the start date');
 const projectSchema = z.object({ title: z.string().trim().min(2).max(120), description: z.string().trim().min(20).max(1600), domain: z.string().trim().min(2).max(60), status: z.string().trim().min(2).max(60), url: safeUrl, repositoryUrl: safeUrl, published: z.boolean() });
 const memberSchema = z.object({ name: z.string().trim().min(2).max(100), role: z.string().trim().min(2).max(100), initials: z.string().trim().min(1).max(4), status: z.enum(['member', 'alumni']).optional() });
-const settingsSchema = z.object({ recruitmentOpen: z.boolean(), recruitmentMessage: z.string().trim().min(10).max(600), recruitmentDeadline: isoDate, cycle: z.string().trim().min(1).max(50), contactEmail: z.email().max(254), instagramUrl: safeUrl, githubUrl: safeUrl, linkedinUrl: safeUrl });
-const applicationSchema = z.object({ name: z.string().trim().min(2).max(100), email: z.email().max(254).transform(e => e.toLowerCase()), year: z.enum(['1', '2', '3', '4']), domain: z.enum(['aiml', 'web', 'dsa']), motivation: z.string().trim().min(30).max(1600), portfolio: safeUrl, consent: z.literal(true), website: z.literal('').optional() });
+const settingsSchema = z.object({ recruitmentOpen: z.boolean(), recruitmentMessage: z.string().trim().min(10).max(600), recruitmentNextOpening: z.string().trim().max(200).optional(), recruitmentDeadline: isoDate, cycle: z.string().trim().min(1).max(50), contactEmail: z.email().max(254), instagramUrl: safeUrl, githubUrl: safeUrl, linkedinUrl: safeUrl });
+const applicationSchema = z.object({ name: z.string().trim().min(2).max(100), email: z.string().trim().pipe(z.email().max(254)).transform(e => e.toLowerCase()), year: z.enum(['1', '2', '3']), domain: z.enum(['aiml', 'web', 'dsa']), motivation: z.string().trim().min(30).max(1600), portfolio: safeUrl.default(''), linkedin: safeUrl.default(''), github: safeUrl.default(''), leetcode: safeUrl.default(''), consent: z.literal(true), website: z.literal('').optional() });
 const hashToken = token => createHash('sha256').update(token).digest('hex');
-const applicationRow = row => ({ id: row.id, name: row.name, email: row.email, year: row.year, domain: row.domain, motivation: row.motivation, portfolio: row.portfolio, cycle: row.cycle, status: row.status, createdAt: row.created_at });
+const applicationRow = row => ({ id: row.id, name: row.name, email: row.email, year: row.year, domain: row.domain, motivation: row.motivation, portfolio: row.portfolio, linkedin: row.linkedin, github: row.github, leetcode: row.leetcode, cycle: row.cycle, status: row.status, createdAt: row.created_at });
 const experienceTrack = createCoasterTrack(), stationPlanner = createStationPlanner(experienceTrack);
-const photoSchema = z.object({ name: z.string().trim().min(1).max(180), mime: z.enum(['image/webp', 'image/jpeg', 'image/png']), data: z.string().max(700_000).regex(/^[A-Za-z0-9+/]+={0,2}$/) });
+const idleTimeout = 30 * 60_000;
 
 export function createApp(db, { production = process.env.NODE_ENV === 'production', origin = process.env.APP_ORIGIN, dist = resolve('dist/client'), limits = true, render } = {}) {
   const app = express();
+  if (production && (!origin || new URL(origin).origin !== origin || !origin.startsWith('https://'))) throw new Error('Production requires APP_ORIGIN as an exact HTTPS origin.');
   app.disable('x-powered-by');
   app.use(compression({ threshold: 1024 }));
   if (process.env.TRUST_PROXY === '1') app.set('trust proxy', 1);
-  app.use(helmet({ contentSecurityPolicy: production ? { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:'], mediaSrc: ["'self'", 'blob:'], connectSrc: ["'self'"], fontSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"] } } : false, strictTransportSecurity: production }));
+  app.use(helmet({ contentSecurityPolicy: production ? { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'blob:'], mediaSrc: ["'self'", 'blob:'], connectSrc: ["'self'"], fontSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"] } } : false, strictTransportSecurity: production }));
   const smallJson = express.json({ limit: '48kb' });
-  app.use('/api', (req, res, next) => /^\/admin\/experience-events\//.test(req.path) ? next() : smallJson(req, res, next));
   app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
   const allowed = new Set(production ? [origin] : [origin, 'http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3001', 'http://127.0.0.1:3001']);
   app.use('/api', (req, res, next) => {
-    if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) && req.headers.origin && !allowed.has(req.headers.origin)) return res.status(403).json({ error: 'This request did not come from the Nucleus website.' });
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+      if (req.headers['sec-fetch-site'] === 'cross-site' || (req.headers.origin && !allowed.has(req.headers.origin))) return res.status(403).json({ error: 'This request did not come from the Nucleus website.' });
+      if ((req.headers['content-length'] > 0 || req.headers['transfer-encoding']) && !req.is('application/json')) return res.status(415).json({ error: 'Send form data as application/json.' });
+    }
     next();
   });
   const limiter = (limit, windowMs) => limits ? rateLimit({ limit, windowMs, standardHeaders: 'draft-8', legacyHeaders: false, message: { error: 'Too many attempts. Please try again later.' } }) : (_req, _res, next) => next();
@@ -48,52 +55,65 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
     if (!photo || !JSON.parse(photo.body).published) return res.status(404).json({ error: 'Photo not found.' });
     res.type(photo.mime).send(Buffer.from(photo.data));
   });
+  app.get('/api/member-photos/:id', (req, res) => {
+    const photo = db.prepare('SELECT mime,data FROM member_photos WHERE id=?').get(req.params.id);
+    if (!photo) return res.status(404).json({ error: 'Photo not found.' });
+    res.type(photo.mime).send(Buffer.from(photo.data));
+  });
 
   const cookieName = production ? '__Host-nucleus_session' : 'nucleus_session';
   const cookieOptions = { httpOnly: true, sameSite: 'strict', secure: production, path: '/', maxAge: 12 * 60 * 60 * 1000 };
   const dummyPassword = hashPassword(randomBytes(32).toString('hex'));
+  const sessionToken = req => (req.headers.cookie || '').split(';').map(s => s.trim()).find(s => s.startsWith(`${cookieName}=`))?.slice(cookieName.length + 1);
   function auth(req, res, next) {
-    const token = (req.headers.cookie || '').split(';').map(s => s.trim()).find(s => s.startsWith(`${cookieName}=`))?.slice(cookieName.length + 1);
+    const token = sessionToken(req);
     if (!token || !/^[a-f0-9]{64}$/.test(token)) return res.status(401).json({ error: 'Please sign in to the control room.' });
-    const session = db.prepare('SELECT s.*,a.email FROM sessions s JOIN admins a ON s.admin_id=a.id WHERE s.token_hash=? AND s.expires_at>?').get(hashToken(token), Date.now());
-    if (!session) return res.status(401).json({ error: 'Your session has expired. Please sign in again.' });
-    if (!['GET', 'HEAD'].includes(req.method) && req.headers['x-csrf-token'] !== session.csrf) return res.status(403).json({ error: 'Session verification failed. Refresh and try again.' });
+    const now = Date.now();
+    const session = db.prepare('SELECT s.*,a.email FROM sessions s JOIN admins a ON s.admin_id=a.id WHERE s.token_hash=? AND s.expires_at>? AND s.last_seen>?').get(hashToken(token), now, now - idleTimeout);
+    if (!session) {
+      db.prepare('DELETE FROM sessions WHERE token_hash=?').run(hashToken(token));
+      res.clearCookie(cookieName, { ...cookieOptions, maxAge: undefined });
+      return res.status(401).json({ error: 'Your session has expired. Please sign in again.' });
+    }
+    const csrf = req.headers['x-csrf-token'];
+    if (!['GET', 'HEAD'].includes(req.method) && (typeof csrf !== 'string' || !/^[a-f0-9]{64}$/.test(csrf) || !timingSafeEqual(Buffer.from(csrf), Buffer.from(session.csrf)))) return res.status(403).json({ error: 'Session verification failed. Refresh and try again.' });
+    db.prepare('UPDATE sessions SET last_seen=? WHERE token_hash=?').run(now, session.token_hash);
     req.session = session; next();
   }
-  app.post('/api/admin/login', limiter(8, 15 * 60_000), (req, res) => {
-    const input = z.object({ email: z.email().max(254), password: z.string().min(1).max(256) }).parse(req.body);
+  app.post('/api/admin/login', limiter(8, 15 * 60_000), smallJson, async (req, res) => {
+    const input = z.object({ email: z.string().trim().pipe(z.email().max(254)), password: z.string().min(1).max(256) }).parse(req.body);
     const admin = db.prepare('SELECT * FROM admins WHERE email=?').get(input.email.toLowerCase());
-    const valid = verifyPassword(input.password, admin?.password_hash || dummyPassword);
+    const valid = await verifyPasswordAsync(input.password, admin?.password_hash || dummyPassword);
     if (!admin || !valid) return res.status(401).json({ error: 'Email or password is incorrect.' });
-    db.prepare('DELETE FROM sessions WHERE expires_at<=?').run(Date.now());
+    db.prepare('DELETE FROM sessions WHERE expires_at<=? OR last_seen<=?').run(Date.now(), Date.now() - idleTimeout);
+    const previous = sessionToken(req);
+    if (previous) db.prepare('DELETE FROM sessions WHERE token_hash=?').run(hashToken(previous));
     const token = randomBytes(32).toString('hex'), csrf = randomBytes(32).toString('hex');
-    db.prepare('INSERT INTO sessions VALUES(?,?,?,?)').run(hashToken(token), admin.id, csrf, Date.now() + cookieOptions.maxAge);
+    db.prepare('INSERT INTO sessions(token_hash,admin_id,csrf,expires_at,last_seen) VALUES(?,?,?,?,?)').run(hashToken(token), admin.id, csrf, Date.now() + cookieOptions.maxAge, Date.now());
     res.cookie(cookieName, token, cookieOptions).json({ email: admin.email, csrf });
   });
-  app.get('/api/admin/session', auth, (req, res) => res.json({ email: req.session.email, csrf: req.session.csrf }));
-  app.post('/api/admin/logout', auth, (req, res) => { db.prepare('DELETE FROM sessions WHERE token_hash=?').run(req.session.token_hash); res.clearCookie(cookieName, { ...cookieOptions, maxAge: undefined }).json({ ok: true }); });
-  app.get('/api/admin/site', auth, (_req, res) => res.json(getSite(db, true)));
-  app.put('/api/admin/experience-events/:id', auth, limiter(20, 60_000), express.json({ limit: '9mb' }), (req, res) => {
+  // Login is the only public admin endpoint. New admin routes inherit this guard.
+  app.use('/api/admin', auth);
+  app.use('/api', (req, res, next) => /^\/admin\/(experience-events\/|content\/(events|team)\/)/.test(req.path) ? next() : smallJson(req, res, next));
+  app.get('/api/admin/session', (req, res) => res.json({ email: req.session.email, csrf: req.session.csrf }));
+  app.post('/api/admin/logout', (req, res) => { db.prepare('DELETE FROM sessions WHERE token_hash=?').run(req.session.token_hash); res.clearCookie(cookieName, { ...cookieOptions, maxAge: undefined }).json({ ok: true }); });
+  app.get('/api/admin/site', (_req, res) => res.json(getSite(db, true)));
+  app.get('/api/admin/event-photos/:id', (req, res) => {
+    const photo = db.prepare('SELECT mime,data FROM event_photos WHERE id=?').get(req.params.id);
+    if (!photo) return res.status(404).json({ error: 'Photo not found.' });
+    res.type(photo.mime).send(Buffer.from(photo.data));
+  });
+  app.put('/api/admin/experience-events/:id', limiter(20, 60_000), express.json({ limit: '9mb' }), async (req, res) => {
     const id = z.uuid().parse(req.params.id);
-    const event = eventSchema.parse(req.body.event);
-    const photos = z.array(photoSchema).max(20).parse(req.body.photos ?? []);
+    const { event, photos } = z.object({ event: eventSchema, photos: z.array(photoSchema).max(20).default([]) }).parse(req.body);
+    const images = await decodePhotos(photos);
     const existing = getSite(db, true).events.find(item => item.id === id);
     // A retried request cannot create duplicate events or duplicate photo blobs.
     if (existing) return res.json(existing);
-    const stations = createEventStations(getSite(db).events);
+    const stations = createEventStations(getSite(db, true).events.map(event => ({ ...event, published: true })));
     const occupied = stationPlanner.forEvents(stations.map(station => station.event)).filter(Boolean);
     const placement = stationPlanner.next(occupied);
-    if (!placement) return res.status(409).json({ error: 'The track has no safe space for another station. Unpublish an event in the control room before adding one.' });
-    let bytes = 0;
-    const images = photos.map(photo => {
-      const data = Buffer.from(photo.data, 'base64'); bytes += data.length;
-      const valid = photo.mime === 'image/webp' ? data.toString('ascii', 0, 4) === 'RIFF' && data.toString('ascii', 8, 12) === 'WEBP'
-        : photo.mime === 'image/png' ? data.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
-        : data[0] === 255 && data[1] === 216 && data[2] === 255;
-      if (!valid || data.length > 500_000 || data.length < 12) throw new z.ZodError([{ code: 'custom', path: ['photos'], message: 'Use valid compressed JPG, PNG or WebP photos under 500 KB each.' }]);
-      return { ...photo, id: randomUUID(), data };
-    });
-    if (bytes > 6_000_000) return res.status(413).json({ error: 'Photos must total less than 6 MB after compression.' });
+    if (!placement) return res.status(409).json({ error: 'The track has no safe space for another station. Remove an unused event in the control room before adding one.' });
     const saved = { id, ...event, published: true, trackPosition: placement.distance / experienceTrack.getLength() };
     db.exec('BEGIN IMMEDIATE');
     try {
@@ -105,49 +125,80 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
     } catch (error) { db.exec('ROLLBACK'); throw error; }
     res.status(201).json(getSite(db).events.find(item => item.id === id));
   });
-  app.put('/api/admin/settings', auth, (req, res) => {
+  app.put('/api/admin/settings', (req, res) => {
     const data = settingsSchema.parse(req.body);
     if (data.recruitmentOpen && data.recruitmentDeadline && new Date(data.recruitmentDeadline).getTime() <= Date.now()) return res.status(400).json({ error: 'Choose a future deadline before opening recruitment.' });
     db.prepare('UPDATE settings SET body=? WHERE id=1').run(JSON.stringify(data)); res.json(data);
   });
   const schemas = { events: eventSchema, projects: projectSchema, team: memberSchema };
-  app.put('/api/admin/content/:kind/:id', auth, (req, res) => {
+  const albumJson = express.json({ limit: '9mb' }), portraitJson = express.json({ limit: '1mb' });
+  app.put('/api/admin/content/:kind/:id', limiter(30, 60_000), (req, res, next) => req.params.kind === 'events' ? albumJson(req, res, next) : req.params.kind === 'team' ? portraitJson(req, res, next) : next(), async (req, res) => {
     const { kind, id } = req.params;
-    if (!schemas[kind] || !/^[a-zA-Z0-9_-]{1,80}$/.test(id)) return res.status(400).json({ error: 'Invalid content identifier.' });
+    if (!Object.hasOwn(schemas, kind) || !/^[a-zA-Z0-9_-]{1,80}$/.test(id)) return res.status(400).json({ error: 'Invalid content identifier.' });
+    const fields = schemas[kind].parse(req.body);
+    const photos = kind === 'events' && req.body.photos !== undefined ? await decodePhotos(z.array(photoSchema).max(20).parse(req.body.photos)) : undefined;
+    const portrait = kind === 'team' && req.body.photo !== undefined ? (req.body.photo === null ? null : (await decodePhotos([photoSchema.parse(req.body.photo)]))[0]) : undefined;
     const previous = db.prepare('SELECT body FROM content WHERE kind=? AND id=?').get(kind, id);
-    const trackPosition = kind === 'events' && previous ? JSON.parse(previous.body).trackPosition : undefined;
+    let trackPosition = kind === 'events' && previous ? JSON.parse(previous.body).trackPosition : undefined;
+    if (kind === 'events' && !previous) {
+      // Reserve a station for dashboard additions, including drafts, so they
+      // never replace an archive chapter or collide when later published.
+      const stations = createEventStations(getSite(db, true).events.map(event => ({ ...event, published: true })));
+      const placement = stationPlanner.next(stationPlanner.forEvents(stations.map(station => station.event)).filter(Boolean));
+      if (!placement) return res.status(409).json({ error: 'The track has no safe space for another station. Remove an unused event before adding one.' });
+      trackPosition = placement.distance / experienceTrack.getLength();
+    }
     // Creation order belongs to the server. Editing a role must not turn an
     // established member into a new foundation block; legacy dates stay absent.
     const createdAt = kind === 'team' ? (previous ? JSON.parse(previous.body).createdAt : new Date().toISOString()) : undefined;
     // Group/role edits retain the member's existing portraits and profile links.
     const profile = kind === 'team' && previous ? JSON.parse(previous.body) : {};
-    const data = { ...profile, id, ...schemas[kind].parse(req.body), ...(trackPosition !== undefined ? { trackPosition } : {}), ...(createdAt !== undefined ? { createdAt } : {}) };
+    const data = { ...profile, id, ...fields, ...(trackPosition !== undefined ? { trackPosition } : {}), ...(createdAt !== undefined ? { createdAt } : {}) };
+    if (kind === 'events') {
+      data.managed = true;
+      // An explicit empty album suppresses the static archive fallback too.
+      if (photos !== undefined || (previous && JSON.parse(previous.body).photos !== undefined)) data.photos = [];
+    }
+    if (portrait !== undefined) data.image = portrait ? `/api/member-photos/${portrait.id}` : '';
     const position = db.prepare('SELECT COALESCE(MAX(position),-1)+1 AS n FROM content WHERE kind=?').get(kind).n;
-    db.prepare('INSERT INTO content(kind,id,body,position) VALUES(?,?,?,?) ON CONFLICT(kind,id) DO UPDATE SET body=excluded.body').run(kind, id, JSON.stringify(data), position);
-    res.json(data);
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      db.prepare('INSERT INTO content(kind,id,body,position) VALUES(?,?,?,?) ON CONFLICT(kind,id) DO UPDATE SET body=excluded.body').run(kind, id, JSON.stringify(data), position);
+      if (photos !== undefined) {
+        db.prepare('DELETE FROM event_photos WHERE event_id=?').run(id);
+        const insert = db.prepare('INSERT INTO event_photos(id,event_id,name,mime,data,position) VALUES(?,?,?,?,?,?)');
+        photos.forEach((photo, index) => insert.run(photo.id, id, photo.name, photo.mime, photo.data, index));
+      }
+      if (portrait !== undefined) {
+        db.prepare('DELETE FROM member_photos WHERE member_id=?').run(id);
+        if (portrait) db.prepare('INSERT INTO member_photos(id,member_id,mime,data) VALUES(?,?,?,?)').run(portrait.id, id, portrait.mime, portrait.data);
+      }
+      db.exec('COMMIT');
+    } catch (error) { db.exec('ROLLBACK'); throw error; }
+    res.json(getSite(db, true)[kind].find(item => item.id === id));
   });
-  app.delete('/api/admin/content/:kind/:id', auth, (req, res) => {
-    if (!schemas[req.params.kind]) return res.status(400).json({ error: 'Invalid content type.' });
+  app.delete('/api/admin/content/:kind/:id', (req, res) => {
+    if (!Object.hasOwn(schemas, req.params.kind)) return res.status(400).json({ error: 'Invalid content type.' });
     db.prepare('DELETE FROM content WHERE kind=? AND id=?').run(req.params.kind, req.params.id); res.json({ ok: true });
   });
-  app.get('/api/admin/applications', auth, (req, res) => {
+  app.get('/api/admin/applications', (req, res) => {
     const cursor = z.coerce.number().int().nonnegative().default(0).parse(req.query.offset);
     const rows = db.prepare('SELECT * FROM applications ORDER BY created_at DESC LIMIT 100 OFFSET ?').all(cursor);
     res.json({ items: rows.map(applicationRow), total: db.prepare('SELECT COUNT(*) AS n FROM applications').get().n });
   });
-  app.patch('/api/admin/applications/:id', auth, (req, res) => {
+  app.patch('/api/admin/applications/:id', (req, res) => {
     const { status } = z.object({ status: z.enum(['new', 'reviewing', 'accepted', 'declined']) }).parse(req.body);
     const result = db.prepare('UPDATE applications SET status=? WHERE id=?').run(status, req.params.id);
     if (!result.changes) return res.status(404).json({ error: 'Application not found.' });
     res.json({ ok: true });
   });
-  app.delete('/api/admin/applications/:id', auth, (req, res) => { db.prepare('DELETE FROM applications WHERE id=?').run(req.params.id); res.json({ ok: true }); });
+  app.delete('/api/admin/applications/:id', (req, res) => { db.prepare('DELETE FROM applications WHERE id=?').run(req.params.id); res.json({ ok: true }); });
   app.post('/api/applications', limiter(5, 60 * 60_000), (req, res) => {
     const settings = getSite(db).settings;
     if (!settings.recruitmentOpen) return res.status(409).json({ error: 'Recruitment is currently closed. Follow Nucleus for the next intake.' });
     const input = applicationSchema.parse(req.body), id = randomUUID();
     try {
-      db.prepare('INSERT INTO applications(id,name,email,year,domain,motivation,portfolio,cycle,created_at) VALUES(?,?,?,?,?,?,?,?,?)').run(id, input.name, input.email, input.year, input.domain, input.motivation, input.portfolio, settings.cycle, new Date().toISOString());
+      db.prepare('INSERT INTO applications(id,name,email,year,domain,motivation,portfolio,linkedin,github,leetcode,cycle,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)').run(id, input.name, input.email, input.year, input.domain, input.motivation, input.portfolio, input.linkedin, input.github, input.leetcode, settings.cycle, new Date().toISOString());
     } catch (error) {
       if (String(error.message).includes('UNIQUE')) return res.status(409).json({ error: 'An application with this email already exists for this intake. Contact the club if you need to update it.' });
       throw error;

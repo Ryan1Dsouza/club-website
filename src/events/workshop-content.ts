@@ -12,10 +12,13 @@ const albums = new Map(WORKSHOP_STATIONS.map(workshop => [workshop.id, workshopP
 export function populateWorkshopStation(station: Station): Station {
   const workshop = WORKSHOP_STATIONS.find(item => item.id === station.workshop);
   if (!workshop) return station;
+  if (station.event?.managed) return { ...station, name: station.event.title, event: {
+    ...station.event, photos: station.event.photos ?? albums.get(workshop.id) ?? [],
+  } };
   return { ...station, name: workshop.title, event: {
     id: station.id, title: workshop.title, description: workshopStory(workshop.title),
     startsAt: '', endsAt: '', location: '', category: 'Workshop', registrationUrl: '', published: true,
-    // Local albums are authoritative, including when the API has no event at this station.
+    // Keep untouched legacy chapters; dashboard edits take precedence above.
     photos: albums.get(workshop.id) ?? [],
   } };
 }
