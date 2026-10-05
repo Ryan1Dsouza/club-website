@@ -1,5 +1,10 @@
-.people-page { position: relative; min-height: 100svh; color: var(--mint); background: var(--bg); }
-.people-page[data-view='grid'] { padding: 120px 0 60px; background: radial-gradient(ellipse at 80% 8%, rgb(var(--mint-rgb) / .045), transparent 40%), var(--bg); }
+.people-page { position: relative; min-height: 100svh; color: var(--mint); background: var(--page-backdrop); }
+.people-page[data-view='grid'] {
+  padding: 120px 0 60px;
+  background:
+    radial-gradient(ellipse at 15% 0, rgb(var(--mint-rgb) / .07), transparent 55%),
+    linear-gradient(145deg, var(--page-backdrop-raised), var(--page-backdrop) 60%, var(--page-backdrop-raised));
+}
 .people-toolbar, .people-directory { width: min(1280px, 100%); margin-inline: auto; padding-inline: var(--gutter); }
 .people-view-toggle { display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-height: 44px; padding: 11px 16px; border: 1px solid var(--line-strong); border-radius: 30px; background: var(--surface); color: var(--mint); font: 11px/1.5 var(--mono); cursor: pointer; }
 .people-view-toggle:hover { background: var(--surface-raised); border-color: var(--mint); }

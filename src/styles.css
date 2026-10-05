@@ -38,7 +38,12 @@ img, video { display: block; max-width: 100%; }
 ::selection { color: var(--bg); background: var(--mint); }
 :focus-visible { outline: 2px solid var(--mint); outline-offset: 5px; }
 #main-content:focus { outline: none; }
-.site-shell--home { isolation: isolate; }
+.site-shell--home {
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 15% 0, rgb(var(--mint-rgb) / .07), transparent 55%),
+    linear-gradient(145deg, var(--page-backdrop-raised), var(--page-backdrop) 60%, var(--page-backdrop-raised));
+}
 .site-shell--home > #main-content, .site-shell--home > .site-footer { position: relative; z-index: 10; }
 .site-shell--home .logo-landing, .site-shell--home .dp-section, .site-shell--home .vm-container { background: transparent; }
 .site-shell--work {
