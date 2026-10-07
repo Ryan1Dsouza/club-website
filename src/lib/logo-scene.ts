@@ -89,13 +89,16 @@ function traceLogo(image: HTMLImageElement): Contour {
   ctx.filter = 'blur(0.8px)';
   ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
   const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const alpha = (x: number, y: number) => data[(y * canvas.width + x) * 4 + 3] / 255;
+  // Find the exact bounding box using direct Uint8ClampedArray access
   let left = canvas.width, right = 0, top = canvas.height, bottom = 0;
   for (let y = 0; y < canvas.height; y++) {
+    const rowOffset = y * canvas.width * 4;
     for (let x = 0; x < canvas.width; x++) {
-      if (alpha(x, y) < 0.5) continue;
-      left = Math.min(left, x); right = Math.max(right, x);
-      top = Math.min(top, y); bottom = Math.max(bottom, y);
+      if (data[rowOffset + x * 4 + 3] < 128) continue;
+      if (x < left) left = x;
+      if (x > right) right = x;
+      if (y < top) top = y;
+      if (y > bottom) bottom = y;
     }
   }
   if (right <= left) throw new Error('The logo has no visible pixels');
@@ -104,13 +107,22 @@ function traceLogo(image: HTMLImageElement): Contour {
   const segments: number[] = [], lengths: number[] = [];
   let totalLength = 0;
 
+  const width4 = canvas.width * 4;
   for (let y = Math.max(0, top - 1); y <= Math.min(bottom, canvas.height - 2); y++) {
+    const row0 = y * width4;
+    const row1 = (y + 1) * width4;
     for (let x = Math.max(0, left - 1); x <= Math.min(right, canvas.width - 2); x++) {
-      const a0 = alpha(x, y), a1 = alpha(x + 1, y), a2 = alpha(x + 1, y + 1), a3 = alpha(x, y + 1);
-      const mask = (a0 >= .5 ? 1 : 0) | (a1 >= .5 ? 2 : 0) | (a2 >= .5 ? 4 : 0) | (a3 >= .5 ? 8 : 0);
+      const x4 = x * 4;
+      const a0 = data[row0 + x4 + 3];
+      const a1 = data[row0 + x4 + 7]; // (x+1)*4 + 3
+      const a2 = data[row1 + x4 + 7]; // row1, x+1
+      const a3 = data[row1 + x4 + 3]; // row1, x
+      
+      const mask = (a0 >= 128 ? 1 : 0) | (a1 >= 128 ? 2 : 0) | (a2 >= 128 ? 4 : 0) | (a3 >= 128 ? 8 : 0);
       // Most cells contain no edge. Skip them before allocating coordinate arrays.
       if (mask === 0 || mask === 15) continue;
-      const corners = [a0, a1, a2, a3];
+      
+      const corners = [a0 / 255.0, a1 / 255.0, a2 / 255.0, a3 / 255.0];
       const coordinates = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]];
       const crossings: number[][] = [];
       for (let edge = 0; edge < 4; edge++) {
@@ -241,6 +253,20 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
     canvas.height = Math.ceil(outlineHeight * outlinePixelsPerUnit);
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Logo outline rendering is unavailable');
+    
+    // Draw the contour once
+    context.setTransform(outlinePixelsPerUnit, 0, 0, -outlinePixelsPerUnit, canvas.width / 2, canvas.height / 2);
+    context.strokeStyle = '#fff';
+    context.lineWidth = width * LOGO_WIDTH / 480;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    context.beginPath();
+    for (let i = 0; i < contour.segments.length; i += 6) {
+      context.moveTo(contour.segments[i], contour.segments[i + 1]);
+      context.lineTo(contour.segments[i + 3], contour.segments[i + 4]);
+    }
+    context.stroke();
+
     const texture = new THREE.CanvasTexture(canvas);
     textures.push(texture);
     const material = new THREE.MeshBasicMaterial({ map: texture, color: mint, transparent: true, opacity: 0,
@@ -277,27 +303,8 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
     uniforms.uCameraZ.value = camera.position.z;
     resizeBuffer();
     wake();
-    // Rasterize the exact traced contour only on resize. Each outline then draws
-    // as two triangles instead of thousands of overlapping wide-line segments.
-    if (outlineSize === logoPixels) return;
-    outlineSize = logoPixels;
-    outlines.forEach(outline => {
-      const { canvas, context, texture } = outline;
-      context.resetTransform();
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.setTransform(outlinePixelsPerUnit, 0, 0, -outlinePixelsPerUnit, canvas.width / 2, canvas.height / 2);
-      context.strokeStyle = '#fff';
-      context.lineWidth = outline.width * LOGO_WIDTH / 480;
-      context.lineCap = 'round';
-      context.lineJoin = 'round';
-      context.beginPath();
-      for (let i = 0; i < contour.segments.length; i += 6) {
-        context.moveTo(contour.segments[i], contour.segments[i + 1]);
-        context.lineTo(contour.segments[i + 3], contour.segments[i + 4]);
-      }
-      context.stroke();
-      texture.needsUpdate = true;
-    });
+    // The texture has a fixed resolution and responsive size is handled by WebGL.
+    // There's no need to redraw the static stroke contour on every screen resize!
   };
 
   let elapsed = 0, previous = 0;
