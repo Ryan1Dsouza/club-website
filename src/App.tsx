@@ -78,7 +78,7 @@ export default function App({ initialData = seed, serverRendered = false }: { in
     // The existing seed/SSR data stays available if startup requests stall.
     const deadline = window.setTimeout(dismiss, LOADER_MAXIMUM_MS);
     const refresh = () => Promise.all([
-      api<SiteData>('/site', { signal: abort.signal }),
+      api<SiteData>('/site', { signal: abort.signal }).catch(() => initialData),
       supabase.from('team_members').select('id, name, role, photo_url, created_at').order('created_at', { ascending: true }),
       supabase.from('events').select('*, event_photos (id, name, photo_url, position)').order('starts_at', { ascending: true })
     ]).then(([site, { data: teamData, error: teamError }, { data: eventData, error: eventError }]) => {
