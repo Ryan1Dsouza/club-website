@@ -45,3 +45,13 @@ create policy "Authenticated users can delete achievements" on achievements for 
 
 create policy "Authenticated users can insert achievement_members" on achievement_members for insert to authenticated with check (true);
 create policy "Authenticated users can delete achievement_members" on achievement_members for delete to authenticated using (true);
+
+-- Grant privileges
+grant select on public.live_news to anon, authenticated;
+grant insert, update, delete on public.live_news to authenticated;
+
+grant select on public.achievements to anon, authenticated;
+grant insert, update, delete on public.achievements to authenticated;
+
+grant select on public.achievement_members to anon, authenticated;
+grant insert, update, delete on public.achievement_members to authenticated;

@@ -37,5 +37,6 @@ export async function deleteNews(id: string): Promise<void> {
 
 export function describeError(e: unknown): string {
   if (e instanceof Error) return e.message
+  if (typeof e === 'object' && e !== null && 'message' in e) return String((e as any).message)
   return String(e)
 }
