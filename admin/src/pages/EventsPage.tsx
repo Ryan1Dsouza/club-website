@@ -9,7 +9,6 @@ import {
   Plus,
   RefreshCw,
   Search,
-  SlidersHorizontal,
   Trash2,
   X,
 } from 'lucide-react'

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Check, X, Calendar, Image as ImageIcon, MapPin, Link2, Trash2, UploadCloud } from 'lucide-react'
+import { Check, X, UploadCloud } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import type { Event, EventInput, EventPhoto } from '../lib/database.types'
 import { describeError, saveEvent, listEventPhotos, uploadEventPhoto, deleteEventPhoto } from '../lib/events'
