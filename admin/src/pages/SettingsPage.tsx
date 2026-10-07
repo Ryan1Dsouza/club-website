@@ -18,18 +18,15 @@ export function SettingsPage() {
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">YOUR WORKSPACE</span>
-          <h1>
-            Account <em>settings.</em>
-          </h1>
-          <p>A little peace of mind behind the scenes.</p>
+          <h1>Account settings</h1>
+          <p>View your account and manage your session.</p>
         </div>
       </div>
       <section className="panel settings-panel">
         <div className="panel-heading">
           <div>
             <h2>Your account</h2>
-            <p>Signed in to the Nucleus control room.</p>
+            <p>Your current administrator account.</p>
           </div>
           <ShieldCheck size={21} />
         </div>
@@ -64,7 +61,7 @@ export function SettingsPage() {
         </div>
         <div className="settings-signout">
           <div>
-            <h3>Done for now?</h3>
+            <h3>Sign out</h3>
             <p>Sign out of this browser to close your workspace.</p>
           </div>
           <button

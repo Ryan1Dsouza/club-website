@@ -12,10 +12,12 @@ for (const member of site.team) {
   if (!member.image?.startsWith('/team_images/core/')) continue;
   const name = member.image.split('/').pop().replace(/\.[^.]+$/, '');
   const variants = {};
-  for (const [size, width] of [['small', 480], ['large', 800]]) {
-    const path = `/team_images/banner/${name}-${width}.webp`;
+  for (const [size, width] of [['small', 480], ['large', 800], ['avatar', 144], ['thumbnail', 320]]) {
+    const folder = width < 480 ? 'thumbnails' : 'banner';
+    await mkdir(new URL(`public/team_images/${folder}/`, root), { recursive: true });
+    const path = `/team_images/${folder}/${name}-${width}.webp`;
     await sharp(await readFile(new URL(`public${member.image}`, root)))
-      .rotate().resize({ width, withoutEnlargement: true }).webp({ quality: 65, effort: 5 })
+      .rotate().resize({ width, withoutEnlargement: true }).webp({ quality: width < 480 ? 85 : 65, effort: 5 })
       .toFile(fileURLToPath(new URL(`public${path}`, root)));
     variants[size] = path;
   }

@@ -31,7 +31,7 @@ for (const mobile of [false, true]) {
       else { await page.mouse.move(700, 650); await page.mouse.wheel(0, 750); }
       await expect.poll(async () => (await position()).y).toBeGreaterThan(30);
       await expect(page.locator('html')).not.toHaveClass(/lenis-scrolling/);
-      const progress = await page.locator('.events-page').evaluate(element => ({
+      const progress = await journey.evaluate(element => ({
         painted: Number(element.style.getPropertyValue('--rail-progress')),
         actual: scrollY / (document.documentElement.scrollHeight - innerHeight),
       }));

@@ -1,0 +1,421 @@
+import * as THREE from "three";
+import { c as createQualityController, q as qualityPixelRatio } from "./event-quality-CCUjlSVB.js";
+const LOGO_WIDTH = 6;
+const TAU = Math.PI * 2;
+const ASSEMBLY_SECONDS = 5.8;
+const clamp = THREE.MathUtils.clamp;
+const yieldToBrowser = () => new Promise((resolve) => window.setTimeout(resolve, 0));
+const particleVertex = (
+  /* glsl */
+  `
+  uniform float uTime;
+  uniform float uPixelRatio;
+  uniform float uCameraZ;
+  uniform vec2 uViewport;
+  uniform vec2 uPointer;
+  attribute vec3 aStart;
+  attribute vec4 aMotion;
+  varying float vAlpha;
+
+  void main() {
+    float progress = min(uTime / ${ASSEMBLY_SECONDS.toFixed(1)}, 1.0);
+    float formation = clamp((progress - 0.03) / 0.62, 0.0, 1.0);
+    float arrival = clamp((formation - aMotion.x) / 0.55, 0.0, 1.0);
+    float ease = 1.0 - pow(1.0 - arrival, 4.0);
+    float reveal = clamp((progress - 0.45) / 0.2, 0.0, 1.0);
+    vec3 start = vec3(aStart.xy * max(uViewport.x, uViewport.y), aStart.z);
+    vec3 target = position;
+    target.xy += uPointer;
+    vec3 p = mix(start, target, ease);
+    // Depth collapses with the assembly, leaving the original silhouette exact.
+    p.z += sin(uTime * 0.3 + aMotion.z) * 0.18 * (1.0 - ease);
+    vec4 view = modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * view;
+    gl_PointSize = clamp(aMotion.y * (1.6 - 0.7 * ease) * 2.0 * uPixelRatio
+      * uCameraZ / -view.z, 1.0, 12.0 * uPixelRatio);
+    float twinkle = 0.0;
+    vAlpha = min(1.0, mix(aMotion.w, 1.0, ease) + twinkle * (1.0 - ease))
+      * max(0.0, 1.0 - reveal * 1.2) * smoothstep(0.0, 0.3, uTime);
+  }
+`
+);
+const dustVertex = (
+  /* glsl */
+  `
+  uniform float uTime;
+  uniform float uPixelRatio;
+  uniform float uCameraZ;
+  uniform vec2 uViewport;
+  uniform vec2 uPointer;
+  attribute vec4 aMotion;
+  varying float vAlpha;
+
+  void main() {
+    vec3 p = position;
+    p.xy = (fract(p.xy + aMotion.xy * uTime * 0.002) - 0.5) * uViewport * 1.5;
+    p.xy += uPointer * (0.15 + p.z * 0.04);
+    vec4 view = modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * view;
+    float twinkle = 0.0;
+    gl_PointSize = clamp(aMotion.z * uPixelRatio * uCameraZ / -view.z,
+      0.7 * uPixelRatio, 6.0 * uPixelRatio);
+    vAlpha = (0.12 + twinkle * 0.2) * smoothstep(0.0, 0.8, uTime);
+  }
+`
+);
+const particleFragment = (
+  /* glsl */
+  `
+  uniform vec3 uColor;
+  varying float vAlpha;
+  void main() {
+    float radius = length(gl_PointCoord - 0.5) * 2.0;
+    float alpha = (1.0 - smoothstep(0.45, 1.0, radius)) * vAlpha;
+    if (alpha < 0.003) discard;
+    gl_FragColor = vec4(uColor, alpha);
+    #include <colorspace_fragment>
+  }
+`
+);
+function traceLogo(image) {
+  const canvas = document.createElement("canvas");
+  const scale = Math.min(1, 1024 / image.naturalWidth);
+  canvas.width = Math.round(image.naturalWidth * scale);
+  canvas.height = Math.round(image.naturalHeight * scale);
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) throw new Error("Logo sampling is unavailable");
+  ctx.filter = "blur(0.8px)";
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+  const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  let left = canvas.width, right = 0, top = canvas.height, bottom = 0;
+  for (let y = 0; y < canvas.height; y++) {
+    const rowOffset = y * canvas.width * 4;
+    for (let x = 0; x < canvas.width; x++) {
+      if (data[rowOffset + x * 4 + 3] < 128) continue;
+      if (x < left) left = x;
+      if (x > right) right = x;
+      if (y < top) top = y;
+      if (y > bottom) bottom = y;
+    }
+  }
+  if (right <= left) throw new Error("The logo has no visible pixels");
+  const factor = LOGO_WIDTH / (right - left);
+  const centerX = (left + right) / 2, centerY = (top + bottom) / 2;
+  const segments = [], lengths = [];
+  let totalLength = 0;
+  const width4 = canvas.width * 4;
+  for (let y = Math.max(0, top - 1); y <= Math.min(bottom, canvas.height - 2); y++) {
+    const row0 = y * width4;
+    const row1 = (y + 1) * width4;
+    for (let x = Math.max(0, left - 1); x <= Math.min(right, canvas.width - 2); x++) {
+      const x4 = x * 4;
+      const a0 = data[row0 + x4 + 3];
+      const a1 = data[row0 + x4 + 7];
+      const a2 = data[row1 + x4 + 7];
+      const a3 = data[row1 + x4 + 3];
+      const mask = (a0 >= 128 ? 1 : 0) | (a1 >= 128 ? 2 : 0) | (a2 >= 128 ? 4 : 0) | (a3 >= 128 ? 8 : 0);
+      if (mask === 0 || mask === 15) continue;
+      const corners = [a0 / 255, a1 / 255, a2 / 255, a3 / 255];
+      const coordinates = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]];
+      const crossings = [];
+      for (let edge = 0; edge < 4; edge++) {
+        const next = (edge + 1) % 4;
+        if (corners[edge] >= 0.5 === corners[next] >= 0.5) continue;
+        const t = (0.5 - corners[edge]) / (corners[next] - corners[edge]);
+        crossings.push([
+          (THREE.MathUtils.lerp(coordinates[edge][0], coordinates[next][0], t) - centerX) * factor,
+          (centerY - THREE.MathUtils.lerp(coordinates[edge][1], coordinates[next][1], t)) * factor
+        ]);
+      }
+      for (let index = 0; index < crossings.length - 1; index += 2) {
+        const [a, b] = [crossings[index], crossings[index + 1]];
+        segments.push(a[0], a[1], 0, b[0], b[1], 0);
+        totalLength += Math.hypot(b[0] - a[0], b[1] - a[1]);
+        lengths.push(totalLength);
+      }
+    }
+  }
+  return { segments, lengths, totalLength };
+}
+async function createLogoScene(host, url, onError, onComplete) {
+  const source = new Image();
+  source.src = url;
+  await source.decode();
+  const contour = traceLogo(source);
+  await yieldToBrowser();
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
+  const geometries = [];
+  const materials = [];
+  const textures = [];
+  let frame = 0, stopped = false, ready = false;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 150);
+  const viewport = new THREE.Vector2();
+  const pointer = new THREE.Vector2();
+  const desiredPointer = new THREE.Vector2();
+  const coarsePointer = window.matchMedia("(pointer: coarse)");
+  const quality = createQualityController(coarsePointer.matches ? 1 : 2, 2);
+  let renderWidth = 0, renderHeight = 0;
+  let pointerDirty = false, pointerX = 0, pointerY = 0;
+  const style = getComputedStyle(host);
+  const mint = new THREE.Color(16777215);
+  renderer.setClearColor(style.getPropertyValue("--bg").trim(), 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.domElement.setAttribute("aria-hidden", "true");
+  let seed = 26;
+  const random = () => {
+    seed = Math.imul(seed, 1664525) + 1013904223 >>> 0;
+    return seed / 4294967296;
+  };
+  const uniforms = {
+    uTime: { value: 0 },
+    uPixelRatio: { value: 1 },
+    uCameraZ: { value: 1 },
+    uViewport: { value: viewport },
+    uPointer: { value: pointer },
+    uColor: { value: mint }
+  };
+  function makePoints(geometry, vertexShader) {
+    const material = new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader,
+      fragmentShader: particleFragment,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false
+    });
+    geometries.push(geometry);
+    materials.push(material);
+    const points = new THREE.Points(geometry, material);
+    points.frustumCulled = false;
+    scene.add(points);
+    return points;
+  }
+  const count = host.clientWidth < 768 ? 900 : 1400;
+  const positions = new Float32Array(count * 3);
+  const starts = new Float32Array(count * 3);
+  const motion = new Float32Array(count * 4);
+  let segment = 0;
+  for (let i = 0; i < count; i++) {
+    const distance = (i + 0.5) / count * contour.totalLength;
+    while (contour.lengths[segment] < distance) segment++;
+    const previousLength = segment ? contour.lengths[segment - 1] : 0;
+    const t = (distance - previousLength) / (contour.lengths[segment] - previousLength);
+    const offset = segment * 6;
+    const x = THREE.MathUtils.lerp(contour.segments[offset], contour.segments[offset + 3], t);
+    const y = THREE.MathUtils.lerp(contour.segments[offset + 1], contour.segments[offset + 4], t);
+    positions.set([x, y, 0], i * 3);
+    const angle = random() * TAU, radius = 0.5 + random() * 0.6;
+    starts.set([Math.cos(angle) * radius, Math.sin(angle) * radius, (random() - 0.5) * 10], i * 3);
+    motion.set([
+      Math.hypot(x, y) / LOGO_WIDTH * 0.3 + random() * 0.125,
+      1 + random() * 0.8,
+      random() * TAU,
+      0.25 + random() * 0.25
+    ], i * 4);
+  }
+  const particles = new THREE.BufferGeometry();
+  particles.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  particles.setAttribute("aStart", new THREE.BufferAttribute(starts, 3));
+  particles.setAttribute("aMotion", new THREE.BufferAttribute(motion, 4));
+  const assembly = makePoints(particles, particleVertex);
+  const dustCount = host.clientWidth < 768 ? 160 : 350;
+  const dustPositions = new Float32Array(dustCount * 3);
+  const dustMotion = new Float32Array(dustCount * 4);
+  for (let i = 0; i < dustCount; i++) {
+    dustPositions.set([random(), random(), (random() - 0.6) * 10], i * 3);
+    dustMotion.set([random() - 0.5, random() - 0.5, 0.6 + Math.pow(random(), 3) * 3.6, random() * TAU], i * 4);
+  }
+  const dust = new THREE.BufferGeometry();
+  dust.setAttribute("position", new THREE.BufferAttribute(dustPositions, 3));
+  dust.setAttribute("aMotion", new THREE.BufferAttribute(dustMotion, 4));
+  makePoints(dust, dustVertex);
+  const logo = new THREE.Group();
+  scene.add(logo);
+  let minY = Infinity, maxY = -Infinity;
+  for (let i = 1; i < contour.segments.length; i += 3) {
+    minY = Math.min(minY, contour.segments[i]);
+    maxY = Math.max(maxY, contour.segments[i]);
+  }
+  const outlineWidth = LOGO_WIDTH + 0.3, outlineHeight = maxY - minY + 0.3;
+  const outlinePixelsPerUnit = 480 * 2 / LOGO_WIDTH;
+  const lineGeometry = new THREE.PlaneGeometry(outlineWidth, outlineHeight);
+  geometries.push(lineGeometry);
+  const outlines = [];
+  function makeContour(width) {
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.ceil(outlineWidth * outlinePixelsPerUnit);
+    canvas.height = Math.ceil(outlineHeight * outlinePixelsPerUnit);
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Logo outline rendering is unavailable");
+    context.setTransform(outlinePixelsPerUnit, 0, 0, -outlinePixelsPerUnit, canvas.width / 2, canvas.height / 2);
+    context.strokeStyle = "#fff";
+    context.lineWidth = width * LOGO_WIDTH / 480;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.beginPath();
+    for (let i = 0; i < contour.segments.length; i += 6) {
+      context.moveTo(contour.segments[i], contour.segments[i + 1]);
+      context.lineTo(contour.segments[i + 3], contour.segments[i + 4]);
+    }
+    context.stroke();
+    const texture = new THREE.CanvasTexture(canvas);
+    textures.push(texture);
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      color: mint,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      depthTest: false
+    });
+    materials.push(material);
+    const line = new THREE.Mesh(lineGeometry, material);
+    line.frustumCulled = false;
+    line.visible = false;
+    logo.add(line);
+    outlines.push({ canvas, context, texture, width, mesh: line });
+    return material;
+  }
+  const edge = makeContour(6);
+  const resizeBuffer = () => {
+    const level = coarsePointer.matches && completed ? 2 : quality.level;
+    const pixelRatio = qualityPixelRatio(level, renderWidth, renderHeight, window.devicePixelRatio, coarsePointer.matches);
+    uniforms.uPixelRatio.value = pixelRatio;
+    renderer.setPixelRatio(pixelRatio);
+    renderer.setSize(renderWidth, renderHeight, false);
+  };
+  const resize = () => {
+    const width = host.clientWidth, height = host.clientHeight;
+    if (!width || !height || width === renderWidth && height === renderHeight) return;
+    renderWidth = width;
+    renderHeight = height;
+    quality.reset();
+    const logoPixels = Math.min(480, width * 0.6, height * 0.55);
+    viewport.set(width / logoPixels * LOGO_WIDTH, height / logoPixels * LOGO_WIDTH);
+    camera.aspect = width / height;
+    camera.position.z = viewport.y / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+    camera.position.y = -0.07 * viewport.y;
+    camera.updateProjectionMatrix();
+    uniforms.uCameraZ.value = camera.position.z;
+    resizeBuffer();
+    wake();
+  };
+  let elapsed = 0, previous = 0;
+  let offscreen = false;
+  let completed = false;
+  function wake() {
+    if (ready && !frame && !stopped && !document.hidden && !offscreen) {
+      previous = 0;
+      frame = requestAnimationFrame(animate);
+    }
+  }
+  const io = new IntersectionObserver(
+    ([entry]) => {
+      offscreen = !entry.isIntersecting;
+      cancelAnimationFrame(frame);
+      frame = 0;
+      previous = 0;
+      quality.reset();
+      wake();
+    },
+    { threshold: 0 }
+  );
+  io.observe(host);
+  function animate(now) {
+    frame = 0;
+    if (stopped || document.hidden || offscreen) {
+      frame = 0;
+      return;
+    }
+    const frameTime = previous ? (now - previous) / 1e3 : 0;
+    const dt = Math.min(frameTime, 0.05);
+    previous = now;
+    if (quality.sample(frameTime) !== null) resizeBuffer();
+    if (pointerDirty) {
+      pointerDirty = false;
+      const bounds = host.getBoundingClientRect();
+      if (bounds.width && bounds.height) desiredPointer.set(
+        ((pointerX - bounds.left) / bounds.width - 0.5) * viewport.x * 0.035,
+        (0.5 - (pointerY - bounds.top) / bounds.height) * viewport.y * 0.035
+      );
+    }
+    elapsed += dt;
+    uniforms.uTime.value = elapsed;
+    pointer.lerp(desiredPointer, 1 - Math.exp(-dt * 3.7));
+    const progress = Math.min(elapsed / ASSEMBLY_SECONDS, 1);
+    const reveal = clamp((progress - 0.45) / 0.2, 0, 1);
+    edge.opacity = reveal * 1;
+    outlines[0].mesh.visible = edge.opacity > 0;
+    logo.position.set(pointer.x, pointer.y, 0);
+    assembly.visible = reveal < 0.84;
+    const justCompleted = !completed && reveal === 1;
+    if (justCompleted) {
+      completed = true;
+      if (coarsePointer.matches) resizeBuffer();
+    }
+    renderer.render(scene, camera);
+    if (justCompleted) onComplete();
+    if (!completed || !coarsePointer.matches) frame = requestAnimationFrame(animate);
+  }
+  const move = (event) => {
+    if (coarsePointer.matches || event.pointerType !== "mouse" || elapsed < ASSEMBLY_SECONDS * 0.55) return;
+    pointerX = event.clientX;
+    pointerY = event.clientY;
+    pointerDirty = true;
+  };
+  const leave = () => {
+    pointerDirty = false;
+    desiredPointer.set(0, 0);
+  };
+  const visibility = () => {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    previous = 0;
+    quality.reset();
+    wake();
+  };
+  const contextLost = (event) => {
+    event.preventDefault();
+    stopped = true;
+    cancelAnimationFrame(frame);
+    renderer.domElement.style.opacity = "0";
+    onError();
+  };
+  const observer = new ResizeObserver(resize);
+  function dispose() {
+    stopped = true;
+    cancelAnimationFrame(frame);
+    io.disconnect();
+    observer.disconnect();
+    host.removeEventListener("pointermove", move);
+    host.removeEventListener("pointerleave", leave);
+    document.removeEventListener("visibilitychange", visibility);
+    renderer.domElement.removeEventListener("webglcontextlost", contextLost);
+    geometries.forEach((geometry) => geometry.dispose());
+    materials.forEach((material) => material.dispose());
+    textures.forEach((texture) => texture.dispose());
+    renderer.dispose();
+    renderer.forceContextLoss();
+    renderer.domElement.remove();
+  }
+  try {
+    await yieldToBrowser();
+    resize();
+    host.appendChild(renderer.domElement);
+    observer.observe(host);
+    host.addEventListener("pointermove", move, { passive: true });
+    host.addEventListener("pointerleave", leave);
+    document.addEventListener("visibilitychange", visibility);
+    renderer.domElement.addEventListener("webglcontextlost", contextLost);
+    ready = true;
+    wake();
+  } catch (error) {
+    dispose();
+    throw error;
+  }
+  return dispose;
+}
+export {
+  createLogoScene
+};

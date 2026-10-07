@@ -46,7 +46,7 @@
 .vm-marquee-content {
   display: flex;
   flex-shrink: 0;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-around;
   gap: 20px;
   min-width: 100%;
@@ -62,11 +62,6 @@
   animation-direction: reverse;
 }
 
-.vm-marquee-wrapper:hover .vm-marquee-content,
-.vm-container[data-paused='true'] .vm-marquee-content,
-.vm-marquee-wrapper:focus-within .vm-marquee-content {
-  animation-play-state: paused;
-}
 
 @keyframes voices-drift {
   from {
@@ -79,7 +74,6 @@
 
 .vm-card {
   position: relative;
-  height: 100%;
   width: 320px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -105,15 +99,14 @@
 }
 
 .vm-avatar {
-  display: grid;
-  place-items: center;
   flex-shrink: 0;
   background: var(--wash);
   color: var(--mint);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   object-fit: cover;
+  object-position: center 22%;
   border: 1px solid var(--line);
 }
 
@@ -126,7 +119,7 @@
 @media (prefers-reduced-motion: reduce) {
   .vm-marquee-wrapper { overflow-x: auto; user-select: text; }
   .vm-marquee-content { animation: none; }
-  .vm-marquee-content[aria-hidden='true'], .vm-fade-left, .vm-fade-right, .vm-pause { display: none; }
+  .vm-marquee-content[aria-hidden='true'], .vm-fade-left, .vm-fade-right { display: none; }
 }
 
 .vm-meta {
@@ -141,7 +134,7 @@
   margin: 0;
 }
 
-.vm-username {
+.vm-role {
   font-size: 12px;
   font-weight: 500;
   color: var(--muted);
@@ -155,7 +148,8 @@
   margin: 0;
 }
 
-.vm-pause { margin-top: 20px; }
+.vm-quote { display: flex; flex-direction: column; flex: 1; gap: 14px; margin: 0; }
+.vm-author { margin-top: auto; color: var(--muted); font-size: 11px; line-height: 1.6; }
 /* Reduced motion users control the cards directly, with no duplicated or faded text. */
 
 /* Gradient fades on the edges */

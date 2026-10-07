@@ -12,6 +12,8 @@ Two-core or <=2GB devices start in that extreme tier. Phones with missing hints 
 
 Two pre-existing physics regressions were repaired while exercising these paths: removing supporting blocks wakes the layers above, and collision-resolved story poses are copied back to the rendered block position.
 
+The tower supports direct manipulation throughout the scroll story and after its finale. Grabbing an unfolding profile or returning piece transfers its visible pose to a dynamic plank and cancels its authored movement. Manual placements survive partial and full reverse seeks; a profile reveal may temporarily borrow a thrown piece, then restores its saved position and rotation. Only the explicit Rebuild tower action clears those placements. Completed story pieces return at the finale so play remains available. On touchscreens, block gestures throw in any direction and gestures starting on empty scenery explore the timeline, without a mode toggle. The profile uses one portrait over glass that reveals the environment, with the enlarged timber mesh hidden during the readable hold.
+
 ## Reproduction
 
 - Build: `npm run build`

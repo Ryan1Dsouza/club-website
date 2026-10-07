@@ -107,11 +107,11 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     const euler = new THREE.Euler(), curve = new THREE.CubicBezierCurve3();
     const plankScale = new THREE.Vector3(...BLOCK_SIZE);
     const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2(), dragPlane = new THREE.Plane(), dragPoint = new THREE.Vector3();
+    const profilePlane = new THREE.Plane(), profilePoint = new THREE.Vector3(), profileLocal = new THREE.Vector3();
     const lastDragPoint = new THREE.Vector3(), throwVelocity = new THREE.Vector3(), pointerVelocity = new THREE.Vector3();
     let lastDragTime = 0;
     let pointerId = -1, draggedIndex = -1, downX = 0, downY = 0, travelled = 0;
-    let gestureId = -1, gestureX = 0, gestureY = 0, lastGestureY = 0;
-    let gestureAxis: 'x' | 'y' | null = null;
+    let gestureId = -1, lastGestureY = 0;
     cleanups.push(() => {
       window.clearTimeout(viewportResizeTimer);
       cancelAnimationFrame(frame); releasePointer();
@@ -129,26 +129,30 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     function syncStory(state: ReturnType<typeof towerFrame>) {
       const desiredRemoved = state.completed;
       if (active === state.index && storyRemoved === desiredRemoved) return;
-      releasePointer();
-      // When scrolling all the way back to the start, do a full reset so the
-      // tower looks exactly as it did originally (all blocks in perfect position).
-      // For partial reverse, return only the needed pieces individually.
-      if (state.completed < storyRemoved || (state.index < 0 && state.completed === 0 && active >= 0)) {
-        if (state.index < 0 && state.completed === 0) {
-          // Full rewind — restore every block to its pristine grid position
-          physics.reset(0);
-        } else {
-          // Partial rewind — return pieces that need to come back.
-          // Each block's stagger delay is based on slot.layer so the tower
-          // always builds bottom-up (foundation first) regardless of scroll speed.
-          for (let i = storyRemoved - 1; i >= state.completed; i--) {
-            physics.returnBody(i);
+      // Reverse only the story's removals. Manual placements and active pointer
+      // constraints survive every seek, including a rewind all the way to zero.
+      if (active >= 0 && active !== state.index && active >= state.completed && !physics.isManual(active)) physics.returnBody(active);
+      if (state.completed < storyRemoved) {
+        for (let i = storyRemoved - 1; i >= state.completed; i--) {
+          if (!physics.isManual(i)) physics.returnBody(i);
+        }
+        // At the finale the remaining pieces are playable again. Re-entering
+        // the story hides its completed pieces while retaining manual throws.
+        if (storyRemoved === members.length) {
+          for (let i = 0; i < state.completed; i++) {
+            if (!physics.isManual(i)) physics.remove(i);
           }
         }
-        storyRemoved = state.completed;
       }
-      for (let i = storyRemoved; i < state.completed; i++) physics.remove(i);
+      for (let i = storyRemoved; i < state.completed; i++) {
+        if (!physics.isManual(i)) physics.remove(i);
+      }
       storyRemoved = state.completed;
+      if (state.completed === members.length) {
+        for (let i = members.length - 1; i >= 0; i--) {
+          if (!physics.isManual(i)) physics.returnBody(i);
+        }
+      }
       active = state.index;
       if (active >= 0) {
         updateProfile(active);
@@ -191,7 +195,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         .addScaledVector(up, (height / 2 - profileTop - profileHeight / 2) / height * viewHeight);
       const exitState = towerExit(state.local);
       const labelsChanged = matricesDirty || changedProgress || cameraMoved;
-      profile.style.opacity = state.index >= 0 ? String(exitState.opacity) : '0';
+      profile.style.opacity = state.index >= 0 && physics.isStory(state.index) ? String(exitState.opacity) : '0';
       if (transformsChanged || matricesDirty || changedProgress || (cameraMoved && state.index >= 0)) {
         const block = batch.pose;
         physics.bodies.forEach((body, index) => {
@@ -199,14 +203,15 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
           // Scrolling normally changes only the currently extracted piece.
           if (!transformsChanged && !matricesDirty && index !== state.index) return;
           const slot = slots[index];
-          if ((index < state.completed || state.outro > 0 || physics.isPending(index)) && index !== state.index) {
+          if (!body.world || physics.isPending(index)) {
             batch.update(index, false);
             return;
           }
 
           block.position.copy(body.interpolatedPosition); block.quaternion.copy(body.interpolatedQuaternion); block.scale.copy(plankScale);
 
-          if (index === state.index) {
+          const storyBlock = index === state.index && physics.isStory(index);
+          if (storyBlock) {
             source.copy(activeSource); block.position.copy(source); block.quaternion.copy(activeQuaternion);
             const t = state.local, pull = smooth(t / .10), flight = smooth((t - .10) / .24), unfold = smooth((t - .2) / .23);
             direction.set(slot.direction, 0, 0).applyQuaternion(activeQuaternion);
@@ -249,7 +254,9 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
             profileObject.quaternion.copy(block.quaternion);
             profileObject.scale.set(block.scale.x / profileWidth, block.scale.y / profileHeight, 1);
           }
-          batch.update(index);
+          // The open glass banner looks through to the environment, not an
+          // enlarged wooden nameplate. Its plane remains directly grabbable.
+          batch.update(index, !storyBlock || exitState.opacity < 1);
         });
         batch.commit(); renderer.shadowMap.needsUpdate = renderer.shadowMap.enabled; matricesDirty = false;
       }
@@ -316,7 +323,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       // directly, so browser scrolling cannot escape below the scene.
       if (pinnedViewport.matches) return;
       const next = clamp01((getScrollPosition() - start) / range);
-      if (next !== target) { lastInteraction = performance.now(); releasePointer(); }
+      if (next !== target) lastInteraction = performance.now();
       target = next;
     }
     function resize() {
@@ -377,30 +384,41 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       raycaster.setFromCamera(pointer, camera);
     }
     function pointerDown(event: PointerEvent) {
-      if (pinnedViewport.matches && event.pointerType !== 'mouse' && event.isPrimary && host.dataset.interaction !== 'play') {
-        gestureId = event.pointerId; gestureX = event.clientX; gestureY = lastGestureY = event.clientY; gestureAxis = null;
-        renderer.domElement.setPointerCapture(event.pointerId);
-      }
-      if (event.button !== 0 || !event.isPrimary || pointerId >= 0 || active >= 0 || towerFrame(progress, members.length).outro > 0) return;
+      if (event.button !== 0 || !event.isPrimary || pointerId >= 0) return;
       cast(event);
-      const hit = raycaster.intersectObject(batch.blocks)[0], index = hit?.instanceId;
-      if (index === undefined || !physics.grab(index, hit.point)) return;
+      const hit = raycaster.intersectObject(batch.blocks)[0];
+      let index = hit?.instanceId, point = hit?.point;
+      if (active >= 0 && physics.isStory(active) && Number(profile.style.opacity) === 1) {
+        direction.set(0, 0, 1).applyQuaternion(profileObject.quaternion);
+        profilePlane.setFromNormalAndCoplanarPoint(direction, profileObject.position);
+        if (raycaster.ray.intersectPlane(profilePlane, profilePoint)) {
+          profileObject.worldToLocal(profileLocal.copy(profilePoint));
+          if (Math.abs(profileLocal.x) <= profileWidth / 2 && Math.abs(profileLocal.y) <= profileHeight / 2
+            && (!hit || raycaster.ray.origin.distanceTo(profilePoint) < hit.distance)) {
+            index = active; point = profilePoint;
+          }
+        }
+      }
+      if (index === undefined || !point || !physics.grab(index, point)) {
+        // A gesture that starts on empty scenery explores the timeline. A
+        // gesture that starts on a block keeps throwing in every direction.
+        if (pinnedViewport.matches && event.pointerType !== 'mouse') {
+          gestureId = event.pointerId; lastGestureY = event.clientY;
+          renderer.domElement.setPointerCapture(event.pointerId);
+        }
+        return;
+      }
       pointerId = event.pointerId; draggedIndex = index; downX = event.clientX; downY = event.clientY; travelled = 0;
-      lastDragPoint.copy(hit.point); throwVelocity.set(0, 0, 0); lastDragTime = performance.now();
-      camera.getWorldDirection(forward); dragPlane.setFromNormalAndCoplanarPoint(forward, hit.point);
+      lastDragPoint.copy(point); throwVelocity.set(0, 0, 0); lastDragTime = performance.now();
+      camera.getWorldDirection(forward); dragPlane.setFromNormalAndCoplanarPoint(forward, point);
       renderer.domElement.setPointerCapture(pointerId); host.dataset.dragging = 'true';
-      lastInteraction = performance.now(); wake();
+      matricesDirty = true; lastInteraction = performance.now(); wake();
     }
     function pointerMove(event: PointerEvent) {
       if (event.pointerId === gestureId) {
-        const dx = event.clientX - gestureX, dy = event.clientY - gestureY;
-        if (!gestureAxis && Math.hypot(dx, dy) >= 6) gestureAxis = Math.abs(dy) >= Math.abs(dx) ? 'y' : 'x';
-        if (gestureAxis === 'y') {
-          releasePointer();
-          seek(target + (lastGestureY - event.clientY) / range);
-          lastGestureY = event.clientY;
-          return;
-        }
+        seek(target + (lastGestureY - event.clientY) / range);
+        lastGestureY = event.clientY;
+        return;
       }
       if (event.pointerId !== pointerId) return;
       travelled = Math.max(travelled, Math.hypot(event.clientX - downX, event.clientY - downY));
@@ -415,10 +433,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       lastInteraction = performance.now(); wake();
     }
     function pointerUp(event: PointerEvent) {
-      // Releasing a grabbed block during a swipe also emits lostpointercapture.
-      // Keep the vertical gesture alive until the finger actually lifts.
-      if (event.pointerId === gestureId && event.type !== 'lostpointercapture') {
-        gestureId = -1; gestureAxis = null;
+      if (event.pointerId === gestureId) {
+        gestureId = -1;
         if (renderer.domElement.hasPointerCapture(event.pointerId)) renderer.domElement.releasePointerCapture(event.pointerId);
       }
       if (event.pointerId !== pointerId) return;
@@ -429,7 +445,6 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     }
     function seek(next: number) {
       if (disposed) return;
-      releasePointer();
       if (pinnedViewport.matches) target = clamp01(next);
       else window.scrollTo({ top: start + clamp01(next) * range, behavior: 'instant' });
       lastInteraction = performance.now(); wake();
@@ -437,12 +452,11 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     function wheel(event: WheelEvent) {
       if (!pinnedViewport.matches || event.ctrlKey || (event.target as HTMLElement).closest('select')) return;
       event.preventDefault();
-      if (host.dataset.interaction === 'play') return;
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? height : 1;
       seek(target + event.deltaY * unit / range);
     }
     function keydown(event: KeyboardEvent) {
-      if (!pinnedViewport.matches || host.dataset.interaction === 'play' || section.closest('[inert]')
+      if (!pinnedViewport.matches || section.closest('[inert]')
         || event.altKey || event.ctrlKey || event.metaKey) return;
       const control = event.target as HTMLElement;
       if (control.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')

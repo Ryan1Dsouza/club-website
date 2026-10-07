@@ -3,7 +3,8 @@ import {
   ArrowUpRight,
   CalendarDays,
   Image,
-  Plus,
+  Newspaper,
+  Trophy,
   ShieldCheck,
   UsersRound,
 } from 'lucide-react'
@@ -20,8 +21,8 @@ export function DashboardPage() {
       <div className="page-heading">
         <div>
           <span className="eyebrow">DASHBOARD</span>
-          <h1>Admin Control Room</h1>
-          <p>Manage your club website data.</p>
+          <h1>Dashboard</h1>
+          <p>Manage team profiles, events, news, and achievements.</p>
         </div>
         <span className="date-chip">
           {new Intl.DateTimeFormat('en', {
@@ -31,17 +32,6 @@ export function DashboardPage() {
           }).format(today)}
         </span>
       </div>
-      <section className="welcome-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h2>Welcome back.</h2>
-          <p>
-            Manage your team members and events here.
-          </p>
-        </div>
-        <Link to="/team?new=1" className="button primary">
-          <Plus size={16} /> Add a team member
-        </Link>
-      </section>
       <div className="stats-grid dashboard-stats">
         <Link to="/team" className="stat-card">
           <span className="stat-icon">
@@ -80,8 +70,7 @@ export function DashboardPage() {
         <section className="panel">
           <div className="panel-heading">
             <div>
-              <h2>Recent connections</h2>
-              <p>The latest people added to your team.</p>
+              <h2>Team Directory</h2>
             </div>
             <Link className="text-button" to="/team">
               View all <ArrowUpRight size={15} />
@@ -120,8 +109,7 @@ export function DashboardPage() {
           ) : (
             <div className="empty-state compact-empty">
               <UsersRound size={27} />
-              <h3>Your people belong here.</h3>
-              <p>Start your directory with the first team member.</p>
+              <h3>No members</h3>
               <Link to="/team?new=1" className="text-button">
                 Add a member <ArrowRight size={15} />
               </Link>
@@ -131,30 +119,37 @@ export function DashboardPage() {
         <section className="panel quick-actions">
           <div className="panel-heading">
             <div>
-              <h2>A place for everything</h2>
-              <p>Small updates. Meaningful connections.</p>
+              <h2>Management</h2>
             </div>
           </div>
           <Link to="/team">
             <UsersRound size={20} />
             <div>
-              <strong>Curate your team</strong>
-              <p>Names, roles, and the faces behind them.</p>
+              <strong>Team Profiles</strong>
             </div>
             <ArrowUpRight size={17} />
           </Link>
           <Link to="/events">
             <CalendarDays size={20} />
             <div>
-              <strong>Collect your moments</strong>
-              <p>Event management is the next chapter.</p>
+              <strong>Club Events</strong>
             </div>
             <ArrowUpRight size={17} />
           </Link>
-          <div className="quick-note">
-            <ShieldCheck size={16} />
-            <span>A private workspace for your club’s administrators.</span>
-          </div>
+          <Link to="/news">
+            <Newspaper size={20} />
+            <div>
+              <strong>Live News</strong>
+            </div>
+            <ArrowUpRight size={17} />
+          </Link>
+          <Link to="/achievements">
+            <Trophy size={20} />
+            <div>
+              <strong>Achievements</strong>
+            </div>
+            <ArrowUpRight size={17} />
+          </Link>
         </section>
       </div>
     </>

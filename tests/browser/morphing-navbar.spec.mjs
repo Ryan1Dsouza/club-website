@@ -147,7 +147,7 @@ test('keyboard focus stays in the full-screen menu and Escape restores the page'
     await page.keyboard.press('Tab');
     await expect(menu(page).getByRole('link', { name: title, exact: true })).toBeFocused();
   }
-  for (const title of ['Instagram', 'LinkedIn', 'GitHub', 'Email']) {
+  for (const title of ['Instagram', 'LinkedIn', 'Email']) {
     await page.keyboard.press('Tab');
     await expect(menu(page).getByRole('link', { name: title, exact: true })).toBeFocused();
   }
@@ -184,7 +184,7 @@ test('routes, social destinations, reduced motion, and the community action rema
   await toggle(page).click();
   await expect(menu(page).getByRole('link', { name: 'Instagram', exact: true })).toHaveAttribute('href', site.settings.instagramUrl);
   await expect(menu(page).getByRole('link', { name: 'LinkedIn', exact: true })).toHaveAttribute('href', site.settings.linkedinUrl);
-  await expect(menu(page).getByRole('link', { name: 'GitHub', exact: true })).toHaveAttribute('href', site.settings.githubUrl);
+  await expect(menu(page).getByRole('link', { name: 'GitHub', exact: true })).toHaveCount(0);
   await page.locator('.morph-nav__join').click();
   await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
   await expect(page.locator('dialog.modal')).toBeVisible();

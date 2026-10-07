@@ -4,6 +4,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, CalendarDays, MapPin, Scan, X } from 
 import type { ClubEvent, EventPhoto } from '../../types';
 import { bookSpreads } from '../../events/photo-order';
 import { eventImageAttributes, preloadEventPhotos } from '../../events/event-images';
+import { restoreOriginalImage } from '../../lib/responsive-images';
 import { BOOK_SCROLL_STEP, useBookScroll } from '../../events/use-book-scroll';
 import { WORKSHOP_STATIONS, workshopStory } from '../../events/stations';
 import { eventDate } from './EventFlipCard';
@@ -102,7 +103,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
       // Reuse the tiny preview when available; uploaded photos share their cached source.
       const backdrop = isMobile ? { '--book-photo-backdrop': image.style?.backgroundImage ?? `url(${JSON.stringify(item.url)})` } as CSSProperties : undefined;
       return <figure className={!isMobile && index === 0 ? 'station-book__cover-art' : 'station-book__panel'} style={backdrop}>
-        {duplicate ? <img key={item.url} {...image} src={item.url} alt="" decoding="async" draggable={false} /> : <a href={item.url} target="_blank" rel="noreferrer" aria-label={`Open ${name} photograph ${index + 1}`}><img key={item.url} {...image} src={item.url} alt={`${name} — photograph ${index + 1}`} fetchPriority="high" decoding="async" draggable={false} /></a>}
+        {duplicate ? <img key={item.url} {...image} src={item.url} alt="" decoding="async" draggable={false} onError={event => { restoreOriginalImage(event.currentTarget); }} /> : <a href={item.url} target="_blank" rel="noreferrer" aria-label={`Open ${name} photograph ${index + 1}`}><img key={item.url} {...image} src={item.url} alt={`${name} — photograph ${index + 1}`} fetchPriority="high" decoding="async" draggable={false} onError={event => { restoreOriginalImage(event.currentTarget); }} /></a>}
       </figure>;
     };
     const item = (index: number, duplicate = false) => index === 0 ? story(duplicate) : photo(index - 1, duplicate);

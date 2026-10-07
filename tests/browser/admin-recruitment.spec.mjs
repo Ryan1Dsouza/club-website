@@ -80,7 +80,7 @@ test('closed recruitment, unavailable backend, and closure during submission are
   await page.getByRole('button', { name: 'Try again' }).click();
   await fillApplication(page); settings({ recruitmentOpen: false });
   await page.getByRole('button', { name: 'Send application' }).click();
-  await expect(page.getByText('Recruitment is currently closed', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Registrations are closed.' })).toBeVisible();
   expect(db.prepare('SELECT COUNT(*) n FROM applications').get().n).toBe(0);
 });
 

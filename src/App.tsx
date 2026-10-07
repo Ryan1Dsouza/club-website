@@ -8,7 +8,6 @@ import PageBoundary from './components/shared/PageBoundary';
 import LoadingScreen from './components/shared/LoadingScreen';
 import { LOADER_MINIMUM_MS, LOADER_MAXIMUM_MS } from './components/shared/loading-frames';
 import { api } from './api';
-import { supabase } from './lib/supabase';
 import RecruitmentApplication from './components/recruitment/RecruitmentApplication';
 import type { SiteData, SiteSettings } from './types';
 import seed from '../shared/public-data.json';
@@ -29,7 +28,7 @@ const domains = [
 ] as const;
 
 function ApplyForm({ settings, onClose }: { settings: SiteSettings; onClose: () => void }) {
-  return <Modal title="Your next connection starts here." onClose={onClose}><RecruitmentApplication initialSettings={settings} /></Modal>;
+  return <Modal title="Recruitment" onClose={onClose}><RecruitmentApplication initialSettings={settings} /></Modal>;
 }
 
 function SiteFooter({ settings }: { settings: SiteSettings }) {
@@ -79,9 +78,12 @@ export default function App({ initialData = seed, serverRendered = false }: { in
     const deadline = window.setTimeout(dismiss, LOADER_MAXIMUM_MS);
     const refresh = () => Promise.all([
       api<SiteData>('/site', { signal: abort.signal }).catch(() => initialData),
-      supabase.from('team_members').select('id, name, role, photo_url, created_at').order('created_at', { ascending: true }),
-      supabase.from('events').select('*, event_photos (id, name, photo_url, position)').order('starts_at', { ascending: true })
-    ]).then(([site, { data: teamData, error: teamError }, { data: eventData, error: eventError }]) => {
+      import('./lib/supabase').then(({ supabase }) => Promise.all([
+        supabase.from('team_members').select('id, name, role, photo_url, created_at').order('created_at', { ascending: true }),
+        supabase.from('events').select('*, event_photos (id, name, photo_url, position)').order('starts_at', { ascending: true }),
+        supabase.from('site_settings').select('recruitment_open').eq('id', 1).single(),
+      ])),
+    ]).then(([site, [{ data: teamData, error: teamError }, { data: eventData, error: eventError }, { data: settingsData, error: settingsError }]]) => {
       if (teamError) console.error('Failed to load team from Supabase', teamError);
       if (eventError) console.error('Failed to load events from Supabase', eventError);
       
@@ -111,7 +113,12 @@ export default function App({ initialData = seed, serverRendered = false }: { in
         }))
       }));
 
-      if (!disposed) { setData({ ...site, team, events: events.length > 0 ? events : site.events }); }
+      const finalSettings = { ...site.settings };
+      if (settingsData && !settingsError) {
+        finalSettings.recruitmentOpen = settingsData.recruitment_open;
+      }
+
+      if (!disposed) { setData({ ...site, settings: finalSettings, team, events: events.length > 0 ? events : site.events }); }
     }).catch(() => { /* Recruitment verifies availability before accepting input. */ });
     const firstRequest = refresh();
     // Fonts and decorative frames load independently. SSR already has usable data.
@@ -159,16 +166,17 @@ export default function App({ initialData = seed, serverRendered = false }: { in
     { title: 'Our work', href: '/projects' },
     { title: 'Achievements', href: '/achievements' },
     { title: 'The people', href: '/team' },
+    { title: 'Recruitment', href: '/recruitment' },
   ];
 
 
 
   return <>
     <LoadingScreen active={loadingStage === 'idle' || loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
-    <div className={`site-shell${['/', '/team'].includes(pagePath) ? ' site-shell--home' : pagePath === '/projects' ? ' site-shell--work' : pagePath === '/achievements' ? ' site-shell--achievements' : ['/news', '/live-news'].includes(pagePath) ? ' site-shell--news' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
-    {['/', '/achievements', '/news', '/live-news'].includes(pagePath) && <BackgroundRippleEffect className="background-ripple-effect--page" />}
+    <div className={`site-shell${['/', '/team', '/recruitment'].includes(pagePath) ? ' site-shell--home' : pagePath === '/projects' ? ' site-shell--work' : pagePath === '/achievements' ? ' site-shell--achievements' : ['/news', '/live-news'].includes(pagePath) ? ' site-shell--news' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
+    {['/', '/achievements', '/news', '/live-news', '/recruitment'].includes(pagePath) && <BackgroundRippleEffect className="background-ripple-effect--page" />}
     <a href="#main-content" className="skip-link">Skip to content</a>
-    <header className={`site-header${pagePath === '/events' ? ' site-header--events' : ['/', '/team'].includes(pagePath) ? ' site-header--home' : ''}`}>
+    <header className={`site-header${pagePath === '/events' ? ' site-header--events' : ['/', '/team', '/recruitment'].includes(pagePath) ? ' site-header--home' : ''}`}>
       <MorphingNavbar items={navItems} settings={settings} open={menuOpen} onOpenChange={setMenuOpen} onApply={() => setApplyOpen(true)} />
     </header>
     <main id="main-content" tabIndex={-1} inert={menuOpen}>

@@ -52,7 +52,7 @@ export function EventsPage() {
   const filtered = useMemo(() => {
     const query = search.trim().toLocaleLowerCase()
     return events.filter((e) =>
-      `${e.title} ${e.category} ${e.location}`.toLocaleLowerCase().includes(query)
+      `${e.title} ${e.category} ${e.location}`.toLocaleLowerCase().includes(query),
     )
   }, [events, search])
 
@@ -80,11 +80,8 @@ export function EventsPage() {
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">THE MOMENTS THAT MATTER</span>
-          <h1>
-            Event <em>stories.</em>
-          </h1>
-          <p>A home for every gathering, workshop, and new beginning.</p>
+          <h1>Events</h1>
+          <p>Manage events, schedules, and photos on the website.</p>
         </div>
         <button className="button primary" onClick={() => setEditor({ event: null })}>
           <Plus size={17} /> Add event
@@ -107,7 +104,7 @@ export function EventsPage() {
           </span>
           <div>
             <span>Published</span>
-            <strong>{loading || error ? '—' : events.filter(e => e.published).length}</strong>
+            <strong>{loading || error ? '—' : events.filter((e) => e.published).length}</strong>
           </div>
         </div>
       </div>
@@ -133,7 +130,6 @@ export function EventsPage() {
               All events{' '}
               <span className="count-badge">{loading || error ? '—' : events.length}</span>
             </h2>
-            <p>Memories worth keeping.</p>
           </div>
           <button
             className="icon-button"
@@ -199,19 +195,17 @@ export function EventsPage() {
             <span className="large-icon">
               <CalendarDays size={28} />
             </span>
-            <h3>{events.length ? 'No events found.' : 'Your first event awaits.'}</h3>
+            <h3>{events.length ? 'No events found.' : 'No events yet.'}</h3>
             <p>
               {events.length
                 ? 'Try another search term.'
-                : 'Create an event to start collecting memories.'}
+                : 'Add an event with its schedule and details.'}
             </p>
             <button
               className="button secondary"
-              onClick={() =>
-                events.length ? setSearch('') : setEditor({ event: null })
-              }
+              onClick={() => (events.length ? setSearch('') : setEditor({ event: null }))}
             >
-              {events.length ? 'Clear filters' : 'Plan your first event'}
+              {events.length ? 'Clear filters' : 'Add event'}
               <Plus size={15} />
             </button>
           </div>
@@ -220,12 +214,16 @@ export function EventsPage() {
             <table>
               <thead>
                 <tr>
-                  <th scope="col" className="index-cell">#</th>
+                  <th scope="col" className="index-cell">
+                    #
+                  </th>
                   <th scope="col">EVENT</th>
                   <th scope="col">CATEGORY</th>
                   <th scope="col">DATE</th>
                   <th scope="col">STATUS</th>
-                  <th scope="col" className="actions-cell">ACTIONS</th>
+                  <th scope="col" className="actions-cell">
+                    ACTIONS
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -361,11 +359,7 @@ export function EventsPage() {
               >
                 Keep event
               </button>
-              <button
-                className="button danger"
-                disabled={deleting}
-                onClick={() => void remove()}
-              >
+              <button className="button danger" disabled={deleting} onClick={() => void remove()}>
                 <Trash2 size={16} />
                 {deleting ? 'Deleting…' : 'Delete event'}
               </button>

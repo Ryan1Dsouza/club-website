@@ -242,11 +242,12 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
         // Route CSS is split from the homepage bundle. Include it in SSR too,
         // so direct requests paint correctly before the client module arrives.
         if (manifest) {
-          const styles = new Set(), visited = new Set();
+          const styles = new Set(), scripts = new Set(), visited = new Set();
           const collect = key => {
             if (!key || visited.has(key)) return;
             visited.add(key);
             const chunk = manifest[key];
+            if (chunk?.file) scripts.add(chunk.file);
             chunk?.css?.forEach(file => styles.add(file));
             chunk?.imports?.forEach(collect);
           };
@@ -256,6 +257,7 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
           // chunk name instead of source path; its logical name stays available.
           if (entry) collect(manifest[entry] ? entry : Object.keys(manifest).find(key => manifest[key].name === name && manifest[key].isDynamicEntry));
           html = html.replace('</head>', [...styles].filter(file => !html.includes(`/${file}`)).map(file => `<link rel="stylesheet" href="/${file}">`).join('') + '</head>');
+          html = html.replace('</head>', [...scripts].filter(file => !html.includes(`/${file}`)).map(file => `<link rel="modulepreload" href="/${file}" crossorigin>`).join('') + '</head>');
         }
         const data = getSite(db);
         const safeData = JSON.stringify(data).replace(/</g, '\\u003c');

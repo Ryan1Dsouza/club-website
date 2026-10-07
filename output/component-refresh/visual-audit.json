@@ -1,0 +1,167 @@
+[
+  {
+    "width": 1440,
+    "surface": "recruitment-closed",
+    "violations": []
+  },
+  {
+    "width": 1440,
+    "surface": "navigation",
+    "violations": []
+  },
+  {
+    "width": 1440,
+    "surface": "recruitment-dialog",
+    "violations": []
+  },
+  {
+    "width": 1440,
+    "surface": "achievements",
+    "violations": []
+  },
+  {
+    "width": 1440,
+    "surface": "voices",
+    "violations": []
+  },
+  {
+    "width": 1440,
+    "loadedMemberPhotos": [
+      {
+        "name": "Poorvik Kuthyala",
+        "loaded": true
+      },
+      {
+        "name": "Dinol Castelino",
+        "loaded": true
+      },
+      {
+        "name": "Joylin Mathias",
+        "loaded": true
+      },
+      {
+        "name": "Prajwal Gaonkar",
+        "loaded": true
+      },
+      {
+        "name": "Rakshith Dsouza",
+        "loaded": true
+      },
+      {
+        "name": "Navya Suvarna",
+        "loaded": true
+      }
+    ],
+    "pageErrors": []
+  },
+  {
+    "width": 390,
+    "surface": "recruitment-closed",
+    "violations": []
+  },
+  {
+    "width": 390,
+    "surface": "navigation",
+    "violations": []
+  },
+  {
+    "width": 390,
+    "surface": "recruitment-dialog",
+    "violations": []
+  },
+  {
+    "width": 390,
+    "surface": "achievements",
+    "violations": []
+  },
+  {
+    "width": 390,
+    "surface": "voices",
+    "violations": []
+  },
+  {
+    "width": 390,
+    "loadedMemberPhotos": [
+      {
+        "name": "Poorvik Kuthyala",
+        "loaded": true
+      },
+      {
+        "name": "Dinol Castelino",
+        "loaded": true
+      },
+      {
+        "name": "Joylin Mathias",
+        "loaded": true
+      },
+      {
+        "name": "Prajwal Gaonkar",
+        "loaded": true
+      },
+      {
+        "name": "Rakshith Dsouza",
+        "loaded": true
+      },
+      {
+        "name": "Navya Suvarna",
+        "loaded": true
+      }
+    ],
+    "pageErrors": []
+  },
+  {
+    "width": 320,
+    "surface": "recruitment-closed",
+    "violations": []
+  },
+  {
+    "width": 320,
+    "surface": "navigation",
+    "violations": []
+  },
+  {
+    "width": 320,
+    "surface": "recruitment-dialog",
+    "violations": []
+  },
+  {
+    "width": 320,
+    "surface": "achievements",
+    "violations": []
+  },
+  {
+    "width": 320,
+    "surface": "voices",
+    "violations": []
+  },
+  {
+    "width": 320,
+    "loadedMemberPhotos": [
+      {
+        "name": "Poorvik Kuthyala",
+        "loaded": true
+      },
+      {
+        "name": "Dinol Castelino",
+        "loaded": true
+      },
+      {
+        "name": "Joylin Mathias",
+        "loaded": true
+      },
+      {
+        "name": "Prajwal Gaonkar",
+        "loaded": true
+      },
+      {
+        "name": "Rakshith Dsouza",
+        "loaded": true
+      },
+      {
+        "name": "Navya Suvarna",
+        "loaded": true
+      }
+    ],
+    "pageErrors": []
+  }
+]

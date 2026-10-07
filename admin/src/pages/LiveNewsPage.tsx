@@ -1,17 +1,33 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { useState, useEffect, useCallback, type FormEvent } from 'react'
+import { Plus, Pencil, Trash2, Newspaper, Search, X } from 'lucide-react'
 import { Modal } from '../components/Modal'
-import { listNews, createNews, updateNews, deleteNews, describeError, type LiveNews } from '../lib/news'
+import { ContentDeleteDialog } from '../components/ContentDeleteDialog'
+import {
+  listNews,
+  createNews,
+  updateNews,
+  deleteNews,
+  describeError,
+  type LiveNews,
+} from '../lib/news'
+
+type NewsInput = Omit<LiveNews, 'id' | 'created_at'>
+type NewsEditor = NewsInput & { id?: string }
 
 export function LiveNewsPage() {
   const [news, setNews] = useState<LiveNews[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [editor, setEditor] = useState<Partial<LiveNews> | null>(null)
+  const [query, setQuery] = useState('')
+  const [editor, setEditor] = useState<NewsEditor | null>(null)
+  const [removing, setRemoving] = useState<LiveNews | null>(null)
+  const [actionError, setActionError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState('')
 
   const refresh = useCallback(async () => {
     setLoading(true)
+    setError('')
     try {
       setNews(await listNews())
     } catch (e) {
@@ -21,103 +37,290 @@ export function LiveNewsPage() {
     }
   }, [])
 
-  useEffect(() => { void refresh() }, [refresh])
+  useEffect(() => {
+    void refresh()
+  }, [refresh])
 
-  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+  const openEditor = (item?: LiveNews) => {
+    setActionError('')
+    setEditor(item ?? { title: '', description: '', image_url: '', date: '' })
+  }
+
+  const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!editor) return
+    if (!editor || saving) return
     setSaving(true)
-    setError('')
+    setActionError('')
     try {
-      if (editor.id) {
-        await updateNews(editor.id, editor)
-      } else {
-        await createNews(editor as Omit<LiveNews, 'id' | 'created_at'>)
+      const input: NewsInput = {
+        title: editor.title.trim(),
+        description: editor.description.trim(),
+        date: editor.date?.trim() || null,
+        image_url: editor.image_url?.trim() || null,
       }
+      if (!input.title || !input.description) throw new Error('Enter a title and description.')
+      if (editor.id) await updateNews(editor.id, input)
+      else await createNews(input)
       setEditor(null)
+      setMessage('News saved.')
       void refresh()
     } catch (err) {
-      setError(describeError(err))
+      setActionError(describeError(err))
     } finally {
       setSaving(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this news item?')) return
+  const handleDelete = async () => {
+    if (!removing || saving) return
+    setSaving(true)
+    setActionError('')
     try {
-      await deleteNews(id)
+      await deleteNews(removing.id)
+      setRemoving(null)
+      setMessage('News deleted.')
       void refresh()
     } catch (err) {
-      alert(describeError(err))
+      setActionError(describeError(err))
+    } finally {
+      setSaving(false)
     }
   }
 
+  const search = query.trim().toLowerCase()
+  const filtered = news.filter((item) =>
+    [item.title, item.description, item.date].some((value) =>
+      value?.toLowerCase().includes(search),
+    ),
+  )
+
   return (
-    <div className="card">
-      <div className="card-header">
-        <h2 className="card-title">Live News</h2>
-        <button className="button button-primary" onClick={() => setEditor({ title: '', description: '', image_url: '', date: '' })}>
-          <Plus size={16} /> Add News
+    <div className="content-page">
+      <div className="page-heading">
+        <div>
+          <h1>Live News</h1>
+          <p>Manage news and announcements on the website.</p>
+        </div>
+        <button className="button primary" onClick={() => openEditor()}>
+          <Plus size={17} /> Add news
         </button>
       </div>
 
-      {error && !editor && <div className="notice error">{error}</div>}
+      {message && (
+        <div className="notice success" role="status">
+          <span>{message}</span>
+          <button
+            className="icon-button"
+            aria-label="Dismiss notification"
+            onClick={() => setMessage('')}
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
-      <div className="card-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Date</th>
-              <th className="action-cell">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? <tr><td colSpan={3} className="empty-state">Loading...</td></tr> : 
-             news.length === 0 ? <tr><td colSpan={3} className="empty-state">No news yet.</td></tr> :
-             news.map(item => (
-              <tr key={item.id}>
-                <td><strong>{item.title}</strong></td>
-                <td>{item.date || '-'}</td>
-                <td className="action-cell">
-                  <button className="icon-button" onClick={() => setEditor(item)}><Pencil size={15} /></button>
-                  <button className="icon-button danger" onClick={() => handleDelete(item.id)}><Trash2 size={15} /></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <section
+        className="panel content-panel"
+        aria-labelledby="news-list-title"
+        aria-busy={loading}
+      >
+        <div className="content-toolbar">
+          <h2 id="news-list-title">
+            All news {!loading && !error && <span className="count-badge">{news.length}</span>}
+          </h2>
+          <label className="search-field">
+            <Search size={17} />
+            <input
+              type="search"
+              aria-label="Search news"
+              placeholder="Search news"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </label>
+        </div>
+
+        {loading ? (
+          <div className="empty-state" role="status">
+            <span className="spinner" />
+            Loading news…
+          </div>
+        ) : error ? (
+          <div className="empty-state">
+            <p className="content-error" role="alert">
+              {error}
+            </p>
+            <button className="button secondary" onClick={() => void refresh()}>
+              Try again
+            </button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="empty-state">
+            <span className="large-icon">
+              <Newspaper size={26} />
+            </span>
+            <h3>{news.length ? 'No matching news' : 'No news yet'}</h3>
+            <p>
+              {news.length
+                ? 'Try a different search.'
+                : 'Add a news item to publish an announcement.'}
+            </p>
+            {news.length > 0 && (
+              <button className="button secondary" onClick={() => setQuery('')}>
+                Clear search
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="content-table-scroll" role="region" aria-label="News list" tabIndex={0}>
+              <table className="content-table news-table">
+                <caption className="sr-only">News published on the website</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Display date</th>
+                    <th scope="col" className="content-actions-cell">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((item) => (
+                    <tr key={item.id}>
+                      <td className="content-title-cell">
+                        <strong>{item.title}</strong>
+                        <p>{item.description}</p>
+                      </td>
+                      <td className="content-date-cell">
+                        {item.date || <span className="content-muted">Not set</span>}
+                      </td>
+                      <td className="content-actions-cell">
+                        <div className="content-row-actions">
+                          <button
+                            className="icon-button"
+                            aria-label={'Edit ' + item.title}
+                            title="Edit news"
+                            onClick={() => openEditor(item)}
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            className="icon-button danger-hover"
+                            aria-label={'Delete ' + item.title}
+                            title="Delete news"
+                            onClick={() => {
+                              setActionError('')
+                              setRemoving(item)
+                            }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="content-list-footer">
+              {search
+                ? filtered.length + ' of ' + news.length + ' news items'
+                : news.length + (news.length === 1 ? ' news item' : ' news items')}
+            </div>
+          </>
+        )}
+      </section>
 
       {editor && (
-        <Modal title={editor.id ? 'Edit News' : 'Add News'} onClose={() => setEditor(null)}>
-          <form onSubmit={handleSave} className="form-stack">
-            {error && <div className="notice error">{error}</div>}
-            <div className="form-group">
-              <label>Title</label>
-              <input required type="text" value={editor.title || ''} onChange={e => setEditor({...editor, title: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label>Description</label>
-              <textarea required value={editor.description || ''} onChange={e => setEditor({...editor, description: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label>Date (Optional, e.g. "Oct 7")</label>
-              <input type="text" value={editor.date || ''} onChange={e => setEditor({...editor, date: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label>Image URL (Optional)</label>
-              <input type="text" value={editor.image_url || ''} onChange={e => setEditor({...editor, image_url: e.target.value})} />
-            </div>
+        <Modal
+          title={editor.id ? 'Edit news' : 'Add news'}
+          onClose={() => setEditor(null)}
+          busy={saving}
+        >
+          <form onSubmit={handleSave}>
+            <fieldset className="form-stack" disabled={saving}>
+              <legend className="sr-only">News details</legend>
+              {actionError && (
+                <div className="notice error" role="alert">
+                  {actionError}
+                </div>
+              )}
+              <div className="form-group">
+                <label htmlFor="news-title">Title</label>
+                <input
+                  id="news-title"
+                  name="title"
+                  data-autofocus
+                  required
+                  value={editor.title}
+                  onChange={(e) => setEditor({ ...editor, title: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="news-description">Description</label>
+                <textarea
+                  id="news-description"
+                  name="description"
+                  required
+                  rows={5}
+                  value={editor.description}
+                  onChange={(e) => setEditor({ ...editor, description: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="news-date">
+                  Display date <span>Optional</span>
+                </label>
+                <input
+                  id="news-date"
+                  name="date"
+                  aria-describedby="news-date-help"
+                  value={editor.date || ''}
+                  onChange={(e) => setEditor({ ...editor, date: e.target.value })}
+                />
+                <p className="form-hint" id="news-date-help">
+                  Shown as entered on the website.
+                </p>
+              </div>
+              <div className="form-group">
+                <label htmlFor="news-image">
+                  Image URL <span>Optional</span>
+                </label>
+                <input
+                  id="news-image"
+                  name="image_url"
+                  type="url"
+                  value={editor.image_url || ''}
+                  onChange={(e) => setEditor({ ...editor, image_url: e.target.value })}
+                />
+              </div>
+            </fieldset>
             <div className="form-actions">
-              <button type="button" className="button button-secondary" onClick={() => setEditor(null)}>Cancel</button>
-              <button type="submit" className="button button-primary" disabled={saving}>
-                {saving ? 'Saving...' : 'Save News'}
+              <button
+                type="button"
+                className="button secondary"
+                disabled={saving}
+                onClick={() => setEditor(null)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="button primary" disabled={saving}>
+                {saving ? 'Saving…' : 'Save news'}
               </button>
             </div>
           </form>
         </Modal>
+      )}
+      {removing && (
+        <ContentDeleteDialog
+          title={removing.title}
+          kind="news item"
+          busy={saving}
+          error={actionError}
+          onClose={() => setRemoving(null)}
+          onConfirm={() => void handleDelete()}
+        />
       )}
     </div>
   )

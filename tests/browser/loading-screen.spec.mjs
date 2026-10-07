@@ -41,7 +41,15 @@ test('native desktop playback advances without a JS clock and the opaque curtain
   await page.goto('/recruitment');
   const loader = screen(page);
   await expect(loader).toHaveAttribute('data-frames-ready', 'true');
-  await expect(loader).toHaveCSS('background-color', 'rgb(6, 17, 8)');
+  const pageBackdrop = await page.evaluate(() => {
+    const swatch = document.createElement('div');
+    swatch.style.backgroundColor = 'var(--page-backdrop)';
+    document.body.append(swatch);
+    const color = getComputedStyle(swatch).backgroundColor;
+    swatch.remove();
+    return color;
+  });
+  await expect(loader).toHaveCSS('background-color', pageBackdrop);
   await expect(loader).toHaveCSS('color', 'rgb(155, 207, 162)');
   await expect(loader.getByRole('status')).toHaveText('Connecting the dots…');
   expect(await page.locator('.site-shell').evaluate(element => element.inert)).toBe(true);

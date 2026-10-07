@@ -1,6 +1,7 @@
 import type { EventPhoto } from '../types';
 import manifest from './workshop-images.json';
 import { preloadImage } from '../lib/preload-image';
+import { storageImageAttributes } from '../lib/responsive-images';
 
 type DisplayPhoto = { images: { url: string; width: number }[]; preview: string };
 export type EventImageLayout = 'card' | 'mobile' | 'spread';
@@ -12,6 +13,7 @@ const sizes = {
 
 export function eventImageAttributes(photo: EventPhoto, layout: EventImageLayout) {
   const display = (manifest as Record<string, DisplayPhoto>)[photo.id];
+  if (!display) return { ...storageImageAttributes(photo.url, [320, 640, 960, 1440], sizes[layout]), style: undefined };
   return {
     srcSet: display?.images.map(image => `${image.url} ${image.width}w`).join(', '),
     sizes: display ? sizes[layout] : undefined,

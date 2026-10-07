@@ -77,7 +77,7 @@ test('keyboard details restore focus, menu route works, and reduced motion stays
   await expect(close).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(trigger).toBeFocused();
-  expect(await page.locator('.ach-rosette').evaluate(element => element.getAnimations().length)).toBe(0);
+  await expect(page.locator('.ach-hero svg')).toHaveCount(0);
   await page.getByRole('button', { name: 'Open menu' }).click();
   await expect(page.getByRole('link', { name: 'Achievements', exact: true })).toHaveAttribute('aria-current', 'page');
   await page.getByRole('link', { name: 'Our work', exact: true }).click();

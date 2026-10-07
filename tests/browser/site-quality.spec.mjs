@@ -49,14 +49,14 @@ test('client navigation updates canonical and social metadata, including unknown
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex,nofollow');
 });
 
-test('moving voices have a keyboard pause control', async ({ page }) => {
+test('moving voices pause on keyboard focus without a separate button', async ({ page }) => {
   await page.route('**/api/site', route => route.fulfill({ json: site }));
   await page.goto('/');
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done');
-  const button = page.getByRole('button', { name: 'Pause moving voices' });
-  await button.scrollIntoViewIfNeeded();
-  await button.focus();
-  await page.keyboard.press('Space');
-  await expect(button).toHaveAttribute('aria-pressed', 'true');
-  for (const row of await page.locator('.vm-marquee-content').all()) await expect(row).toHaveCSS('animation-play-state', 'paused');
+  await expect(page.getByRole('button', { name: 'Pause moving voices' })).toHaveCount(0);
+  for (const row of await page.locator('.vm-marquee-wrapper').all()) {
+    await row.scrollIntoViewIfNeeded();
+    await row.focus();
+    for (const content of await row.locator('.vm-marquee-content').all()) await expect(content).toHaveCSS('animation-play-state', 'paused');
+  }
 });

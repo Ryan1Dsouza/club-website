@@ -1,8 +1,7 @@
 .ach-page { color: var(--mint); background: transparent; min-height: calc(100svh - var(--header-height)); }
 .ach-wrap { width: min(1440px, 100%); margin-inline: auto; padding: 26px var(--gutter) 0; }
-.ach-hero { display: grid; grid-template-columns: minmax(0, 1fr) clamp(92px, 17vw, 235px); align-items: center; gap: 24px; padding-block: 12px 30px; }
+.ach-hero { padding-block: 12px 30px; }
 .ach-hero h1 { font-size: clamp(40px, 6.7vw, 96px); line-height: 1.05; letter-spacing: -.065em; font-weight: 500; }
-.ach-rosette { width: 100%; height: auto; transform: rotate(11deg); }
 .ach-archive { padding-block: 24px 56px; border-top: 1px solid var(--line-strong); scroll-margin-top: calc(var(--header-height) + 20px); }
 .ach-results-note, .ach-record__topline { font: 10px/1.6 var(--mono); letter-spacing: .075em; }
 .ach-tools { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 18px 30px; border-bottom: 1px solid var(--line-strong); padding-bottom: 18px; }
@@ -64,9 +63,7 @@
 .ach-detail__records p { margin-top: 14px; font-size: 13px; line-height: 1.8; color: var(--muted); }
 .ach-detail__link { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 44px; margin-top: 16px; font-size: 12px; }
 @media (prefers-reduced-motion: no-preference) {
-  .ach-rosette { animation: ach-rosette-arrive .7s var(--ease-settle) both; }
   .ach-record, .ach-record__arrow, .ach-portrait, .ach-portrait > img { transition: transform .35s var(--ease-settle), background .25s, border-color .25s, filter .35s; }
-  @keyframes ach-rosette-arrive { from { opacity: 0; transform: translateY(12px) rotate(0deg); } to { opacity: 1; transform: translateY(0) rotate(11deg); } }
 }
 @media (hover: hover) and (pointer: fine) {
   .ach-record:hover, .ach-record:focus-within { border-color: var(--mint); }
@@ -126,6 +123,6 @@
   .ach-record:hover .ach-portrait, .ach-record:focus-within .ach-portrait, .ach-record__open:hover .ach-record__arrow { transform: none; }
 }
 @media (max-width: 600px) {
-  .ach-hero { grid-template-columns: minmax(0, 1fr) 66px; gap: 12px; padding-block: 25px 30px; }
+  .ach-hero { padding-block: 25px 30px; }
   .ach-hero h1 { font-size: clamp(28px, 8.8vw, 49px); }
 }

@@ -43,7 +43,6 @@ export function Modal({
     >
       <header className="modal-heading">
         <div>
-          <span className="eyebrow">THE PEOPLE / NUCLEUS</span>
           <h2 id="dialog-title">{title}</h2>
           {subtitle && <p id="dialog-subtitle">{subtitle}</p>}
         </div>

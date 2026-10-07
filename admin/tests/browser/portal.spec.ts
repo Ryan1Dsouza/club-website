@@ -1,4 +1,4 @@
-﻿import { expect, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { adminId, imageBytes, mockSupabase } from './supabase-mock'
 
@@ -27,12 +27,12 @@ test('login errors, password visibility, successful login, signout and back navi
   await expect(page.getByRole('alert')).toContainText('Unable to sign in')
   await page.getByLabel('Password', { exact: true }).fill('test-password')
   await page.getByRole('button', { name: 'Sign in' }).click()
-  await expect(page.getByRole('heading', { name: 'Team members.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Team Members', exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Sign out', exact: true }).click()
   await expect(page).toHaveURL(/\/login$/)
   expect(await page.evaluate(() => localStorage.getItem('sb-portal-test-auth-token'))).toBeNull()
   await page.goBack()
-  await expect(page.getByRole('heading', { name: 'Team members.' })).not.toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Team Members', exact: true })).not.toBeVisible()
 })
 
 test('authenticated non-admin and forged stored session cannot open the directory', async ({
@@ -65,7 +65,7 @@ test('directory filters, pagination, accessible desktop layout and dashboard', a
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   await page.screenshot({ path: 'test-results/team-desktop.png', fullPage: true })
   await page.getByRole('link', { name: 'Dashboard', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'The control room.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible()
   await page.screenshot({ path: 'test-results/dashboard-desktop.png', fullPage: true })
 })
 
@@ -142,7 +142,7 @@ test('rejects invalid and oversized images without sending them to storage', asy
     mimeType: 'image/svg+xml',
     buffer: Buffer.from('<svg/>'),
   })
-  await expect(page.getByRole('alert')).toContainText('Choose a JPG, PNG, or WebP')
+  await expect(page.getByRole('alert')).toContainText('Choose a JPG, PNG, WebP, or AVIF image.')
   await input.setInputFiles({
     name: 'too-large.png',
     mimeType: 'image/png',
@@ -216,7 +216,7 @@ test('mobile login, sidebar, directory, and editor fit the viewport', async ({ p
   await page.getByRole('button', { name: 'Sign in' }).click()
   await page.getByRole('button', { name: 'Open navigation' }).click()
   await page.getByRole('link', { name: 'Team Members', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Team members.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Team Members', exact: true })).toBeVisible()
   await expect(page.getByText('Alex D’Souza', { exact: true })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])

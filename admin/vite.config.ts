@@ -6,4 +6,7 @@ export default defineConfig({
   plugins: [react()],
   // Keep this standalone app independent of the main site's PostCSS/Tailwind config.
   css: { postcss: { plugins: [] } },
+  server: {
+    port: 3001,
+  },
 })

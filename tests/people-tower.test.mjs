@@ -285,6 +285,55 @@ test('revisiting a flung member after the next reveal preserves the original fli
   } finally { physics.dispose(); }
 });
 
+test('reverse seeks preserve manual positions and only rebuilding clears them', () => {
+  for (const detail of [0, 1, 2]) {
+    const physics = createTowerPhysics(fixtureSlots(), detail);
+    try {
+      physics.pull(0); simulate(physics, 4);
+      const body = physics.bodies[0], position = body.interpolatedPosition.clone(), rotation = body.interpolatedQuaternion.clone();
+      assert.ok(position.distanceTo(new Vec3(...fixtureSlots()[0].position)) > 2);
+      physics.beginStory(0);
+      physics.placeStory(new Vec3(5, 3, 8), new Quaternion(), new Vec3(5, 3, .16), false);
+      physics.remove(0); physics.beginStory(1);
+      physics.returnBody(1); physics.returnBody(0);
+      assert.deepEqual(body.position.toArray(), position.toArray());
+      assert.deepEqual(body.quaternion.toArray(), rotation.toArray());
+      assert.equal(body.type, Body.DYNAMIC);
+      assert.equal(body.world, physics.world);
+      assert.equal(physics.isFlying(0), false);
+      assert.equal(physics.isManual(0), true);
+      physics.reset();
+      assert.equal(physics.isManual(0), false);
+      assert.deepEqual(body.position.toArray(), [...fixtureSlots()[0].position]);
+    } finally { physics.dispose(); }
+  }
+});
+
+test('grabbing an unfolding or returning piece takes over its visible pose and survives scroll changes', () => {
+  const physics = createTowerPhysics(fixtureSlots());
+  try {
+    physics.beginStory(0);
+    physics.placeStory(new Vec3(4, 3, 7), new Quaternion(), new Vec3(5, 3, .16), false);
+    const body = physics.bodies[0], position = body.interpolatedPosition.clone();
+    assert.ok(physics.grab(0, position));
+    assert.equal(physics.isStory(0), false);
+    assert.equal(body.type, Body.DYNAMIC);
+    assert.equal(body.mass, .36);
+    assert.deepEqual(body.shapes[0].halfExtents.toArray(), BLOCK_SIZE.map(value => value / 2));
+    physics.beginStory(0); physics.remove(0); physics.returnBody(0); physics.beginStory(1);
+    assert.equal(physics.world.constraints.length, 1, 'scrolling cannot cancel an active grab');
+    assert.deepEqual(body.position.toArray(), position.toArray());
+    physics.release({ x: 7, y: 2, z: 0 }); simulate(physics, .2);
+    assert.ok(body.position.distanceTo(position) > .5);
+    physics.reset(); physics.remove(14); physics.returnBody(14); physics.step(.1);
+    const returning = physics.bodies[14], visible = returning.interpolatedPosition.clone();
+    assert.ok(physics.grab(14, visible));
+    assert.deepEqual(returning.position.toArray(), visible.toArray());
+    assert.equal(physics.isFlying(14), false);
+    assert.equal(returning.type, Body.DYNAMIC);
+  } finally { physics.dispose(); }
+});
+
 test('a reveal can take over an unfinished rebuild without its old animation moving the source', () => {
   const physics = createTowerPhysics(fixtureSlots());
   try {

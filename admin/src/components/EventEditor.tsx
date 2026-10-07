@@ -98,8 +98,8 @@ export function EventEditor({
 
   return (
     <Modal
-      title={event ? 'Edit event details' : 'Plan a new event.'}
-      subtitle={event ? 'Update scheduling and descriptions.' : 'Get everything ready for the big day.'}
+      title={event ? 'Edit event details' : 'Add event'}
+      subtitle={event ? 'Update scheduling and descriptions.' : 'Set the schedule and event details.'}
       onClose={onClose}
       busy={saving}
     >
@@ -114,7 +114,6 @@ export function EventEditor({
                 data-autofocus
                 required
                 maxLength={120}
-                placeholder="e.g. Beyond the baseline"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 disabled={saving}
@@ -127,7 +126,6 @@ export function EventEditor({
                 required
                 rows={4}
                 maxLength={1600}
-                placeholder="Event details..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={saving}

@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+﻿import { lazy } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { RequireAuth } from './auth/RequireAuth'
@@ -6,18 +6,13 @@ import { AdminLayout } from './components/AdminLayout'
 import { LoginPage } from './pages/LoginPage'
 import './App.css'
 
-const DashboardPage = lazy(async () => ({
-  default: (await import('./pages/DashboardPage')).DashboardPage,
-}))
-const TeamMembersPage = lazy(async () => ({
-  default: (await import('./pages/TeamMembersPage')).TeamMembersPage,
-}))
+const DashboardPage = lazy(async () => ({ default: (await import('./pages/DashboardPage')).DashboardPage }))
+const TeamMembersPage = lazy(async () => ({ default: (await import('./pages/TeamMembersPage')).TeamMembersPage }))
 const EventsPage = lazy(async () => ({ default: (await import('./pages/EventsPage')).EventsPage }))
 const LiveNewsPage = lazy(async () => ({ default: (await import('./pages/LiveNewsPage')).LiveNewsPage }))
 const AchievementsPage = lazy(async () => ({ default: (await import('./pages/AchievementsPage')).AchievementsPage }))
-const SettingsPage = lazy(async () => ({
-  default: (await import('./pages/SettingsPage')).SettingsPage,
-}))
+const RecruitmentPage = lazy(async () => ({ default: (await import('./pages/RecruitmentPage')).RecruitmentPage }))
+const SettingsPage = lazy(async () => ({ default: (await import('./pages/SettingsPage')).SettingsPage }))
 
 export default function App() {
   return (
@@ -32,6 +27,7 @@ export default function App() {
               <Route path="events" element={<EventsPage />} />
               <Route path="news" element={<LiveNewsPage />} />
               <Route path="achievements" element={<AchievementsPage />} />
+              <Route path="recruitment" element={<RecruitmentPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

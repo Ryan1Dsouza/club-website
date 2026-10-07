@@ -2,76 +2,106 @@
   "/team_images/core/Poorvik.avif": {
     "small": "/team_images/banner/Poorvik-480.webp",
     "large": "/team_images/banner/Poorvik-800.webp",
-    "preview": "data:image/webp;base64,UklGRl4BAABXRUJQVlA4IFIBAACQBwCdASoeACgAPwFqrk+rJaQiKqwBYCAJagDDczOTowgXzcMsSrVgK4c7z9hPEoMQaZfeHUv5GpFHH2ZNMXZTBIoz1gAA/uYoYn+VmFJ0tQXQ/CN9x5ar/3R/w0+XQlOGygF5Aud3/R9LvrG7B00SM5YoymX+nIFDAg+bAn3zIbfBQDiUaaX3lBrpXmvADbHAn1ZiFs6F4YEiPTFpVkbcuYSNRsFgAA+19fuJRUnqlQh2cMa1pkJNz9q4s5w5uI4QOa5Tyoc6WhK2whYh/WM4a5p3o/p5OnYOUn8vhfYomSENG6GvfAYlRn80BoaBwUhMV3fG6a+ZuLTaejaDlwlliclc+i2Fy4qphjYETlj4hMz7tVG7YtPS3YMrP+WL/fejyr3vhl7mKSWbSMHJcMm1D7wZuRwLHMQ2MW/DNMRqINBcoLjd68CGnqVo/A1nuXoAAA=="
+    "preview": "data:image/webp;base64,UklGRl4BAABXRUJQVlA4IFIBAACQBwCdASoeACgAPwFqrk+rJaQiKqwBYCAJagDDczOTowgXzcMsSrVgK4c7z9hPEoMQaZfeHUv5GpFHH2ZNMXZTBIoz1gAA/uYoYn+VmFJ0tQXQ/CN9x5ar/3R/w0+XQlOGygF5Aud3/R9LvrG7B00SM5YoymX+nIFDAg+bAn3zIbfBQDiUaaX3lBrpXmvADbHAn1ZiFs6F4YEiPTFpVkbcuYSNRsFgAA+19fuJRUnqlQh2cMa1pkJNz9q4s5w5uI4QOa5Tyoc6WhK2whYh/WM4a5p3o/p5OnYOUn8vhfYomSENG6GvfAYlRn80BoaBwUhMV3fG6a+ZuLTaejaDlwlliclc+i2Fy4qphjYETlj4hMz7tVG7YtPS3YMrP+WL/fejyr3vhl7mKSWbSMHJcMm1D7wZuRwLHMQ2MW/DNMRqINBcoLjd68CGnqVo/A1nuXoAAA==",
+    "avatar": "/team_images/thumbnails/Poorvik-144.webp",
+    "thumbnail": "/team_images/thumbnails/Poorvik-320.webp"
   },
   "/team_images/core/Dinol.avif": {
     "small": "/team_images/banner/Dinol-480.webp",
     "large": "/team_images/banner/Dinol-800.webp",
-    "preview": "data:image/webp;base64,UklGRnYBAABXRUJQVlA4IGoBAABwCACdASoeACgAPu1kp06ppaOiNUgBMB2JQBjfXgastpua6g6eC6tUYbmthuN1GJBtpXcVyaWuMD32SToFTBSij8rHq++DrOU53geAAP6Bm3/1Igf5eXmgSAEVw2wkTHqGcIXnsmTI79e3UxPb3uj0fhOefDmSKf8HGE4dSZRCx/JroHMDNwviD/3RsqtfywYiISeIlEpmra1iWxV7H7PzNkcfZO/DI3E9FoiJV7sSDJ9AzRdtFCBi4lfjSh7aZAtNm/R2ldIoul+ljo4P1vNqbJ8BUCal84TkEzGIcUL2CV7cwBMCWtXhpZNcLtgx7Ttd9QfkZLrIaF9xkgS7BJMOlk7dKWrwtpPlmpeCw2rTZRPF1RLKpx1/MkxO66EyFjtuQ4FLo9oKW3E8JVWQ3dwD6h7r1Uk4wOUHHtbiMXAt+VdFOJcHFDy1bT9YLE+fKX4ofTiIOCbyL1PsUepXxrkwVSg/NgPYCbAAAA=="
+    "preview": "data:image/webp;base64,UklGRnYBAABXRUJQVlA4IGoBAABwCACdASoeACgAPu1kp06ppaOiNUgBMB2JQBjfXgastpua6g6eC6tUYbmthuN1GJBtpXcVyaWuMD32SToFTBSij8rHq++DrOU53geAAP6Bm3/1Igf5eXmgSAEVw2wkTHqGcIXnsmTI79e3UxPb3uj0fhOefDmSKf8HGE4dSZRCx/JroHMDNwviD/3RsqtfywYiISeIlEpmra1iWxV7H7PzNkcfZO/DI3E9FoiJV7sSDJ9AzRdtFCBi4lfjSh7aZAtNm/R2ldIoul+ljo4P1vNqbJ8BUCal84TkEzGIcUL2CV7cwBMCWtXhpZNcLtgx7Ttd9QfkZLrIaF9xkgS7BJMOlk7dKWrwtpPlmpeCw2rTZRPF1RLKpx1/MkxO66EyFjtuQ4FLo9oKW3E8JVWQ3dwD6h7r1Uk4wOUHHtbiMXAt+VdFOJcHFDy1bT9YLE+fKX4ofTiIOCbyL1PsUepXxrkwVSg/NgPYCbAAAA==",
+    "avatar": "/team_images/thumbnails/Dinol-144.webp",
+    "thumbnail": "/team_images/thumbnails/Dinol-320.webp"
   },
   "/team_images/core/Joylin.avif": {
     "small": "/team_images/banner/Joylin-480.webp",
     "large": "/team_images/banner/Joylin-800.webp",
-    "preview": "data:image/webp;base64,UklGRowBAABXRUJQVlA4IIABAACQCACdASodACgAPwFqq08rJiOiMBqqqWAgCUAX7XAlKZmfViOniZ61grKRh5YvjuEXK0rtnHA+uAeIU+1tN1oflqDzHKWJTSRu4KE7gAD+u2THjtkbMnJ5pSEQPrrDwrJK/HRDkCKn2Gyn7a3SPhbVvncboO853p3Yl0IbYPRcQit41855ml80q9OxL4ZYrMegmNLYLe4xhdrQHo1d0ztFG/ISy+X3AIEJU62v4DbSZVQbRXBzTKmoaK9JBVlac6HSSP7TV3Z2bY2+x0jwPJPU2WqvFHgnZr3IuYNtb60MyP3i4emUalgWDVtb8kT2veTUXMRdXr0Qnfclkw7jr9TynBZjMXiULQPh5ULzdfiLSq/2qzSzo/hWVhKtpTKIpSLzFPOSGLyfG2G5eNzHlkzGIm4rRsQkl/nNy5yFr6XQKq5450SGnc4BulmkDNDx2F3EvrAAzFc4spVlvzTdCxQ9bn0eBDsinmKidtr69y7jDQdM0+ltFGiFIwhFj/esAAA="
+    "preview": "data:image/webp;base64,UklGRowBAABXRUJQVlA4IIABAACQCACdASodACgAPwFqq08rJiOiMBqqqWAgCUAX7XAlKZmfViOniZ61grKRh5YvjuEXK0rtnHA+uAeIU+1tN1oflqDzHKWJTSRu4KE7gAD+u2THjtkbMnJ5pSEQPrrDwrJK/HRDkCKn2Gyn7a3SPhbVvncboO853p3Yl0IbYPRcQit41855ml80q9OxL4ZYrMegmNLYLe4xhdrQHo1d0ztFG/ISy+X3AIEJU62v4DbSZVQbRXBzTKmoaK9JBVlac6HSSP7TV3Z2bY2+x0jwPJPU2WqvFHgnZr3IuYNtb60MyP3i4emUalgWDVtb8kT2veTUXMRdXr0Qnfclkw7jr9TynBZjMXiULQPh5ULzdfiLSq/2qzSzo/hWVhKtpTKIpSLzFPOSGLyfG2G5eNzHlkzGIm4rRsQkl/nNy5yFr6XQKq5450SGnc4BulmkDNDx2F3EvrAAzFc4spVlvzTdCxQ9bn0eBDsinmKidtr69y7jDQdM0+ltFGiFIwhFj/esAAA=",
+    "avatar": "/team_images/thumbnails/Joylin-144.webp",
+    "thumbnail": "/team_images/thumbnails/Joylin-320.webp"
   },
   "/team_images/core/Nishanth1.avif": {
     "small": "/team_images/banner/Nishanth1-480.webp",
     "large": "/team_images/banner/Nishanth1-800.webp",
-    "preview": "data:image/webp;base64,UklGRpwBAABXRUJQVlA4IJABAADQCACdASoeACgAPwFssFArJaSisBVaqWAgCUAWI/ZR/0WL9+mLFi9bJxcTnbTK/pNBWHc4GT0tLc7Xo7jmIvSrqcI27JbqYiChbVuY2n1AAP7OjqGULIOBM7sDpv81dr/T4urDsQfvNId4gp8980XDgx+LjfteTF2aBiFqOIYCqog3A1pcW3IOKnw+t6spxTLu2ByYjIP2ZWiRunghvRZHaADyGRvRM7ja+zn7SWlqc+oXHEKOxMNrho/NGOrN1EozmidSkFK8e4jtBLCuSCr1oU1hlrGqIUwKlafauP7SHmXEadzR2aqWyih0BpO/zJIu0UfplWjwf0vhP+ce8f3CUubqOAk+E8NzHRgAF6d56PIwM+4I1IGqoyrxTEy4XmnZMj7VU9LrbOjtJjaSuIWnmXmCxq6uKHTduESt99JVUqoKgf4SLrw6S5kBAqJMYBy/RWtIV/BuZCL+hcsRP+R3pS7dV94yzWg2Y9WM/C85RD2GH8dIGOlBiyR0nl69AIARl1HFADaSITQwjxEsSAAA"
+    "preview": "data:image/webp;base64,UklGRpwBAABXRUJQVlA4IJABAADQCACdASoeACgAPwFssFArJaSisBVaqWAgCUAWI/ZR/0WL9+mLFi9bJxcTnbTK/pNBWHc4GT0tLc7Xo7jmIvSrqcI27JbqYiChbVuY2n1AAP7OjqGULIOBM7sDpv81dr/T4urDsQfvNId4gp8980XDgx+LjfteTF2aBiFqOIYCqog3A1pcW3IOKnw+t6spxTLu2ByYjIP2ZWiRunghvRZHaADyGRvRM7ja+zn7SWlqc+oXHEKOxMNrho/NGOrN1EozmidSkFK8e4jtBLCuSCr1oU1hlrGqIUwKlafauP7SHmXEadzR2aqWyih0BpO/zJIu0UfplWjwf0vhP+ce8f3CUubqOAk+E8NzHRgAF6d56PIwM+4I1IGqoyrxTEy4XmnZMj7VU9LrbOjtJjaSuIWnmXmCxq6uKHTduESt99JVUqoKgf4SLrw6S5kBAqJMYBy/RWtIV/BuZCL+hcsRP+R3pS7dV94yzWg2Y9WM/C85RD2GH8dIGOlBiyR0nl69AIARl1HFADaSITQwjxEsSAAA",
+    "avatar": "/team_images/thumbnails/Nishanth1-144.webp",
+    "thumbnail": "/team_images/thumbnails/Nishanth1-320.webp"
   },
   "/team_images/core/Karthik.avif": {
     "small": "/team_images/banner/Karthik-480.webp",
     "large": "/team_images/banner/Karthik-800.webp",
-    "preview": "data:image/webp;base64,UklGRpABAABXRUJQVlA4IIQBAABQCACdASodACgAPwFqrE8rJaQiNVQIAWAgCWQAnTK+aRzOvlGymnAhLNcizBMVsoeR091iiUyHjz5E0sQlswWMznZ4i+OZZnYk4aAA9ih2oegkr5/L7OL3cBfGPyTkR89II4Y/ef6H5kFKR7PgI3I4eaaeoKEBQxv6N/yYH+sCwJr094MAfrFVKLAcQ7xbS6e9iPk53XNtp4YuPjEqDr/XjzrMrIUnWjb4rZKc7dlDtM/PKdNznWDKonQK0CiwOWVUB/7IyIOMntfgU+sRqGTy8G9b0Mcd0W3grCtDoYuX+nqYjdgvk7k5gwSfs5iDXg3H51B4sbH/7dp3RXar+QZszQCFNvb72ZXeA0XVtIYvKOVmgZK4pfrd3bN3DbSY543N59fs3tDhYOzQygoBxeI0ffTFIj2DusYoISlvpyi4UEbk7yLtzA3vllp6liJPK08PWu2k4PpnIKk9foWkHv3dc98UWrbi+hkAw64woF3rMf5M99qBvocRtz34J+Qv2QnfAAAA"
+    "preview": "data:image/webp;base64,UklGRpABAABXRUJQVlA4IIQBAABQCACdASodACgAPwFqrE8rJaQiNVQIAWAgCWQAnTK+aRzOvlGymnAhLNcizBMVsoeR091iiUyHjz5E0sQlswWMznZ4i+OZZnYk4aAA9ih2oegkr5/L7OL3cBfGPyTkR89II4Y/ef6H5kFKR7PgI3I4eaaeoKEBQxv6N/yYH+sCwJr094MAfrFVKLAcQ7xbS6e9iPk53XNtp4YuPjEqDr/XjzrMrIUnWjb4rZKc7dlDtM/PKdNznWDKonQK0CiwOWVUB/7IyIOMntfgU+sRqGTy8G9b0Mcd0W3grCtDoYuX+nqYjdgvk7k5gwSfs5iDXg3H51B4sbH/7dp3RXar+QZszQCFNvb72ZXeA0XVtIYvKOVmgZK4pfrd3bN3DbSY543N59fs3tDhYOzQygoBxeI0ffTFIj2DusYoISlvpyi4UEbk7yLtzA3vllp6liJPK08PWu2k4PpnIKk9foWkHv3dc98UWrbi+hkAw64woF3rMf5M99qBvocRtz34J+Qv2QnfAAAA",
+    "avatar": "/team_images/thumbnails/Karthik-144.webp",
+    "thumbnail": "/team_images/thumbnails/Karthik-320.webp"
   },
   "/team_images/core/Prajwal.avif": {
     "small": "/team_images/banner/Prajwal-480.webp",
     "large": "/team_images/banner/Prajwal-800.webp",
-    "preview": "data:image/webp;base64,UklGRmoBAABXRUJQVlA4IF4BAADQBwCdASoaACgAPwFwrlErJiQiqqoBYCAJQBf23mT8O4XpX2kQ+2w31LJ6x8Fy2l+O9qcZbg8OKWHw0CzbbjBkuK2bTZtAAAD+QJbp8unr3VfR1PdUQFQeO+PXtmsGNQwBON41KCx6J8A5vWlpHhuNT2+xP3VsxMUiCnB9NmmnabBU94JpUhVznk21AiFqfLCb33ASFpDhYA3FMYkIfNS/0GgLUPPkzSg/65sL5D1IrifN+PE2CpDKd7Ylte+a2hC61wtfoatIAFv/sVfvvUudWbf9K8Kb0FV1yfofpFD8MWXEr+pdtlUct5Yx0fN1NLXw8ed+NyfRyleojXeFVY58o4Byk8FIr/OsRQZXeKxc7fyOIk78yLtnXy2PcVVPfgu8NTcJxobe8ilu3sxaVDwn+spZx3k8o4FLMREtVWNUcAgwWBV8/s+oQ3x1lGPdkMMCsRXXVrDtoPNEEVwAAA=="
+    "preview": "data:image/webp;base64,UklGRmoBAABXRUJQVlA4IF4BAADQBwCdASoaACgAPwFwrlErJiQiqqoBYCAJQBf23mT8O4XpX2kQ+2w31LJ6x8Fy2l+O9qcZbg8OKWHw0CzbbjBkuK2bTZtAAAD+QJbp8unr3VfR1PdUQFQeO+PXtmsGNQwBON41KCx6J8A5vWlpHhuNT2+xP3VsxMUiCnB9NmmnabBU94JpUhVznk21AiFqfLCb33ASFpDhYA3FMYkIfNS/0GgLUPPkzSg/65sL5D1IrifN+PE2CpDKd7Ylte+a2hC61wtfoatIAFv/sVfvvUudWbf9K8Kb0FV1yfofpFD8MWXEr+pdtlUct5Yx0fN1NLXw8ed+NyfRyleojXeFVY58o4Byk8FIr/OsRQZXeKxc7fyOIk78yLtnXy2PcVVPfgu8NTcJxobe8ilu3sxaVDwn+spZx3k8o4FLMREtVWNUcAgwWBV8/s+oQ3x1lGPdkMMCsRXXVrDtoPNEEVwAAA==",
+    "avatar": "/team_images/thumbnails/Prajwal-144.webp",
+    "thumbnail": "/team_images/thumbnails/Prajwal-320.webp"
   },
   "/team_images/core/Mohit.avif": {
     "small": "/team_images/banner/Mohit-480.webp",
     "large": "/team_images/banner/Mohit-800.webp",
-    "preview": "data:image/webp;base64,UklGRnwBAABXRUJQVlA4IHABAAAwCACdASoeACgAPvFoqE6ppiOiNVv4ATAeCWIAvk7zNZ2QuvjjFRJRBDO7K11yJOzC6CmgZ7/D//UQB8ljp/i7iYevwn6VjBUqIAD9I5wAziLdzqu1yGzY78LuhtiPXGV9EV6PRvVCJctaz2rKKBW2naVfp6GxTqmmfp7xQJ0tjXtoQd21PdHqjG8QMTCL3KwgMJqe/yqGz5TQPumm5Fq84IGRUmTG6KWXav/KGnnoRaHIIZF99qCyROTQtTfHrWXLeWa99Bsro5CUfp6xOGvfHe+ManH8rmqZUuf7tkbSeIsl4ma7WLDp80k0t3CptMLcOMRz6GcpqIesDgIdkImEogNrId0p7Pu5OYkiAb86N1xq0yPOv3zSy38/TSRTUZNPxrY+0NbwvJG7SsOH0vl5mItVj1swsTjhIedRm3qLZ/iPhDSX683OCXOqr8btE/0l7v8CmzR/Uckwtz9TKeO6md1vS/1v0NytY4fJjgAAAA=="
+    "preview": "data:image/webp;base64,UklGRnwBAABXRUJQVlA4IHABAAAwCACdASoeACgAPvFoqE6ppiOiNVv4ATAeCWIAvk7zNZ2QuvjjFRJRBDO7K11yJOzC6CmgZ7/D//UQB8ljp/i7iYevwn6VjBUqIAD9I5wAziLdzqu1yGzY78LuhtiPXGV9EV6PRvVCJctaz2rKKBW2naVfp6GxTqmmfp7xQJ0tjXtoQd21PdHqjG8QMTCL3KwgMJqe/yqGz5TQPumm5Fq84IGRUmTG6KWXav/KGnnoRaHIIZF99qCyROTQtTfHrWXLeWa99Bsro5CUfp6xOGvfHe+ManH8rmqZUuf7tkbSeIsl4ma7WLDp80k0t3CptMLcOMRz6GcpqIesDgIdkImEogNrId0p7Pu5OYkiAb86N1xq0yPOv3zSy38/TSRTUZNPxrY+0NbwvJG7SsOH0vl5mItVj1swsTjhIedRm3qLZ/iPhDSX683OCXOqr8btE/0l7v8CmzR/Uckwtz9TKeO6md1vS/1v0NytY4fJjgAAAA==",
+    "avatar": "/team_images/thumbnails/Mohit-144.webp",
+    "thumbnail": "/team_images/thumbnails/Mohit-320.webp"
   },
   "/team_images/core/Rakshith.avif": {
     "small": "/team_images/banner/Rakshith-480.webp",
     "large": "/team_images/banner/Rakshith-800.webp",
-    "preview": "data:image/webp;base64,UklGRqoBAABXRUJQVlA4IJ4BAACwCACdASobACgAPwFsrlArJaQisBVaqWAgCWIAp0eUKUzO8pqcp506QGliaPGnDJLJWlYUmgnB6jCMu6ZCH42V0qmUCDmpPH3RnS1PPgAA/tsj8ow5FDoFMAg+X3qg4iam649C7F0aQKwa7PTG0B+vKuR+tsce6rtWCbKSKbTISfh6+f3ufykt1Swrja0hCLgaOWdonzyp0eF4VCm/4LH/oFDbPl5fQiTpUY30lQBelYDhgvH80cBrFqNdxEryLwYqKnWfFCDm7N9FCCp8GDwNaNvxwlX1hnLhUcUf+330niVhXu6XU2x9nrgS0CcyMiIuQBm5H80qq+nMRdEakaSt17kuxAYvnkcv1DSS+3ZAkeDs4ptoqVA5MYUsnx1+LFlmgc5EYNlRBROD8pDwfPmbIC/CGG7TCG9IRoEJQxYabws1srp5lzwX+d2lXmol9x9f7P6wvQddvTkt3mCRLhRJoCrYc0xJzqvpqvY59vLnlmnzO+caR+KwjYxi0X2KHul6rW74mwe6EXeV2HKwYAz0NbVTzo19rufIF1AAAAA="
+    "preview": "data:image/webp;base64,UklGRqoBAABXRUJQVlA4IJ4BAACwCACdASobACgAPwFsrlArJaQisBVaqWAgCWIAp0eUKUzO8pqcp506QGliaPGnDJLJWlYUmgnB6jCMu6ZCH42V0qmUCDmpPH3RnS1PPgAA/tsj8ow5FDoFMAg+X3qg4iam649C7F0aQKwa7PTG0B+vKuR+tsce6rtWCbKSKbTISfh6+f3ufykt1Swrja0hCLgaOWdonzyp0eF4VCm/4LH/oFDbPl5fQiTpUY30lQBelYDhgvH80cBrFqNdxEryLwYqKnWfFCDm7N9FCCp8GDwNaNvxwlX1hnLhUcUf+330niVhXu6XU2x9nrgS0CcyMiIuQBm5H80qq+nMRdEakaSt17kuxAYvnkcv1DSS+3ZAkeDs4ptoqVA5MYUsnx1+LFlmgc5EYNlRBROD8pDwfPmbIC/CGG7TCG9IRoEJQxYabws1srp5lzwX+d2lXmol9x9f7P6wvQddvTkt3mCRLhRJoCrYc0xJzqvpqvY59vLnlmnzO+caR+KwjYxi0X2KHul6rW74mwe6EXeV2HKwYAz0NbVTzo19rufIF1AAAAA=",
+    "avatar": "/team_images/thumbnails/Rakshith-144.webp",
+    "thumbnail": "/team_images/thumbnails/Rakshith-320.webp"
   },
   "/team_images/core/Navya.avif": {
     "small": "/team_images/banner/Navya-480.webp",
     "large": "/team_images/banner/Navya-800.webp",
-    "preview": "data:image/webp;base64,UklGRqIBAABXRUJQVlA4IJYBAAAwCQCdASobACgAPwFwq1GrJiOiqqoBYCAJZgDE81HtttmrN14zq4VfNZZe/MuvHrSgWlk1n2tHeg5gq20+pGLzHjZrjs6YwSFxYTS8SvvrgBEAAP2YSS+PGLQ0Ly5ZFACiJzlj2ovRWI3lOR/xUr/CO6VOjOfOnP2h1S8tPaDP22AZNBUAjTpHHzPCyslp4WCjj0+nhZ5XtbFZHMGO/Jksj2GRReyQYSR/Zrb+u3uu+IUWEkjqsEaBi4te/pVg6t70rr0KGGXpXOlPFtVf0gr6uyo2leEpRZNc4ZQCUZy5uTK6M9BEYUBeIoXkdYvscK+5BQ1SZCh/gGzdekbLumQ/XXZSibaePSmjw5RVlVvBxlB99xKNlcYy/qeQZbVUmqkf47azsTVWP29A2UqR2XXZOXWNOCvCO5nFvi88kY1ZZJfJz/MoldwVTGg4l5Pjdm603QqgJjLO91nLeLBn0zaUlobWJ4uSz0ceAPe2x34LI61RK4zVa3iTSzijFz0MsX9oms/pOu7vb+ZLqLg37XlwYU2uAAAA"
+    "preview": "data:image/webp;base64,UklGRqIBAABXRUJQVlA4IJYBAAAwCQCdASobACgAPwFwq1GrJiOiqqoBYCAJZgDE81HtttmrN14zq4VfNZZe/MuvHrSgWlk1n2tHeg5gq20+pGLzHjZrjs6YwSFxYTS8SvvrgBEAAP2YSS+PGLQ0Ly5ZFACiJzlj2ovRWI3lOR/xUr/CO6VOjOfOnP2h1S8tPaDP22AZNBUAjTpHHzPCyslp4WCjj0+nhZ5XtbFZHMGO/Jksj2GRReyQYSR/Zrb+u3uu+IUWEkjqsEaBi4te/pVg6t70rr0KGGXpXOlPFtVf0gr6uyo2leEpRZNc4ZQCUZy5uTK6M9BEYUBeIoXkdYvscK+5BQ1SZCh/gGzdekbLumQ/XXZSibaePSmjw5RVlVvBxlB99xKNlcYy/qeQZbVUmqkf47azsTVWP29A2UqR2XXZOXWNOCvCO5nFvi88kY1ZZJfJz/MoldwVTGg4l5Pjdm603QqgJjLO91nLeLBn0zaUlobWJ4uSz0ceAPe2x34LI61RK4zVa3iTSzijFz0MsX9oms/pOu7vb+ZLqLg37XlwYU2uAAAA",
+    "avatar": "/team_images/thumbnails/Navya-144.webp",
+    "thumbnail": "/team_images/thumbnails/Navya-320.webp"
   },
   "/team_images/core/Deona.avif": {
     "small": "/team_images/banner/Deona-480.webp",
     "large": "/team_images/banner/Deona-800.webp",
-    "preview": "data:image/webp;base64,UklGRmgBAABXRUJQVlA4IFwBAABQBwCdASodACgAPwFurk+rJqQiKqwBYCAJbAC2+5QHKmAR7wcR6ENee4GQ8A/IIlzAIP20rwQTB98PftOCyOjGcK4AAP6s8lSJV3vNzTeWyZNqT+uNlEIFm1m/ygvK5cKHf2FH2RswJ5xY+oMfTutq2JAiM3ozVkS8dHrlcmGJyptiLDnk65zBCvg64v1iDYNHip5fKlpRCcUSt7j7i2lKCzcJtvMG3F9owTSs+c6lqYadVIfqmyvHYCdOB7trRwsGPgb11gjvlvvWuSADB1V49nCpVzZLctHdI6XLZ03wHNAUXwBvFD3BYJ6DqaRbU+EfPkz0brEmSaYfJc/JLrlVTLwr6HXIgmVtWsPKgAak8hEwfFyX4ZjslD/mdDmLLpGBx3uCxWILx8kHWyXoYz9YPdxrR2UGRLeyCSrldjVHzYPJQa0VUIsUjL6KmGIHiiwS7BAZZEMoe5Z+gAA="
+    "preview": "data:image/webp;base64,UklGRmgBAABXRUJQVlA4IFwBAABQBwCdASodACgAPwFurk+rJqQiKqwBYCAJbAC2+5QHKmAR7wcR6ENee4GQ8A/IIlzAIP20rwQTB98PftOCyOjGcK4AAP6s8lSJV3vNzTeWyZNqT+uNlEIFm1m/ygvK5cKHf2FH2RswJ5xY+oMfTutq2JAiM3ozVkS8dHrlcmGJyptiLDnk65zBCvg64v1iDYNHip5fKlpRCcUSt7j7i2lKCzcJtvMG3F9owTSs+c6lqYadVIfqmyvHYCdOB7trRwsGPgb11gjvlvvWuSADB1V49nCpVzZLctHdI6XLZ03wHNAUXwBvFD3BYJ6DqaRbU+EfPkz0brEmSaYfJc/JLrlVTLwr6HXIgmVtWsPKgAak8hEwfFyX4ZjslD/mdDmLLpGBx3uCxWILx8kHWyXoYz9YPdxrR2UGRLeyCSrldjVHzYPJQa0VUIsUjL6KmGIHiiwS7BAZZEMoe5Z+gAA=",
+    "avatar": "/team_images/thumbnails/Deona-144.webp",
+    "thumbnail": "/team_images/thumbnails/Deona-320.webp"
   },
   "/team_images/core/Sweeden.avif": {
     "small": "/team_images/banner/Sweeden-480.webp",
     "large": "/team_images/banner/Sweeden-800.webp",
-    "preview": "data:image/webp;base64,UklGRmIBAABXRUJQVlA4IFYBAADwBgCdASoaACgAPwF2sVIrJySiqqgBYCAJQBibO7QxjniqyM/3B/HFdWgcsmTG/m3Ed7xYOJT3e1sgx1fFN0FwAPXZ0SSforbeYDMop+1gw+xVNLJaHX4qxQ3qnucHrIRTfuuliNRR30vvxCZ61AWiqKK0RXXsZ42B0jLiCnvYA42a9UfiIwwOR47wSV5GRZZ+caDp1HVCgfPRROj9RGlDh6n3Bv5bL6JA/bZJsGln+8wm9AcrWaPN0reOpPYvAUdtDlI0EsmdjpGQQMFU6pN9yBsj5cd0nLytm0oKwKsc4+ges/D4thcIAmylffM5Ka99G49iqg92k7LoprAYR9B+usVCTwweC88uEXOkCfI2ojuVEPwnDc3Vp8vGnbch85YfT8uKa+FzuZD2foQWGWAHAI4mLtzxGqSptlfiGOpe2Tz1pdtex/r/qabBNDhH7QDe4zWJAAA="
+    "preview": "data:image/webp;base64,UklGRmIBAABXRUJQVlA4IFYBAADwBgCdASoaACgAPwF2sVIrJySiqqgBYCAJQBibO7QxjniqyM/3B/HFdWgcsmTG/m3Ed7xYOJT3e1sgx1fFN0FwAPXZ0SSforbeYDMop+1gw+xVNLJaHX4qxQ3qnucHrIRTfuuliNRR30vvxCZ61AWiqKK0RXXsZ42B0jLiCnvYA42a9UfiIwwOR47wSV5GRZZ+caDp1HVCgfPRROj9RGlDh6n3Bv5bL6JA/bZJsGln+8wm9AcrWaPN0reOpPYvAUdtDlI0EsmdjpGQQMFU6pN9yBsj5cd0nLytm0oKwKsc4+ges/D4thcIAmylffM5Ka99G49iqg92k7LoprAYR9B+usVCTwweC88uEXOkCfI2ojuVEPwnDc3Vp8vGnbch85YfT8uKa+FzuZD2foQWGWAHAI4mLtzxGqSptlfiGOpe2Tz1pdtex/r/qabBNDhH7QDe4zWJAAA=",
+    "avatar": "/team_images/thumbnails/Sweeden-144.webp",
+    "thumbnail": "/team_images/thumbnails/Sweeden-320.webp"
   },
   "/team_images/core/Manvitha.avif": {
     "small": "/team_images/banner/Manvitha-480.webp",
     "large": "/team_images/banner/Manvitha-800.webp",
-    "preview": "data:image/webp;base64,UklGRpYBAABXRUJQVlA4IIoBAACQBwCdASogACgAPu1gpU6ppaOiNUgBMB2JagDDOvA1d7Va3weQRY893q+tKxUxC4DfDOJm7xwEff+RiL8lJGZ5X3JgSAAA/jR6aeFVMmGgL2VudB5Y9WfBsEIvXkc9jSTzmBpjUobp9rkzLoUMTiPsw+wdWJDC69GKVmQJH7qx6XDvR/uqU9FNFGYAqV1+lhk8uOb7mzuTX0qMlR3wjfC+c85Wq3MbCg1D+2EkRbvXhWU4Pbp4lk8D9p1WP4Vps/83BFhinRi9yT4BXlWNIipw3rO0vM0n0p/PSfPYPBzJ1EbZ9QFeoHeJdhl6cbRXWodaLY8JBsosfQh25dfOW8XsNuI/AjddjrVrI5m7Y5jiQ/oZxMzHfwZhPz5+awgEY7uPcBOJccxyNaAzEMDJtdDb2BCrdEtuvxBQz1rULHkoF4iAaayYH4odqXcALKGsjZ5tQ0HOHTZ/6a72lCH84yT2rtY8/lizFEKEotJk8fqNbLgMkQNTUtW/7hP1d3POJUPPyYO+OK/ku4AA"
+    "preview": "data:image/webp;base64,UklGRpYBAABXRUJQVlA4IIoBAACQBwCdASogACgAPu1gpU6ppaOiNUgBMB2JagDDOvA1d7Va3weQRY893q+tKxUxC4DfDOJm7xwEff+RiL8lJGZ5X3JgSAAA/jR6aeFVMmGgL2VudB5Y9WfBsEIvXkc9jSTzmBpjUobp9rkzLoUMTiPsw+wdWJDC69GKVmQJH7qx6XDvR/uqU9FNFGYAqV1+lhk8uOb7mzuTX0qMlR3wjfC+c85Wq3MbCg1D+2EkRbvXhWU4Pbp4lk8D9p1WP4Vps/83BFhinRi9yT4BXlWNIipw3rO0vM0n0p/PSfPYPBzJ1EbZ9QFeoHeJdhl6cbRXWodaLY8JBsosfQh25dfOW8XsNuI/AjddjrVrI5m7Y5jiQ/oZxMzHfwZhPz5+awgEY7uPcBOJccxyNaAzEMDJtdDb2BCrdEtuvxBQz1rULHkoF4iAaayYH4odqXcALKGsjZ5tQ0HOHTZ/6a72lCH84yT2rtY8/lizFEKEotJk8fqNbLgMkQNTUtW/7hP1d3POJUPPyYO+OK/ku4AA",
+    "avatar": "/team_images/thumbnails/Manvitha-144.webp",
+    "thumbnail": "/team_images/thumbnails/Manvitha-320.webp"
   },
   "/team_images/core/Salim.avif": {
     "small": "/team_images/banner/Salim-480.webp",
     "large": "/team_images/banner/Salim-800.webp",
-    "preview": "data:image/webp;base64,UklGRm4BAABXRUJQVlA4IGIBAADwBwCdASocACgAPwFwrk+rJqQiKqwBYCAJYwDE3atlQFx8r58GizSh4agx/+kLjTqdol0x72XCBQkxqDEHC82XtvrcrQOmOgAA/hk5cgOIDau+oCS2Q1hJxWgjhuCx64euPt8PsfTVQ0Goms3SiSSZ+AYy0o+H9mi2+UlMbJakDstrvpD2pvBnFZZLKiA9m5B4yKyjhAN1TIGppY+qN7+wVum4I2HUFGVRTJVkMsLRAPY9Rb2K6GAjD74wthdEB8Pwrr/3jydKsU8pDpXLhbXiQ90aHPlCpmdVPCgirkkVd8Z1MvlkhBjV1J9BEEvrG+4ohkuBpP0MUQRTE6aB0qmWY+0kSLQzKbbl01GtMFJ4a5ll8ocuevyWj6ePlCWhcnduSUCwE5Yk6UmAET51khEBnF+GyD2ZUy40u2yS793ObJh2KeUQ6W0kbLR3P3oaIl1OtSH6vj+DVEG2ywc5JGgAAAA="
+    "preview": "data:image/webp;base64,UklGRm4BAABXRUJQVlA4IGIBAADwBwCdASocACgAPwFwrk+rJqQiKqwBYCAJYwDE3atlQFx8r58GizSh4agx/+kLjTqdol0x72XCBQkxqDEHC82XtvrcrQOmOgAA/hk5cgOIDau+oCS2Q1hJxWgjhuCx64euPt8PsfTVQ0Goms3SiSSZ+AYy0o+H9mi2+UlMbJakDstrvpD2pvBnFZZLKiA9m5B4yKyjhAN1TIGppY+qN7+wVum4I2HUFGVRTJVkMsLRAPY9Rb2K6GAjD74wthdEB8Pwrr/3jydKsU8pDpXLhbXiQ90aHPlCpmdVPCgirkkVd8Z1MvlkhBjV1J9BEEvrG+4ohkuBpP0MUQRTE6aB0qmWY+0kSLQzKbbl01GtMFJ4a5ll8ocuevyWj6ePlCWhcnduSUCwE5Yk6UmAET51khEBnF+GyD2ZUy40u2yS793ObJh2KeUQ6W0kbLR3P3oaIl1OtSH6vj+DVEG2ywc5JGgAAAA=",
+    "avatar": "/team_images/thumbnails/Salim-144.webp",
+    "thumbnail": "/team_images/thumbnails/Salim-320.webp"
   },
   "/team_images/core/Nikhitha.avif": {
     "small": "/team_images/banner/Nikhitha-480.webp",
     "large": "/team_images/banner/Nikhitha-800.webp",
-    "preview": "data:image/webp;base64,UklGRpoBAABXRUJQVlA4II4BAACQCACdASocACgAPwFutFIrJiUiqrgKAWAgCWwAuw1wByULAZTR10Yxm/J1dZAQNsHJ7+SSeDJlbHFgEsRzGs+wZbWc/5x3h8gCPaM6UAD+3PLv/2BzKmXbNDWWeax3/10UyZQTVwLN7tIVV+ejDgYjJFzgK5FNcvrLb4rnFPPK/yidqe+E9i07ox62OkGlE6t8R+3eix+7AhTj37VYQ4FecpmZHPzu0dQOyxNVNPUXyF7+FXPxxTk+A1ApfNthM34kTc0AhCppPme6r4kmlSVwigqR8t0lsbRJC5HJfQJ2fHa33XEzNfm7Dd8GNXUcuvwF+YOeqlI0Q/DR2sArO+Qe+C7Memu5LXkYJQsv1VqypyizzAZKohsaBL10lBhYBTOrvcyElKOZZjsE54K8gIuH3q/QSn+AHDe8VLFdzbzP4bRXT2PTUOWGDFmNP6I5uPteh8PVxYF/5K4/WR/j/keQvvHjYggA5vJIQsh6IwThKkjf2h1H7ue+ejjR86AL+/rl/f3Nr397N9VFjtngAA=="
+    "preview": "data:image/webp;base64,UklGRpoBAABXRUJQVlA4II4BAACQCACdASocACgAPwFutFIrJiUiqrgKAWAgCWwAuw1wByULAZTR10Yxm/J1dZAQNsHJ7+SSeDJlbHFgEsRzGs+wZbWc/5x3h8gCPaM6UAD+3PLv/2BzKmXbNDWWeax3/10UyZQTVwLN7tIVV+ejDgYjJFzgK5FNcvrLb4rnFPPK/yidqe+E9i07ox62OkGlE6t8R+3eix+7AhTj37VYQ4FecpmZHPzu0dQOyxNVNPUXyF7+FXPxxTk+A1ApfNthM34kTc0AhCppPme6r4kmlSVwigqR8t0lsbRJC5HJfQJ2fHa33XEzNfm7Dd8GNXUcuvwF+YOeqlI0Q/DR2sArO+Qe+C7Memu5LXkYJQsv1VqypyizzAZKohsaBL10lBhYBTOrvcyElKOZZjsE54K8gIuH3q/QSn+AHDe8VLFdzbzP4bRXT2PTUOWGDFmNP6I5uPteh8PVxYF/5K4/WR/j/keQvvHjYggA5vJIQsh6IwThKkjf2h1H7ue+ejjR86AL+/rl/f3Nr397N9VFjtngAA==",
+    "avatar": "/team_images/thumbnails/Nikhitha-144.webp",
+    "thumbnail": "/team_images/thumbnails/Nikhitha-320.webp"
   },
   "/team_images/core/Saniya.avif": {
     "small": "/team_images/banner/Saniya-480.webp",
     "large": "/team_images/banner/Saniya-800.webp",
-    "preview": "data:image/webp;base64,UklGRk4BAABXRUJQVlA4IEIBAABwBwCdASogACgAPvVkqE6qpaOiNVv4AVAeiUAYyN5GuMHTlkhFHBYHJKfoEUn7VpBdG1FhHrcUXsFjlbj2zlVYFzglIADgHBY7VLf8ONBElvzcqQP1GAjrLZZY5U/hSmhH0j3ojjgaGcwTvekWjyRX0K8KGgETeqpHlqqDawS3GygiIn0NZSimLpJyFDIlSAN1J2nkdVHLpADwnD+ntlh69XNhmtvxpShIoODcXZj2iUsjaVjUbuCj6VolrZ0ehVoAR0Mz3QaYQ5hY8yd3g8GyRwyJMbyv81ywUFbWlKnHieetZSj0+AY4+Z1bD0JM4FzaMKhebWgQn1LKriDERPMo9ky4xLveg7ky2cHHAJDgca4eVv4tU5x1S2Kb3TlId+spZWDwURkUOt34K7oZ4o5tbsPX31l87MFiYkwXKcFw0oAA"
+    "preview": "data:image/webp;base64,UklGRk4BAABXRUJQVlA4IEIBAABwBwCdASogACgAPvVkqE6qpaOiNVv4AVAeiUAYyN5GuMHTlkhFHBYHJKfoEUn7VpBdG1FhHrcUXsFjlbj2zlVYFzglIADgHBY7VLf8ONBElvzcqQP1GAjrLZZY5U/hSmhH0j3ojjgaGcwTvekWjyRX0K8KGgETeqpHlqqDawS3GygiIn0NZSimLpJyFDIlSAN1J2nkdVHLpADwnD+ntlh69XNhmtvxpShIoODcXZj2iUsjaVjUbuCj6VolrZ0ehVoAR0Mz3QaYQ5hY8yd3g8GyRwyJMbyv81ywUFbWlKnHieetZSj0+AY4+Z1bD0JM4FzaMKhebWgQn1LKriDERPMo9ky4xLveg7ky2cHHAJDgca4eVv4tU5x1S2Kb3TlId+spZWDwURkUOt34K7oZ4o5tbsPX31l87MFiYkwXKcFw0oAA",
+    "avatar": "/team_images/thumbnails/Saniya-144.webp",
+    "thumbnail": "/team_images/thumbnails/Saniya-320.webp"
   }
 }

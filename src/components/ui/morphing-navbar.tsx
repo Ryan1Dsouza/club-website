@@ -37,7 +37,6 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
   const socials = [
     { title: 'Instagram', href: settings.instagramUrl },
     { title: 'LinkedIn', href: settings.linkedinUrl },
-    { title: 'GitHub', href: settings.githubUrl },
     { title: 'Email', href: 'mailto:' + settings.contactEmail },
   ];
 

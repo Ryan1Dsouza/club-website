@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import type { Member } from '../types';
 import { createTeamProfiles, type TeamProfile } from '../lib/team-profiles';
 import { preloadImage } from '../lib/preload-image';
+import { storageImageAttributes, restoreOriginalImage } from '../lib/responsive-images';
 import { useReveal } from '../components/ui/reveal';
 import TeamProfileOverlay from '../components/people/TeamProfileOverlay';
 import TowerPlayButton from '../components/people/TowerPlayButton';
@@ -26,8 +27,8 @@ function MemberCard({ person, index, onSelect }: { person: TeamProfile; index: n
     <button type="button" onPointerEnter={prepare} onFocus={prepare} onTouchStart={prepare} onClick={() => onSelect(person)} aria-label={`Meet ${person.name}, ${person.role}`}>
       <span className="people-card__portrait">
         <span className="people-card__initials" aria-hidden="true">{person.initials}</span>
-        {person.cardImage && <img src={person.cardImage} alt="" loading={index < 3 ? 'eager' : 'lazy'} decoding="async" fetchPriority={index === 0 ? 'high' : 'auto'} style={person.previewImage ? { backgroundImage: `url("${person.previewImage}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
-          width="400" height="500" onError={event => { event.currentTarget.style.visibility = 'hidden'; }} />}
+        {person.cardImage && <img src={person.cardImage} {...storageImageAttributes(person.cardImage, [320, 480, 768, 1024], '(max-width: 600px) 90vw, (max-width: 1000px) 45vw, 400px')} alt="" loading={index < 3 ? 'eager' : 'lazy'} decoding="async" fetchPriority={index === 0 ? 'high' : 'auto'} style={person.previewImage ? { backgroundImage: `url("${person.previewImage}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+          width="400" height="500" onError={event => { if (!restoreOriginalImage(event.currentTarget)) event.currentTarget.style.visibility = 'hidden'; }} />}
         <span className="people-card__number" aria-hidden="true">{String(index + 1).padStart(2, '0')} / NUCLEUS</span>
         <span className="people-card__open" aria-hidden="true"><ArrowUpRight size={20} /></span>
       </span>

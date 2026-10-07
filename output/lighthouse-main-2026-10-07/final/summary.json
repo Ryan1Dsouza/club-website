@@ -1,0 +1,1685 @@
+[
+  {
+    "name": "mobile-home",
+    "path": "/",
+    "scores": {
+      "performance": 87,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2116.1573,
+        "display": "2.1 s"
+      },
+      "largest-contentful-paint": {
+        "value": 3254.1573,
+        "display": "3.3 s"
+      },
+      "total-blocking-time": {
+        "value": 144,
+        "display": "140 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 4402.8537604791845,
+        "display": "4.4 s"
+      }
+    },
+    "bytes": 907497,
+    "mainThreadMs": 2880.736000000001,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.1 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "3.3 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "4.4 s"
+      },
+      {
+        "id": "total-blocking-time",
+        "title": "Total Blocking Time",
+        "value": "140 ms"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "160 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "4.5 s"
+      },
+      {
+        "id": "mainthread-work-breakdown",
+        "title": "Minimize main-thread work",
+        "value": "2.9 s",
+        "savings": {
+          "TBT": 150
+        }
+      },
+      {
+        "id": "bootup-time",
+        "title": "Reduce JavaScript execution time",
+        "value": "1.3 s",
+        "savings": {
+          "TBT": 300
+        }
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 179 KiB",
+        "savings": {
+          "FCP": 300,
+          "LCP": 300
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 51 KiB",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 600 ms",
+        "savings": {
+          "FCP": 600,
+          "LCP": 600
+        }
+      }
+    ]
+  },
+  {
+    "name": "mobile-team",
+    "path": "/team",
+    "scores": {
+      "performance": 72,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2165.0789,
+        "display": "2.2 s"
+      },
+      "largest-contentful-paint": {
+        "value": 6857.4198400000005,
+        "display": "6.9 s"
+      },
+      "total-blocking-time": {
+        "value": 19,
+        "display": "20 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 4291.992803962205,
+        "display": "4.3 s"
+      }
+    },
+    "bytes": 2347964,
+    "mainThreadMs": 1978.3199999999886,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.2 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "6.9 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "4.3 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "80 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "7.5 s"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 125 KiB",
+        "savings": {
+          "FCP": 450,
+          "LCP": 450
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 896 KiB",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      },
+      {
+        "id": "lcp-discovery-insight",
+        "title": "LCP request discovery",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "mobile-events",
+    "path": "/events",
+    "scores": {
+      "performance": 0,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {},
+      "largest-contentful-paint": {},
+      "total-blocking-time": {},
+      "cumulative-layout-shift": {},
+      "speed-index": {}
+    },
+    "bytes": 2106302,
+    "warnings": [],
+    "runtimeError": {
+      "code": "NO_NAVSTART",
+      "message": "Something went wrong with recording the trace over your page load. Please run Lighthouse again. (NO_NAVSTART)",
+      "errorStack": "LighthouseError: NO_NAVSTART\n    at LHTraceProcessor.createNoNavstartError (file:///C:/Users/ryan1/OneDrive/Documents/club-website/node_modules/lighthouse/core/lib/lh-trace-processor.js:17:12)\n    at LHTraceProcessor.computeTimeOrigin (file:///C:/Users/ryan1/OneDrive/Documents/club-website/node_modules/lighthouse/core/lib/tracehouse/trace-processor.js:1007:33)\n    at LHTraceProcessor.processTrace (file:///C:/Users/ryan1/OneDrive/Documents/club-website/node_modules/lighthouse/core/lib/tracehouse/trace-processor.js:824:32)\n    at ProcessedTrace.compute_ (file:///C:/Users/ryan1/OneDrive/Documents/club-website/node_modules/lighthouse/core/computed/processed-trace.js:16:29)\n    at ProcessedTrace.request (file:///C:/Users/ryan1/OneDrive/Documents/club-website/node_modules/lighthouse/core/computed/computed-artifact.js:72:29)\n    at TraceEngineResult.compute_ (file:///C:/Users/ryan1/OneDrive/Documents/club-website/node_modules/lighthouse/core/computed/trace-engine-result.js:235:49)\n    at TraceEngineResult.request (file:///C:/Users/ryan1/OneDrive/Documents/club-website/node_modules/lighthouse/core/computed/computed-artifact.js:72:29)\n    at TraceElements.getArtifact (file:///C:/Users/ryan1/OneDrive/Documents/club-website/node_modules/lighthouse/core/gather/gatherers/trace-elements.js:330:31)\n    at file:///C:/Users/ryan1/OneDrive/Documents/club-website/node_modules/lighthouse/core/gather/runner-helpers.js:106:45\n    at async collectPhaseArtifacts (file:///C:/Users/ryan1/OneDrive/Documents/club-website/node_modules/lighthouse/core/gather/runner-helpers.js:123:5)",
+      "artifactKey": "TraceElements"
+    },
+    "issues": [
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      }
+    ]
+  },
+  {
+    "name": "mobile-projects",
+    "path": "/projects",
+    "scores": {
+      "performance": 87,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2463.49575,
+        "display": "2.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 3374.7949,
+        "display": "3.4 s"
+      },
+      "total-blocking-time": {
+        "value": 23,
+        "display": "20 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 3405.5738339697027,
+        "display": "3.4 s"
+      }
+    },
+    "bytes": 542027,
+    "mainThreadMs": 1193.484000000004,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.5 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "3.4 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "3.4 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "70 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "3.4 s"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 127 KiB",
+        "savings": {
+          "FCP": 450,
+          "LCP": 900
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 600 ms",
+        "savings": {
+          "FCP": 600,
+          "LCP": 600
+        }
+      }
+    ]
+  },
+  {
+    "name": "mobile-achievements",
+    "path": "/achievements",
+    "scores": {
+      "performance": 62,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 69
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2004.7374,
+        "display": "2.0 s"
+      },
+      "largest-contentful-paint": {
+        "value": 3967.29045,
+        "display": "4.0 s"
+      },
+      "total-blocking-time": {
+        "value": 32.5,
+        "display": "30 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.6074567353631635,
+        "display": "0.607"
+      },
+      "speed-index": {
+        "value": 3968.9390719557523,
+        "display": "4.0 s"
+      }
+    },
+    "bytes": 1075250,
+    "mainThreadMs": 1410.4120000000028,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.0 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "4.0 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "4.0 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "120 ms"
+      },
+      {
+        "id": "cumulative-layout-shift",
+        "title": "Cumulative Layout Shift",
+        "value": "0.607"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "4.9 s"
+      },
+      {
+        "id": "layout-shifts",
+        "title": "Avoid large layout shifts",
+        "value": "1 layout shift found",
+        "savings": {
+          "CLS": 0.607
+        }
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 116 KiB",
+        "savings": {
+          "FCP": 450,
+          "LCP": 750
+        }
+      },
+      {
+        "id": "is-crawlable",
+        "title": "Page is blocked from indexing"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "cls-culprits-insight",
+        "title": "Layout shift culprits",
+        "savings": {
+          "CLS": 0
+        }
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 274 KiB",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      },
+      {
+        "id": "lcp-discovery-insight",
+        "title": "LCP request discovery",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 150 ms",
+        "savings": {
+          "FCP": 150,
+          "LCP": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "mobile-news",
+    "path": "/news",
+    "scores": {
+      "performance": 93,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2261.7762,
+        "display": "2.3 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2561.7762,
+        "display": "2.6 s"
+      },
+      "total-blocking-time": {
+        "value": 65,
+        "display": "70 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 3391.502668641009,
+        "display": "3.4 s"
+      }
+    },
+    "bytes": 702618,
+    "mainThreadMs": 1290.9800000000014,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.3 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "2.6 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "3.4 s"
+      },
+      {
+        "id": "total-blocking-time",
+        "title": "Total Blocking Time",
+        "value": "70 ms"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "110 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "4.0 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 117 KiB",
+        "savings": {
+          "FCP": 300,
+          "LCP": 450
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 300 ms",
+        "savings": {
+          "FCP": 300,
+          "LCP": 300
+        }
+      }
+    ]
+  },
+  {
+    "name": "mobile-recruitment",
+    "path": "/recruitment",
+    "scores": {
+      "performance": 93,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 1864.779,
+        "display": "1.9 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2934.1684999999998,
+        "display": "2.9 s"
+      },
+      "total-blocking-time": {
+        "value": 40,
+        "display": "40 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 3304.226507605482,
+        "display": "3.3 s"
+      }
+    },
+    "bytes": 478425,
+    "mainThreadMs": 939.7200000000016,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "1.9 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "2.9 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "3.3 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "90 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "2.9 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 125 KiB",
+        "savings": {
+          "FCP": 450,
+          "LCP": 850
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 150 ms",
+        "savings": {
+          "FCP": 150,
+          "LCP": 150
+        }
+      }
+    ]
+  },
+  {
+    "name": "mobile-about",
+    "path": "/about",
+    "scores": {
+      "performance": 93,
+      "accessibility": 96,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2106.9739999999997,
+        "display": "2.1 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2569.4739999999997,
+        "display": "2.6 s"
+      },
+      "total-blocking-time": {
+        "value": 20.5,
+        "display": "20 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.0634416583373811,
+        "display": "0.063"
+      },
+      "speed-index": {
+        "value": 3433.6758782093225,
+        "display": "3.4 s"
+      }
+    },
+    "bytes": 525167,
+    "mainThreadMs": 1099.0600000000013,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.1 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "2.6 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "3.4 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "80 ms"
+      },
+      {
+        "id": "cumulative-layout-shift",
+        "title": "Cumulative Layout Shift",
+        "value": "0.063"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "3.0 s"
+      },
+      {
+        "id": "color-contrast",
+        "title": "Background and foreground colors do not have a sufficient contrast ratio."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 126 KiB",
+        "savings": {
+          "FCP": 450,
+          "LCP": 450
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 600 ms",
+        "savings": {
+          "FCP": 600,
+          "LCP": 600
+        }
+      }
+    ]
+  },
+  {
+    "name": "mobile-live-news",
+    "path": "/live-news",
+    "scores": {
+      "performance": 94,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2259.5724999999998,
+        "display": "2.3 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2559.5724999999998,
+        "display": "2.6 s"
+      },
+      "total-blocking-time": {
+        "value": 21,
+        "display": "20 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.03819202774599205,
+        "display": "0.038"
+      },
+      "speed-index": {
+        "value": 3366.1764709189374,
+        "display": "3.4 s"
+      }
+    },
+    "bytes": 702593,
+    "mainThreadMs": 1376.6680000000013,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.3 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "2.6 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "3.4 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "90 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "3.2 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 117 KiB",
+        "savings": {
+          "FCP": 300,
+          "LCP": 450
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 300 ms",
+        "savings": {
+          "FCP": 300,
+          "LCP": 300
+        }
+      }
+    ]
+  },
+  {
+    "name": "desktop-home",
+    "path": "/",
+    "scores": {
+      "performance": 98,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 445.5199,
+        "display": "0.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 609.5199,
+        "display": "0.6 s"
+      },
+      "total-blocking-time": {
+        "value": 15.499999999999943,
+        "display": "20 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1548.9246886245182,
+        "display": "1.5 s"
+      }
+    },
+    "bytes": 1053390,
+    "mainThreadMs": 910.877999999997,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "0.6 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.5 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "80 ms"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 177 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 100
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "desktop-team",
+    "path": "/team",
+    "scores": {
+      "performance": 85,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 525.9499999999999,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2513.8969399999996,
+        "display": "2.5 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1506.8088757473656,
+        "display": "1.5 s"
+      }
+    },
+    "bytes": 3013086,
+    "mainThreadMs": 624.5439999999907,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "2.5 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.5 s"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "2.5 s"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "total-byte-weight",
+        "title": "Avoid enormous network payloads",
+        "value": "Total size was 2,942 KiB"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 125 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 400
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 1,340 KiB",
+        "savings": {
+          "FCP": 0,
+          "LCP": 50
+        }
+      },
+      {
+        "id": "lcp-discovery-insight",
+        "title": "LCP request discovery",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 40 ms",
+        "savings": {
+          "FCP": 50,
+          "LCP": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "desktop-events",
+    "path": "/events",
+    "scores": {
+      "performance": 95,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 514.1158,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 1170.2316,
+        "display": "1.2 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.0005360950360082305,
+        "display": "0.001"
+      },
+      "speed-index": {
+        "value": 1649.1200313840036,
+        "display": "1.6 s"
+      }
+    },
+    "bytes": 1551762,
+    "mainThreadMs": 741.398999999998,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "1.2 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.6 s"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 124 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 200
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "cache-insight",
+        "title": "Use efficient cache lifetimes",
+        "value": "Est savings of 357 KiB",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 357 KiB",
+        "savings": {
+          "FCP": 0,
+          "LCP": 100
+        }
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 40 ms",
+        "savings": {
+          "FCP": 50,
+          "LCP": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "desktop-projects",
+    "path": "/projects",
+    "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 552.2252,
+        "display": "0.6 s"
+      },
+      "largest-contentful-paint": {
+        "value": 595.7252,
+        "display": "0.6 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.00009211033950617283,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1278.2809747426302,
+        "display": "1.3 s"
+      }
+    },
+    "bytes": 761499,
+    "mainThreadMs": 279.00000000000085,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "0.6 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "0.6 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.3 s"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 127 KiB",
+        "savings": {
+          "FCP": 100,
+          "LCP": 100
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 160 ms",
+        "savings": {
+          "FCP": 150,
+          "LCP": 150
+        }
+      }
+    ]
+  },
+  {
+    "name": "desktop-achievements",
+    "path": "/achievements",
+    "scores": {
+      "performance": 98,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 69
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 466.9744,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 647.4679999999998,
+        "display": "0.6 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.04144788451646091,
+        "display": "0.041"
+      },
+      "speed-index": {
+        "value": 1415.34540280904,
+        "display": "1.4 s"
+      }
+    },
+    "bytes": 1024922,
+    "mainThreadMs": 404.51300000000015,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "0.6 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.4 s"
+      },
+      {
+        "id": "cumulative-layout-shift",
+        "title": "Cumulative Layout Shift",
+        "value": "0.041"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 116 KiB",
+        "savings": {
+          "FCP": 100,
+          "LCP": 50
+        }
+      },
+      {
+        "id": "is-crawlable",
+        "title": "Page is blocked from indexing"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 286 KiB",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 40 ms",
+        "savings": {
+          "FCP": 50,
+          "LCP": 50
+        }
+      }
+    ]
+  },
+  {
+    "name": "desktop-news",
+    "path": "/news",
+    "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 462.89639999999997,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 502.89639999999997,
+        "display": "0.5 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.0003125,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1256.080078727007,
+        "display": "1.3 s"
+      }
+    },
+    "bytes": 922086,
+    "mainThreadMs": 340.14400000000046,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.3 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 117 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 50
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "desktop-recruitment",
+    "path": "/recruitment",
+    "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 408.9173,
+        "display": "0.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 488.9173,
+        "display": "0.5 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1248.7980719532695,
+        "display": "1.2 s"
+      }
+    },
+    "bytes": 697898,
+    "mainThreadMs": 229.62900000000096,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.2 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 125 KiB",
+        "savings": {
+          "FCP": 100,
+          "LCP": 100
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "desktop-about",
+    "path": "/about",
+    "scores": {
+      "performance": 99,
+      "accessibility": 96,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 445.9185,
+        "display": "0.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 568.9185,
+        "display": "0.6 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.03215015552662037,
+        "display": "0.032"
+      },
+      "speed-index": {
+        "value": 1329.7858977438027,
+        "display": "1.3 s"
+      }
+    },
+    "bytes": 744637,
+    "mainThreadMs": 292.9010000000005,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.3 s"
+      },
+      {
+        "id": "color-contrast",
+        "title": "Background and foreground colors do not have a sufficient contrast ratio."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 126 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 100
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "desktop-live-news",
+    "path": "/live-news",
+    "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 482.66690000000006,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 562.6669,
+        "display": "0.6 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.0003125,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1324.5473582886818,
+        "display": "1.3 s"
+      }
+    },
+    "bytes": 922062,
+    "mainThreadMs": 485.40099999999904,
+    "warnings": [],
+    "issues": [
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.3 s"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 117 KiB",
+        "savings": {
+          "FCP": 50,
+          "LCP": 50
+        }
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree",
+        "savings": {
+          "LCP": 0
+        }
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "savings": {
+          "FCP": 0,
+          "LCP": 0
+        }
+      }
+    ]
+  }
+]

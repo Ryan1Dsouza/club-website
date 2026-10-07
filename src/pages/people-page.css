@@ -1,5 +1,4 @@
 .people-page { position: relative; min-height: 100svh; color: var(--mint); }
-html.people-tower-playing, html.people-tower-playing body { overflow: hidden; overscroll-behavior: none; }
 @media (max-width: 760px), (pointer: coarse) {
   html.people-tower-open { height: 100%; overflow: hidden; overscroll-behavior: none; }
   html.people-tower-open body { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; }

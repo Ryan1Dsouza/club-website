@@ -134,7 +134,6 @@ export function TeamMembersPage() {
               All members{' '}
               <span className="count-badge">{loading || error ? '—' : members.length}</span>
             </h2>
-            <p>The minds making things happen.</p>
           </div>
           <button
             className="icon-button"
@@ -238,11 +237,11 @@ export function TeamMembersPage() {
             <span className="large-icon">
               <UsersRound size={28} />
             </span>
-            <h3>{members.length ? 'No connections found.' : 'Every team starts with someone.'}</h3>
+            <h3>{members.length ? 'No members found.' : 'No team members yet.'}</h3>
             <p>
               {members.length
                 ? 'Try another name or adjust your role filter.'
-                : 'Add your first team member and put a face to Nucleus.'}
+                : 'Add a team member to display their profile on the website.'}
             </p>
             <button
               className="button secondary"

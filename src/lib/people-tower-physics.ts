@@ -47,6 +47,28 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
   type PendingReturn = { delay: number; fromPos: Vec3; fromQuat: CannonQuat; toPos: Vec3; toQuat: CannonQuat };
   const pendingReturns = new Map<number, PendingReturn>();
   const storyOrigins = new Map<number, { position: Vec3; quaternion: CannonQuat }>();
+  // Manual placements belong to the visitor until an explicit rebuild. The
+  // story may borrow a piece for its profile, then returns it to that placement.
+  const manual = new Set<number>();
+
+  function makeDynamic(body: Body) {
+    body.type = Body.DYNAMIC; body.mass = .36; body.collisionFilterMask = -1;
+    if (body.shapes[0] !== shape) { body.removeShape(storyShape); body.addShape(shape); }
+    body.updateMassProperties(); body.aabbNeedsUpdate = true; world.broadphase.dirty = true;
+  }
+  function restoreManual(index: number) {
+    if (!manual.has(index)) return false;
+    const body = bodies[index];
+    if (story === index) {
+      const origin = storyOrigins.get(index)!;
+      body.position.copy(origin.position); body.quaternion.copy(origin.quaternion);
+      body.previousPosition.copy(body.position); body.interpolatedPosition.copy(body.position);
+      body.previousQuaternion.copy(body.quaternion); body.interpolatedQuaternion.copy(body.quaternion);
+      makeDynamic(body); body.sleep(); story = -1;
+    }
+    // An actively held/thrown piece keeps its live pose, velocity and constraint.
+    return true;
+  }
 
   function setDetail(value: TowerDetail) {
     if (detail === value) return;
@@ -87,8 +109,18 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     release();
     const body = bodies[index];
     if (!body?.world) return false;
+    pendingReturns.delete(index); (body as any).transition = null;
+    body.position.copy(body.interpolatedPosition); body.quaternion.copy(body.interpolatedQuaternion);
+    body.previousPosition.copy(body.position); body.previousQuaternion.copy(body.quaternion);
+    if (story === index) story = -1;
+    makeDynamic(body); manual.add(index); storyOrigins.delete(index);
     held = index; anchor.position.set(point.x, point.y, point.z); target.copy(anchor.position);
     body.pointToLocalFrame(anchor.position, pivot);
+    // An unfolded banner becomes a plank again when grabbed. Keep the joint on
+    // that plank even when the pointer originally landed near the banner edge.
+    pivot.x = Math.max(-BLOCK_SIZE[0] / 2, Math.min(BLOCK_SIZE[0] / 2, pivot.x));
+    pivot.y = Math.max(-BLOCK_SIZE[1] / 2, Math.min(BLOCK_SIZE[1] / 2, pivot.y));
+    pivot.z = Math.max(-BLOCK_SIZE[2] / 2, Math.min(BLOCK_SIZE[2] / 2, pivot.z));
     world.addBody(anchor);
     joint = new PointToPointConstraint(body, pivot, anchor, new Vec3(), 100);
     joint.collideConnected = false; world.addConstraint(joint); wake(); return true;
@@ -105,29 +137,18 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     pullEnd.vadd(pullStart, pullEnd); pullTime = 0;
   }
   function remove(index: number) {
+    if (restoreManual(index)) return;
     if (held === index) release();
     const wasStory = story === index;
     if (wasStory) story = -1;
     const body = bodies[index];
+    pendingReturns.delete(index);
+    if (body) (body as any).transition = null;
     if (body?.world) { world.removeBody(body); if (!wasStory) wakeSupported(body); }
   }
   function beginStory(index: number) {
-    release();
-    
-    // Clean up the previous story block if one exists.
-    // If the user scrolls very fast, the previous block might be left hanging mid-air.
-    if (story >= 0 && story !== index) {
-      const oldBody = bodies[story];
-      if (oldBody && !pendingReturns.has(story)) {
-        const oldSlot = slots[story];
-        oldBody.position.set(...oldSlot.position);
-        oldBody.quaternion.setFromEuler(0, oldSlot.yaw, 0);
-        oldBody.type = Body.DYNAMIC;
-        oldBody.removeShape(storyShape);
-        oldBody.addShape(shape);
-        oldBody.sleep();
-      }
-    }
+    if (held === index) return;
+    if (story >= 0 && story !== index) returnBody(story);
     const body = bodies[index];
     if (!body) return;
     const returning = pendingReturns.has(index) || (body as any).transition?.returning;
@@ -226,7 +247,7 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     body.aabbNeedsUpdate = true; world.broadphase.dirty = true;
   }
   function reset(completed = 0) {
-    release(); story = -1; accumulator = 0; pendingReturns.clear(); storyOrigins.clear();
+    release(); story = -1; accumulator = 0; pendingReturns.clear(); storyOrigins.clear(); manual.clear();
     bodies.forEach((body, index) => {
       const slot = slots[index];
       const oldPos = body.interpolatedPosition.clone();
@@ -254,13 +275,12 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     });
     world.broadphase.dirty = true;
   }
-  /** Return a single body to its tower slot with a smooth cinematic arc.
-   * Never reads stale physics state — the start position is deterministically
-   * computed from the slot geometry, so it's always correct regardless of
-   * whether the body was in-world, removed, or mid-story. */
+  /** Restore a manual placement, or return an untouched piece to its tower
+   * slot along a deterministic arc, even after a skipped or reversed reveal. */
   function returnBody(index: number) {
     const body = bodies[index];
     if (!body) return;
+    if (restoreManual(index)) return;
     const slot = slots[index];
 
     if (story === index) story = -1;
@@ -395,11 +415,13 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
   }
   function dispose() {
     if (disposed) return;
-    release(); disposed = true; pendingReturns.clear(); storyOrigins.clear();
+    release(); disposed = true; pendingReturns.clear(); storyOrigins.clear(); manual.clear();
     [...world.bodies].forEach(body => world.removeBody(body));
     world.contacts.length = 0; world.frictionEquations.length = 0;
   }
   const isPending = (index: number) => pendingReturns.has(index);
   const isFlying = (index: number) => isPending(index) || !!(bodies[index] as any).transition;
-  return { world, bodies, floorY, step, moving, setDetail, isPending, isFlying, grab, move, release, pull, remove, beginStory, placeStory, reset, returnBody, dispose };
+  const isManual = (index: number) => manual.has(index);
+  const isStory = (index: number) => story === index;
+  return { world, bodies, floorY, step, moving, setDetail, isPending, isFlying, isManual, isStory, grab, move, release, pull, remove, beginStory, placeStory, reset, returnBody, dispose };
 }

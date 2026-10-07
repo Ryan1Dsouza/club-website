@@ -1,57 +1,72 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import seed from '../../../shared/public-data.json';
+import { createTeamProfiles, type TeamProfile } from '../../lib/team-profiles';
 import { Reveal } from '../ui/reveal';
 import { TextReveal } from '../ui/text-reveal';
 import './voices-marquee.css';
 
-const reviews = [
+// Credit the original authors separately from the club members on each card.
+const quotes = [
   {
-    name: "Ken Masters",
-    username: "@kmasters",
-    body: "“Our productivity has nearly doubled since onboarding. Automation features removed repetitive tasks, allowing our team to focus on building instead of managing operations.”",
+    memberId: 'poorvik',
+    body: 'What I cannot create, I do not understand.',
+    author: 'Richard Feynman',
   },
   {
-    name: "Kira Athrun",
-    username: "@kathrun",
-    body: "“What surprised us most was how quickly our team adapted. Minimal learning curve, excellent documentation, and powerful features make it a must-have for modern SaaS companies.”",
+    memberId: 'dinol',
+    body: 'The best way to predict the future is to invent it.',
+    author: 'Alan Kay',
   },
   {
-    name: "Lirael Nassun",
-    username: "@lnassun",
-    body: "“This is easily one of the most reliable SaaS tools we’ve adopted. The UI is intuitive, integrations are seamless, and it saves us countless hours every week.”",
+    memberId: 'joylin',
+    body: 'Simplicity is prerequisite for reliability.',
+    author: 'Edsger W. Dijkstra',
   },
   {
-    name: "Jessica",
-    username: "@jessica",
-    body: "“Switching to this platform streamlined our entire workflow. Setup was effortless, performance improved instantly, and our team now ships features faster without worrying about infrastructure.”",
+    memberId: 'prajwal',
+    body: 'Science is what we understand well enough to explain to a computer. Art is everything else we do.',
+    author: 'Donald Knuth',
   },
   {
-    name: "Jenny",
-    username: "@jenny",
-    body: "“We evaluated multiple solutions, but this stood out immediately. It’s fast, scalable, and thoughtfully designed for growing teams that need stability without added complexity.”",
+    memberId: 'rakshith',
+    body: 'Programs must be written for people to read, and only incidentally for machines to execute.',
+    author: 'Harold Abelson & Gerald Jay Sussman',
+  },
+  {
+    memberId: 'navya',
+    body: 'The programmer, like the poet, works only slightly removed from pure thought.',
+    author: 'Fred Brooks',
   },
 ];
 
-const firstRow = reviews; // Reusing all reviews to have enough cards
-const secondRow = [...reviews].reverse(); // A bit of variety for the second row
+type Voice = { member: TeamProfile; body: string; author: string };
+const coreMembers = createTeamProfiles(seed.team);
+const firstRow: Voice[] = quotes.flatMap(({ memberId, ...quote }) => {
+  const member = coreMembers.find(member => member.id === memberId);
+  return member ? [{ member, ...quote }] : [];
+});
+const secondRow = [...firstRow].reverse();
 
-const ReviewCard = ({ name, username, body }: { name: string; username: string; body: string }) => {
+const ReviewCard = ({ member, body, author }: Voice) => {
   return (
     <div className="vm-card">
       <div className="vm-card-header">
-        <span className="vm-avatar" aria-hidden="true">{name.slice(0, 1)}</span>
+        <img className="vm-avatar" src={member.avatarImage} alt={member.name} width={48} height={48} loading="lazy" decoding="async" />
         <div className="vm-meta">
-          <p className="vm-name">{name}</p>
-          <p className="vm-username">{username}</p>
+          <p className="vm-name">{member.name}</p>
+          <p className="vm-role">{member.role}</p>
         </div>
       </div>
-      <p className="vm-body">{body}</p>
+      <blockquote className="vm-quote">
+        <p className="vm-body">“{body}”</p>
+        <footer className="vm-author">— {author}</footer>
+      </blockquote>
     </div>
   );
 };
 
 export default function VoicesMarquee() {
   const ref = useRef<HTMLElement>(null);
-  const [paused, setPaused] = useState(false);
   useEffect(() => {
     const section = ref.current!;
     const rows = section.querySelectorAll<HTMLElement>('.vm-marquee-wrapper');
@@ -75,10 +90,9 @@ export default function VoicesMarquee() {
     };
   }, []);
   return (
-    <section ref={ref} className="vm-container section-space" data-paused={paused} aria-label="Community voices">
+    <section ref={ref} className="vm-container section-space" aria-label="Community voices">
       <div className="vm-header">
         <TextReveal as="h2" className="vm-title" text="THE VOICES OF NUCLEUS" />
-        <button className="button vm-pause" aria-pressed={paused} onClick={() => setPaused(value => !value)}>Pause moving voices</button>
       </div>
 
       <Reveal className="vm-marquee-wrapper" delay={70} tabIndex={0} role="region" aria-label="Community voices, first row">

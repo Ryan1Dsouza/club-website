@@ -79,8 +79,7 @@ export default function TeamProfileOverlay({ person, onClose }: { person: TeamPr
       <div className="team-profile__photo" style={person.previewImage ? { backgroundImage: `url("${person.previewImage}")` } : undefined}>
         {!person.previewImage && <span className="team-profile__initials" aria-hidden="true">{person.initials}</span>}
         {person.cardImage && <img className="team-profile__preview" src={person.cardImage} alt="" aria-hidden="true" onError={event => { event.currentTarget.style.visibility = 'hidden'; }} />}
-        {person.profileImage && <img className="team-profile__portrait" src={person.profileImage} alt={person.name} decoding="async" fetchPriority="high"
-          onError={event => { event.currentTarget.style.visibility = 'hidden'; }} />}
+        {/* person.profileImage intentionally removed to show only environment */}
       </div>
     </div>
   </dialog>, document.body);

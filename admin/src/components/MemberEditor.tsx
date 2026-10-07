@@ -83,10 +83,8 @@ export function MemberEditor({
   const displayPhoto = preview || (removeExistingPhoto ? null : member?.photo_url)
   return (
     <Modal
-      title={member ? 'Edit team member' : 'A new connection.'}
-      subtitle={
-        member ? 'Keep their profile up to date.' : 'Introduce another mind behind Nucleus.'
-      }
+      title={member ? 'Edit team member' : 'Add team member'}
+      subtitle={member ? 'Keep their profile up to date.' : 'Add a profile to the website.'}
       onClose={onClose}
       busy={busy}
     >
@@ -108,7 +106,6 @@ export function MemberEditor({
                 autoComplete="name"
                 required
                 maxLength={100}
-                placeholder="e.g. Alex D’Souza"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={saving}
@@ -123,7 +120,6 @@ export function MemberEditor({
                 name="role"
                 required
                 maxLength={100}
-                placeholder="e.g. Design Lead"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 disabled={saving}
@@ -185,12 +181,9 @@ export function MemberEditor({
             </span>
             <Avatar name={name || 'New member'} url={displayPhoto} large />
             <div>
-              <h3>{name.trim() || 'Their name here'}</h3>
-              <p>{role.trim() || 'Their role at Nucleus'}</p>
+              <h3>{name.trim() || 'Full name'}</h3>
+              <p>{role.trim() || 'Role'}</p>
             </div>
-            <span className="preview-footer">
-              ONE OF MANY MINDS. <span>✳</span>
-            </span>
           </aside>
         </div>
         {error && (

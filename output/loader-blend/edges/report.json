@@ -1,0 +1,162 @@
+[
+  {
+    "width": 320,
+    "height": 568,
+    "reducedMotion": "no-preference",
+    "outside": [
+      15,
+      28,
+      17
+    ],
+    "inside": [
+      15,
+      28,
+      17
+    ],
+    "maxChannelDifference": 0
+  },
+  {
+    "width": 320,
+    "height": 568,
+    "reducedMotion": "reduce",
+    "outside": [
+      15,
+      28,
+      17
+    ],
+    "inside": [
+      15,
+      28,
+      17
+    ],
+    "maxChannelDifference": 0
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "reducedMotion": "no-preference",
+    "outside": [
+      15,
+      28,
+      17
+    ],
+    "inside": [
+      15,
+      28,
+      17
+    ],
+    "maxChannelDifference": 0
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "reducedMotion": "reduce",
+    "outside": [
+      15,
+      28,
+      17
+    ],
+    "inside": [
+      15,
+      28,
+      17
+    ],
+    "maxChannelDifference": 0
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "reducedMotion": "no-preference",
+    "outside": [
+      15,
+      28,
+      17
+    ],
+    "inside": [
+      15,
+      28,
+      17
+    ],
+    "maxChannelDifference": 0
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "reducedMotion": "reduce",
+    "outside": [
+      15,
+      28,
+      17
+    ],
+    "inside": [
+      15,
+      28,
+      17
+    ],
+    "maxChannelDifference": 0
+  },
+  {
+    "width": 844,
+    "height": 390,
+    "reducedMotion": "no-preference",
+    "outside": [
+      15,
+      28,
+      17
+    ],
+    "inside": [
+      15,
+      28,
+      17
+    ],
+    "maxChannelDifference": 0
+  },
+  {
+    "width": 844,
+    "height": 390,
+    "reducedMotion": "reduce",
+    "outside": [
+      15,
+      28,
+      17
+    ],
+    "inside": [
+      15,
+      28,
+      17
+    ],
+    "maxChannelDifference": 0
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "reducedMotion": "no-preference",
+    "outside": [
+      15,
+      28,
+      17
+    ],
+    "inside": [
+      15,
+      28,
+      17
+    ],
+    "maxChannelDifference": 0
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "reducedMotion": "reduce",
+    "outside": [
+      15,
+      28,
+      17
+    ],
+    "inside": [
+      15,
+      28,
+      17
+    ],
+    "maxChannelDifference": 0
+  }
+]

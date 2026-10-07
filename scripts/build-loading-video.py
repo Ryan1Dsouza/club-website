@@ -15,14 +15,26 @@ styles = (project / 'src/styles.css').read_text(encoding='utf-8')
 
 
 def palette_color(token):
-    match = re.search(rf'--{re.escape(token)}:\s*(#[0-9a-fA-F]{{6}})\s*;', styles)
+    match = re.search(rf'--{re.escape(token)}:\s*([^;]+);', styles)
     if not match:
-        raise ValueError(f'Missing hex palette token: --{token}')
-    return ImageColor.getrgb(match.group(1))
+        raise ValueError(f'Missing palette token: --{token}')
+    value = match.group(1).strip()
+    if re.fullmatch(r'#[0-9a-fA-F]{6}', value):
+        return ImageColor.getrgb(value)
+    # Resolve the site's sRGB backdrop mix so baked video backgrounds stay in
+    # sync with the shared page palette instead of using the darker card surface.
+    mix = re.fullmatch(
+        r'color-mix\(in srgb,\s*var\(--([\w-]+)\)\s+([\d.]+)%,\s*var\(--([\w-]+)\)\)', value)
+    if mix:
+        first, percentage, second = mix.groups()
+        weight = float(percentage) / 100
+        return tuple(round(a * weight + b * (1 - weight))
+                     for a, b in zip(palette_color(first), palette_color(second)))
+    raise ValueError(f'Unsupported palette value for --{token}: {value}')
 
 
 ink = palette_color('mint')
-background = palette_color('surface-raised')
+background = palette_color('page-backdrop')
 for compact in (False, True):
     size = (480, 1040) if compact else (1440, 810)
     destination = root / ('mobile' if compact else 'desktop')

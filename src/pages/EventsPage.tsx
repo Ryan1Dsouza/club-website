@@ -30,7 +30,13 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
   const station = stations.find(item => item.id === selected);
 
   useCinematicScroll(mode === 'grid' && !station && portal === null, false, (scroll, limit) => {
-    archive.current?.style.setProperty('--rail-progress', String(limit > 0 ? Math.max(0, Math.min(1, scroll / limit)) : 0));
+    const progress = String(limit > 0 ? Math.max(0, Math.min(1, scroll / limit)) : 0);
+    // Only the two moving layers need the value. Updating the archive root
+    // invalidates inherited styles for every card, photo and label on scroll.
+    for (const button of portalButtons.current) {
+      const journey = button?.querySelector<HTMLElement>('.railway-track__journey');
+      if (journey && journey.style.getPropertyValue('--rail-progress') !== progress) journey.style.setProperty('--rail-progress', progress);
+    }
   });
 
   useEffect(() => {

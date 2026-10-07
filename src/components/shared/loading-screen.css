@@ -7,11 +7,17 @@
   overflow: hidden;
   isolation: isolate;
   contain: layout paint;
-  background: var(--surface-raised, #061108);
+  background: var(--page-backdrop, #0f1c11);
   color: var(--mint, #9bcfa2);
   overscroll-behavior: none;
   touch-action: none;
   will-change: transform;
+}
+.nucleus-loader__art {
+  /* H.264 decoding shifts the dark backdrop slightly below the CSS/poster
+     color. Blend the finished artwork group into the isolated loader so its
+     edges disappear, while the opaque video still covers the fallback poster. */
+  mix-blend-mode: lighten;
 }
 .nucleus-loader__art,
 .nucleus-loader__poster,

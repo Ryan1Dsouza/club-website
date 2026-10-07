@@ -3,6 +3,8 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   ArrowUpRight,
   CalendarDays,
+  Newspaper,
+  Trophy,
   ChevronRight,
   LayoutDashboard,
   LogOut,
@@ -19,8 +21,9 @@ const links = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/events', label: 'Events', icon: CalendarDays },
   { to: '/team', label: 'Team Members', icon: UsersRound },
-  { to: '/news', label: 'Live News', icon: CalendarDays },
-  { to: '/achievements', label: 'Achievements', icon: ShieldCheck },
+  { to: '/news', label: 'Live News', icon: Newspaper },
+  { to: '/achievements', label: 'Achievements', icon: Trophy },
+  { to: '/recruitment', label: 'Recruitment', icon: Trophy },
   { to: '/settings', label: 'Settings', icon: Settings2 },
 ]
 export function AdminLayout() {
@@ -97,19 +100,11 @@ export function AdminLayout() {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <div className="workspace-note">
-            <span className="small-orbit">✳</span>
-            <h3>Made of many minds.</h3>
-            <p>
-              A little care behind the scenes.
-              <br />A better space for everyone.
-            </p>
-            {safeSiteUrl && (
-              <a href={safeSiteUrl} target="_blank" rel="noreferrer">
-                Visit website <ArrowUpRight size={14} />
-              </a>
-            )}
-          </div>
+          {safeSiteUrl && (
+            <a className="website-link" href={safeSiteUrl} target="_blank" rel="noreferrer">
+              Visit website <ArrowUpRight size={15} />
+            </a>
+          )}
           <div className="sidebar-user">
             <Avatar name={user?.email || 'Admin'} />
             <div>
@@ -162,10 +157,7 @@ export function AdminLayout() {
         </main>
         <footer className="workspace-footer">
           <span>
-            NUCLEUS <span className="footer-divider">/</span> CONTROL ROOM
-          </span>
-          <span>
-            Made of many minds. <span className="footer-star">✳</span>
+            NUCLEUS <span className="footer-divider">/</span> ADMINISTRATION
           </span>
         </footer>
       </div>
