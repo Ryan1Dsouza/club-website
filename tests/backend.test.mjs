@@ -223,7 +223,9 @@ test('production renders the animated home and club pages, escapes data, and hid
     assert.match(work, /work-feature/); assert.match(work, /i Laundroid/);
     const team = await fetch(`${base}/team`).then(r => r.text());
     for (const member of getSite(db).team) assert.ok(team.includes(member.name));
-    for (const path of ['/', '/about', '/projects', '/team', '/events', '/recruitment']) {
+    const achievements = await fetch(`${base}/achievements`).then(r => r.text());
+    assert.match(achievements, /class="ach-record"/); assert.match(achievements, /SAMPLE RECORD/);
+    for (const path of ['/', '/about', '/projects', '/team', '/events', '/recruitment', '/achievements']) {
       const response = await fetch(`${base}${path}?source=test`);
       const document = await response.text(), meta = pageMeta(path);
       assert.equal(response.status, 200);

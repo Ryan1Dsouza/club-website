@@ -35,7 +35,7 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
   app.disable('x-powered-by');
   app.use(compression({ threshold: 1024 }));
   if (process.env.TRUST_PROXY === '1') app.set('trust proxy', 1);
-  app.use(helmet({ contentSecurityPolicy: production ? { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'blob:'], mediaSrc: ["'self'", 'blob:'], connectSrc: ["'self'"], fontSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"] } } : false, strictTransportSecurity: production }));
+  app.use(helmet({ contentSecurityPolicy: production ? { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'blob:', 'https://*.supabase.co'], mediaSrc: ["'self'", 'blob:'], connectSrc: ["'self'", 'https://*.supabase.co'], fontSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"] } } : false, strictTransportSecurity: production }));
   const smallJson = express.json({ limit: '48kb' });
   app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
   const allowed = new Set(production ? [origin] : [origin, 'http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3001', 'http://127.0.0.1:3001']);
@@ -231,7 +231,7 @@ export function createApp(db, { production = process.env.NODE_ENV === 'productio
       if (req.path.startsWith('/api') || req.path.startsWith('/assets')) return next();
       const meta = pageMeta(req.path);
       const admin = /^\/admin(?:\/|$)/.test(req.path);
-      if (meta.robots.startsWith('noindex') && !admin) return next();
+      if (!meta.found && !admin) return next();
       const escape = value => value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
       let html = template.replace(/<title>[^<]*<\/title>/, () => `<title>${escape(meta.title)}</title>`)
         .replace(/(<link rel="canonical" href=")[^"]*("\s*\/?>)/, (_match, start, end) => start + escape(meta.canonical) + end)

@@ -7,8 +7,8 @@
   overflow: hidden;
   isolation: isolate;
   contain: layout paint;
-  background: var(--bg, #000000);
-  color: var(--mint, #c3e5c8);
+  background: var(--surface-raised, #061108);
+  color: var(--mint, #9bcfa2);
   overscroll-behavior: none;
   touch-action: none;
   will-change: transform;
@@ -36,19 +36,8 @@
   text-align: center;
   font: italic 24px/1 var(--serif, Georgia, serif);
 }
-/* Portrait artwork keeps its aspect ratio and clears notches in either orientation. */
-@media (max-width: 767px), (max-height: 500px) and (max-width: 1024px), (pointer: coarse) {
-  .nucleus-loader__art {
-    top: max(16px, env(safe-area-inset-top));
-    right: max(16px, env(safe-area-inset-right));
-    bottom: max(16px, env(safe-area-inset-bottom));
-    left: max(16px, env(safe-area-inset-left));
-    width: auto;
-    height: auto;
-  }
-  .nucleus-loader__poster img,
-  .nucleus-loader__video { object-fit: contain; }
-}
+/* Both compositions bleed to the viewport edges. Their central artwork is
+   framed in the assets so cover never needs a padded video-sized container. */
 @media (prefers-reduced-motion: reduce) {
   .nucleus-loader { will-change: auto; }
   .nucleus-loader__video { display: none; }

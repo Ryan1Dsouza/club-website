@@ -38,13 +38,14 @@ img, video { display: block; max-width: 100%; }
 ::selection { color: var(--bg); background: var(--mint); }
 :focus-visible { outline: 2px solid var(--mint); outline-offset: 5px; }
 #main-content:focus { outline: none; }
-.site-shell--home {
+.site-shell--home, .site-shell--achievements, .site-shell--news {
   isolation: isolate;
   background:
     radial-gradient(ellipse 100% 100% at 50% 0%, rgb(var(--mint-rgb) / .10), rgb(var(--mint-rgb) / 0) 70%),
     var(--page-backdrop);
 }
-.site-shell--home > #main-content, .site-shell--home > .site-footer { position: relative; z-index: 10; }
+.site-shell--home > #main-content, .site-shell--home > .site-footer,
+.site-shell--achievements > #main-content, .site-shell--news > #main-content { position: relative; z-index: 10; }
 .site-shell--home .logo-landing, .site-shell--home .dp-section, .site-shell--home .vm-container { background: transparent; }
 .site-shell--work {
   min-height: 100svh;

@@ -6,11 +6,25 @@ The silent H.264 clips retain all 17 cuts at 20fps and work with playsInline on 
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import subprocess
-from PIL import Image, ImageOps
+import re
+from PIL import Image, ImageColor, ImageOps
 
-root = Path(__file__).resolve().parents[1] / 'src/assets/loading'
+project = Path(__file__).resolve().parents[1]
+root = project / 'src/assets/loading'
+styles = (project / 'src/styles.css').read_text(encoding='utf-8')
+
+
+def palette_color(token):
+    match = re.search(rf'--{re.escape(token)}:\s*(#[0-9a-fA-F]{{6}})\s*;', styles)
+    if not match:
+        raise ValueError(f'Missing hex palette token: --{token}')
+    return ImageColor.getrgb(match.group(1))
+
+
+ink = palette_color('mint')
+background = palette_color('surface-raised')
 for compact in (False, True):
-    size = (480, 600) if compact else (1440, 810)
+    size = (480, 1040) if compact else (1440, 810)
     destination = root / ('mobile' if compact else 'desktop')
     destination.mkdir(exist_ok=True)
     source = Image.open(root / 'mobile/sequence.webp') if compact else None
@@ -18,14 +32,18 @@ for compact in (False, True):
         for index in range(17):
             if source:
                 source.seek(index)
-                artwork = source.convert('RGBA')
+                alpha = source.convert('RGBA').getchannel('A')
+                # A tall, full-bleed canvas replaces the old 4:5 video panel.
+                # Keep the subjects inside the crop shared by tall phones and
+                # 4:3 tablets; only the surrounding background is trimmed.
+                subject = ImageOps.contain(alpha.crop(alpha.getbbox()), (400, 600), Image.Resampling.LANCZOS)
+                alpha = Image.new('L', size)
+                alpha.paste(subject, ((size[0] - subject.width) // 2, (size[1] - subject.height) // 2))
             else:
                 alpha = Image.open(root / f'frame-{index:02}.webp').getchannel('A')
                 alpha = ImageOps.fit(alpha, size, Image.Resampling.LANCZOS)
-                artwork = Image.new('RGBA', size, (195, 229, 200, 255))
-                artwork.putalpha(alpha)
-            frame = Image.new('RGB', size, 'black')
-            frame.paste(artwork, mask=artwork.getchannel('A'))
+            frame = Image.new('RGB', size, background)
+            frame.paste(ink, (0, 0, *size), alpha)
             frame.save(Path(temporary) / f'{index:02}.png')
             if index == 6:
                 frame.save(destination / 'still.webp', lossless=True, method=6)

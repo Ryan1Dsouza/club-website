@@ -42,6 +42,8 @@ test('a scene started before navigation releases its GPU resources when compilat
   await page.getByRole('link', { name: 'Our work', exact: true }).click();
   await expect(page).toHaveURL(/\/projects$/);
   await expect(page.locator('.people-page')).toHaveCount(0);
+  await expect(page.locator('html')).not.toHaveClass(/people-tower-open|people-tower-playing/);
+  await expect(page.locator('body')).toHaveCSS('position', 'static');
   await page.evaluate(() => window.__releaseTowerCompilation());
   await expect.poll(() => page.evaluate(() => window.__towerStartup.disposed)).toBe(true);
   expect(await page.evaluate(() => window.__towerStartup.memory)).toEqual({ geometries: 0, textures: 0 });

@@ -30,6 +30,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
   // Register resources as they are created, including partial initialization.
   try {
     const coarsePointer = matchMedia('(pointer: coarse)');
+    const pinnedViewport = matchMedia('(max-width: 760px), (pointer: coarse)');
     const device = {
       coarsePointer: coarsePointer.matches, cores: navigator.hardwareConcurrency,
       memory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory
@@ -84,12 +85,13 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     function sizeProfileName(index: number) {
       const parts = members[index].name.split(' ');
       const longest = Math.max(parts[0].length, parts.slice(1).join(' ').length);
-      const fontSize = Math.min(profileHeight * .225, profileWidth * .83 / (Math.max(5, longest) * .49));
+      const portraitLayout = width <= 760 && height > 500;
+      const fontSize = Math.min(profileHeight * (portraitLayout && height < 700 ? .14 : .19), profileWidth * (portraitLayout ? .86 : .45) / (Math.max(5, longest) * .49));
       profile.style.setProperty('--profile-name', `${fontSize}px`);
     }
 
     const stage = host.parentElement!;
-    let width = 1, height = 1, profileWidth = 1, profileHeight = 1;
+    let width = 1, height = 1, profileWidth = 1, profileHeight = 1, profileTop = 0;
     let bufferWidth = 0, bufferHeight = 0, viewportResizeTimer = 0;
     let start = 0, range = 1, target = 0, progress = 0, frame = 0, previousTime = 0;
     let active = -2, storyRemoved = 0, visible = true, idleAngle = 0, lastInteraction = -Infinity;
@@ -108,6 +110,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     const lastDragPoint = new THREE.Vector3(), throwVelocity = new THREE.Vector3(), pointerVelocity = new THREE.Vector3();
     let lastDragTime = 0;
     let pointerId = -1, draggedIndex = -1, downX = 0, downY = 0, travelled = 0;
+    let gestureId = -1, gestureX = 0, gestureY = 0, lastGestureY = 0;
+    let gestureAxis: 'x' | 'y' | null = null;
     cleanups.push(() => {
       window.clearTimeout(viewportResizeTimer);
       cancelAnimationFrame(frame); releasePointer();
@@ -181,8 +185,10 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       right.set(1, 0, 0).applyQuaternion(camera.quaternion); up.set(0, 1, 0).applyQuaternion(camera.quaternion);
       camera.getWorldDirection(forward);
       const distance = 4.8;
-      targetScale.set(2 * halfFov * distance * camera.aspect * .93, 2 * halfFov * distance * .79, .16);
-      destination.copy(camera.position).addScaledVector(forward, distance + .08).addScaledVector(up, -0.1);
+      const viewHeight = 2 * halfFov * distance;
+      targetScale.set(viewHeight * camera.aspect * profileWidth / width, viewHeight * profileHeight / height, .16);
+      destination.copy(camera.position).addScaledVector(forward, distance + .08)
+        .addScaledVector(up, (height / 2 - profileTop - profileHeight / 2) / height * viewHeight);
       const exitState = towerExit(state.local);
       const labelsChanged = matricesDirty || changedProgress || cameraMoved;
       profile.style.opacity = state.index >= 0 ? String(exitState.opacity) : '0';
@@ -306,6 +312,9 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     }
     function sampleScroll() {
       scrollDirty = false;
+      // On touch devices the document stays fixed. Gestures move this timeline
+      // directly, so browser scrolling cannot escape below the scene.
+      if (pinnedViewport.matches) return;
       const next = clamp01((getScrollPosition() - start) / range);
       if (next !== target) { lastInteraction = performance.now(); releasePointer(); }
       target = next;
@@ -319,7 +328,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       // bursts only mark dirty, so this work happens at most once per frame.
       const nextWidth = Math.max(1, host.clientWidth), nextHeight = Math.max(1, host.clientHeight);
       const header = parseFloat(getComputedStyle(stage).top) || 0;
-      start = section.getBoundingClientRect().top + getScrollPosition() - header; range = Math.max(1, section.offsetHeight - stage.offsetHeight);
+      start = pinnedViewport.matches ? 0 : section.getBoundingClientRect().top + getScrollPosition() - header;
+      range = pinnedViewport.matches ? nextHeight * (members.length * .55 + .2) : Math.max(1, section.offsetHeight - stage.offsetHeight);
       device.coarsePointer = coarsePointer.matches;
       quality = towerQuality(nextWidth, nextHeight, window.devicePixelRatio, device);
       detail = Math.min(detail, quality.detail, adaptive.detail) as TowerDetail;
@@ -345,7 +355,10 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         matricesDirty = true;
         width = nextWidth; height = nextHeight;
         css.setSize(width, height); camera.aspect = width / height; camera.updateProjectionMatrix();
-        profileWidth = width * .93; profileHeight = height * .79;
+        const portraitLayout = width <= 760 && height > 500;
+        profileTop = height <= 500 ? 82 : portraitLayout ? 148 : 100;
+        const bottomSpace = height <= 500 ? 88 : portraitLayout ? 154 : 104;
+        profileWidth = width * .9; profileHeight = Math.max(160, height - profileTop - bottomSpace);
         const monogramSize = Math.min(profileHeight * .57, profileWidth * .6);
         profile.style.width = `${profileWidth}px`;
         profile.style.height = `${profileHeight}px`;
@@ -364,6 +377,10 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       raycaster.setFromCamera(pointer, camera);
     }
     function pointerDown(event: PointerEvent) {
+      if (pinnedViewport.matches && event.pointerType !== 'mouse' && event.isPrimary && host.dataset.interaction !== 'play') {
+        gestureId = event.pointerId; gestureX = event.clientX; gestureY = lastGestureY = event.clientY; gestureAxis = null;
+        renderer.domElement.setPointerCapture(event.pointerId);
+      }
       if (event.button !== 0 || !event.isPrimary || pointerId >= 0 || active >= 0 || towerFrame(progress, members.length).outro > 0) return;
       cast(event);
       const hit = raycaster.intersectObject(batch.blocks)[0], index = hit?.instanceId;
@@ -375,6 +392,16 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       lastInteraction = performance.now(); wake();
     }
     function pointerMove(event: PointerEvent) {
+      if (event.pointerId === gestureId) {
+        const dx = event.clientX - gestureX, dy = event.clientY - gestureY;
+        if (!gestureAxis && Math.hypot(dx, dy) >= 6) gestureAxis = Math.abs(dy) >= Math.abs(dx) ? 'y' : 'x';
+        if (gestureAxis === 'y') {
+          releasePointer();
+          seek(target + (lastGestureY - event.clientY) / range);
+          lastGestureY = event.clientY;
+          return;
+        }
+      }
       if (event.pointerId !== pointerId) return;
       travelled = Math.max(travelled, Math.hypot(event.clientX - downX, event.clientY - downY));
       cast(event);
@@ -388,19 +415,53 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       lastInteraction = performance.now(); wake();
     }
     function pointerUp(event: PointerEvent) {
+      // Releasing a grabbed block during a swipe also emits lostpointercapture.
+      // Keep the vertical gesture alive until the finger actually lifts.
+      if (event.pointerId === gestureId && event.type !== 'lostpointercapture') {
+        gestureId = -1; gestureAxis = null;
+        if (renderer.domElement.hasPointerCapture(event.pointerId)) renderer.domElement.releasePointerCapture(event.pointerId);
+      }
       if (event.pointerId !== pointerId) return;
       const index = draggedIndex, click = travelled < 6 && event.type === 'pointerup';
       const throwing = !click && event.type === 'pointerup' && performance.now() - lastDragTime < 120;
       releasePointer(throwing ? throwVelocity : undefined); if (click) physics.pull(index);
       lastInteraction = performance.now(); wake();
     }
+    function seek(next: number) {
+      if (disposed) return;
+      releasePointer();
+      if (pinnedViewport.matches) target = clamp01(next);
+      else window.scrollTo({ top: start + clamp01(next) * range, behavior: 'instant' });
+      lastInteraction = performance.now(); wake();
+    }
+    function wheel(event: WheelEvent) {
+      if (!pinnedViewport.matches || event.ctrlKey || (event.target as HTMLElement).closest('select')) return;
+      event.preventDefault();
+      if (host.dataset.interaction === 'play') return;
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? height : 1;
+      seek(target + event.deltaY * unit / range);
+    }
+    function keydown(event: KeyboardEvent) {
+      if (!pinnedViewport.matches || host.dataset.interaction === 'play' || section.closest('[inert]')
+        || event.altKey || event.ctrlKey || event.metaKey) return;
+      const control = event.target as HTMLElement;
+      if (control.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')
+        || (event.key === ' ' && control.closest('button, a'))) return;
+      const delta = ({ ArrowDown: 80, ArrowUp: -80, PageDown: height * .65, PageUp: -height * .65, ' ': height * (event.shiftKey ? -.65 : .65) } as Record<string, number>)[event.key];
+      if (delta === undefined && event.key !== 'Home' && event.key !== 'End') return;
+      event.preventDefault();
+      seek(event.key === 'Home' ? 0 : event.key === 'End' ? 1 : target + delta / range);
+    }
+    function changeViewportMode() {
+      const saved = target;
+      measure(); seek(saved); resize();
+    }
     function rebuild() {
       if (disposed) return;
       releasePointer(); physics.reset(); storyRemoved = 0; active = -2; progress = target = 0; idleAngle = 0;
       scrollMotion.value = 0; scrollMotion.velocity = 0;
       matricesDirty = true; renderedProgress = -1; lastInteraction = performance.now();
-      window.scrollTo({ top: start, behavior: 'instant' });
-      wake();
+      seek(0);
     }
 
     const resizeObserver = new ResizeObserver(resize);
@@ -420,6 +481,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     const contextLost = (event: Event) => { event.preventDefault(); dispose(); callbacks.onError(); };
     cleanups.push(() => {
       window.removeEventListener('scroll', scroll); window.removeEventListener('resize', resize);
+      stage.removeEventListener('wheel', wheel); window.removeEventListener('keydown', keydown);
+      pinnedViewport.removeEventListener('change', changeViewportMode);
       document.removeEventListener('visibilitychange', visibility);
       renderer.domElement.removeEventListener('webglcontextlost', contextLost);
       renderer.domElement.removeEventListener('pointerdown', pointerDown); renderer.domElement.removeEventListener('pointermove', pointerMove);
@@ -431,6 +494,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     renderer.domElement.addEventListener('pointerup', pointerUp); renderer.domElement.addEventListener('pointercancel', pointerUp);
     renderer.domElement.addEventListener('lostpointercapture', pointerUp);
     window.addEventListener('scroll', scroll, { passive: true }); window.addEventListener('resize', resize, { passive: true });
+    stage.addEventListener('wheel', wheel, { passive: false }); window.addEventListener('keydown', keydown);
+    pinnedViewport.addEventListener('change', changeViewportMode);
     document.addEventListener('visibilitychange', visibility);
     host.append(renderer.domElement, css.domElement);
     await renderer.compileAsync(scene, camera);
@@ -439,7 +504,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     // force synchronous shader work onto the first mobile scroll frame.
     compiled = true;
     resize();
-    return { dispose, rebuild };
+    return { dispose, rebuild, seek };
   } catch (error) {
     dispose(); throw error;
   }

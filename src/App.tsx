@@ -8,13 +8,14 @@ import PageBoundary from './components/shared/PageBoundary';
 import LoadingScreen from './components/shared/LoadingScreen';
 import { LOADER_MINIMUM_MS, LOADER_MAXIMUM_MS } from './components/shared/loading-frames';
 import { api } from './api';
+import { supabase } from './lib/supabase';
 import RecruitmentApplication from './components/recruitment/RecruitmentApplication';
 import type { SiteData, SiteSettings } from './types';
 import seed from '../shared/public-data.json';
 import LogoLanding from './components/home/LogoLanding';
 import { BackgroundRippleEffect } from './components/ui/background-ripple-effect';
 import DomainParallax from './components/home/DomainParallax';
-import { EventsPage, WorkPage, PeoplePage, Recruitment } from './route-pages';
+import { EventsPage, WorkPage, PeoplePage, Recruitment, AchievementsPage, LiveNews } from './route-pages';
 import VoicesMarquee from './components/home/VoicesMarquee';
 import CommunityCTA from './components/home/CommunityCTA';
 import { useReveal } from './components/ui/reveal';
@@ -76,8 +77,24 @@ export default function App({ initialData = seed, serverRendered = false }: { in
     };
     // The existing seed/SSR data stays available if startup requests stall.
     const deadline = window.setTimeout(dismiss, LOADER_MAXIMUM_MS);
-    const refresh = () => api<SiteData>('/site', { signal: abort.signal }).then(site => {
-      if (!disposed) { setData(site); }
+        const refresh = () => Promise.all([
+      api<SiteData>('/site', { signal: abort.signal }),
+      supabase.from('team_members').select('id, name, role, photo_url, created_at').order('created_at', { ascending: true })
+    ]).then(([site, { data, error }]) => {
+      if (error) {
+        console.error('Failed to load team from Supabase', error);
+        if (!disposed) { setData(site); }
+        return;
+      }
+      const team = (data || []).map((member: any) => ({
+        id: member.id,
+        name: member.name,
+        role: member.role,
+        image: member.photo_url ?? undefined,
+        createdAt: member.created_at,
+        initials: member.name.trim().split(/\s+/).slice(0, 2).map((part: string) => part[0]).join('').toUpperCase(),
+      }));
+      if (!disposed) { setData({ ...site, team }); }
     }).catch(() => { /* Recruitment verifies availability before accepting input. */ });
     const firstRequest = refresh();
     // Fonts and decorative frames load independently. SSR already has usable data.
@@ -121,7 +138,9 @@ export default function App({ initialData = seed, serverRendered = false }: { in
   const navItems = [
     { title: 'Home', href: '/' },
     { title: 'Events', href: '/events' },
+    { title: 'Live News', href: '/news' },
     { title: 'Our work', href: '/projects' },
+    { title: 'Achievements', href: '/achievements' },
     { title: 'The people', href: '/team' },
   ];
 
@@ -129,8 +148,8 @@ export default function App({ initialData = seed, serverRendered = false }: { in
 
   return <>
     <LoadingScreen active={loadingStage === 'idle' || loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
-    <div className={`site-shell${['/', '/team'].includes(pagePath) ? ' site-shell--home' : pagePath === '/projects' ? ' site-shell--work' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
-    {location.pathname === '/' && <BackgroundRippleEffect className="background-ripple-effect--page" />}
+    <div className={`site-shell${['/', '/team'].includes(pagePath) ? ' site-shell--home' : pagePath === '/projects' ? ' site-shell--work' : pagePath === '/achievements' ? ' site-shell--achievements' : ['/news', '/live-news'].includes(pagePath) ? ' site-shell--news' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
+    {['/', '/achievements', '/news', '/live-news'].includes(pagePath) && <BackgroundRippleEffect className="background-ripple-effect--page" />}
     <a href="#main-content" className="skip-link">Skip to content</a>
     <header className={`site-header${pagePath === '/events' ? ' site-header--events' : ['/', '/team'].includes(pagePath) ? ' site-header--home' : ''}`}>
       <MorphingNavbar items={navItems} settings={settings} open={menuOpen} onOpenChange={setMenuOpen} onApply={() => setApplyOpen(true)} />
@@ -142,6 +161,9 @@ export default function App({ initialData = seed, serverRendered = false }: { in
         <Route path="/recruitment" element={<Recruitment settings={settings} />} />
         <Route path="/events" element={<EventsPage events={data.events} onPublished={event => setData(current => ({ ...current, events: [...current.events.filter(item => item.id !== event.id), event] }))} />} />
         <Route path="/projects" element={<WorkPage projects={data.projects} settings={settings} />} />
+        <Route path="/achievements" element={<AchievementsPage members={data.team} settings={settings} />} />
+        <Route path="/news" element={<LiveNews />} />
+        <Route path="/live-news" element={<LiveNews />} />
         <Route path="/team" element={<PeoplePage members={data.team} />} />
         <Route path="*" element={<section className="recruitment-page section-wrap"><span className="eyebrow">404</span><h1>Lost the<br /><em>connection?</em></h1><Link className="button primary" to="/">Back to Nucleus <ArrowRight size={17} /></Link></section>} />
       </Routes></Suspense></PageBoundary>

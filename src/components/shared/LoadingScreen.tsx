@@ -8,6 +8,7 @@ import './loading-screen.css';
 
 const compactQueries = ['(max-width: 767px)', '(max-height: 500px) and (max-width: 1024px)', '(pointer: coarse)'];
 const compactMedia = compactQueries.join(', ');
+const portraitMedia = '(orientation: portrait)';
 
 export type LoadingScreenProps = { active?: boolean; message?: string; onExitComplete?: () => void };
 
@@ -30,7 +31,7 @@ function LoadingOverlay({ message }: { message: string }) {
     const video = videoRef.current!;
     let disposed = false;
     const preference = matchMedia('(prefers-reduced-motion: reduce)');
-    const compactPreference = matchMedia(compactMedia);
+    const portraitPreference = matchMedia(portraitMedia);
     let request: AbortController | undefined, objectUrl = '', selected = '';
     // The browser media pipeline owns decode/playback, without a JS frame clock.
     const playback = () => {
@@ -38,7 +39,7 @@ function LoadingOverlay({ message }: { message: string }) {
       void video.play().catch(() => { if (!disposed) setReady(false); });
     };
     const select = async () => {
-      const source = preference.matches ? '' : compactPreference.matches ? mobileSequence : desktopSequence;
+      const source = preference.matches ? '' : portraitPreference.matches ? mobileSequence : desktopSequence;
       if (source === selected) { playback(); return; }
       selected = source; request?.abort(); video.pause(); setReady(false);
       video.removeAttribute('src'); video.load();
@@ -58,13 +59,13 @@ function LoadingOverlay({ message }: { message: string }) {
     void select();
     document.addEventListener('visibilitychange', playback);
     preference.addEventListener('change', select);
-    compactPreference.addEventListener('change', select);
+    portraitPreference.addEventListener('change', select);
     return () => {
       disposed = true; request?.abort(); video.pause(); video.removeAttribute('src'); video.load();
       if (objectUrl) URL.revokeObjectURL(objectUrl);
       document.removeEventListener('visibilitychange', playback);
       preference.removeEventListener('change', select);
-      compactPreference.removeEventListener('change', select);
+      portraitPreference.removeEventListener('change', select);
     };
   }, []);
 
@@ -86,7 +87,7 @@ function LoadingOverlay({ message }: { message: string }) {
     transition={{ type: 'tween', duration: reduced ? 0 : compact ? .35 : .45, ease: [.77, 0, .175, 1] }}>
     <div className="nucleus-loader__art" aria-hidden="true">
       <picture className="nucleus-loader__poster">
-        <source media={compactMedia} srcSet={mobilePoster} />
+        <source media={portraitMedia} srcSet={mobilePoster} />
         <img src={desktopPoster} alt="" width={1440} height={810} decoding="async" fetchPriority="high"
           onError={() => setFailed(true)} onLoad={() => setFailed(false)} />
       </picture>

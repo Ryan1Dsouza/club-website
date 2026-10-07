@@ -1,5 +1,5 @@
 import { Component, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowDown, ArrowLeft, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import type { Member } from '../types';
 import { createTeamProfiles, type TeamProfile } from '../lib/team-profiles';
 import { preloadImage } from '../lib/preload-image';
@@ -48,6 +48,12 @@ export default function PeoplePage({ members }: { members: Member[] }) {
   const closeProfile = useCallback(() => setSelected(null), []);
   const previousView = useRef(view);
   const previousGroup = useRef(group);
+
+  useEffect(() => {
+    if (view !== 'tower') return;
+    document.documentElement.classList.add('people-tower-open');
+    return () => document.documentElement.classList.remove('people-tower-open');
+  }, [view]);
 
   useEffect(() => {
     if (previousGroup.current === group) return;

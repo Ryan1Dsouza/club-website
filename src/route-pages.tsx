@@ -13,6 +13,8 @@ export const EventsPage = deferredPage(() => import('./pages/EventsPage'));
 export const WorkPage = deferredPage(() => import('./pages/WorkPage'));
 export const PeoplePage = deferredPage(() => import('./pages/PeoplePage'));
 export const Recruitment = deferredPage(() => import('./pages/Recruitment'));
+export const AchievementsPage = deferredPage(() => import('./pages/AchievementsPage'));
+export const LiveNews = deferredPage(() => import('./pages/LiveNews'));
 
-const pages = { '/events': EventsPage, '/projects': WorkPage, '/team': PeoplePage, '/recruitment': Recruitment };
+const pages = { '/events': EventsPage, '/projects': WorkPage, '/team': PeoplePage, '/recruitment': Recruitment, '/achievements': AchievementsPage, '/news': LiveNews, '/live-news': LiveNews };
 export const preloadPage = (path: string) => pages[path.replace(/\/$/, '') as keyof typeof pages]?.preload() ?? Promise.resolve();

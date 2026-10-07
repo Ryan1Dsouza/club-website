@@ -28,6 +28,7 @@ export function createTowerPortraits(members: Member[], small: boolean) {
     if (disposed || active !== index || cache.get(index) !== portrait || !host) return;
     const ready = portrait.full?.loaded ? portrait.full : portrait.thumbnail.loaded ? portrait.thumbnail : undefined;
     if (!ready || host.querySelector('.tower-profile__photo') === ready.image) return;
+    host.dataset.hasPhoto = 'true';
     host.querySelectorAll('.tower-profile__photo, .tower-profile__photo-bg').forEach(el => el.remove());
     const bgImg = ready.image.cloneNode() as HTMLImageElement;
     bgImg.className = 'tower-profile__photo-bg';
@@ -92,10 +93,12 @@ export function createTowerPortraits(members: Member[], small: boolean) {
   }
   function show(index: number, element: HTMLElement) {
     active = index; host = element;
+    delete host.dataset.hasPhoto;
     host.querySelectorAll('.tower-profile__photo, .tower-profile__photo-bg').forEach(el => el.remove());
     prepare(index);
     const portrait = cache.get(index);
     if (portrait?.preview) {
+      host.dataset.hasPhoto = 'true';
       const preview = new Image();
       preview.className = 'tower-profile__photo'; preview.alt = '';
       preview.dataset.preview = 'true'; preview.src = portrait.preview;

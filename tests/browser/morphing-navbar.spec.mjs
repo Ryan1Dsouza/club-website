@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
 const site = JSON.parse(await readFile(new URL('../../shared/public-data.json', import.meta.url), 'utf8'));
-const destinations = [['Home', '/'], ['Events', '/events'], ['Our work', '/projects'], ['The people', '/team']];
+const destinations = [['Home', '/'], ['Events', '/events'], ['Live News', '/news'], ['Our work', '/projects'], ['Achievements', '/achievements'], ['The people', '/team']];
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/site', route => route.fulfill({ json: site }));
@@ -73,7 +73,7 @@ test('reference layout keeps a centered pill and reveals a full-screen menu in f
   expect(frames.some(frame => frame.bands[0] > 10 && frame.bands[0] < 1300 && frame.bands[4] > frame.bands[0] + 100 && frame.text < .1)).toBe(true);
   const overlay = await page.locator('.morph-nav__overlay').boundingBox();
   expect(overlay).toEqual({ x: 0, y: 0, width: 1440, height: 900 });
-  await expect(page.locator('.morph-nav__links .morph-nav__link')).toHaveCount(4);
+  await expect(page.locator('.morph-nav__links .morph-nav__link')).toHaveCount(destinations.length);
   expect(await page.locator('.morph-nav__links').evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeLessThanOrEqual(96);
   await expect(menu(page).getByRole('link', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page');
   await page.screenshot({ path: info.outputPath('desktop-open.png') });
@@ -194,7 +194,7 @@ test('routes, social destinations, reduced motion, and the community action rema
   await expect(toggle(page)).toBeFocused();
   await toggle(page).click();
   await page.goBack();
-  await expect(page).toHaveURL(/\/projects$/);
+  await expect(page).toHaveURL(/\/achievements$/);
   await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
 });
 
@@ -223,7 +223,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
   });
 }
 
-test('all four navigation links change pages as soon as the reverse slide clears', async ({ page }, info) => {
+test('all navigation links change pages as soon as the reverse slide clears', async ({ page }, info) => {
   await page.goto('/recruitment');
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done', { timeout: 15000 });
 

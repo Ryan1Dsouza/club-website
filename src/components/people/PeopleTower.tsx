@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { ArrowDown, RotateCcw } from 'lucide-react';
+import { MoveUpRight, RotateCcw } from 'lucide-react';
 import type { Member } from '../../types';
 import { memberProgress, sortTowerMembers } from '../../lib/people-tower-motion';
 import { createTowerPortraits } from '../../lib/people-tower-portraits';
@@ -17,11 +17,10 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
   useEffect(() => { onStatusChange(status); }, [status, onStatusChange]);
   const memberKey = useMemo(() => JSON.stringify(sorted), [sorted]);
   useEffect(() => {
-    if (playMode) { document.body.style.overflow = 'hidden'; }
-    else { document.body.style.overflow = ''; }
-    return () => { document.body.style.overflow = ''; };
+    document.documentElement.classList.toggle('people-tower-playing', playMode);
+    return () => document.documentElement.classList.remove('people-tower-playing');
   }, [playMode]);
-  const controller = useRef<{ rebuild: () => void } | null>(null);
+  const controller = useRef<{ rebuild: () => void; seek: (progress: number) => void } | null>(null);
   useEffect(() => {
     const element = host.current, section = story.current;
     if (!element || !section || !sorted.length) { setStatus('still'); return; }
@@ -80,12 +79,8 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
   function revealMember(index: number) {
     const section = story.current;
     if (!section || status !== 'ready') return;
-    const stage = section.querySelector<HTMLElement>('.people-tower__stage');
-    if (!stage) return;
-    const header = parseFloat(getComputedStyle(stage).top) || 0;
-    const top = section.getBoundingClientRect().top + window.scrollY - header;
     setPlayMode(false);
-    window.scrollTo({ top: top + memberProgress(index, sorted.length) * (section.offsetHeight - stage.offsetHeight), behavior: 'instant' });
+    controller.current?.seek(memberProgress(index, sorted.length));
     section.querySelector<HTMLSelectElement>('select')?.focus({ preventScroll: true });
   }
   return <section className="people-tower-view" aria-label="Interactive team tower" data-tower-status={status}>
@@ -97,7 +92,7 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
     } as CSSProperties}>
       <div className="people-tower__stage">
         <div className="people-tower__world" ref={host} data-interaction={playMode ? 'play' : 'scroll'} aria-hidden="true" />
-        <div className="people-tower__finish" aria-hidden="true"><p>The<br /><em>whole team.</em></p><span>Meet everyone <ArrowDown size={15} /></span></div>
+        <div className="people-tower__finish" aria-hidden="true"><p>The<br /><em>whole team.</em></p><span>Scroll back to revisit. Rebuild to play again.</span></div>
         <p className="people-tower__hint" hidden={status !== 'ready'}>
           <span className="people-tower__hint-mouse">Click to pull. Grab, drag and release to throw. Scroll to meet the team.</span>
           <span className="people-tower__hint-touch">{playMode ? 'Grab any block. Drag and release to throw. Switch to Scroll to explore when you’re ready.' : 'Swipe up to meet the team. Tap a block to pull it, or choose Drag & throw to play.'}</span>
@@ -106,11 +101,11 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
           <button type="button" className="people-tower__mode" aria-pressed={playMode} onClick={() => {
             if (!playMode) controller.current?.rebuild();
             setPlayMode(!playMode);
-          }}>{playMode ? 'Scroll to explore' : 'Drag & throw'}</button>
+          }}><MoveUpRight size={15} />{playMode ? 'Scroll to explore' : 'Drag & throw'}</button>
           <div className="people-tower__counter"><span>{active < 0 ? '—' : String(active + 1).padStart(2, '0')}</span><span>/ {String(sorted.length).padStart(2, '0')}</span></div>
 
           <label className="people-tower__picker"><span className="sr-only">Jump to a member</span><select value={active < 0 ? '' : active} onChange={event => revealMember(Number(event.target.value))}><option value="" disabled>Meet the members</option>{sorted.map((member, index) => <option key={member.id} value={index}>{member.name}</option>)}</select></label>
-          <button className="people-tower__rebuild" onClick={() => controller.current?.rebuild()}><RotateCcw size={14} /><span>Rebuild tower</span></button>
+          <button type="button" className="people-tower__rebuild" aria-label="Rebuild tower" onClick={() => controller.current?.rebuild()}><RotateCcw size={14} /><span>Rebuild tower</span></button>
         </div>
       </div>
     </div>

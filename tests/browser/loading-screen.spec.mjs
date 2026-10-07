@@ -41,9 +41,9 @@ test('native desktop playback advances without a JS clock and the opaque curtain
   await page.goto('/recruitment');
   const loader = screen(page);
   await expect(loader).toHaveAttribute('data-frames-ready', 'true');
-  await expect(loader).toHaveCSS('background-color', 'rgb(0, 0, 0)');
-  await expect(loader).toHaveCSS('color', 'rgb(195, 229, 200)');
-  await expect(page.getByRole('status')).toHaveText('Connecting the dots…');
+  await expect(loader).toHaveCSS('background-color', 'rgb(6, 17, 8)');
+  await expect(loader).toHaveCSS('color', 'rgb(155, 207, 162)');
+  await expect(loader.getByRole('status')).toHaveText('Connecting the dots…');
   expect(await page.locator('.site-shell').evaluate(element => element.inert)).toBe(true);
   await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
   const video = loader.locator('video');
@@ -111,7 +111,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     await expect(loader).toBeVisible();
     const box = await loader.boundingBox();
     expect(box).toEqual({ x: 0, y: 0, ...viewport });
-    await expect(loader.locator('video')).toHaveCSS('object-fit', viewport.width <= 767 || viewport.height <= 500 ? 'contain' : 'cover');
+    await expect(loader.locator('video')).toHaveCSS('object-fit', 'cover');
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
     await page.screenshot({ path: info.outputPath(`loader-${viewport.width}.png`) });
     await expect(loader).toHaveCount(0, { timeout: 3000 });
@@ -195,7 +195,7 @@ test('failed video playback keeps the branded poster and never blocks startup', 
 test.describe('mobile artwork', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
 
-  test('native video animates with JS paused and keeps the mobile artwork prominent', async ({ page }, info) => {
+  test('native video animates with JS paused and fills portrait and landscape screens', async ({ page }, info) => {
     await freezeStartup(page);
     const requests = [];
     page.on('request', request => { if (['image', 'media', 'fetch', 'other'].includes(request.resourceType()) && /loading/.test(request.url())) requests.push(request.url()); });
@@ -217,24 +217,26 @@ test.describe('mobile artwork', () => {
     // The static branded frame also makes screenshot comparisons deterministic.
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expect(screen(page).locator('video')).toBeHidden();
-    for (const viewport of [{ width: 320, height: 568 }, { width: 360, height: 640 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 844, height: 390 }]) {
+    for (const viewport of [{ width: 320, height: 568 }, { width: 360, height: 800 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 844, height: 390 }]) {
       await page.setViewportSize(viewport);
-      await expect(image).toHaveCSS('object-fit', 'contain');
+      await expect(image).toHaveCSS('object-fit', 'cover');
       await expect(screen(page)).toHaveCSS('height', `${viewport.height}px`);
-      const box = await image.boundingBox();
-      expect(box.x).toBeGreaterThanOrEqual(16);
-      expect(box.y).toBeGreaterThanOrEqual(16);
-      expect(box.x + box.width).toBeLessThanOrEqual(viewport.width - 16);
-      expect(box.y + box.height).toBeLessThanOrEqual(viewport.height - 16);
-      const dimensions = await image.evaluate(element => ({ width: element.naturalWidth, height: element.naturalHeight }));
-      expect(dimensions).toEqual({ width: 480, height: 600 });
-      const scale = Math.min(box.width / 480, box.height / 600);
-      // On portrait phones the composition occupies almost half the viewport,
-      // rather than a tiny 16:9 strip in the middle of a tall screen.
-      if (viewport.width < viewport.height) expect(600 * scale / viewport.height).toBeGreaterThan(.48);
-      await page.screenshot({ path: info.outputPath(`loader-prominent-${viewport.width}.png`) });
+      expect(await image.boundingBox()).toEqual({ x: 0, y: 0, ...viewport });
+      const portrait = viewport.height >= viewport.width;
+      await expect.poll(() => image.evaluate(element => ({ width: element.naturalWidth, height: element.naturalHeight })))
+        .toEqual(portrait ? { width: 480, height: 1040 } : { width: 1440, height: 810 });
+      if (portrait) {
+        const scale = Math.max(viewport.width / 480, viewport.height / 1040);
+        // The central subject stays inside the screen even on tall phones and tablets.
+        expect(400 * scale).toBeLessThanOrEqual(viewport.width);
+        expect(600 * scale).toBeLessThanOrEqual(viewport.height);
+      }
+      await page.screenshot({ path: info.outputPath(`loader-fullscreen-${viewport.width}.png`) });
     }
     await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await expect(screen(page)).toHaveAttribute('data-frames-ready', 'true');
+    await expect.poll(() => screen(page).locator('video').evaluate(video => [video.videoWidth, video.videoHeight]))
+      .toEqual([1440, 810]);
     release();
     await page.clock.runFor(1500);
     await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'exiting');
