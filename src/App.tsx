@@ -77,16 +77,15 @@ export default function App({ initialData = seed, serverRendered = false }: { in
     };
     // The existing seed/SSR data stays available if startup requests stall.
     const deadline = window.setTimeout(dismiss, LOADER_MAXIMUM_MS);
-        const refresh = () => Promise.all([
+    const refresh = () => Promise.all([
       api<SiteData>('/site', { signal: abort.signal }),
-      supabase.from('team_members').select('id, name, role, photo_url, created_at').order('created_at', { ascending: true })
-    ]).then(([site, { data, error }]) => {
-      if (error) {
-        console.error('Failed to load team from Supabase', error);
-        if (!disposed) { setData(site); }
-        return;
-      }
-      const team = (data || []).map((member: any) => ({
+      supabase.from('team_members').select('id, name, role, photo_url, created_at').order('created_at', { ascending: true }),
+      supabase.from('events').select('*, event_photos (id, name, photo_url, position)').order('starts_at', { ascending: true })
+    ]).then(([site, { data: teamData, error: teamError }, { data: eventData, error: eventError }]) => {
+      if (teamError) console.error('Failed to load team from Supabase', teamError);
+      if (eventError) console.error('Failed to load events from Supabase', eventError);
+      
+      const team = (teamData || []).map((member: any) => ({
         id: member.id,
         name: member.name,
         role: member.role,
@@ -94,7 +93,25 @@ export default function App({ initialData = seed, serverRendered = false }: { in
         createdAt: member.created_at,
         initials: member.name.trim().split(/\s+/).slice(0, 2).map((part: string) => part[0]).join('').toUpperCase(),
       }));
-      if (!disposed) { setData({ ...site, team }); }
+
+      const events = (eventData || []).map((ev: any) => ({
+        id: ev.id,
+        title: ev.title,
+        description: ev.description,
+        startsAt: ev.starts_at,
+        endsAt: ev.ends_at,
+        location: ev.location,
+        category: ev.category,
+        registrationUrl: ev.registration_url ?? '',
+        albumUrl: ev.album_url ?? undefined,
+        published: ev.published,
+        managed: true,
+        photos: (ev.event_photos || []).sort((a: any, b: any) => a.position - b.position).map((p: any) => ({
+          id: p.id, name: p.name, url: p.photo_url
+        }))
+      }));
+
+      if (!disposed) { setData({ ...site, team, events: events.length > 0 ? events : site.events }); }
     }).catch(() => { /* Recruitment verifies availability before accepting input. */ });
     const firstRequest = refresh();
     // Fonts and decorative frames load independently. SSR already has usable data.
