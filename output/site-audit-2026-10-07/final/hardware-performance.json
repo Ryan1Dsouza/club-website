@@ -1,0 +1,919 @@
+[
+  {
+    "device": "phone",
+    "target": "home",
+    "cpuSlowdown": 4,
+    "heroTextReadyMs": 8882.899999999907,
+    "sample": {
+      "frames": 555,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.5,
+      "maxMs": 14.099999999998545,
+      "over33Percent": 0,
+      "longTasks": [],
+      "renderCalls": 2,
+      "triangles": 2,
+      "pixels": 1316640,
+      "pixelRatio": 2,
+      "geometries": 3,
+      "textures": 1
+    },
+    "cpu": {
+      "taskMs": 1173.806,
+      "scriptMs": 147.92,
+      "layoutMs": 6.8069999999999995,
+      "layouts": 2,
+      "heapMB": 10.233047485351562
+    },
+    "metrics": {
+      "lcp": 11364,
+      "cls": 0,
+      "maxLongTask": 410,
+      "initialLongTaskCount": 13
+    }
+  },
+  {
+    "device": "phone",
+    "target": "domains",
+    "cpuSlowdown": 4,
+    "sample": {
+      "frames": 398,
+      "p50Ms": 7,
+      "p95Ms": 20.900000000000546,
+      "maxMs": 132,
+      "over33Percent": 2.261306532663317,
+      "longTasks": [],
+      "renderCalls": 2,
+      "triangles": 0,
+      "pixels": 1007314,
+      "pixelRatio": 1.75,
+      "geometries": 2,
+      "textures": 0
+    },
+    "cpu": {
+      "taskMs": 2906.77,
+      "scriptMs": 629.6410000000001,
+      "layoutMs": 100.81799999999997,
+      "layouts": 79,
+      "heapMB": 9.18411636352539
+    },
+    "metrics": {
+      "lcp": 520,
+      "cls": 0,
+      "maxLongTask": 220,
+      "initialLongTaskCount": 6
+    }
+  },
+  {
+    "device": "phone",
+    "target": "events",
+    "cpuSlowdown": 4,
+    "sample": {
+      "frames": 93,
+      "p50Ms": 41.5,
+      "p95Ms": 76.40000000000055,
+      "maxMs": 111.09999999999945,
+      "over33Percent": 77.41935483870968,
+      "longTasks": [
+        {
+          "start": 4058.600000000093,
+          "duration": 71
+        },
+        {
+          "start": 4131,
+          "duration": 77
+        },
+        {
+          "start": 4209.699999999721,
+          "duration": 50
+        },
+        {
+          "start": 4306.100000000093,
+          "duration": 58
+        },
+        {
+          "start": 4736.699999999721,
+          "duration": 54
+        },
+        {
+          "start": 4792.299999999814,
+          "duration": 52
+        },
+        {
+          "start": 4845.5,
+          "duration": 60
+        },
+        {
+          "start": 4907.199999999721,
+          "duration": 53
+        },
+        {
+          "start": 4964.100000000093,
+          "duration": 74
+        },
+        {
+          "start": 5041.299999999814,
+          "duration": 57
+        },
+        {
+          "start": 5099.600000000093,
+          "duration": 54
+        },
+        {
+          "start": 5155.100000000093,
+          "duration": 95
+        },
+        {
+          "start": 5251.100000000093,
+          "duration": 81
+        },
+        {
+          "start": 5333.600000000093,
+          "duration": 66
+        },
+        {
+          "start": 6101.899999999907,
+          "duration": 58
+        },
+        {
+          "start": 6250.799999999814,
+          "duration": 53
+        },
+        {
+          "start": 6304.699999999721,
+          "duration": 95
+        },
+        {
+          "start": 6401.399999999907,
+          "duration": 108
+        },
+        {
+          "start": 6510.799999999814,
+          "duration": 74
+        },
+        {
+          "start": 7092.100000000093,
+          "duration": 69
+        },
+        {
+          "start": 7243.199999999721,
+          "duration": 67
+        },
+        {
+          "start": 7311.299999999814,
+          "duration": 84
+        }
+      ]
+    },
+    "cpu": {
+      "taskMs": 3995.362,
+      "scriptMs": 108.64500000000005,
+      "layoutMs": 3.3440000000000136,
+      "layouts": 3,
+      "heapMB": 6.6144866943359375
+    },
+    "fixedTrains": {
+      "frames": 577,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.100000000000364,
+      "maxMs": 7.700000000000728,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "metrics": {
+      "lcp": 648,
+      "cls": 0,
+      "maxLongTask": 108,
+      "initialLongTaskCount": 22
+    }
+  },
+  {
+    "device": "phone",
+    "target": "ride",
+    "cpuSlowdown": 4,
+    "sceneReadyMs": 3624,
+    "sample": {
+      "frames": 403,
+      "p50Ms": 7,
+      "p95Ms": 14.300000000000182,
+      "maxMs": 48.5,
+      "over33Percent": 0.7444168734491315,
+      "longTasks": [],
+      "renderCalls": 64,
+      "triangles": 20794,
+      "pixels": 513785,
+      "pixelRatio": 1.25,
+      "geometries": 36,
+      "textures": 5
+    },
+    "cpu": {
+      "taskMs": 3389.6680000000006,
+      "scriptMs": 2558.5119999999997,
+      "layoutMs": 0,
+      "layouts": 0,
+      "heapMB": 21.69522476196289
+    },
+    "metrics": {
+      "lcp": 496,
+      "cls": 0,
+      "maxLongTask": 1325,
+      "initialLongTaskCount": 5
+    }
+  },
+  {
+    "device": "phone-landscape",
+    "target": "home",
+    "cpuSlowdown": 4,
+    "heroTextReadyMs": 7516.600000000093,
+    "sample": {
+      "frames": 572,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.100000000000364,
+      "maxMs": 13.700000000000728,
+      "over33Percent": 0,
+      "longTasks": [],
+      "renderCalls": 2,
+      "triangles": 2,
+      "pixels": 1316640,
+      "pixelRatio": 2,
+      "geometries": 3,
+      "textures": 1
+    },
+    "cpu": {
+      "taskMs": 1007.223,
+      "scriptMs": 111.731,
+      "layoutMs": 2.87,
+      "layouts": 2,
+      "heapMB": 7.347747802734375
+    },
+    "metrics": {
+      "lcp": 708,
+      "cls": 0,
+      "maxLongTask": 385,
+      "initialLongTaskCount": 10
+    }
+  },
+  {
+    "device": "phone-landscape",
+    "target": "domains",
+    "cpuSlowdown": 4,
+    "sample": {
+      "frames": 458,
+      "p50Ms": 7,
+      "p95Ms": 20.699999999999818,
+      "maxMs": 34.70000000000073,
+      "over33Percent": 0.21834061135371177,
+      "longTasks": [],
+      "renderCalls": 2,
+      "triangles": 0,
+      "pixels": 1007314,
+      "pixelRatio": 1.75,
+      "geometries": 2,
+      "textures": 0
+    },
+    "cpu": {
+      "taskMs": 3106.986,
+      "scriptMs": 644.724,
+      "layoutMs": 96.88,
+      "layouts": 69,
+      "heapMB": 8.270233154296875
+    },
+    "metrics": {
+      "lcp": 428,
+      "cls": 0,
+      "maxLongTask": 303,
+      "initialLongTaskCount": 5
+    }
+  },
+  {
+    "device": "phone-landscape",
+    "target": "events",
+    "cpuSlowdown": 4,
+    "sample": {
+      "frames": 108,
+      "p50Ms": 34.70000000000073,
+      "p95Ms": 62.400000000000546,
+      "maxMs": 97.19999999999982,
+      "over33Percent": 71.29629629629629,
+      "longTasks": [
+        {
+          "start": 3836.100000000093,
+          "duration": 61
+        },
+        {
+          "start": 3989.100000000093,
+          "duration": 51
+        },
+        {
+          "start": 4040.4000000003725,
+          "duration": 50
+        },
+        {
+          "start": 4634.800000000279,
+          "duration": 51
+        },
+        {
+          "start": 5868.600000000093,
+          "duration": 59
+        },
+        {
+          "start": 5972,
+          "duration": 65
+        },
+        {
+          "start": 6037.800000000279,
+          "duration": 64
+        },
+        {
+          "start": 6175.4000000003725,
+          "duration": 63
+        },
+        {
+          "start": 6239.100000000093,
+          "duration": 101
+        },
+        {
+          "start": 7466.200000000186,
+          "duration": 59
+        },
+        {
+          "start": 7526.200000000186,
+          "duration": 55
+        },
+        {
+          "start": 7582.9000000003725,
+          "duration": 57
+        },
+        {
+          "start": 7641.100000000093,
+          "duration": 58
+        }
+      ]
+    },
+    "cpu": {
+      "taskMs": 4039.185,
+      "scriptMs": 122.703,
+      "layoutMs": 0,
+      "layouts": 0,
+      "heapMB": 6.5807647705078125
+    },
+    "fixedTrains": {
+      "frames": 577,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.100000000000364,
+      "maxMs": 8.5,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "metrics": {
+      "lcp": 864,
+      "cls": 0,
+      "maxLongTask": 101,
+      "initialLongTaskCount": 19
+    }
+  },
+  {
+    "device": "phone-landscape",
+    "target": "ride",
+    "cpuSlowdown": 4,
+    "sceneReadyMs": 3680,
+    "sample": {
+      "frames": 393,
+      "p50Ms": 7,
+      "p95Ms": 20.80000000000109,
+      "maxMs": 41.599999999999454,
+      "over33Percent": 0.5089058524173028,
+      "longTasks": [],
+      "renderCalls": 99,
+      "triangles": 23030,
+      "pixels": 513785,
+      "pixelRatio": 1.25,
+      "geometries": 49,
+      "textures": 9
+    },
+    "cpu": {
+      "taskMs": 3557.040999999999,
+      "scriptMs": 2616.6929999999998,
+      "layoutMs": 0,
+      "layouts": 0,
+      "heapMB": 23.051429748535156
+    },
+    "metrics": {
+      "lcp": 496,
+      "cls": 0,
+      "maxLongTask": 1335,
+      "initialLongTaskCount": 7
+    }
+  },
+  {
+    "device": "tablet",
+    "target": "home",
+    "cpuSlowdown": 4,
+    "heroTextReadyMs": 8529.80000000028,
+    "sample": {
+      "frames": 555,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.699999999998909,
+      "maxMs": 14,
+      "over33Percent": 0,
+      "longTasks": [],
+      "renderCalls": 2,
+      "triangles": 2,
+      "pixels": 2198208,
+      "pixelRatio": 1.6725563253470221,
+      "geometries": 3,
+      "textures": 1
+    },
+    "cpu": {
+      "taskMs": 1258.7189999999998,
+      "scriptMs": 148.494,
+      "layoutMs": 4.753,
+      "layouts": 2,
+      "heapMB": 10.071304321289062
+    },
+    "metrics": {
+      "lcp": 10644,
+      "cls": 0,
+      "maxLongTask": 326,
+      "initialLongTaskCount": 11
+    }
+  },
+  {
+    "device": "tablet",
+    "target": "domains",
+    "cpuSlowdown": 4,
+    "sample": {
+      "frames": 425,
+      "p50Ms": 7,
+      "p95Ms": 20.800000000000182,
+      "maxMs": 35,
+      "over33Percent": 0.4705882352941176,
+      "longTasks": [],
+      "renderCalls": 2,
+      "triangles": 0,
+      "pixels": 1798389,
+      "pixelRatio": 1.5128841196122722,
+      "geometries": 2,
+      "textures": 0
+    },
+    "cpu": {
+      "taskMs": 3404.157,
+      "scriptMs": 685.8380000000001,
+      "layoutMs": 123.809,
+      "layouts": 91,
+      "heapMB": 10.2047119140625
+    },
+    "metrics": {
+      "lcp": 936,
+      "cls": 0,
+      "maxLongTask": 299,
+      "initialLongTaskCount": 5
+    }
+  },
+  {
+    "device": "tablet",
+    "target": "events",
+    "cpuSlowdown": 4,
+    "sample": {
+      "frames": 102,
+      "p50Ms": 34.69999999999982,
+      "p95Ms": 90.19999999999982,
+      "maxMs": 111.30000000000018,
+      "over33Percent": 56.86274509803921,
+      "longTasks": [
+        {
+          "start": 4515,
+          "duration": 57
+        },
+        {
+          "start": 5147.399999999907,
+          "duration": 69
+        },
+        {
+          "start": 5217.199999999721,
+          "duration": 64
+        },
+        {
+          "start": 5352.799999999814,
+          "duration": 59
+        },
+        {
+          "start": 5806.299999999814,
+          "duration": 53
+        },
+        {
+          "start": 5905.299999999814,
+          "duration": 50
+        },
+        {
+          "start": 5998,
+          "duration": 55
+        },
+        {
+          "start": 6090.5,
+          "duration": 59
+        },
+        {
+          "start": 6236.699999999721,
+          "duration": 60
+        },
+        {
+          "start": 6415,
+          "duration": 52
+        },
+        {
+          "start": 6584.100000000093,
+          "duration": 51
+        },
+        {
+          "start": 6892.100000000093,
+          "duration": 56
+        },
+        {
+          "start": 6954.5,
+          "duration": 62
+        },
+        {
+          "start": 7017.199999999721,
+          "duration": 65
+        },
+        {
+          "start": 7140.600000000093,
+          "duration": 50
+        },
+        {
+          "start": 7192.899999999907,
+          "duration": 104
+        },
+        {
+          "start": 7406.299999999814,
+          "duration": 51
+        },
+        {
+          "start": 7459.699999999721,
+          "duration": 73
+        },
+        {
+          "start": 7586.199999999721,
+          "duration": 57
+        },
+        {
+          "start": 7644.799999999814,
+          "duration": 51
+        },
+        {
+          "start": 7767.5,
+          "duration": 113
+        },
+        {
+          "start": 7881.899999999907,
+          "duration": 73
+        },
+        {
+          "start": 7956.100000000093,
+          "duration": 94
+        },
+        {
+          "start": 8050.5,
+          "duration": 65
+        },
+        {
+          "start": 8162.699999999721,
+          "duration": 107
+        },
+        {
+          "start": 8270.5,
+          "duration": 50
+        }
+      ]
+    },
+    "cpu": {
+      "taskMs": 4059.014,
+      "scriptMs": 96.86399999999998,
+      "layoutMs": 0,
+      "layouts": 0,
+      "heapMB": 6.656913757324219
+    },
+    "fixedTrains": {
+      "frames": 556,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.600000000000364,
+      "maxMs": 27.700000000000728,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "metrics": {
+      "lcp": 1304,
+      "cls": 0,
+      "maxLongTask": 113,
+      "initialLongTaskCount": 31
+    }
+  },
+  {
+    "device": "tablet",
+    "target": "ride",
+    "cpuSlowdown": 4,
+    "sceneReadyMs": 3734,
+    "sample": {
+      "frames": 272,
+      "p50Ms": 13.899999999999636,
+      "p95Ms": 27.799999999999272,
+      "maxMs": 55.5,
+      "over33Percent": 2.5735294117647056,
+      "longTasks": [],
+      "renderCalls": 67,
+      "triangles": 20612,
+      "pixels": 1228800,
+      "pixelRatio": 1.25,
+      "geometries": 37,
+      "textures": 6
+    },
+    "cpu": {
+      "taskMs": 2953.2609999999995,
+      "scriptMs": 2241.629,
+      "layoutMs": 0,
+      "layouts": 0,
+      "heapMB": 14.579212188720703
+    },
+    "metrics": {
+      "lcp": 896,
+      "cls": 0,
+      "maxLongTask": 1606,
+      "initialLongTaskCount": 6
+    }
+  },
+  {
+    "device": "desktop",
+    "target": "home",
+    "cpuSlowdown": 1,
+    "heroTextReadyMs": 6851.799999999814,
+    "sample": {
+      "frames": 576,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.100000000000364,
+      "maxMs": 7.800000000001091,
+      "over33Percent": 0,
+      "longTasks": [],
+      "renderCalls": 2,
+      "triangles": 2,
+      "pixels": 1296000,
+      "pixelRatio": 1,
+      "geometries": 3,
+      "textures": 1
+    },
+    "cpu": {
+      "taskMs": 895.9780000000001,
+      "scriptMs": 280.041,
+      "layoutMs": 2.07,
+      "layouts": 2,
+      "heapMB": 8.643356323242188
+    },
+    "metrics": {
+      "lcp": 9288,
+      "cls": 0,
+      "maxLongTask": 179,
+      "initialLongTaskCount": 1
+    }
+  },
+  {
+    "device": "desktop",
+    "target": "domains",
+    "cpuSlowdown": 1,
+    "sample": {
+      "frames": 564,
+      "p50Ms": 6.900000000000546,
+      "p95Ms": 7.100000000000364,
+      "maxMs": 41.69999999999982,
+      "over33Percent": 0.3546099290780142,
+      "longTasks": [],
+      "renderCalls": 2,
+      "triangles": 0,
+      "pixels": 1296000,
+      "pixelRatio": 1,
+      "geometries": 2,
+      "textures": 0
+    },
+    "cpu": {
+      "taskMs": 851.2710000000001,
+      "scriptMs": 163.77899999999997,
+      "layoutMs": 28.471999999999998,
+      "layouts": 116,
+      "heapMB": 8.001640319824219
+    },
+    "metrics": {
+      "lcp": 852,
+      "cls": 0,
+      "maxLongTask": 50,
+      "initialLongTaskCount": 1
+    }
+  },
+  {
+    "device": "desktop",
+    "target": "events",
+    "cpuSlowdown": 1,
+    "sample": {
+      "frames": 576,
+      "p50Ms": 6.900000000000546,
+      "p95Ms": 7.100000000000364,
+      "maxMs": 14,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 2261.873,
+      "scriptMs": 76.93599999999999,
+      "layoutMs": 0,
+      "layouts": 0,
+      "heapMB": 6.6923675537109375
+    },
+    "fixedTrains": {
+      "frames": 576,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.100000000000364,
+      "maxMs": 7.899999999999636,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "metrics": {
+      "lcp": 352,
+      "cls": 0.0005360950360082305,
+      "maxLongTask": 0,
+      "initialLongTaskCount": 0
+    }
+  },
+  {
+    "device": "desktop",
+    "target": "ride",
+    "cpuSlowdown": 1,
+    "sceneReadyMs": 2714,
+    "sample": {
+      "frames": 510,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 13.799999999999272,
+      "maxMs": 166.5,
+      "over33Percent": 0.5882352941176471,
+      "longTasks": [
+        {
+          "start": 7638.100000000093,
+          "duration": 163
+        }
+      ],
+      "renderCalls": 73,
+      "triangles": 22534,
+      "pixels": 699338,
+      "pixelRatio": 0.734930919740164,
+      "geometries": 50,
+      "textures": 9
+    },
+    "cpu": {
+      "taskMs": 2135.69,
+      "scriptMs": 1225.249,
+      "layoutMs": 24.470000000000006,
+      "layouts": 400,
+      "heapMB": 15.372261047363281
+    },
+    "metrics": {
+      "lcp": 216,
+      "cls": 0.0005360950360082305,
+      "maxLongTask": 724,
+      "initialLongTaskCount": 4
+    }
+  },
+  {
+    "device": "wide",
+    "target": "home",
+    "cpuSlowdown": 1,
+    "heroTextReadyMs": 6726.100000000093,
+    "sample": {
+      "frames": 576,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.100000000000364,
+      "maxMs": 9,
+      "over33Percent": 0,
+      "longTasks": [],
+      "renderCalls": 2,
+      "triangles": 2,
+      "pixels": 2073600,
+      "pixelRatio": 1,
+      "geometries": 3,
+      "textures": 1
+    },
+    "cpu": {
+      "taskMs": 389.32800000000003,
+      "scriptMs": 117.625,
+      "layoutMs": 0.707,
+      "layouts": 2,
+      "heapMB": 8.792572021484375
+    },
+    "metrics": {
+      "lcp": 8880,
+      "cls": 0,
+      "maxLongTask": 56,
+      "initialLongTaskCount": 1
+    }
+  },
+  {
+    "device": "wide",
+    "target": "domains",
+    "cpuSlowdown": 1,
+    "sample": {
+      "frames": 564,
+      "p50Ms": 6.900000000000546,
+      "p95Ms": 7.100000000000364,
+      "maxMs": 14.400000000000091,
+      "over33Percent": 0,
+      "longTasks": [],
+      "renderCalls": 3,
+      "triangles": 2,
+      "pixels": 2073600,
+      "pixelRatio": 1,
+      "geometries": 3,
+      "textures": 1
+    },
+    "cpu": {
+      "taskMs": 1538.787,
+      "scriptMs": 293.91900000000004,
+      "layoutMs": 48.74,
+      "layouts": 120,
+      "heapMB": 9.62636947631836
+    },
+    "metrics": {
+      "lcp": 188,
+      "cls": 0,
+      "maxLongTask": 55,
+      "initialLongTaskCount": 2
+    }
+  },
+  {
+    "device": "wide",
+    "target": "events",
+    "cpuSlowdown": 1,
+    "sample": {
+      "frames": 515,
+      "p50Ms": 7,
+      "p95Ms": 13.899999999999636,
+      "maxMs": 55.69999999999982,
+      "over33Percent": 0.3883495145631068,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 3510.895,
+      "scriptMs": 111.37400000000001,
+      "layoutMs": 0,
+      "layouts": 0,
+      "heapMB": 6.639274597167969
+    },
+    "fixedTrains": {
+      "frames": 572,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.100000000000364,
+      "maxMs": 27.800000000000182,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "metrics": {
+      "lcp": 452,
+      "cls": 0.00025129454812885805,
+      "maxLongTask": 0,
+      "initialLongTaskCount": 0
+    }
+  },
+  {
+    "device": "wide",
+    "target": "ride",
+    "cpuSlowdown": 1,
+    "sceneReadyMs": 2363,
+    "sample": {
+      "frames": 466,
+      "p50Ms": 7,
+      "p95Ms": 13.900000000001455,
+      "maxMs": 173.60000000000036,
+      "over33Percent": 0.2145922746781116,
+      "longTasks": [
+        {
+          "start": 6989.299999999814,
+          "duration": 125
+        }
+      ],
+      "renderCalls": 73,
+      "triangles": 22210,
+      "pixels": 699105,
+      "pixelRatio": 0.5810139073153302,
+      "geometries": 50,
+      "textures": 9
+    },
+    "cpu": {
+      "taskMs": 1379.4529999999997,
+      "scriptMs": 740.977,
+      "layoutMs": 17.858000000000004,
+      "layouts": 358,
+      "heapMB": 15.800357818603516
+    },
+    "metrics": {
+      "lcp": 416,
+      "cls": 0.00025129454812885805,
+      "maxLongTask": 589,
+      "initialLongTaskCount": 4
+    }
+  }
+]

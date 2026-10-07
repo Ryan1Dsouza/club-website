@@ -1,0 +1,5 @@
+{
+  "commit": "be1da0fe2d86ea3e8dc8c8ca3ad5092274445276",
+  "initialCommit": "7e18e46",
+  "reason": "The working tree received three commits and its dist output was rebuilt during the initial audit. Final checks use this frozen source snapshot."
+}

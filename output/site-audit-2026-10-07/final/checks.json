@@ -1,0 +1,334 @@
+[
+  {
+    "test": "team-api-error",
+    "initialSeedMembers": 15,
+    "remainingCards": 15,
+    "visibleAlerts": 0
+  },
+  {
+    "test": "supabase-event-integration",
+    "rendered": true
+  },
+  {
+    "test": "reduced-motion-home",
+    "errors": [],
+    "state": {
+      "stage": "done",
+      "loader": false,
+      "bodyText": "Skip to content\nNUCLEUS\nHOME\nEVENTS\nLIVE NEWS\nOUR WORK\nACHIEVEMENTS\nTHE PEOPLE\nInstagram\nLinkedIn\nGitHub\nEmail\nMADE OF MANY MINDS\n© 2026 Nucleus SJEC\nTHE COMMUNITY\nStay connected\nNucleus SJEC — A connection worth making.\n\nOUR DOMAINS\nOUR DOMAINS\n\nTHREE PATHS.\nTHREE PATHS.\n\nINFINITE DIRECTIONS.\nINFIN",
+      "textReady": "true",
+      "canvas": 0
+    }
+  },
+  {
+    "test": "menu-and-navigation",
+    "device": "phone-small",
+    "links": [
+      {
+        "text": "Home",
+        "left": 20,
+        "right": 130.21875,
+        "top": 100,
+        "bottom": 144
+      },
+      {
+        "text": "Events",
+        "left": 20,
+        "right": 162.171875,
+        "top": 148.46875,
+        "bottom": 192.46875
+      },
+      {
+        "text": "Live News",
+        "left": 20,
+        "right": 206.21875,
+        "top": 196.9375,
+        "bottom": 240.9375
+      },
+      {
+        "text": "Our work",
+        "left": 20,
+        "right": 208.78125,
+        "top": 245.40625,
+        "bottom": 289.40625
+      },
+      {
+        "text": "Achievements",
+        "left": 20,
+        "right": 290.265625,
+        "top": 293.875,
+        "bottom": 337.875
+      },
+      {
+        "text": "The people",
+        "left": 20,
+        "right": 222.5,
+        "top": 342.34375,
+        "bottom": 386.34375
+      }
+    ],
+    "maxOverflow": 0,
+    "navigated": true
+  },
+  {
+    "test": "menu-and-navigation",
+    "device": "phone",
+    "links": [
+      {
+        "text": "Home",
+        "left": 20,
+        "right": 154.34375,
+        "top": 202.859375,
+        "bottom": 246.859375
+      },
+      {
+        "text": "Events",
+        "left": 20,
+        "right": 193.3125,
+        "top": 252.3125,
+        "bottom": 296.3125
+      },
+      {
+        "text": "Live News",
+        "left": 20,
+        "right": 246.984375,
+        "top": 301.765625,
+        "bottom": 345.765625
+      },
+      {
+        "text": "Our work",
+        "left": 20,
+        "right": 250.078125,
+        "top": 351.21875,
+        "bottom": 395.21875
+      },
+      {
+        "text": "Achievements",
+        "left": 20,
+        "right": 349.4375,
+        "top": 400.671875,
+        "bottom": 444.671875
+      },
+      {
+        "text": "The people",
+        "left": 20,
+        "right": 266.84375,
+        "top": 450.125,
+        "bottom": 494.125
+      }
+    ],
+    "maxOverflow": 0,
+    "navigated": true
+  },
+  {
+    "test": "menu-and-navigation",
+    "device": "phone-landscape",
+    "links": [
+      {
+        "text": "Home",
+        "left": 22.859375,
+        "right": 163.9375,
+        "top": 92,
+        "bottom": 136
+      },
+      {
+        "text": "Events",
+        "left": 22.859375,
+        "right": 204.8125,
+        "top": 138.046875,
+        "bottom": 182.046875
+      },
+      {
+        "text": "Live News",
+        "left": 22.859375,
+        "right": 261.203125,
+        "top": 184.09375,
+        "bottom": 228.09375
+      },
+      {
+        "text": "Our work",
+        "left": 22.859375,
+        "right": 264.484375,
+        "top": 230.140625,
+        "bottom": 274.140625
+      },
+      {
+        "text": "Achievements",
+        "left": 22.859375,
+        "right": 368.765625,
+        "top": 276.1875,
+        "bottom": 320.1875
+      },
+      {
+        "text": "The people",
+        "left": 22.859375,
+        "right": 282.046875,
+        "top": 322.234375,
+        "bottom": 366.234375
+      }
+    ],
+    "maxOverflow": 0,
+    "navigated": true
+  },
+  {
+    "test": "menu-and-navigation",
+    "device": "tablet",
+    "links": [
+      {
+        "text": "Home",
+        "left": 20.8125,
+        "right": 241.265625,
+        "top": 229.796875,
+        "bottom": 293.765625
+      },
+      {
+        "text": "Events",
+        "left": 20.8125,
+        "right": 305.171875,
+        "top": 302.71875,
+        "bottom": 366.6875
+      },
+      {
+        "text": "Live News",
+        "left": 20.8125,
+        "right": 393.265625,
+        "top": 375.640625,
+        "bottom": 439.609375
+      },
+      {
+        "text": "Our work",
+        "left": 20.8125,
+        "right": 398.390625,
+        "top": 448.5625,
+        "bottom": 512.53125
+      },
+      {
+        "text": "Achievements",
+        "left": 20.8125,
+        "right": 561.359375,
+        "top": 521.484375,
+        "bottom": 585.453125
+      },
+      {
+        "text": "The people",
+        "left": 20.8125,
+        "right": 425.828125,
+        "top": 594.40625,
+        "bottom": 658.375
+      }
+    ],
+    "maxOverflow": 0,
+    "navigated": true
+  },
+  {
+    "test": "menu-and-navigation",
+    "device": "desktop",
+    "links": [
+      {
+        "text": "Home",
+        "left": 39.015625,
+        "right": 358.015625,
+        "top": 158.984375,
+        "bottom": 248.984375
+      },
+      {
+        "text": "Events",
+        "left": 39.015625,
+        "right": 447.890625,
+        "top": 257.984375,
+        "bottom": 347.984375
+      },
+      {
+        "text": "Live News",
+        "left": 39.015625,
+        "right": 571.765625,
+        "top": 356.984375,
+        "bottom": 446.984375
+      },
+      {
+        "text": "Our work",
+        "left": 39.015625,
+        "right": 578.984375,
+        "top": 455.984375,
+        "bottom": 545.984375
+      },
+      {
+        "text": "Achievements",
+        "left": 39.015625,
+        "right": 808.125,
+        "top": 554.984375,
+        "bottom": 644.984375
+      },
+      {
+        "text": "The people",
+        "left": 39.015625,
+        "right": 617.53125,
+        "top": 653.984375,
+        "bottom": 743.984375
+      }
+    ],
+    "maxOverflow": 0,
+    "navigated": true
+  },
+  {
+    "test": "menu-and-navigation",
+    "device": "wide",
+    "links": [
+      {
+        "text": "Home",
+        "left": 52,
+        "right": 392.265625,
+        "top": 223.0625,
+        "bottom": 319.046875
+      },
+      {
+        "text": "Events",
+        "left": 52,
+        "right": 488.125,
+        "top": 328.640625,
+        "bottom": 424.625
+      },
+      {
+        "text": "Live News",
+        "left": 52,
+        "right": 620.265625,
+        "top": 434.21875,
+        "bottom": 530.203125
+      },
+      {
+        "text": "Our work",
+        "left": 52,
+        "right": 627.953125,
+        "top": 539.796875,
+        "bottom": 635.78125
+      },
+      {
+        "text": "Achievements",
+        "left": 52,
+        "right": 872.40625,
+        "top": 645.375,
+        "bottom": 741.359375
+      },
+      {
+        "text": "The people",
+        "left": 52,
+        "right": 669.109375,
+        "top": 750.953125,
+        "bottom": 846.9375
+      }
+    ],
+    "maxOverflow": 0,
+    "navigated": true
+  },
+  {
+    "test": "failed-entry-script",
+    "serverContent": 15,
+    "loaderVisible": true,
+    "centerBlockedByLoader": true
+  },
+  {
+    "test": "stalled-api",
+    "readyMs": 2203,
+    "cards": 15
+  }
+]

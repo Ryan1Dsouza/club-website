@@ -1,0 +1,958 @@
+[
+  {
+    "device": "phone-small",
+    "errors": [],
+    "menuLinks": [
+      {
+        "text": "Skip to content",
+        "left": 10,
+        "right": 163.671875,
+        "top": -66.80000305175781,
+        "bottom": -18.800003051757812
+      },
+      {
+        "text": "Nucleus",
+        "left": 86,
+        "right": 182,
+        "top": 12,
+        "bottom": 56
+      },
+      {
+        "text": "Home",
+        "left": 276.1053466796875,
+        "right": 386.3240966796875,
+        "top": 100,
+        "bottom": 144
+      },
+      {
+        "text": "Events",
+        "left": 276.1053466796875,
+        "right": 418.2772216796875,
+        "top": 148.46875,
+        "bottom": 192.46875
+      },
+      {
+        "text": "Live News",
+        "left": 276.1053466796875,
+        "right": 462.3240966796875,
+        "top": 196.9375,
+        "bottom": 240.9375
+      },
+      {
+        "text": "Our work",
+        "left": 276.1053466796875,
+        "right": 464.8865966796875,
+        "top": 245.40625,
+        "bottom": 289.40625
+      },
+      {
+        "text": "Achievements",
+        "left": 276.1053466796875,
+        "right": 546.3709716796875,
+        "top": 293.875,
+        "bottom": 337.875
+      },
+      {
+        "text": "The people",
+        "left": 276.1053466796875,
+        "right": 478.6053466796875,
+        "top": 342.34375,
+        "bottom": 386.34375
+      },
+      {
+        "text": "Instagram",
+        "left": 276.1053466796875,
+        "right": 332.6365966796875,
+        "top": 410.34375,
+        "bottom": 450.34375
+      },
+      {
+        "text": "LinkedIn",
+        "left": 350.6365966796875,
+        "right": 398.2147216796875,
+        "top": 410.34375,
+        "bottom": 450.34375
+      },
+      {
+        "text": "GitHub",
+        "left": 416.2147216796875,
+        "right": 455.5115966796875,
+        "top": 410.34375,
+        "bottom": 450.34375
+      },
+      {
+        "text": "Email",
+        "left": 473.5115966796875,
+        "right": 503.7147216796875,
+        "top": 410.34375,
+        "bottom": 450.34375
+      }
+    ],
+    "book": {
+      "client": 320,
+      "scroll": 320,
+      "height": 568,
+      "layout": "mobile"
+    },
+    "bookTurn": {
+      "frames": 520,
+      "p50Ms": 7,
+      "p95Ms": 13.300000000000182,
+      "maxMs": 83.40000000000055,
+      "over33Percent": 0.576923076923077,
+      "longTasks": [
+        {
+          "start": 4725.5,
+          "duration": 84
+        }
+      ]
+    },
+    "bookPage": "2",
+    "bookClosed": true,
+    "project": {
+      "client": 294,
+      "scroll": 294
+    },
+    "profile": {
+      "client": 320,
+      "scroll": 320,
+      "emptyLinks": 3
+    },
+    "towerActive": {
+      "frames": 341,
+      "p50Ms": 7,
+      "p95Ms": 27.899999999999636,
+      "maxMs": 55.5,
+      "over33Percent": 4.69208211143695,
+      "longTasks": [
+        {
+          "start": 5022.600000000093,
+          "duration": 52
+        }
+      ],
+      "renderCalls": 5,
+      "triangles": 1902,
+      "pixels": 556640,
+      "pixelRatio": 1.75,
+      "geometries": 5,
+      "textures": 3
+    },
+    "towerProgress": {
+      "before": 0,
+      "after": 0.12426036647463141,
+      "documentScroll": 0
+    },
+    "towerPicker": "1",
+    "towerThrow": {
+      "frames": 557,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.299999999999272,
+      "maxMs": 20.799999999999272,
+      "over33Percent": 0,
+      "longTasks": [],
+      "renderCalls": 5,
+      "triangles": 1902,
+      "pixels": 556640,
+      "pixelRatio": 1.75,
+      "geometries": 5,
+      "textures": 3
+    },
+    "cleanedUp": {
+      "canvas": 0,
+      "locked": false,
+      "geometries": 0,
+      "textures": 0
+    }
+  },
+  {
+    "device": "phone",
+    "errors": [],
+    "menuLinks": [
+      {
+        "text": "Skip to content",
+        "left": 10,
+        "right": 163.671875,
+        "top": -66.80000305175781,
+        "bottom": -18.800003051757812
+      },
+      {
+        "text": "Nucleus",
+        "left": 121,
+        "right": 217,
+        "top": 12,
+        "bottom": 56
+      },
+      {
+        "text": "Home",
+        "left": 329.1315612792969,
+        "right": 463.4753112792969,
+        "top": 202.859375,
+        "bottom": 246.859375
+      },
+      {
+        "text": "Events",
+        "left": 329.1315612792969,
+        "right": 502.4440612792969,
+        "top": 252.3125,
+        "bottom": 296.3125
+      },
+      {
+        "text": "Live News",
+        "left": 329.1315612792969,
+        "right": 556.115966796875,
+        "top": 301.765625,
+        "bottom": 345.765625
+      },
+      {
+        "text": "Our work",
+        "left": 329.1315612792969,
+        "right": 559.209716796875,
+        "top": 351.21875,
+        "bottom": 395.21875
+      },
+      {
+        "text": "Achievements",
+        "left": 329.1315612792969,
+        "right": 658.569091796875,
+        "top": 400.671875,
+        "bottom": 444.671875
+      },
+      {
+        "text": "The people",
+        "left": 329.1315612792969,
+        "right": 575.975341796875,
+        "top": 450.125,
+        "bottom": 494.125
+      },
+      {
+        "text": "Instagram",
+        "left": 329.1315612792969,
+        "right": 385.6628112792969,
+        "top": 518.125,
+        "bottom": 558.125
+      },
+      {
+        "text": "LinkedIn",
+        "left": 403.6628112792969,
+        "right": 451.2409362792969,
+        "top": 518.125,
+        "bottom": 558.125
+      },
+      {
+        "text": "GitHub",
+        "left": 469.2409362792969,
+        "right": 508.5378112792969,
+        "top": 518.125,
+        "bottom": 558.125
+      },
+      {
+        "text": "Email",
+        "left": 526.537841796875,
+        "right": 556.740966796875,
+        "top": 518.125,
+        "bottom": 558.125
+      }
+    ],
+    "book": {
+      "client": 390,
+      "scroll": 390,
+      "height": 844,
+      "layout": "mobile"
+    },
+    "bookTurn": {
+      "frames": 526,
+      "p50Ms": 6.900000000000546,
+      "p95Ms": 13.799999999999272,
+      "maxMs": 83.39999999999964,
+      "over33Percent": 0.19011406844106463,
+      "longTasks": [
+        {
+          "start": 4804.699999999721,
+          "duration": 60
+        }
+      ]
+    },
+    "bookPage": "2",
+    "bookClosed": true,
+    "project": {
+      "client": 364,
+      "scroll": 364
+    },
+    "profile": {
+      "client": 390,
+      "scroll": 390,
+      "emptyLinks": 3
+    },
+    "towerActive": {
+      "frames": 295,
+      "p50Ms": 7,
+      "p95Ms": 41.70000000000073,
+      "maxMs": 263.09999999999945,
+      "over33Percent": 8.47457627118644,
+      "longTasks": [
+        {
+          "start": 5731.300000000279,
+          "duration": 62
+        },
+        {
+          "start": 6115.9000000003725,
+          "duration": 55
+        },
+        {
+          "start": 6277.5,
+          "duration": 60
+        },
+        {
+          "start": 6338.200000000186,
+          "duration": 64
+        },
+        {
+          "start": 6407,
+          "duration": 57
+        },
+        {
+          "start": 6927.4000000003725,
+          "duration": 260
+        },
+        {
+          "start": 7424.300000000279,
+          "duration": 62
+        }
+      ],
+      "renderCalls": 5,
+      "triangles": 362,
+      "pixels": 329160,
+      "pixelRatio": 1,
+      "geometries": 5,
+      "textures": 3
+    },
+    "towerProgress": {
+      "before": 0,
+      "after": 0.12426034604350734,
+      "documentScroll": 0
+    },
+    "towerPicker": "1",
+    "towerThrow": {
+      "frames": 552,
+      "p50Ms": 6.900000000001455,
+      "p95Ms": 7.199999999998909,
+      "maxMs": 34.600000000000364,
+      "over33Percent": 0.18115942028985507,
+      "longTasks": [],
+      "renderCalls": 5,
+      "triangles": 362,
+      "pixels": 329160,
+      "pixelRatio": 1,
+      "geometries": 5,
+      "textures": 3
+    },
+    "cleanedUp": {
+      "canvas": 0,
+      "locked": false,
+      "geometries": 0,
+      "textures": 0
+    }
+  },
+  {
+    "device": "phone-landscape",
+    "errors": [],
+    "menuLinks": [
+      {
+        "text": "Skip to content",
+        "left": 10,
+        "right": 163.671875,
+        "top": -66.80000305175781,
+        "bottom": -18.800003051757812
+      },
+      {
+        "text": "Nucleus",
+        "left": 345.3671875,
+        "right": 446.6328125,
+        "top": 12,
+        "bottom": 56
+      },
+      {
+        "text": "Home",
+        "left": 522.154052734375,
+        "right": 663.232177734375,
+        "top": 92,
+        "bottom": 136
+      },
+      {
+        "text": "Events",
+        "left": 522.154052734375,
+        "right": 704.107177734375,
+        "top": 138.046875,
+        "bottom": 182.046875
+      },
+      {
+        "text": "Live News",
+        "left": 522.154052734375,
+        "right": 760.497802734375,
+        "top": 184.09375,
+        "bottom": 228.09375
+      },
+      {
+        "text": "Our work",
+        "left": 522.154052734375,
+        "right": 763.779052734375,
+        "top": 230.140625,
+        "bottom": 274.140625
+      },
+      {
+        "text": "Achievements",
+        "left": 522.154052734375,
+        "right": 868.060302734375,
+        "top": 276.1875,
+        "bottom": 320.1875
+      },
+      {
+        "text": "The people",
+        "left": 522.154052734375,
+        "right": 781.341552734375,
+        "top": 322.234375,
+        "bottom": 366.234375
+      },
+      {
+        "text": "Instagram",
+        "left": 522.154052734375,
+        "right": 578.685302734375,
+        "top": 390.234375,
+        "bottom": 430.234375
+      },
+      {
+        "text": "LinkedIn",
+        "left": 596.685302734375,
+        "right": 644.263427734375,
+        "top": 390.234375,
+        "bottom": 430.234375
+      },
+      {
+        "text": "GitHub",
+        "left": 662.263427734375,
+        "right": 701.560302734375,
+        "top": 390.234375,
+        "bottom": 430.234375
+      },
+      {
+        "text": "Email",
+        "left": 719.560302734375,
+        "right": 749.763427734375,
+        "top": 390.234375,
+        "bottom": 430.234375
+      }
+    ],
+    "book": {
+      "client": 844,
+      "scroll": 844,
+      "height": 390,
+      "layout": "mobile"
+    },
+    "bookTurn": {
+      "frames": 551,
+      "p50Ms": 6.900000000000546,
+      "p95Ms": 7.399999999999636,
+      "maxMs": 41.69999999999982,
+      "over33Percent": 0.3629764065335753,
+      "longTasks": []
+    },
+    "bookPage": "2",
+    "bookClosed": true,
+    "project": {
+      "client": 758,
+      "scroll": 758
+    },
+    "profile": {
+      "client": 844,
+      "scroll": 844,
+      "emptyLinks": 3
+    },
+    "towerActive": {
+      "frames": 201,
+      "p50Ms": 13.800000000000182,
+      "p95Ms": 49,
+      "maxMs": 249.90000000000055,
+      "over33Percent": 20.8955223880597,
+      "longTasks": [
+        {
+          "start": 6018,
+          "duration": 58
+        },
+        {
+          "start": 6241.5,
+          "duration": 67
+        },
+        {
+          "start": 6318.799999999814,
+          "duration": 50
+        },
+        {
+          "start": 7573.899999999907,
+          "duration": 243
+        },
+        {
+          "start": 7851.299999999814,
+          "duration": 60
+        },
+        {
+          "start": 7962.399999999907,
+          "duration": 56
+        },
+        {
+          "start": 8059.299999999814,
+          "duration": 62
+        },
+        {
+          "start": 8277.5,
+          "duration": 50
+        },
+        {
+          "start": 8407.100000000093,
+          "duration": 52
+        },
+        {
+          "start": 8462.5,
+          "duration": 58
+        }
+      ],
+      "renderCalls": 5,
+      "triangles": 362,
+      "pixels": 329160,
+      "pixelRatio": 1,
+      "geometries": 5,
+      "textures": 3
+    },
+    "towerProgress": {
+      "before": 0,
+      "after": 0.12426035502958575,
+      "documentScroll": 0
+    },
+    "towerPicker": "1",
+    "towerThrow": {
+      "frames": 522,
+      "p50Ms": 7,
+      "p95Ms": 13.200000000000728,
+      "maxMs": 55.5,
+      "over33Percent": 0.7662835249042145,
+      "longTasks": [
+        {
+          "start": 11961.600000000093,
+          "duration": 61
+        }
+      ],
+      "renderCalls": 5,
+      "triangles": 362,
+      "pixels": 329160,
+      "pixelRatio": 1,
+      "geometries": 5,
+      "textures": 3
+    },
+    "cleanedUp": {
+      "canvas": 0,
+      "locked": false,
+      "geometries": 0,
+      "textures": 0
+    }
+  },
+  {
+    "device": "tablet",
+    "errors": [],
+    "menuLinks": [
+      {
+        "text": "Skip to content",
+        "left": 10,
+        "right": 163.671875,
+        "top": -66.80000305175781,
+        "bottom": -18.800003051757812
+      },
+      {
+        "text": "Nucleus",
+        "left": 310,
+        "right": 406,
+        "top": 12,
+        "bottom": 56
+      },
+      {
+        "text": "Home",
+        "left": 362.0123291015625,
+        "right": 582.4654541015625,
+        "top": 229.796875,
+        "bottom": 293.765625
+      },
+      {
+        "text": "Events",
+        "left": 362.0123291015625,
+        "right": 646.3717041015625,
+        "top": 302.71875,
+        "bottom": 366.6875
+      },
+      {
+        "text": "Live News",
+        "left": 362.0123291015625,
+        "right": 734.4654541015625,
+        "top": 375.640625,
+        "bottom": 439.609375
+      },
+      {
+        "text": "Our work",
+        "left": 362.0123291015625,
+        "right": 739.5904541015625,
+        "top": 448.5625,
+        "bottom": 512.53125
+      },
+      {
+        "text": "Achievements",
+        "left": 362.0123291015625,
+        "right": 902.5592041015625,
+        "top": 521.484375,
+        "bottom": 585.453125
+      },
+      {
+        "text": "The people",
+        "left": 362.0123291015625,
+        "right": 767.0279541015625,
+        "top": 594.40625,
+        "bottom": 658.375
+      },
+      {
+        "text": "Instagram",
+        "left": 362.0123291015625,
+        "right": 418.5435791015625,
+        "top": 682.375,
+        "bottom": 722.375
+      },
+      {
+        "text": "LinkedIn",
+        "left": 436.5435791015625,
+        "right": 484.1217041015625,
+        "top": 682.375,
+        "bottom": 722.375
+      },
+      {
+        "text": "GitHub",
+        "left": 502.1217041015625,
+        "right": 541.4185791015625,
+        "top": 682.375,
+        "bottom": 722.375
+      },
+      {
+        "text": "Email",
+        "left": 559.4185791015625,
+        "right": 589.6217041015625,
+        "top": 682.375,
+        "bottom": 722.375
+      }
+    ],
+    "book": {
+      "client": 716,
+      "scroll": 716,
+      "height": 432,
+      "layout": "spread"
+    },
+    "bookTurn": {
+      "frames": 515,
+      "p50Ms": 7,
+      "p95Ms": 13.800000000000182,
+      "maxMs": 83.29999999999927,
+      "over33Percent": 0.5825242718446602,
+      "longTasks": [
+        {
+          "start": 5411,
+          "duration": 82
+        }
+      ]
+    },
+    "bookPage": "2",
+    "bookClosed": true,
+    "project": {
+      "client": 726,
+      "scroll": 726
+    },
+    "profile": {
+      "client": 768,
+      "scroll": 768,
+      "emptyLinks": 3
+    },
+    "towerActive": {
+      "frames": 312,
+      "p50Ms": 7,
+      "p95Ms": 48.599999999999454,
+      "maxMs": 180.60000000000036,
+      "over33Percent": 6.730769230769231,
+      "longTasks": [
+        {
+          "start": 6440.700000000186,
+          "duration": 64
+        },
+        {
+          "start": 6505.300000000279,
+          "duration": 74
+        },
+        {
+          "start": 6750.200000000186,
+          "duration": 70
+        },
+        {
+          "start": 6826.100000000093,
+          "duration": 57
+        },
+        {
+          "start": 6903.200000000186,
+          "duration": 68
+        },
+        {
+          "start": 7097,
+          "duration": 50
+        },
+        {
+          "start": 7190,
+          "duration": 53
+        },
+        {
+          "start": 7243.5,
+          "duration": 63
+        },
+        {
+          "start": 7309.800000000279,
+          "duration": 56
+        },
+        {
+          "start": 7367.399999999907,
+          "duration": 58
+        },
+        {
+          "start": 7426.200000000186,
+          "duration": 58
+        },
+        {
+          "start": 7484.700000000186,
+          "duration": 54
+        },
+        {
+          "start": 7539.600000000093,
+          "duration": 53
+        },
+        {
+          "start": 7947.399999999907,
+          "duration": 187
+        }
+      ],
+      "renderCalls": 5,
+      "triangles": 362,
+      "pixels": 448920,
+      "pixelRatio": 0.7564420598061361,
+      "geometries": 5,
+      "textures": 3
+    },
+    "towerProgress": {
+      "before": 0,
+      "after": 0.12426034233273833,
+      "documentScroll": 0
+    },
+    "towerPicker": "1",
+    "towerThrow": {
+      "frames": 309,
+      "p50Ms": 7,
+      "p95Ms": 41.599999999998545,
+      "maxMs": 69.39999999999964,
+      "over33Percent": 9.06148867313916,
+      "longTasks": [
+        {
+          "start": 14475.80000000028,
+          "duration": 54
+        },
+        {
+          "start": 14605.30000000028,
+          "duration": 58
+        },
+        {
+          "start": 14696.399999999907,
+          "duration": 69
+        },
+        {
+          "start": 14800.30000000028,
+          "duration": 65
+        },
+        {
+          "start": 14908.30000000028,
+          "duration": 52
+        },
+        {
+          "start": 15396.100000000093,
+          "duration": 62
+        },
+        {
+          "start": 16064.899999999907,
+          "duration": 69
+        }
+      ],
+      "renderCalls": 5,
+      "triangles": 362,
+      "pixels": 448920,
+      "pixelRatio": 0.7564420598061361,
+      "geometries": 5,
+      "textures": 3
+    },
+    "cleanedUp": {
+      "canvas": 0,
+      "locked": false,
+      "geometries": 0,
+      "textures": 0
+    }
+  },
+  {
+    "device": "desktop",
+    "errors": [],
+    "menuLinks": [
+      {
+        "text": "Skip to content",
+        "left": 10,
+        "right": 163.671875,
+        "top": -66.80000305175781,
+        "bottom": -18.800003051757812
+      },
+      {
+        "text": "Nucleus",
+        "left": 629,
+        "right": 759,
+        "top": 17,
+        "bottom": 61
+      },
+      {
+        "text": "Home",
+        "left": 1353.389892578125,
+        "right": 1672.389892578125,
+        "top": 158.984375,
+        "bottom": 248.984375
+      },
+      {
+        "text": "Events",
+        "left": 1353.389892578125,
+        "right": 1762.264892578125,
+        "top": 257.984375,
+        "bottom": 347.984375
+      },
+      {
+        "text": "Live News",
+        "left": 1353.389892578125,
+        "right": 1886.139892578125,
+        "top": 356.984375,
+        "bottom": 446.984375
+      },
+      {
+        "text": "Our work",
+        "left": 1353.389892578125,
+        "right": 1893.358642578125,
+        "top": 455.984375,
+        "bottom": 545.984375
+      },
+      {
+        "text": "Achievements",
+        "left": 1353.389892578125,
+        "right": 2122.499267578125,
+        "top": 554.984375,
+        "bottom": 644.984375
+      },
+      {
+        "text": "The people",
+        "left": 1353.389892578125,
+        "right": 1931.905517578125,
+        "top": 653.984375,
+        "bottom": 743.984375
+      },
+      {
+        "text": "Instagram",
+        "left": 2625.780517578125,
+        "right": 2715.358642578125,
+        "top": 376.484375,
+        "bottom": 412.484375
+      },
+      {
+        "text": "LinkedIn",
+        "left": 2636.796142578125,
+        "right": 2715.358642578125,
+        "top": 414.484375,
+        "bottom": 450.484375
+      },
+      {
+        "text": "GitHub",
+        "left": 2646.999267578125,
+        "right": 2715.358642578125,
+        "top": 452.484375,
+        "bottom": 488.484375
+      },
+      {
+        "text": "Email",
+        "left": 2658.186767578125,
+        "right": 2715.358642578125,
+        "top": 490.484375,
+        "bottom": 526.484375
+      }
+    ],
+    "book": {
+      "client": 1388,
+      "scroll": 1388,
+      "height": 684,
+      "layout": "spread"
+    },
+    "bookTurn": {
+      "frames": 528,
+      "p50Ms": 6.900000000000546,
+      "p95Ms": 13.300000000000182,
+      "maxMs": 41.79999999999927,
+      "over33Percent": 0.3787878787878788,
+      "longTasks": []
+    },
+    "bookPage": "2",
+    "bookClosed": true,
+    "project": {
+      "client": 758,
+      "scroll": 758
+    },
+    "profile": {
+      "client": 1440,
+      "scroll": 1440,
+      "emptyLinks": 3
+    },
+    "towerActive": {
+      "frames": 455,
+      "p50Ms": 7,
+      "p95Ms": 21,
+      "maxMs": 34.80000000000018,
+      "over33Percent": 1.3186813186813187,
+      "longTasks": [],
+      "renderCalls": 5,
+      "triangles": 4942,
+      "pixels": 1296000,
+      "pixelRatio": 1,
+      "geometries": 5,
+      "textures": 5
+    },
+    "towerProgress": {
+      "before": 0,
+      "after": 0.26298487836949375,
+      "documentScroll": 2000
+    },
+    "towerPicker": "1",
+    "towerThrow": {
+      "frames": 364,
+      "p50Ms": 13.799999999999272,
+      "p95Ms": 14,
+      "maxMs": 20.799999999999272,
+      "over33Percent": 0,
+      "longTasks": [],
+      "renderCalls": 5,
+      "triangles": 4942,
+      "pixels": 1296000,
+      "pixelRatio": 1,
+      "geometries": 5,
+      "textures": 5
+    },
+    "cleanedUp": {
+      "canvas": 0,
+      "locked": false,
+      "geometries": 0,
+      "textures": 0
+    }
+  }
+]

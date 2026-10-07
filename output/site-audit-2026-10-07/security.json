@@ -1,0 +1,23 @@
+{
+  "publicPhotoBucket": true,
+  "anonymousDraftRows": [
+    {
+      "id": "draft-test",
+      "published": false
+    }
+  ],
+  "anonymousDraftPhotoRows": [
+    {
+      "event_id": "draft-test",
+      "name": "private.webp"
+    }
+  ],
+  "outsiderIsAdmin": false,
+  "outsiderTruncatePrivileges": {
+    "events": true,
+    "photos": true
+  },
+  "outsiderInsertBlocked": true,
+  "outsiderUpdateRows": 0,
+  "outsiderDeleteRows": 0
+}

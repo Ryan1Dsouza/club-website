@@ -1,0 +1,35 @@
+[
+  {
+    "test": "team-api-error",
+    "status": 403,
+    "initialSeedMembers": 15,
+    "remainingCards": 0,
+    "visibleAlerts": 0
+  },
+  {
+    "test": "recruitment-submit",
+    "success": true,
+    "responses": [
+      {
+        "path": "/api/site",
+        "status": 200
+      },
+      {
+        "path": "/api/site",
+        "status": 200
+      },
+      {
+        "path": "proxy-result",
+        "status": 201,
+        "body": "{\"id\":\"e73e05bf-a393-4c11-b450-4224e1071420\",\"message\":\"Your application has been received. Keep your reference number for follow-up.\"}"
+      },
+      {
+        "path": "/api/applications",
+        "status": 201
+      }
+    ],
+    "persisted": 1,
+    "alerts": [],
+    "invalid": []
+  }
+]

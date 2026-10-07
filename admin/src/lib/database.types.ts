@@ -63,6 +63,24 @@ export type Database = {
           }
         ]
       }
+      live_news: {
+        Row: { id: string; title: string; description: string; image_url: string | null; date: string | null; created_at: string }
+        Insert: any
+        Update: any
+        Relationships: []
+      }
+      achievements: {
+        Row: { id: string; title: string; category: string; result: string; year: string; description: string; href: string | null; created_at: string }
+        Insert: any
+        Update: any
+        Relationships: []
+      }
+      achievement_members: {
+        Row: { achievement_id: string; member_id: string }
+        Insert: any
+        Update: any
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: { is_admin: { Args: Record<string, never>; Returns: boolean } }

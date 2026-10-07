@@ -1,0 +1,1035 @@
+[
+  {
+    "device": "phone-small",
+    "path": "/",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 3880.7000000001863,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "height": 4401,
+      "cls": 0,
+      "lcp": 1772,
+      "jsBytes": 1241186,
+      "transferBytes": 796631
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-small",
+    "path": "/about",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2084,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "height": 2298,
+      "cls": 0,
+      "lcp": 248,
+      "jsBytes": 698111,
+      "transferBytes": 493297
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-small",
+    "path": "/events",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2081.399999999907,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "height": 3258,
+      "cls": 0,
+      "lcp": 204,
+      "jsBytes": 759332,
+      "transferBytes": 831907
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-small",
+    "path": "/projects",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2056.4000000003725,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "height": 679,
+      "cls": 0,
+      "lcp": 152,
+      "jsBytes": 709415,
+      "transferBytes": 508436
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-small",
+    "path": "/team",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2081,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "height": 7303,
+      "cls": 0,
+      "lcp": 324,
+      "jsBytes": 791344,
+      "transferBytes": 2082553
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-small",
+    "path": "/achievements",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2297,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "height": 3454,
+      "cls": 0,
+      "lcp": 328,
+      "jsBytes": 706646,
+      "transferBytes": 1250847
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-small",
+    "path": "/news",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2226.100000000093,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "height": 859,
+      "cls": 0,
+      "lcp": 444,
+      "jsBytes": 703453,
+      "transferBytes": 666179
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-small",
+    "path": "/recruitment",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2266.6999999997206,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "height": 805,
+      "cls": 0,
+      "lcp": 240,
+      "jsBytes": 698682,
+      "transferBytes": 448239
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone",
+    "path": "/",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2425.3000000002794,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "height": 4527,
+      "cls": 0,
+      "lcp": 340,
+      "jsBytes": 1241186,
+      "transferBytes": 796631
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "phone",
+    "path": "/about",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2561.7999999998137,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "height": 2100,
+      "cls": 0,
+      "lcp": 472,
+      "jsBytes": 698111,
+      "transferBytes": 493297
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "targets": [
+          [
+            "div[aria-label=\"Artificial Intelligence detail\"] > .dp-panel__inner > .dp-panel__desc > span[aria-hidden=\"true\"] > .text-reveal__word:nth-child(9) > .text-reveal__unit"
+          ],
+          [
+            "div[aria-label=\"Artificial Intelligence detail\"] > .dp-panel__inner > .dp-panel__desc > span[aria-hidden=\"true\"] > .text-reveal__word:nth-child(10) > .text-reveal__unit"
+          ],
+          [
+            "div[aria-label=\"Artificial Intelligence detail\"] > .dp-panel__inner > .dp-panel__desc > span[aria-hidden=\"true\"] > .text-reveal__word:nth-child(11) > .text-reveal__unit"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "device": "phone",
+    "path": "/events",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2427.899999999907,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "height": 3678,
+      "cls": 0,
+      "lcp": 500,
+      "jsBytes": 759332,
+      "transferBytes": 1294135
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "phone",
+    "path": "/projects",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2344.8000000002794,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "height": 844,
+      "cls": 0,
+      "lcp": 404,
+      "jsBytes": 709415,
+      "transferBytes": 508436
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "phone",
+    "path": "/team",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2279.5,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "height": 8439,
+      "cls": 0,
+      "lcp": 572,
+      "jsBytes": 791344,
+      "transferBytes": 1882131
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "phone",
+    "path": "/achievements",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2678.600000000093,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "height": 3574,
+      "cls": 0,
+      "lcp": 556,
+      "jsBytes": 706646,
+      "transferBytes": 1250847
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "phone",
+    "path": "/news",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2417.7000000001863,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "height": 892,
+      "cls": 0,
+      "lcp": 704,
+      "jsBytes": 703453,
+      "transferBytes": 666179
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "phone",
+    "path": "/recruitment",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2051.600000000093,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "height": 844,
+      "cls": 0,
+      "lcp": 152,
+      "jsBytes": 698682,
+      "transferBytes": 448239
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "phone-landscape",
+    "path": "/",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2320.7000000001863,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 844,
+      "viewport": 844,
+      "height": 3900,
+      "cls": 0,
+      "lcp": 268,
+      "jsBytes": 1241186,
+      "transferBytes": 1018766
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-landscape",
+    "path": "/about",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2120.600000000093,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 844,
+      "viewport": 844,
+      "height": 2064,
+      "cls": 0,
+      "lcp": 204,
+      "jsBytes": 698111,
+      "transferBytes": 715432
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-landscape",
+    "path": "/events",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2154,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 844,
+      "viewport": 844,
+      "height": 2138,
+      "cls": 0,
+      "lcp": 2124,
+      "jsBytes": 759332,
+      "transferBytes": 1516270
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-landscape",
+    "path": "/projects",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2644,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 844,
+      "viewport": 844,
+      "height": 737,
+      "cls": 0,
+      "lcp": 508,
+      "jsBytes": 709415,
+      "transferBytes": 730571
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-landscape",
+    "path": "/team",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2181,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 844,
+      "viewport": 844,
+      "height": 5441,
+      "cls": 0,
+      "lcp": 576,
+      "jsBytes": 791344,
+      "transferBytes": 3033305
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-landscape",
+    "path": "/achievements",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2340.7999999998137,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 844,
+      "viewport": 844,
+      "height": 2066,
+      "cls": 0,
+      "lcp": 436,
+      "jsBytes": 706646,
+      "transferBytes": 1472982
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-landscape",
+    "path": "/news",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2134.2999999998137,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 844,
+      "viewport": 844,
+      "height": 964,
+      "cls": 0,
+      "lcp": 204,
+      "jsBytes": 703453,
+      "transferBytes": 888314
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "phone-landscape",
+    "path": "/recruitment",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2048.5,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 844,
+      "viewport": 844,
+      "height": 800,
+      "cls": 0,
+      "lcp": 152,
+      "jsBytes": 698682,
+      "transferBytes": 670374
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "tablet",
+    "path": "/",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2374,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "height": 4875,
+      "cls": 0,
+      "lcp": 304,
+      "jsBytes": 1241186,
+      "transferBytes": 796631
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "tablet",
+    "path": "/about",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2289.5,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "height": 2158,
+      "cls": 0,
+      "lcp": 388,
+      "jsBytes": 698111,
+      "transferBytes": 493297
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "tablet",
+    "path": "/events",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2398.7999999998137,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "height": 2024,
+      "cls": 0,
+      "lcp": 560,
+      "jsBytes": 759332,
+      "transferBytes": 1294135
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "tablet",
+    "path": "/projects",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2018.6999999997206,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "height": 1024,
+      "cls": 0,
+      "lcp": 132,
+      "jsBytes": 709415,
+      "transferBytes": 508436
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "tablet",
+    "path": "/team",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2122,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "height": 5088,
+      "cls": 0,
+      "lcp": 352,
+      "jsBytes": 791344,
+      "transferBytes": 3192491
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "tablet",
+    "path": "/achievements",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2483.1999999997206,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "height": 2052,
+      "cls": 0,
+      "lcp": 320,
+      "jsBytes": 706646,
+      "transferBytes": 1250847
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "tablet",
+    "path": "/news",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2523.6999999997206,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "height": 1024,
+      "cls": 0,
+      "lcp": 820,
+      "jsBytes": 703453,
+      "transferBytes": 666179
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "tablet",
+    "path": "/recruitment",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2355.399999999907,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "height": 1024,
+      "cls": 0,
+      "lcp": 320,
+      "jsBytes": 698682,
+      "transferBytes": 448239
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "desktop",
+    "path": "/",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2658.5,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "height": 5031,
+      "cls": 0,
+      "lcp": 380,
+      "jsBytes": 1241186,
+      "transferBytes": 1018766
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "targets": [
+          [
+            ".reverse > .vm-marquee-content[aria-hidden=\"true\"] > .vm-card:nth-child(1) > .vm-card-header > .vm-meta > .vm-username"
+          ],
+          [
+            ".reverse > .vm-marquee-content[aria-hidden=\"true\"] > .vm-card:nth-child(2) > .vm-card-header > .vm-meta > .vm-username"
+          ],
+          [
+            ".reverse > .vm-marquee-content[aria-hidden=\"true\"] > .vm-card:nth-child(3) > .vm-card-header > .vm-meta > .vm-username"
+          ],
+          [
+            ".reverse > .vm-marquee-content[aria-hidden=\"true\"] > .vm-card:nth-child(4) > .vm-card-header > .vm-meta > .vm-username"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "device": "desktop",
+    "path": "/about",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2723.7999999998137,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "height": 2556,
+      "cls": 0.03215015552662037,
+      "lcp": 328,
+      "jsBytes": 698111,
+      "transferBytes": 715432
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "targets": [
+          [
+            "div[aria-label=\"Artificial Intelligence detail\"] > .dp-panel__inner > .dp-panel__head > .dp-panel__heading > .dp-panel__num"
+          ],
+          [
+            "div[aria-label=\"Artificial Intelligence detail\"] > .dp-panel__inner > .dp-panel__tags > .dp-panel__tag:nth-child(1)"
+          ],
+          [
+            "div[aria-label=\"Artificial Intelligence detail\"] > .dp-panel__inner > .dp-panel__tags > .dp-panel__tag:nth-child(2)"
+          ],
+          [
+            "div[aria-label=\"Artificial Intelligence detail\"] > .dp-panel__inner > .dp-panel__tags > .dp-panel__tag:nth-child(3)"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "device": "desktop",
+    "path": "/events",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2578,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "height": 1878,
+      "cls": 0.0005360950360082305,
+      "lcp": 2148,
+      "jsBytes": 759332,
+      "transferBytes": 1054042
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "desktop",
+    "path": "/projects",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2059.899999999907,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "height": 900,
+      "cls": 0.0002331305191186557,
+      "lcp": 144,
+      "jsBytes": 709415,
+      "transferBytes": 730571
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "desktop",
+    "path": "/team",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2822,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "height": 3835,
+      "cls": 0,
+      "lcp": 552,
+      "jsBytes": 791344,
+      "transferBytes": 3573817
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "desktop",
+    "path": "/achievements",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2281.6999999997206,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "height": 1676,
+      "cls": 0,
+      "lcp": 352,
+      "jsBytes": 706646,
+      "transferBytes": 1472982
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "desktop",
+    "path": "/news",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2609.1999999997206,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "height": 1051,
+      "cls": 0.0003125,
+      "lcp": 388,
+      "jsBytes": 703453,
+      "transferBytes": 888314
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "desktop",
+    "path": "/recruitment",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2532.3000000002794,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "height": 909,
+      "cls": 0,
+      "lcp": 160,
+      "jsBytes": 698682,
+      "transferBytes": 670374
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": [],
+    "accessibility": []
+  },
+  {
+    "device": "wide",
+    "path": "/",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2691.6999999997206,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1920,
+      "viewport": 1920,
+      "height": 5395,
+      "cls": 0,
+      "lcp": 268,
+      "jsBytes": 1241186,
+      "transferBytes": 1018766
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "wide",
+    "path": "/about",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2554.600000000093,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1920,
+      "viewport": 1920,
+      "height": 2560,
+      "cls": 0.01658705817328559,
+      "lcp": 172,
+      "jsBytes": 698111,
+      "transferBytes": 715432
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "wide",
+    "path": "/events",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2534.899999999907,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1920,
+      "viewport": 1920,
+      "height": 1878,
+      "cls": 0.00025129454812885805,
+      "lcp": 248,
+      "jsBytes": 759332,
+      "transferBytes": 1054042
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "wide",
+    "path": "/projects",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2545.9000000003725,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1920,
+      "viewport": 1920,
+      "height": 1080,
+      "cls": 0.00010789847668306326,
+      "lcp": 156,
+      "jsBytes": 709415,
+      "transferBytes": 730571
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "wide",
+    "path": "/team",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2588.8000000002794,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1920,
+      "viewport": 1920,
+      "height": 3813,
+      "cls": 0,
+      "lcp": 1140,
+      "jsBytes": 791344,
+      "transferBytes": 3573817
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "wide",
+    "path": "/achievements",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2558.399999999907,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1920,
+      "viewport": 1920,
+      "height": 1676,
+      "cls": 0,
+      "lcp": 188,
+      "jsBytes": 706646,
+      "transferBytes": 1472982
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "wide",
+    "path": "/news",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2556.2999999998137,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1920,
+      "viewport": 1920,
+      "height": 1080,
+      "cls": 0.015781692065329218,
+      "lcp": 300,
+      "jsBytes": 703453,
+      "transferBytes": 888314
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  },
+  {
+    "device": "wide",
+    "path": "/recruitment",
+    "errors": [],
+    "failed": [],
+    "status": 200,
+    "readyMs": 2841.2000000001863,
+    "initial": {
+      "h1": 1,
+      "scrollWidth": 1920,
+      "viewport": 1920,
+      "height": 1080,
+      "cls": 0,
+      "lcp": 340,
+      "jsBytes": 698682,
+      "transferBytes": 670374
+    },
+    "maxHorizontalOverflow": 0,
+    "brokenImages": []
+  }
+]

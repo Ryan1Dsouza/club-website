@@ -1,0 +1,44 @@
+﻿.nucleus-loader {
+  position: fixed;
+  inset: 0;
+  height: 100%;
+  height: 100dvh;
+  z-index: 2147483000;
+  overflow: hidden;
+  isolation: isolate;
+  contain: layout paint;
+  background: var(--surface-raised, #061108);
+  color: var(--mint, #9bcfa2);
+  overscroll-behavior: none;
+  touch-action: none;
+  will-change: transform;
+}
+.nucleus-loader__art,
+.nucleus-loader__poster,
+.nucleus-loader__poster img,
+.nucleus-loader__video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.nucleus-loader__poster img,
+.nucleus-loader__video { object-fit: cover; }
+.nucleus-loader__video { opacity: 0; }
+.nucleus-loader[data-frames-ready='true'] .nucleus-loader__video { opacity: 1; }
+.nucleus-loader[data-art-failed='true'] .nucleus-loader__poster { visibility: hidden; }
+.nucleus-loader__fallback {
+  position: absolute;
+  inset: 50% 0 auto;
+  transform: translateY(-50%) rotate(-7deg);
+  text-align: center;
+  font: italic 24px/1 var(--serif, Georgia, serif);
+}
+/* Both compositions bleed to the viewport edges. Their central artwork is
+   framed in the assets so cover never needs a padded video-sized container. */
+@media (prefers-reduced-motion: reduce) {
+  .nucleus-loader { will-change: auto; }
+  .nucleus-loader__video { display: none; }
+}

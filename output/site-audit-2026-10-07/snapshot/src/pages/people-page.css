@@ -1,0 +1,80 @@
+.people-page { position: relative; min-height: 100svh; color: var(--mint); }
+html.people-tower-playing, html.people-tower-playing body { overflow: hidden; overscroll-behavior: none; }
+@media (max-width: 760px), (pointer: coarse) {
+  html.people-tower-open { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  html.people-tower-open body { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; }
+  .people-page[data-view='tower'] { height: 100dvh; min-height: 0; margin-top: 0; }
+}
+.people-page[data-view='grid'] {
+  padding: 120px 0 60px;
+}
+.people-toolbar, .people-directory { width: min(1280px, 100%); margin-inline: auto; padding-inline: var(--gutter); }
+.people-view-toggle { display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-height: 44px; padding: 11px 16px; border: 1px solid var(--line-strong); border-radius: 30px; background: var(--surface); color: var(--mint); font: 11px/1.5 var(--mono); cursor: pointer; }
+.people-view-toggle:hover { background: var(--surface-raised); border-color: var(--mint); }
+.people-page[data-view='tower'] > .people-toolbar { position: fixed; top: calc(17px + env(safe-area-inset-top, 0px)); right: var(--gutter); width: auto; padding: 0; z-index: 20; }
+.people-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; padding-block: 30px 42px; }
+.people-intro h1 { font-size: clamp(48px, 6.4vw, 88px); line-height: .98; letter-spacing: -.055em; }
+.people-intro h1:focus, .people-directory__roster:focus { outline: none; }
+.people-intro p { margin-top: 22px; color: var(--muted); font: 13px/1.7 Inter, sans-serif; }
+.people-meet-button { display: inline-flex; flex-shrink: 0; align-items: center; gap: 20px; min-height: 48px; padding: 12px 18px; margin-bottom: 3px; border: 1px solid var(--line-strong); border-radius: 30px; background: var(--surface); font: 12px/1.5 Inter, sans-serif; }
+.people-meet-button > span { color: var(--muted); font: 10px var(--mono); }
+.people-meet-button:hover { background: var(--surface-raised); border-color: var(--mint); }
+.people-directory__roster { padding-top: 24px; scroll-margin-top: calc(var(--header-height) + 20px); }
+.people-directory > .people-tower-button { margin-top: clamp(40px, 5vw, 64px); }
+.people-directory__heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
+.people-directory__heading h2 { max-width: 20ch; font-size: clamp(28px, 3vw, 40px); }
+.people-directory__heading p { flex-shrink: 0; color: var(--mint); font: 10px/1.6 var(--mono); text-align: right; text-transform: uppercase; letter-spacing: .06em; }
+.people-directory__heading p > span { display: block; margin-top: 6px; color: var(--muted); font: 11px/1.6 Inter, sans-serif; text-transform: none; letter-spacing: 0; }
+.people-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(22px, 2.4vw, 32px) clamp(16px, 1.8vw, 24px); margin: 0; padding: 0; list-style: none; }
+.people-card { min-width: 0; }
+.people-card > button { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); text-align: left; }
+.people-card__portrait { position: relative; display: block; flex-shrink: 0; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; background: linear-gradient(145deg, #1e3325, var(--surface-raised)); }
+.people-card__portrait::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(transparent 70%, rgb(0 0 0 / .35)); }
+.people-card__initials { position: absolute; inset: 0; display: grid; place-items: center; color: var(--mint); font: italic clamp(60px, 8vw, 120px) var(--serif); }
+.people-card__portrait img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 25%; }
+.people-card__number { position: absolute; z-index: 1; top: 14px; left: 14px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 5px; background: #080b08eb; color: var(--mint); font: 8px/1.4 var(--mono); letter-spacing: .08em; }
+.people-card__open { position: absolute; z-index: 1; right: 14px; bottom: 14px; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--mint); color: var(--bg); }
+.people-card__copy { display: grid; align-content: start; flex: 1; width: 100%; min-width: 0; gap: 10px; padding: clamp(18px, 1.8vw, 24px); }
+.people-card__role { color: var(--muted); font: clamp(.8125rem, .7rem + .3vw, .9375rem)/1.5 var(--mono); letter-spacing: .055em; text-transform: uppercase; overflow-wrap: anywhere; }
+.people-card__name { font-size: clamp(22px, 1rem + .7vw, 28px); font-weight: 450; line-height: 1.2; letter-spacing: -.04em; overflow-wrap: anywhere; }
+.people-empty { padding: 70px 24px; border: 1px solid var(--line); border-radius: 12px; text-align: center; color: var(--muted); font: 14px/1.8 Inter, sans-serif; }
+.people-groups { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 32px; margin-top: 40px; border-top: 1px solid var(--line); }
+.people-groups > span { color: var(--muted); font: 11px/1.6 Inter, sans-serif; }
+.people-groups > div { display: flex; gap: 10px; }
+.people-groups button { display: inline-flex; align-items: center; gap: 24px; min-height: 46px; padding: 12px 18px; border: 1px solid var(--line-strong); border-radius: 30px; background: var(--surface); color: var(--mint); font: 12px/1.5 Inter, sans-serif; }
+.people-groups button[aria-pressed='true'] { background: var(--mint); color: var(--bg); border-color: var(--mint); }
+.people-groups button:hover { border-color: var(--mint); }
+.people-view-status, .people-tower__status { position: relative; z-index: 1; margin: 0; padding: 180px var(--gutter) 45px; color: var(--muted); font: 14px/1.8 Inter, sans-serif; }
+.people-tower__status { position: absolute; inset: 0 0 auto; }
+.people-tower-view[data-tower-status='loading'] .people-tower { visibility: hidden; }
+.people-tower-view:is([data-tower-status='still'], [data-tower-status='fallback']) .people-tower { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .people-view { animation: people-view-enter .3s ease-out; }
+  .people-card > button { transition: transform .3s var(--ease-settle), border-color .25s; }
+  .people-card__portrait img, .people-card__open { transition: transform .4s var(--ease-settle); }
+  @keyframes people-view-enter { from { opacity: 0; } to { opacity: 1; } }
+}
+@media (hover: hover) and (pointer: fine) {
+  .people-card > button:hover { border-color: var(--line-strong); transform: translateY(-5px); }
+  .people-card > button:hover img { transform: scale(1.035); }
+  .people-card > button:hover .people-card__open { transform: rotate(45deg); }
+}
+@media (max-width: 900px) { .people-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .people-page[data-view='tower'] > .people-toolbar { top: calc(var(--header-height) + 12px); }
+  .people-page[data-view='grid'] { padding-top: 100px; }
+  .people-intro { align-items: flex-start; flex-direction: column; gap: 24px; padding-block: 26px 32px; }
+  .people-intro h1 { font-size: clamp(44px, 11vw, 66px); }
+  .people-intro p { font-size: 12px; margin-top: 18px; }
+  .people-meet-button { gap: 18px; }
+  .people-directory__roster { padding-top: 20px; }
+  .people-directory__heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .people-directory__heading p { text-align: left; }
+  .people-groups { align-items: flex-start; flex-direction: column; }
+  .people-groups > div { width: 100%; }
+  .people-groups button { flex: 1; justify-content: space-between; }
+  .people-grid { grid-template-columns: minmax(0, 1fr); max-width: 420px; margin-inline: auto; gap: 22px; }
+  .people-card__portrait { aspect-ratio: 4 / 4.4; }
+  .people-card__name { font-size: clamp(22px, 5vw, 26px); }
+}
+@media (prefers-reduced-motion: reduce) { .people-card > button:hover, .people-card > button:hover img, .people-card > button:hover .people-card__open { transform: none; } }

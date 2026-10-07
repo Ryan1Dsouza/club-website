@@ -1,0 +1,406 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config=output/site-audit-2026-10-07/admin-audit.config.mjs"
+    ],
+    "configFile": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-audit.config.mjs",
+    "rootDir": "C:/Users/ryan1/OneDrive/Documents/club-website/output/site-audit-2026-10-07",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/ryan1/OneDrive/Documents/club-website/output/site-audit-2026-10-07/admin-event-artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/ryan1/OneDrive/Documents/club-website/output/site-audit-2026-10-07",
+        "testIgnore": [],
+        "testMatch": [
+          "admin-events.spec.ts"
+        ],
+        "timeout": 45000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json",
+        {
+          "outputFile": "output/site-audit-2026-10-07/admin-events-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm --prefix admin run dev -- --host 127.0.0.1 --port 5188 --strictPort",
+      "cwd": "../..",
+      "url": "http://127.0.0.1:5188",
+      "reuseExistingServer": false,
+      "env": {
+        "VITE_SUPABASE_URL": "https://portal-test.supabase.co",
+        "VITE_SUPABASE_ANON_KEY": "test-public-key",
+        "VITE_PUBLIC_SITE_URL": "https://example.com"
+      }
+    }
+  },
+  "suites": [
+    {
+      "title": "admin-events.spec.ts",
+      "file": "admin-events.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "event editor layout and accessibility 320",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3409,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m285\u001b[39m\nReceived:    \u001b[31m555\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m285\u001b[39m\nReceived:    \u001b[31m555\u001b[39m\n    at C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts:19:30",
+                    "location": {
+                      "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts",
+                      "column": 30,
+                      "line": 19
+                    },
+                    "snippet": "  17 |   const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();\n  18 |   console.log(JSON.stringify({width,geometry:before,accessibility:axe.violations.map(({id,impact,nodes})=>({id,impact,targets:nodes.map(n=>n.target)}))}));\n> 19 |   expect.soft(before.scroll).toBeLessThanOrEqual(before.client+1);\n     |                              ^\n  20 |   expect.soft(axe.violations.map(x=>x.id)).toEqual([]);\n  21 | });\n  22 |"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts",
+                        "column": 30,
+                        "line": 19
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m285\u001b[39m\nReceived:    \u001b[31m555\u001b[39m\n\n  17 |   const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();\n  18 |   console.log(JSON.stringify({width,geometry:before,accessibility:axe.violations.map(({id,impact,nodes})=>({id,impact,targets:nodes.map(n=>n.target)}))}));\n> 19 |   expect.soft(before.scroll).toBeLessThanOrEqual(before.client+1);\n     |                              ^\n  20 |   expect.soft(axe.violations.map(x=>x.id)).toEqual([]);\n  21 | });\n  22 |\n    at C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts:19:30"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "{\"width\":320,\"geometry\":{\"client\":284,\"scroll\":555,\"viewport\":320,\"body\":320},\"accessibility\":[]}\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-07T02:42:39.393Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-event-artifacts\\admin-events-event-editor-layout-and-accessibility-320\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts",
+                    "column": 30,
+                    "line": 19
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "b892bdf3c77f983de137-860b856ae13af3b5ad09",
+          "file": "admin-events.spec.ts",
+          "line": 5,
+          "column": 41
+        },
+        {
+          "title": "event editor layout and accessibility 390",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3700,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m355\u001b[39m\nReceived:    \u001b[31m555\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m355\u001b[39m\nReceived:    \u001b[31m555\u001b[39m\n    at C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts:19:30",
+                    "location": {
+                      "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts",
+                      "column": 30,
+                      "line": 19
+                    },
+                    "snippet": "  17 |   const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();\n  18 |   console.log(JSON.stringify({width,geometry:before,accessibility:axe.violations.map(({id,impact,nodes})=>({id,impact,targets:nodes.map(n=>n.target)}))}));\n> 19 |   expect.soft(before.scroll).toBeLessThanOrEqual(before.client+1);\n     |                              ^\n  20 |   expect.soft(axe.violations.map(x=>x.id)).toEqual([]);\n  21 | });\n  22 |"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts",
+                        "column": 30,
+                        "line": 19
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m355\u001b[39m\nReceived:    \u001b[31m555\u001b[39m\n\n  17 |   const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();\n  18 |   console.log(JSON.stringify({width,geometry:before,accessibility:axe.violations.map(({id,impact,nodes})=>({id,impact,targets:nodes.map(n=>n.target)}))}));\n> 19 |   expect.soft(before.scroll).toBeLessThanOrEqual(before.client+1);\n     |                              ^\n  20 |   expect.soft(axe.violations.map(x=>x.id)).toEqual([]);\n  21 | });\n  22 |\n    at C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts:19:30"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "{\"width\":390,\"geometry\":{\"client\":354,\"scroll\":555,\"viewport\":390,\"body\":390},\"accessibility\":[]}\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-07T02:42:45.280Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-event-artifacts\\admin-events-event-editor-layout-and-accessibility-390\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts",
+                    "column": 30,
+                    "line": 19
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "b892bdf3c77f983de137-7850bc988e749572c8d7",
+          "file": "admin-events.spec.ts",
+          "line": 5,
+          "column": 41
+        },
+        {
+          "title": "event editor layout and accessibility 768",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3035,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "{\"width\":768,\"geometry\":{\"client\":732,\"scroll\":732,\"viewport\":768,\"body\":768},\"accessibility\":[]}\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-07T02:42:51.218Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b892bdf3c77f983de137-09f7cc9dd3a1da067024",
+          "file": "admin-events.spec.ts",
+          "line": 5,
+          "column": 41
+        },
+        {
+          "title": "event editor layout and accessibility 1440",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2217,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "{\"width\":1440,\"geometry\":{\"client\":758,\"scroll\":758,\"viewport\":1440,\"body\":1440},\"accessibility\":[]}\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-07T02:42:54.538Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b892bdf3c77f983de137-759949533b15fa367652",
+          "file": "admin-events.spec.ts",
+          "line": 5,
+          "column": 41
+        },
+        {
+          "title": "failed photo upload followed by retry does not create duplicate events",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 1615,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m1\u001b[39m\nReceived: \u001b[31m2\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m1\u001b[39m\nReceived: \u001b[31m2\u001b[39m\n    at C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts:46:19",
+                    "location": {
+                      "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts",
+                      "column": 19,
+                      "line": 46
+                    },
+                    "snippet": "  44 |   await expect(page.getByRole('alert')).toContainText('photo could not be uploaded');\n  45 |   console.log(JSON.stringify({eventInsertsAfterTwoAttempts:inserts}));\n> 46 |   expect(inserts).toBe(1);\n     |                   ^\n  47 | });\n  48 |\n  49 | test('member photo replacement completes after the save request',async({page})=>{"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts",
+                        "column": 19,
+                        "line": 46
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m1\u001b[39m\nReceived: \u001b[31m2\u001b[39m\n\n  44 |   await expect(page.getByRole('alert')).toContainText('photo could not be uploaded');\n  45 |   console.log(JSON.stringify({eventInsertsAfterTwoAttempts:inserts}));\n> 46 |   expect(inserts).toBe(1);\n     |                   ^\n  47 | });\n  48 |\n  49 | test('member photo replacement completes after the save request',async({page})=>{\n    at C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts:46:19"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "{\"eventInsertsAfterTwoAttempts\":2}\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-07T02:42:56.770Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-event-artifacts\\admin-events-failed-photo--0c17c-not-create-duplicate-events\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ryan1\\OneDrive\\Documents\\club-website\\output\\site-audit-2026-10-07\\admin-events.spec.ts",
+                    "column": 19,
+                    "line": 46
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "b892bdf3c77f983de137-2b257af6eda1b2794af9",
+          "file": "admin-events.spec.ts",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "member photo replacement completes after the save request",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1872,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-07T02:42:59.773Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b892bdf3c77f983de137-9c7687071b16e602d594",
+          "file": "admin-events.spec.ts",
+          "line": 49,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-07T02:42:37.642Z",
+    "duration": 25272.308,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

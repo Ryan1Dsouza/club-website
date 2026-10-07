@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Asterisk, Search, X } from 'lucide-react';
 import Modal from '../components/shared/Modal';
-import { achievementCategories, createAchievementProfiles, type AchievementProfile } from '../content/achievements';
+import { achievementCategories, createAchievementProfiles, type AchievementProfile, type Achievement } from '../content/achievements';
 import type { Member, SiteSettings } from '../types';
 import './achievements-page.css';
 
@@ -40,7 +40,16 @@ export default function AchievementsPage({ members, settings }: Props) {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<AchievementProfile | null>(null);
   const search = useRef<HTMLInputElement>(null);
-  const { profiles, isPreview } = useMemo(() => createAchievementProfiles(members), [members]);
+  
+  const [fetchedAchievements, setFetchedAchievements] = useState<Achievement[]>([]);
+  useEffect(() => {
+    const controller = new AbortController();
+    import('../content/achievements').then(m => m.fetchAchievements(controller.signal))
+      .then(setFetchedAchievements).catch(() => {});
+    return () => controller.abort();
+  }, []);
+
+  const { profiles, isPreview } = useMemo(() => createAchievementProfiles(members, fetchedAchievements), [members, fetchedAchievements]);
   const categories = achievementCategories.filter(item => item === 'All' || profiles.some(profile => profile.achievements.some(record => record.category === item)));
   const activeCategory = categories.some(item => item === category) ? category : 'All';
   const visible = profiles.filter(profile => {

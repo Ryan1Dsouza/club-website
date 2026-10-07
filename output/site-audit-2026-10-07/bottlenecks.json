@@ -1,0 +1,416 @@
+[
+  {
+    "device": "phone",
+    "variant": "original",
+    "sample": {
+      "frames": 140,
+      "p50Ms": 16.700000000000728,
+      "p95Ms": 66.60000000000036,
+      "maxMs": 83.40000000000055,
+      "over33Percent": 20.714285714285715,
+      "longTasks": [
+        {
+          "start": 4644,
+          "duration": 50
+        },
+        {
+          "start": 4922.399999999907,
+          "duration": 58
+        },
+        {
+          "start": 4981.0999999996275,
+          "duration": 53
+        },
+        {
+          "start": 5035,
+          "duration": 51
+        },
+        {
+          "start": 5086.899999999907,
+          "duration": 56
+        },
+        {
+          "start": 5143.799999999814,
+          "duration": 54
+        },
+        {
+          "start": 5239.899999999907,
+          "duration": 51
+        },
+        {
+          "start": 5334.199999999721,
+          "duration": 50
+        },
+        {
+          "start": 5384.5999999996275,
+          "duration": 64
+        },
+        {
+          "start": 5450,
+          "duration": 52
+        },
+        {
+          "start": 5815.299999999814,
+          "duration": 56
+        },
+        {
+          "start": 5872.0999999996275,
+          "duration": 55
+        },
+        {
+          "start": 6234.399999999907,
+          "duration": 52
+        },
+        {
+          "start": 6287,
+          "duration": 62
+        },
+        {
+          "start": 6350.5,
+          "duration": 74
+        },
+        {
+          "start": 6425.899999999907,
+          "duration": 66
+        },
+        {
+          "start": 6492.799999999814,
+          "duration": 63
+        },
+        {
+          "start": 6556.899999999907,
+          "duration": 58
+        },
+        {
+          "start": 6615.899999999907,
+          "duration": 68
+        },
+        {
+          "start": 7057.0999999996275,
+          "duration": 61
+        },
+        {
+          "start": 7119.699999999721,
+          "duration": 66
+        }
+      ]
+    },
+    "cpu": {
+      "taskMs": 3919.4639999999995,
+      "scriptMs": 82.22800000000002,
+      "styleMs": 3486.3660000000004,
+      "styleRecalculations": 138,
+      "layoutMs": 0
+    }
+  },
+  {
+    "device": "phone",
+    "variant": "no-portal-glow",
+    "sample": {
+      "frames": 217,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 33.30000000000018,
+      "maxMs": 66.79999999999927,
+      "over33Percent": 1.3824884792626728,
+      "longTasks": [
+        {
+          "start": 5658.899999999907,
+          "duration": 52
+        }
+      ]
+    },
+    "cpu": {
+      "taskMs": 3979.9809999999998,
+      "scriptMs": 157.78699999999998,
+      "styleMs": 3301.1059999999998,
+      "styleRecalculations": 230,
+      "layoutMs": 0.38399999999999546
+    }
+  },
+  {
+    "device": "phone",
+    "variant": "fixed-trains",
+    "sample": {
+      "frames": 241,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 16.700000000000728,
+      "maxMs": 16.800000000000182,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 525.598,
+      "scriptMs": 184.831,
+      "styleMs": 0,
+      "styleRecalculations": 0,
+      "layoutMs": 0
+    }
+  },
+  {
+    "device": "phone",
+    "variant": "no-photo-filter",
+    "sample": {
+      "frames": 235,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 16.800000000000182,
+      "maxMs": 33.400000000000546,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 3762.4710000000005,
+      "scriptMs": 151.516,
+      "styleMs": 2996.848,
+      "styleRecalculations": 274,
+      "layoutMs": 4.604999999999998
+    }
+  },
+  {
+    "device": "phone-landscape",
+    "variant": "original",
+    "sample": {
+      "frames": 228,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 16.800000000000182,
+      "maxMs": 50,
+      "over33Percent": 0.8771929824561403,
+      "longTasks": [
+        {
+          "start": 6847.5,
+          "duration": 50
+        }
+      ]
+    },
+    "cpu": {
+      "taskMs": 3865.5950000000003,
+      "scriptMs": 157.284,
+      "styleMs": 3183.4580000000005,
+      "styleRecalculations": 223,
+      "layoutMs": 0
+    }
+  },
+  {
+    "device": "phone-landscape",
+    "variant": "no-portal-glow",
+    "sample": {
+      "frames": 178,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 33.400000000000546,
+      "maxMs": 66.69999999999982,
+      "over33Percent": 3.3707865168539324,
+      "longTasks": [
+        {
+          "start": 7326.399999999907,
+          "duration": 52
+        }
+      ]
+    },
+    "cpu": {
+      "taskMs": 3979.4039999999995,
+      "scriptMs": 140.802,
+      "styleMs": 3299.351,
+      "styleRecalculations": 188,
+      "layoutMs": 2.4330000000000047
+    }
+  },
+  {
+    "device": "phone-landscape",
+    "variant": "fixed-trains",
+    "sample": {
+      "frames": 240,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 16.799999999999272,
+      "maxMs": 16.800000000000182,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 549.2019999999999,
+      "scriptMs": 195.05999999999997,
+      "styleMs": 0,
+      "styleRecalculations": 0,
+      "layoutMs": 0
+    }
+  },
+  {
+    "device": "phone-landscape",
+    "variant": "no-photo-filter",
+    "sample": {
+      "frames": 194,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 33.399999999999636,
+      "maxMs": 50,
+      "over33Percent": 1.5463917525773196,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 3982.184,
+      "scriptMs": 164.19,
+      "styleMs": 3208.729,
+      "styleRecalculations": 224,
+      "layoutMs": 2.462000000000006
+    }
+  },
+  {
+    "device": "tablet",
+    "variant": "original",
+    "sample": {
+      "frames": 189,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 33.399999999999636,
+      "maxMs": 66.69999999999982,
+      "over33Percent": 1.0582010582010581,
+      "longTasks": [
+        {
+          "start": 7217.5,
+          "duration": 57
+        }
+      ]
+    },
+    "cpu": {
+      "taskMs": 3918.1049999999996,
+      "scriptMs": 143.356,
+      "styleMs": 3285.733,
+      "styleRecalculations": 183,
+      "layoutMs": 0
+    }
+  },
+  {
+    "device": "tablet",
+    "variant": "no-portal-glow",
+    "sample": {
+      "frames": 191,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 33.399999999999636,
+      "maxMs": 50,
+      "over33Percent": 1.5706806282722512,
+      "longTasks": [
+        {
+          "start": 6904.600000000093,
+          "duration": 53
+        }
+      ]
+    },
+    "cpu": {
+      "taskMs": 3976.706,
+      "scriptMs": 150.06199999999998,
+      "styleMs": 3199.337,
+      "styleRecalculations": 196,
+      "layoutMs": 0.1290000000000041
+    }
+  },
+  {
+    "device": "tablet",
+    "variant": "fixed-trains",
+    "sample": {
+      "frames": 241,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 16.700000000000728,
+      "maxMs": 16.800000000000182,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 594.228,
+      "scriptMs": 186.07700000000003,
+      "styleMs": 0,
+      "styleRecalculations": 0,
+      "layoutMs": 0
+    }
+  },
+  {
+    "device": "tablet",
+    "variant": "no-photo-filter",
+    "sample": {
+      "frames": 198,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 33.399999999999636,
+      "maxMs": 33.400000000000546,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 4006.938,
+      "scriptMs": 131.468,
+      "styleMs": 3263.6859999999997,
+      "styleRecalculations": 228,
+      "layoutMs": 0.6280000000000036
+    }
+  },
+  {
+    "device": "desktop",
+    "variant": "original",
+    "sample": {
+      "frames": 241,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 16.700000000000728,
+      "maxMs": 16.800000000000182,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 986.9650000000001,
+      "scriptMs": 32.474000000000004,
+      "styleMs": 760.205,
+      "styleRecalculations": 234,
+      "layoutMs": 0
+    }
+  },
+  {
+    "device": "desktop",
+    "variant": "no-portal-glow",
+    "sample": {
+      "frames": 240,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 16.800000000000182,
+      "maxMs": 16.800000000000182,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 929.809,
+      "scriptMs": 28.784999999999997,
+      "styleMs": 722.5319999999999,
+      "styleRecalculations": 250,
+      "layoutMs": 0.09599999999999886
+    }
+  },
+  {
+    "device": "desktop",
+    "variant": "fixed-trains",
+    "sample": {
+      "frames": 241,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 16.700000000000728,
+      "maxMs": 16.800000000000182,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 124.43,
+      "scriptMs": 26.637,
+      "styleMs": 0,
+      "styleRecalculations": 0,
+      "layoutMs": 0
+    }
+  },
+  {
+    "device": "desktop",
+    "variant": "no-photo-filter",
+    "sample": {
+      "frames": 240,
+      "p50Ms": 16.699999999999818,
+      "p95Ms": 16.800000000000182,
+      "maxMs": 16.800000000000182,
+      "over33Percent": 0,
+      "longTasks": []
+    },
+    "cpu": {
+      "taskMs": 1424.6989999999998,
+      "scriptMs": 44.67499999999999,
+      "styleMs": 1133.601,
+      "styleRecalculations": 276,
+      "layoutMs": 0.42700000000000027
+    }
+  }
+]

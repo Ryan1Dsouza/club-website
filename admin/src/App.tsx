@@ -13,6 +13,8 @@ const TeamMembersPage = lazy(async () => ({
   default: (await import('./pages/TeamMembersPage')).TeamMembersPage,
 }))
 const EventsPage = lazy(async () => ({ default: (await import('./pages/EventsPage')).EventsPage }))
+const LiveNewsPage = lazy(async () => ({ default: (await import('./pages/LiveNewsPage')).LiveNewsPage }))
+const AchievementsPage = lazy(async () => ({ default: (await import('./pages/AchievementsPage')).AchievementsPage }))
 const SettingsPage = lazy(async () => ({
   default: (await import('./pages/SettingsPage')).SettingsPage,
 }))
@@ -28,6 +30,8 @@ export default function App() {
               <Route index element={<DashboardPage />} />
               <Route path="team" element={<TeamMembersPage />} />
               <Route path="events" element={<EventsPage />} />
+              <Route path="news" element={<LiveNewsPage />} />
+              <Route path="achievements" element={<AchievementsPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

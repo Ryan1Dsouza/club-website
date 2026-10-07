@@ -1,0 +1,358 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync, existsSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import sharp from 'sharp';
+import { openDatabase, hashPassword, verifyPassword, getSite } from '../server/db.mjs';
+import { createApp } from '../server/app.mjs';
+import { pageMeta } from '../shared/page-meta.ts';
+import { createCoasterTrack, trackSeparation } from '../src/lib/event-coaster.ts';
+import { createStationPlanner } from '../src/lib/event-layout.ts';
+import { createEventStations } from '../src/lib/event-stations.ts';
+
+async function fixture(fn, options = {}) {
+  const db = openDatabase(':memory:');
+  db.prepare('INSERT INTO admins VALUES(?,?,?)').run('test-admin', 'admin@example.com', hashPassword('correct-horse-battery-2026'));
+  const app = createApp(db, { limits: false, dist: resolve('__no_test_dist__'), ...options });
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise(resolve => server.once('listening', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const request = async (path, method = 'GET', body, headers = {}) => fetch(`${base}/api${path}`, { method, headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...headers }, body: body ? JSON.stringify(body) : undefined });
+  async function login() {
+    const res = await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'correct-horse-battery-2026' });
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    return { Cookie: res.headers.get('set-cookie').split(';')[0], 'X-CSRF-Token': data.csrf };
+  }
+  try { await fn({ db, request, login, base }); }
+  finally { await new Promise(resolve => server.close(resolve)); db.close(); }
+}
+const applicant = { name: 'Test Student', email: 'student@example.com', year: '2', domain: 'aiml', motivation: 'I would like to build practical AI applications with the student community.', portfolio: 'https://github.com/example', consent: true, website: '' };
+const image = { name: 'workshop.png', mime: 'image/png', data: (await sharp({ create: { width: 16, height: 16, channels: 3, background: '#79af84' } }).png().toBuffer()).toString('base64') };
+
+test('members move to alumni and back without losing their portrait or creation date', () => fixture(async ({ request, login, db }) => {
+  const headers = await login(), member = getSite(db).team[0];
+  const path = `/admin/content/team/${member.id}`;
+  const fields = { name: member.name, role: member.role, initials: member.initials };
+  for (const status of ['alumni', 'member']) {
+    const result = await request(path, 'PUT', { ...fields, status }, headers);
+    assert.equal(result.status, 200);
+    const saved = await result.json();
+    assert.equal(saved.status, status);
+    assert.equal(saved.image, member.image);
+    assert.equal(saved.createdAt, member.createdAt);
+    const published = (await request('/site').then(response => response.json())).team.find(person => person.id === member.id);
+    assert.equal(published.status, status);
+    assert.equal(published.image, member.image);
+  }
+  assert.equal((await request(path, 'PUT', { ...fields, status: 'invalid' }, headers)).status, 400);
+}));
+
+test('new team members get immutable server creation dates and legacy edits preserve foundation ordering', () => fixture(async ({ request, login, db }) => {
+  const headers = await login(), member = { name: 'New Member', role: 'Member', initials: 'NM', createdAt: '2000-01-01T00:00:00Z' };
+  const before = Date.now();
+  const created = await request('/admin/content/team/new-member', 'PUT', member, headers).then(response => response.json());
+  assert.ok(Date.parse(created.createdAt) >= before);
+  const updated = await request('/admin/content/team/new-member', 'PUT', { ...member, role: 'President' }, headers).then(response => response.json());
+  assert.equal(updated.createdAt, created.createdAt);
+  const legacy = getSite(db).team[0];
+  const saved = await request(`/admin/content/team/${legacy.id}`, 'PUT', { ...legacy, createdAt: created.createdAt }, headers).then(response => response.json());
+  assert.equal(saved.createdAt, undefined);
+  const publicMember = (await request('/site').then(response => response.json())).team.at(-1);
+  assert.equal(publicMember.id, 'new-member'); assert.equal(publicMember.createdAt, created.createdAt);
+}));
+
+test('publishing an experience requires auth and CSRF, persists photos and a safe station, and is idempotent', () => fixture(async ({ request, login, db, base }) => {
+  const track = createCoasterTrack(), planner = createStationPlanner(track);
+  const originalStations = planner.forEvents(createEventStations(getSite(db).events).map(station => station.event));
+  const id = 'baf123c4-e81b-43df-831d-e85916d1ad80', path = `/admin/experience-events/${id}`;
+  const event = { ...getSite(db).events[0], title: 'Photo workshop' };
+  const body = { event, photos: [image] };
+  assert.equal((await request(path, 'PUT', body)).status, 401);
+  const headers = await login();
+  assert.equal((await request(path, 'PUT', body, { Cookie: headers.Cookie })).status, 403);
+  assert.equal((await request(path, 'PUT', body, { ...headers, Origin: 'https://elsewhere.example' })).status, 403);
+  const result = await request(path, 'PUT', body, { ...headers, Origin: 'http://127.0.0.1:3000' });
+  assert.equal(result.status, 201); const saved = await result.json();
+  assert.ok(saved.trackPosition > 0 && saved.trackPosition < 1); assert.equal(saved.photos.length, 1);
+  const stations = createEventStations(getSite(db).events), placements = planner.forEvents(stations.map(station => station.event));
+  const addedIndex = originalStations.length;
+  assert.equal(stations.length, addedIndex + 1); assert.equal(stations[addedIndex].number, String(addedIndex + 1).padStart(2, '0')); assert.equal(stations[addedIndex].id, id);
+  assert.deepEqual(placements.slice(0, addedIndex).map(stop => stop.distance), originalStations.map(stop => stop.distance));
+  assert.equal(placements[addedIndex].distance / track.getLength(), saved.trackPosition);
+  for (const original of placements.slice(0, addedIndex)) {
+    assert.ok(trackSeparation(original.distance, placements[addedIndex].distance, track.getLength()) > 48);
+    assert.ok(!original.bounds.intersectsBox(placements[addedIndex].bounds));
+  }
+  assert.equal((await request(path, 'PUT', body, headers)).status, 200);
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM event_photos').get().n, 1);
+  const photo = await fetch(base + saved.photos[0].url); assert.equal(photo.status, 200); assert.match(photo.headers.get('content-type'), /image\/webp/);
+  const metadata = await sharp(Buffer.from(await photo.arrayBuffer())).metadata(); assert.equal(metadata.width, 16); assert.equal(metadata.format, 'webp');
+  const publicEvent = (await request('/site').then(r => r.json())).events.find(e => e.id === id);
+  assert.deepEqual(publicEvent.photos, saved.photos);
+  await request(`/admin/content/events/${id}`, 'PUT', { ...event, published: false }, headers);
+  assert.equal((await fetch(base + saved.photos[0].url)).status, 404);
+  assert.equal(getSite(db, true).events.find(e => e.id === id).trackPosition, saved.trackPosition);
+  await request(`/admin/content/events/${id}`, 'DELETE', undefined, headers);
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM event_photos').get().n, 0);
+}));
+
+test('photo-free experiences persist album and registration links and reject unsafe URLs', () => fixture(async ({ request, login, db }) => {
+  const headers = await login(), id = 'ddf123c4-e81b-43df-831d-e85916d1ad81';
+  const event = { ...getSite(db).events[0], title: 'Linked album workshop', albumUrl: 'https://drive.google.com/drive/folders/example', registrationUrl: 'https://example.com/register' };
+  for (const patch of [{ albumUrl: 'javascript:alert(1)' }, { albumUrl: 'data:text/html,hello' }, { registrationUrl: 'file:///private' }]) {
+    assert.equal((await request(`/admin/experience-events/${id}`, 'PUT', { event: { ...event, ...patch } }, headers)).status, 400);
+  }
+  const result = await request(`/admin/experience-events/${id}`, 'PUT', { event, photos: [] }, headers);
+  assert.equal(result.status, 201); const saved = await result.json();
+  assert.equal(saved.albumUrl, event.albumUrl); assert.equal(saved.registrationUrl, event.registrationUrl);
+  const published = (await request('/site').then(r => r.json())).events.find(e => e.id === id);
+  assert.equal(published.albumUrl, event.albumUrl); assert.equal(published.registrationUrl, event.registrationUrl);
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM event_photos').get().n, 0);
+}));
+
+test('invalid photos are rejected atomically and track capacity returns a useful error', () => fixture(async ({ request, login, db }) => {
+  const headers = await login(), event = getSite(db).events[0];
+  const bad = { name: 'fake.png', mime: 'image/png', data: Buffer.from('<svg>not a photo</svg>').toString('base64') };
+  const badId = 'f8227533-2857-4d28-a491-52d86ee91b76';
+  assert.equal((await request(`/admin/experience-events/${badId}`, 'PUT', { event, photos: [bad] }, headers)).status, 400);
+  assert.equal(getSite(db).events.length, 3);
+  let added = 0;
+  for (let i = 0; i < 30; i++) {
+    const id = `f8227533-2857-4d28-a491-${String(i).padStart(12, '0')}`;
+    const response = await request(`/admin/experience-events/${id}`, 'PUT', { event, photos: [] }, headers);
+    if (response.status === 409) { assert.match((await response.json()).error, /no safe space/); break; }
+    assert.equal(response.status, 201); added++;
+  }
+  assert.ok(added > 3 && added < 30);
+  const positions = getSite(db).events.filter(e => e.trackPosition !== undefined).map(e => e.trackPosition);
+  assert.equal(new Set(positions).size, added);
+}));
+
+test('public API exposes published club content without private application data', () => fixture(async ({ request, db }) => {
+  db.prepare('INSERT INTO content VALUES(?,?,?,?)').run('events', 'draft', JSON.stringify({ id: 'draft', title: 'Hidden draft', published: false }), 99);
+  const response = await request('/site'); assert.equal(response.status, 200);
+  const site = await response.json(); assert.equal(site.events.length, 3); assert.equal(site.settings.recruitmentOpen, false);
+  assert.equal(site.applications, undefined); assert.equal(site.admins, undefined);
+  assert.ok(!JSON.stringify(site).includes('System Design')); assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
+}));
+test('passwords are salted and verified; admin endpoints require authentication', () => fixture(async ({ request }) => {
+  const hash = hashPassword('my-long-password'); assert.notEqual(hash, hashPassword('my-long-password'));
+  assert.equal(verifyPassword('my-long-password', hash), true); assert.equal(verifyPassword('incorrect', hash), false);
+  assert.equal((await request('/admin/applications')).status, 401);
+  assert.equal((await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'incorrect' })).status, 401);
+  const response = await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'correct-horse-battery-2026' });
+  assert.match(response.headers.get('set-cookie'), /HttpOnly/); assert.match(response.headers.get('set-cookie'), /SameSite=Strict/);
+}));
+test('closed recruitment and expired deadlines reject applications', () => fixture(async ({ request, db }) => {
+  assert.equal((await request('/applications', 'POST', applicant)).status, 409);
+  const settings = getSite(db).settings; settings.recruitmentOpen = true; settings.recruitmentDeadline = '2020-01-01T00:00:00.000Z';
+  db.prepare('UPDATE settings SET body=?').run(JSON.stringify(settings));
+  assert.equal((await request('/site').then(r => r.json())).settings.recruitmentOpen, false);
+  assert.equal((await request('/applications', 'POST', applicant)).status, 409);
+}));
+test('full application lifecycle: open intake, submit, reject duplicates, review, delete', () => fixture(async ({ request, login, db }) => {
+  const headers = await login();
+  const settings = { ...getSite(db).settings, recruitmentOpen: true, cycle: 'test-intake' };
+  assert.equal((await request('/admin/settings', 'PUT', settings, headers)).status, 200);
+  const submission = await request('/applications', 'POST', applicant); assert.equal(submission.status, 201); const { id } = await submission.json(); assert.ok(id);
+  assert.equal((await request('/applications', 'POST', { ...applicant, email: 'STUDENT@example.com' })).status, 409);
+  const inbox = await request('/admin/applications', 'GET', undefined, headers).then(r => r.json()); assert.equal(inbox.total, 1); assert.equal(inbox.items[0].email, applicant.email);
+  assert.equal((await request(`/admin/applications/${id}`, 'PATCH', { status: 'reviewing' }, headers)).status, 200);
+  assert.equal(db.prepare('SELECT status FROM applications WHERE id=?').get(id).status, 'reviewing');
+  assert.equal((await request(`/admin/applications/${id}`, 'DELETE', undefined, headers)).status, 200);
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM applications').get().n, 0);
+}));
+test('server rejects removed domains, invalid links, absent consent, and spam trap values', () => fixture(async ({ request, login, db }) => {
+  const headers = await login(); await request('/admin/settings', 'PUT', { ...getSite(db).settings, recruitmentOpen: true }, headers);
+  for (const patch of [{ domain: 'system-design' }, { portfolio: 'javascript:alert(1)' }, { consent: false }, { website: 'spam' }, { motivation: 'short' }]) {
+    assert.equal((await request('/applications', 'POST', { ...applicant, ...patch })).status, 400);
+  }
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM applications').get().n, 0);
+}));
+test('admin mutations require CSRF and reject cross-origin requests', () => fixture(async ({ request, login, db }) => {
+  const headers = await login(), settings = getSite(db).settings;
+  assert.equal((await request('/admin/settings', 'PUT', settings, { Cookie: headers.Cookie })).status, 403);
+  assert.equal((await request('/admin/settings', 'PUT', settings, { ...headers, Origin: 'https://untrusted.example' })).status, 403);
+  assert.equal((await request('/admin/logout', 'POST', undefined, headers)).status, 200);
+  assert.equal((await request('/admin/session', 'GET', undefined, headers)).status, 401);
+}));
+test('content CRUD validates dates, persists publication status, and updates the public feed', () => fixture(async ({ request, login, db }) => {
+  const headers = await login(); const event = { ...getSite(db).events[0], id: 'new-event', title: 'A new connection', published: false };
+  assert.equal((await request('/admin/content/events/new-event', 'PUT', event, headers)).status, 200);
+  assert.equal((await request('/site').then(r => r.json())).events.length, 3);
+  assert.equal((await request('/admin/site', 'GET', undefined, headers).then(r => r.json())).events.length, 4);
+  assert.equal((await request('/admin/content/events/new-event', 'PUT', { ...event, endsAt: '2000-01-01T00:00:00.000Z' }, headers)).status, 400);
+  assert.equal((await request('/admin/content/events/new-event', 'PUT', { ...event, published: true }, headers)).status, 200);
+  assert.equal((await request('/site').then(r => r.json())).events.length, 4);
+  assert.equal((await request('/admin/content/events/new-event', 'DELETE', undefined, headers)).status, 200);
+  assert.equal((await request('/site').then(r => r.json())).events.length, 3);
+}));
+test('database content survives a close and reopen without reseeding over edits', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'nucleus-db-test-')), path = join(directory, 'site.sqlite');
+  let db;
+  try {
+    db = openDatabase(path); const settings = getSite(db).settings; settings.cycle = 'persisted-intake';
+    db.prepare('UPDATE settings SET body=?').run(JSON.stringify(settings)); db.close(); db = openDatabase(path);
+    assert.equal(getSite(db).settings.cycle, 'persisted-intake'); assert.equal(getSite(db).events.length, 3);
+    db.prepare('INSERT INTO event_photos(id,event_id,name,mime,data,position) VALUES(?,?,?,?,?,?)').run('persistent-photo', getSite(db).events[0].id, 'memory.png', 'image/png', Buffer.from('saved image bytes'), 0);
+    db.close(); db = openDatabase(path);
+    assert.equal(getSite(db).events[0].photos[0].id, 'persistent-photo');
+    assert.equal(Buffer.from(db.prepare('SELECT data FROM event_photos WHERE id=?').get('persistent-photo').data).toString(), 'saved image bytes');
+  } finally { db?.close(); rmSync(directory, { recursive: true, force: true }); }
+});
+test('production renders the animated home and club pages, escapes data, and hides admin from indexing', async () => {
+  if (!existsSync('dist/server/entry-server.js')) return;
+  const { render } = await import('../dist/server/entry-server.js');
+  await fixture(async ({ base, db }) => {
+    const settings = getSite(db).settings; settings.recruitmentMessage = 'Updated from the database </script><script>alert(1)</script>';
+    db.prepare('UPDATE settings SET body=?').run(JSON.stringify(settings));
+    const response = await fetch(base); const html = await response.text();
+    assert.equal(response.status, 200);
+    const home = html.match(/<div id="root">([\s\S]*?)<script id="nucleus-data"/)?.[1];
+    assert.ok(home); assert.match(home, /class="logo-landing"/); assert.match(home, /nucleus-logo[^" ]*\.webp/);
+    assert.match(home, /aria-label="Main navigation"/); assert.match(home, /class="dp-section"/);
+    assert.match(home, /class="mu-morph-wrap/); assert.match(home, /community-section--reveal/);
+    assert.doesNotMatch(home, /class="home-links/);
+    assert.doesNotMatch(html, /Enable JavaScript to explore events and apply/);
+    assert.match(html, /Updated from the database/); assert.match(html, /application\/ld\+json/);
+    const about = await fetch(`${base}/about`).then(r => r.text());
+    assert.match(about, /A meeting/); assert.match(about, /of minds/); assert.match(about, /Data Structures/); assert.match(about, /site-header/);
+    const work = await fetch(`${base}/projects`).then(r => r.text());
+    assert.match(work, /work-feature/); assert.match(work, /i Laundroid/);
+    const team = await fetch(`${base}/team`).then(r => r.text());
+    for (const member of getSite(db).team) assert.ok(team.includes(member.name));
+    const achievements = await fetch(`${base}/achievements`).then(r => r.text());
+    assert.match(achievements, /class="ach-record"/); assert.match(achievements, /SAMPLE RECORD/);
+    for (const path of ['/', '/about', '/projects', '/team', '/events', '/recruitment', '/achievements']) {
+      const response = await fetch(`${base}${path}?source=test`);
+      const document = await response.text(), meta = pageMeta(path);
+      assert.equal(response.status, 200);
+      assert.ok(document.includes(`<title>${meta.title}</title>`));
+      assert.ok(document.includes(`<link rel="canonical" href="${meta.canonical}"`));
+      assert.ok(document.includes(`<meta name="description" content="${meta.description}"`));
+      assert.ok(document.includes(`<meta property="og:url" content="${meta.canonical}"`));
+    }
+    const recruitment = await fetch(`${base}/recruitment`);
+    assert.equal(recruitment.status, 200); assert.match(await recruitment.text(), /recruitment-page/);
+    assert.ok(!html.includes('</script><script>alert(1)</script>')); assert.match(html, /id="nucleus-data"/);
+    const admin = await fetch(`${base}/admin`).then(r => r.text()); assert.match(admin, /noindex,nofollow/); assert.ok(!admin.includes('Updated from the database'));
+    assert.equal((await fetch(`${base}/does-not-exist`)).status, 404);
+    const assets = [...html.matchAll(/(?:src|href)="(\/assets\/[^" ]+)"/g)].map(m => m[1]); assert.ok(assets.length > 0);
+    for (const asset of assets) { const assetRes = await fetch(base + asset); assert.equal(assetRes.status, 200); assert.match(assetRes.headers.get('cache-control'), /immutable/); }
+  }, { dist: resolve('dist/client'), render });
+});
+
+test('production sessions use secure host-only cookies and authentication is rate limited', async () => {
+  await fixture(async ({ request }) => {
+    const response = await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'correct-horse-battery-2026' });
+    assert.match(response.headers.get('set-cookie'), /^__Host-nucleus_session=/); assert.match(response.headers.get('set-cookie'), /Secure/);
+    assert.ok(response.headers.get('content-security-policy').includes("frame-ancestors 'none'"));
+    assert.ok(response.headers.get('content-security-policy').includes("media-src 'self' blob:"));
+    for (let i = 0; i < 7; i++) assert.equal((await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'wrong' })).status, 401);
+    assert.equal((await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'wrong' })).status, 429);
+  }, { production: true, origin: 'https://nucleussjec.in', limits: true });
+});
+
+test('all profile links are private, validated, normalized and saved on the existing application', () => fixture(async ({ request, login, db }) => {
+  const headers = await login();
+  await request('/admin/settings', 'PUT', { ...getSite(db).settings, recruitmentOpen: true, recruitmentNextOpening: 'November 2026' }, headers);
+  const links = { linkedin: 'https://linkedin.com/in/student', github: 'https://github.com/student', leetcode: 'https://leetcode.com/u/student', portfolio: 'https://student.example.com' };
+  const result = await request('/applications', 'POST', { ...applicant, ...links, email: ' STUDENT@EXAMPLE.COM ' });
+  assert.equal(result.status, 201);
+  const row = db.prepare('SELECT * FROM applications').get();
+  assert.equal(row.email, 'student@example.com');
+  for (const [key, value] of Object.entries(links)) assert.equal(row[key], value);
+  const inbox = await request('/admin/applications', 'GET', undefined, headers).then(response => response.json());
+  for (const [key, value] of Object.entries(links)) assert.equal(inbox.items[0][key], value);
+  assert.ok(!(await request('/site').then(response => response.text())).includes('student@example.com'));
+  for (const patch of [{ year: '4' }, { linkedin: 'javascript:alert(1)' }, { github: 'data:text/html,x' }, { leetcode: 'https://user:password@example.com' }, { portfolio: 'https://example.com/' + 'x'.repeat(500) }]) {
+    assert.equal((await request('/applications', 'POST', { ...applicant, ...patch })).status, 400);
+  }
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM applications').get().n, 1);
+}));
+
+test('admin route guard protects all content, media and application endpoints including unknown routes', () => fixture(async ({ request, login, db }) => {
+  const headers = await login(), event = getSite(db).events[0], member = getSite(db).team[0];
+  const mutations = [
+    ['/admin/settings', 'PUT', getSite(db).settings], ['/admin/content/events/example', 'PUT', event],
+    ['/admin/content/team/example', 'PUT', member], ['/admin/content/projects/example', 'PUT', {}],
+    ['/admin/content/events/example', 'DELETE'], ['/admin/applications/example', 'PATCH', { status: 'accepted' }],
+    ['/admin/applications/example', 'DELETE'], ['/admin/logout', 'POST'],
+  ];
+  for (const [path, method, body] of mutations) {
+    assert.equal((await request(path, method, body)).status, 401, path);
+    assert.equal((await request(path, method, body, { Cookie: headers.Cookie })).status, 403, path);
+  }
+  for (const path of ['/admin/site', '/admin/applications', '/admin/event-photos/example', '/admin/unknown']) {
+    assert.equal((await request(path)).status, 401, path);
+  }
+  for (const kind of ['__proto__', 'constructor', 'unknown']) assert.equal((await request(`/admin/content/${kind}/id`, 'PUT', {}, headers)).status, 400);
+  assert.equal((await request('/admin/settings', 'PUT', getSite(db).settings, { ...headers, 'Sec-Fetch-Site': 'cross-site' })).status, 403);
+  assert.equal((await request('/admin/login', 'POST', {}, { 'Content-Type': 'text/plain' })).status, 415);
+  assert.equal(verifyPassword('anything', 'broken:hash'), false);
+}));
+
+test('sessions are hashed, rotate on sign-in, and expire on inactivity or absolute lifetime', () => fixture(async ({ request, login, db }) => {
+  let headers = await login();
+  const stored = db.prepare('SELECT * FROM sessions').get();
+  assert.ok(!headers.Cookie.includes(stored.token_hash));
+  const signedIn = await request('/admin/login', 'POST', { email: 'admin@example.com', password: 'correct-horse-battery-2026' }, { Cookie: headers.Cookie });
+  assert.equal(signedIn.status, 200);
+  assert.equal((await request('/admin/session', 'GET', undefined, headers)).status, 401);
+  headers = await login();
+  db.prepare('UPDATE sessions SET last_seen=?').run(Date.now() - 31 * 60_000);
+  assert.equal((await request('/admin/session', 'GET', undefined, headers)).status, 401);
+  headers = await login();
+  db.prepare('UPDATE sessions SET expires_at=?').run(Date.now() - 1);
+  assert.equal((await request('/admin/settings', 'PUT', getSite(db).settings, headers)).status, 401);
+}));
+
+test('admin photo updates persist, preserve metadata, reject corrupt images atomically and remove obsolete blobs', () => fixture(async ({ request, login, db, base }) => {
+  const headers = await login(), event = getSite(db).events[0], member = getSite(db).team[0];
+  const eventPath = `/admin/content/events/${event.id}`, memberPath = `/admin/content/team/${member.id}`;
+  let response = await request(eventPath, 'PUT', { ...event, photos: [image] }, headers);
+  assert.equal(response.status, 200); const album = await response.json();
+  const portrait = await request(memberPath, 'PUT', { ...member, role: 'New lead', photo: image }, headers).then(response => response.json());
+  assert.match(portrait.image, /^\/api\/member-photos\//);
+  assert.equal((await fetch(base + portrait.image)).status, 200);
+  assert.equal(portrait.createdAt, member.createdAt);
+  assert.equal(getSite(db).team.find(item => item.id === member.id).role, 'New lead');
+  assert.equal((await request(memberPath, 'PUT', { ...member, role: 'Updated lead' }, headers).then(response => response.json())).image, portrait.image);
+  for (const invalid of [{ ...image, data: Buffer.from('RIFFxxxxWEBPnot an actual image').toString('base64'), mime: 'image/webp' }, { ...image, mime: 'image/jpeg' }]) {
+    assert.equal((await request(eventPath, 'PUT', { ...event, title: 'Should not save', photos: [invalid] }, headers)).status, 400);
+    assert.equal((await request(memberPath, 'PUT', { ...member, role: 'Should not save', photo: invalid }, headers)).status, 400);
+  }
+  assert.equal(getSite(db).events.find(item => item.id === event.id).title, event.title);
+  assert.equal(getSite(db).team.find(item => item.id === member.id).role, 'Updated lead');
+  await request(eventPath, 'PUT', { ...event, published: false }, headers);
+  assert.equal((await fetch(base + album.photos[0].url)).status, 404);
+  assert.equal((await request(`/admin/event-photos/${album.photos[0].id}`, 'GET', undefined, headers)).status, 200);
+  const replaced = await request(eventPath, 'PUT', { ...event, photos: [image, image] }, headers).then(response => response.json());
+  assert.equal(replaced.photos.length, 2);
+  assert.equal((await fetch(base + album.photos[0].url)).status, 404);
+  await request(memberPath, 'PUT', { ...member, photo: null }, headers);
+  assert.equal(getSite(db).team.find(item => item.id === member.id).image, '');
+  assert.equal((await fetch(base + portrait.image)).status, 404);
+  await request(eventPath, 'PUT', { ...event, photos: [] }, headers);
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM event_photos').get().n, 0);
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM member_photos').get().n, 0);
+}));
+
+test('legacy database migrates without losing applications, content, or stored profile links on reopen', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'nucleus-migration-')), path = join(directory, 'site.sqlite');
+  let db;
+  try {
+    db = openDatabase(path);
+    db.prepare('INSERT INTO applications(id,name,email,year,domain,motivation,portfolio,cycle,created_at) VALUES(?,?,?,?,?,?,?,?,?)').run('old', 'Legacy Student', 'old@example.com', '4', 'web', 'A previous application', 'https://example.com', 'old-intake', new Date().toISOString());
+    for (const name of ['linkedin', 'github', 'leetcode']) db.exec(`ALTER TABLE applications DROP COLUMN ${name}`);
+    db.exec('ALTER TABLE sessions DROP COLUMN last_seen');
+    db.close(); db = openDatabase(path);
+    let row = db.prepare('SELECT * FROM applications WHERE id=?').get('old');
+    assert.equal(row.year, '4'); assert.equal(row.portfolio, 'https://example.com'); assert.equal(row.linkedin, '');
+    db.prepare('UPDATE applications SET linkedin=? WHERE id=?').run('https://linkedin.com/in/old', 'old');
+    db.close(); db = openDatabase(path); row = db.prepare('SELECT * FROM applications WHERE id=?').get('old');
+    assert.equal(row.linkedin, 'https://linkedin.com/in/old'); assert.equal(getSite(db).events.length, 3);
+  } finally { db?.close(); rmSync(directory, { recursive: true, force: true }); }
+});

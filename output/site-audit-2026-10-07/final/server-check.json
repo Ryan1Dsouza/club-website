@@ -1,0 +1,276 @@
+{
+  "requests": [
+    {
+      "path": "/",
+      "status": 200,
+      "bytes": 52754,
+      "headers": {
+        "cache-control": "no-cache",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": true
+    },
+    {
+      "path": "/team",
+      "status": 200,
+      "bytes": 48952,
+      "headers": {
+        "cache-control": "no-cache",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": true
+    },
+    {
+      "path": "/events",
+      "status": 200,
+      "bytes": 36508,
+      "headers": {
+        "cache-control": "no-cache",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": true
+    },
+    {
+      "path": "/achievements",
+      "status": 200,
+      "bytes": 38137,
+      "headers": {
+        "cache-control": "no-cache",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": true
+    },
+    {
+      "path": "/news",
+      "status": 200,
+      "bytes": 18841,
+      "headers": {
+        "cache-control": "no-cache",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": true
+    },
+    {
+      "path": "/live-news",
+      "status": 200,
+      "bytes": 18814,
+      "headers": {
+        "cache-control": "no-cache",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": true
+    },
+    {
+      "path": "/admin",
+      "status": 200,
+      "bytes": 3411,
+      "headers": {
+        "cache-control": "no-cache",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": false
+    },
+    {
+      "path": "/not-a-page",
+      "status": 404,
+      "bytes": 56,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": false
+    },
+    {
+      "path": "/api/health",
+      "status": 200,
+      "bytes": 15,
+      "headers": {
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "application/json; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": false
+    },
+    {
+      "path": "/api/site",
+      "status": 200,
+      "bytes": 3770,
+      "headers": {
+        "cache-control": "no-store",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "application/json; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": false
+    },
+    {
+      "path": "/api/admin/site",
+      "status": 401,
+      "bytes": 47,
+      "headers": {
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "application/json; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": false
+    },
+    {
+      "path": "/.env.local",
+      "status": 404,
+      "bytes": 56,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": false
+    },
+    {
+      "path": "/.git/config",
+      "status": 404,
+      "bytes": 56,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": false
+    },
+    {
+      "path": "/data/nucleus.sqlite",
+      "status": 404,
+      "bytes": 56,
+      "headers": {
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/html; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": false
+    },
+    {
+      "path": "/assets/index-S9j69SxX.js",
+      "status": 200,
+      "bytes": 698695,
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "gzip",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data: blob: https://*.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;media-src 'self' blob:;connect-src 'self' https://*.supabase.co",
+        "content-type": "text/javascript; charset=utf-8",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "ssr": false
+    }
+  ],
+  "latency": [
+    {
+      "path": "/api/site",
+      "requests": 30,
+      "p50Ms": 1.5649000000000797,
+      "p95Ms": 2.0588000000000193,
+      "maxMs": 2.3841999999999643
+    },
+    {
+      "path": "/",
+      "requests": 30,
+      "p50Ms": 9.012000000000171,
+      "p95Ms": 38.203899999999976,
+      "maxMs": 41.44939999999997
+    },
+    {
+      "path": "/team",
+      "requests": 30,
+      "p50Ms": 6.222999999999956,
+      "p95Ms": 11.14639999999963,
+      "maxMs": 12.641700000000128
+    },
+    {
+      "path": "/events",
+      "requests": 30,
+      "p50Ms": 23.071399999999812,
+      "p95Ms": 44.071100000000115,
+      "maxMs": 44.080999999999676
+    }
+  ],
+  "loginLimit": [
+    401,
+    401,
+    401,
+    401,
+    401,
+    401,
+    401,
+    401,
+    429
+  ],
+  "crossOriginStatus": 403
+}

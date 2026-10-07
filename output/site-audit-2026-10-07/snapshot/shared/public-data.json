@@ -1,0 +1,166 @@
+{
+  "settings": {
+    "recruitmentOpen": false,
+    "recruitmentMessage": "Recruitment is currently closed. Follow our community for the next intake and results updates.",
+    "recruitmentDeadline": "",
+    "cycle": "2026",
+    "contactEmail": "nucleussjec@gmail.com",
+    "instagramUrl": "https://www.instagram.com/nucleus_sjec/",
+    "githubUrl": "https://github.com/nucleus-sjec",
+    "linkedinUrl": "https://www.linkedin.com/company/nucleus-sjec/"
+  },
+  "events": [
+    {
+      "id": "inaugural-2026",
+      "title": "The first connection",
+      "description": "The official inauguration of Nucleus. A beginning for a community of curious minds, ambitious builders, and future collaborators at SJEC.",
+      "startsAt": "2026-03-12T05:30:00.000Z",
+      "endsAt": "2026-03-12T06:15:00.000Z",
+      "location": "St. Joseph Engineering College, Mangaluru",
+      "category": "Inauguration",
+      "registrationUrl": "",
+      "published": true
+    },
+    {
+      "id": "ai-workshop-2026",
+      "title": "Beyond the baseline",
+      "description": "AI is the baseline. How do you stand out? A session with Chandan Jha exploring what it means to build your own edge in a world shaped by artificial intelligence.",
+      "startsAt": "2026-03-12T06:15:00.000Z",
+      "endsAt": "",
+      "location": "St. Joseph Engineering College, Mangaluru",
+      "category": "AI workshop",
+      "registrationUrl": "",
+      "published": true
+    },
+    {
+      "id": "recruitment-2026",
+      "title": "Find your people",
+      "description": "Our March 2026 recruitment brought together students interested in learning, building, and contributing to Nucleus. Follow our recruitment updates for the next opportunity to join.",
+      "startsAt": "2026-03-12T03:30:00.000Z",
+      "endsAt": "2026-03-15T18:29:00.000Z",
+      "location": "Nucleus \u00b7 SJEC",
+      "category": "Community",
+      "registrationUrl": "",
+      "published": true
+    }
+  ],
+  "projects": [
+    {
+      "id": "i-laundroid",
+      "title": "i Laundroid",
+      "description": "A centralized laundry management platform connecting campus life with better logistics. Built to simplify booking, order tracking, and delivery for students and administrators across residential campuses.",
+      "domain": "Web development",
+      "status": "Club project",
+      "url": "",
+      "repositoryUrl": "",
+      "published": true
+    }
+  ],
+  "team": [
+    {
+      "id": "poorvik",
+      "name": "Poorvik Kuthyala",
+      "role": "President",
+      "initials": "PK",
+      "image": "/team_images/core/Poorvik.avif"
+    },
+    {
+      "id": "dinol",
+      "name": "Dinol Castelino",
+      "role": "Vice President",
+      "initials": "DC",
+      "image": "/team_images/core/Dinol.avif"
+    },
+    {
+      "id": "joylin",
+      "name": "Joylin Mathias",
+      "role": "Secretary",
+      "initials": "JM",
+      "image": "/team_images/core/Joylin.avif"
+    },
+    {
+      "id": "nishanth",
+      "name": "Nishanth Uday Naik",
+      "role": "Plan & Strategy Lead",
+      "initials": "NN",
+      "image": "/team_images/core/Nishanth1.avif"
+    },
+    {
+      "id": "karthik",
+      "name": "Karthik",
+      "role": "Treasurer",
+      "initials": "K",
+      "image": "/team_images/core/Karthik.avif"
+    },
+    {
+      "id": "prajwal",
+      "name": "Prajwal Gaonkar",
+      "role": "Technical Lead",
+      "initials": "PG",
+      "image": "/team_images/core/Prajwal.avif"
+    },
+    {
+      "id": "mohit",
+      "name": "Mohit",
+      "role": "AI & ML Lead",
+      "initials": "M",
+      "image": "/team_images/core/Mohit.avif"
+    },
+    {
+      "id": "rakshith",
+      "name": "Rakshith Dsouza",
+      "role": "Development Lead",
+      "initials": "RD",
+      "image": "/team_images/core/Rakshith.avif"
+    },
+    {
+      "id": "navya",
+      "name": "Navya Suvarna",
+      "role": "DSA Lead",
+      "initials": "NS",
+      "image": "/team_images/core/Navya.avif"
+    },
+    {
+      "id": "deona",
+      "name": "Deona Rego",
+      "role": "Event Lead",
+      "initials": "DR",
+      "image": "/team_images/core/Deona.avif"
+    },
+    {
+      "id": "sweedan",
+      "name": "Sweedan Cardoza",
+      "role": "Media Lead",
+      "initials": "SC",
+      "image": "/team_images/core/Sweeden.avif"
+    },
+    {
+      "id": "manvitha",
+      "name": "Manvitha Lewis",
+      "role": "Discipline Head",
+      "initials": "ML",
+      "image": "/team_images/core/Manvitha.avif"
+    },
+    {
+      "id": "salim",
+      "name": "Salim Pallikal",
+      "role": "Member",
+      "initials": "SP",
+      "image": "/team_images/core/Salim.avif"
+    },
+    {
+      "id": "nikhitha",
+      "name": "Nikhitha Dsouza",
+      "role": "Member",
+      "initials": "ND",
+      "image": "/team_images/core/Nikhitha.avif"
+    },
+    {
+      "id": "saniya",
+      "name": "Aisahath Saniya",
+      "role": "Member",
+      "initials": "AS",
+      "image": "/team_images/core/Saniya.avif"
+    }
+  ]
+}

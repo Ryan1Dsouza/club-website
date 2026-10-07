@@ -1,0 +1,9 @@
+.railway-track { --rail-color:var(--muted); position:absolute; inset:0; display:block; overflow:clip; pointer-events:none; }
+.railway-track__sleepers { position:absolute; inset:0 7px; background:repeating-linear-gradient(180deg,transparent 0 13px,rgb(var(--mint-rgb) / .22) 13px 17px,transparent 17px 23px); }
+.railway-track__rails { position:absolute; inset:0 12px; border-inline:2px solid var(--rail-color); box-shadow:inset 1px 0 var(--line),1px 0 var(--line); }
+.railway-track__journey { position:absolute; inset:28px 0; transform:translate3d(0,calc(var(--rail-progress,0) * 100%),0); will-change:transform; }
+.railway-track__cart { position:absolute; top:-28px; left:50%; width:36px; height:56px; margin-left:-18px; filter:drop-shadow(0 4px 5px #0006); }
+.railway-track--horizontal .railway-track__sleepers { inset:5px 0; background:repeating-linear-gradient(90deg,transparent 0 10px,rgb(var(--mint-rgb) / .22) 10px 13px,transparent 13px 19px); }
+.railway-track--horizontal .railway-track__rails { inset:9px 0; border-inline:0; border-block:2px solid var(--rail-color); }
+.railway-track--horizontal .railway-track__journey { inset:0 28px; transform:translate3d(calc(var(--rail-progress,0) * 100%),0,0); }
+.railway-track--horizontal .railway-track__cart { left:-18px; top:50%; margin:-28px 0 0; transform:rotate(90deg); }

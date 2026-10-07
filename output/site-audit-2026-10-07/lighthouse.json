@@ -1,0 +1,1326 @@
+[
+  {
+    "name": "mobile-home",
+    "scores": {
+      "performance": 84,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2415.3763,
+        "display": "2.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 3333.3763,
+        "display": "3.3 s"
+      },
+      "total-blocking-time": {
+        "value": 165,
+        "display": "170 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 4470.86068975368,
+        "display": "4.5 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.4 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "3.3 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "4.5 s"
+      },
+      {
+        "id": "total-blocking-time",
+        "title": "Total Blocking Time",
+        "value": "170 ms"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "200 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "4.6 s"
+      },
+      {
+        "id": "mainthread-work-breakdown",
+        "title": "Minimize main-thread work",
+        "value": "2.8 s"
+      },
+      {
+        "id": "bootup-time",
+        "title": "Reduce JavaScript execution time",
+        "value": "1.4 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 182 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 600 ms"
+      }
+    ]
+  },
+  {
+    "name": "mobile-team",
+    "scores": {
+      "performance": 73,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2021.7658,
+        "display": "2.0 s"
+      },
+      "largest-contentful-paint": {
+        "value": 6520.41308,
+        "display": "6.5 s"
+      },
+      "total-blocking-time": {
+        "value": 42,
+        "display": "40 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 4168.63852396441,
+        "display": "4.2 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.0 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "6.5 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "4.2 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "100 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "8.1 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 127 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 1,067 KiB"
+      },
+      {
+        "id": "lcp-discovery-insight",
+        "title": "LCP request discovery"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 150 ms"
+      }
+    ]
+  },
+  {
+    "name": "mobile-events",
+    "scores": {
+      "performance": 71,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2564.9028749999998,
+        "display": "2.6 s"
+      },
+      "largest-contentful-paint": {
+        "value": 6382.444600000001,
+        "display": "6.4 s"
+      },
+      "total-blocking-time": {
+        "value": 71,
+        "display": "70 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.0003767945793418973,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 4225.990914712968,
+        "display": "4.2 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.6 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "6.4 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "4.2 s"
+      },
+      {
+        "id": "total-blocking-time",
+        "title": "Total Blocking Time",
+        "value": "70 ms"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "130 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "8.0 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "total-byte-weight",
+        "title": "Avoid enormous network payloads",
+        "value": "Total size was 2,876 KiB"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 127 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "cache-insight",
+        "title": "Use efficient cache lifetimes",
+        "value": "Est savings of 1,260 KiB"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 1,407 KiB"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 450 ms"
+      }
+    ]
+  },
+  {
+    "name": "mobile-projects",
+    "scores": {
+      "performance": 88,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2650.2466249999998,
+        "display": "2.7 s"
+      },
+      "largest-contentful-paint": {
+        "value": 3214.69595,
+        "display": "3.2 s"
+      },
+      "total-blocking-time": {
+        "value": 34,
+        "display": "30 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 3600.3407513265643,
+        "display": "3.6 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.7 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "3.2 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "3.6 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "80 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "3.3 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 128 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 750 ms"
+      }
+    ]
+  },
+  {
+    "name": "mobile-achievements",
+    "scores": {
+      "performance": 76,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 69
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2205.3612500000004,
+        "display": "2.2 s"
+      },
+      "largest-contentful-paint": {
+        "value": 4923.0335000000005,
+        "display": "4.9 s"
+      },
+      "total-blocking-time": {
+        "value": 42.5,
+        "display": "40 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 5292.05703863984,
+        "display": "5.3 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.2 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "4.9 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "5.3 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "140 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "7.7 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 119 KiB"
+      },
+      {
+        "id": "is-crawlable",
+        "title": "Page is blocked from indexing"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 1,988 KiB"
+      },
+      {
+        "id": "lcp-discovery-insight",
+        "title": "LCP request discovery"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 300 ms"
+      }
+    ]
+  },
+  {
+    "name": "mobile-news",
+    "scores": {
+      "performance": 89,
+      "accessibility": 100,
+      "best-practices": 96,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 2409.1076,
+        "display": "2.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2709.1076,
+        "display": "2.7 s"
+      },
+      "total-blocking-time": {
+        "value": 36.5,
+        "display": "40 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.1069376776887777,
+        "display": "0.107"
+      },
+      "speed-index": {
+        "value": 3291.9980242237134,
+        "display": "3.3 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "value": "2.4 s"
+      },
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "2.7 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "3.3 s"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "100 ms"
+      },
+      {
+        "id": "cumulative-layout-shift",
+        "title": "Cumulative Layout Shift",
+        "value": "0.107"
+      },
+      {
+        "id": "errors-in-console",
+        "title": "Browser errors were logged to the console"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "3.3 s"
+      },
+      {
+        "id": "layout-shifts",
+        "title": "Avoid large layout shifts",
+        "value": "1 layout shift found"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 120 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "cls-culprits-insight",
+        "title": "Layout shift culprits"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 600 ms"
+      }
+    ]
+  },
+  {
+    "name": "mobile-recruitment",
+    "scores": {
+      "performance": 0,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {},
+      "largest-contentful-paint": {},
+      "total-blocking-time": {},
+      "cumulative-layout-shift": {},
+      "speed-index": {}
+    },
+    "issues": [
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      }
+    ]
+  },
+  {
+    "name": "mobile-about",
+    "scores": {
+      "performance": 90,
+      "accessibility": 96,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 801.2176,
+        "display": "0.8 s"
+      },
+      "largest-contentful-paint": {
+        "value": 1376.4352,
+        "display": "1.4 s"
+      },
+      "total-blocking-time": {
+        "value": 336,
+        "display": "340 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.0634529070565971,
+        "display": "0.063"
+      },
+      "speed-index": {
+        "value": 3794.466821968753,
+        "display": "3.8 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "3.8 s"
+      },
+      {
+        "id": "total-blocking-time",
+        "title": "Total Blocking Time",
+        "value": "340 ms"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "170 ms"
+      },
+      {
+        "id": "cumulative-layout-shift",
+        "title": "Cumulative Layout Shift",
+        "value": "0.063"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "3.5 s"
+      },
+      {
+        "id": "mainthread-work-breakdown",
+        "title": "Minimize main-thread work",
+        "value": "2.1 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "color-contrast",
+        "title": "Background and foreground colors do not have a sufficient contrast ratio."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 128 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests"
+      }
+    ]
+  },
+  {
+    "name": "desktop-home",
+    "scores": {
+      "performance": 97,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 535.5253,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 682.0253,
+        "display": "0.7 s"
+      },
+      "total-blocking-time": {
+        "value": 1,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1693.3078305121378,
+        "display": "1.7 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "0.7 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.7 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 180 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 80 ms"
+      }
+    ]
+  },
+  {
+    "name": "desktop-team",
+    "scores": {
+      "performance": 85,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 471.5972,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2462.03699,
+        "display": "2.5 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1656.6638987719843,
+        "display": "1.7 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "2.5 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.7 s"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "2.5 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "total-byte-weight",
+        "title": "Avoid enormous network payloads",
+        "value": "Total size was 4,747 KiB"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 127 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 3,154 KiB"
+      },
+      {
+        "id": "lcp-discovery-insight",
+        "title": "LCP request discovery"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 40 ms"
+      }
+    ]
+  },
+  {
+    "name": "desktop-events",
+    "scores": {
+      "performance": 82,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 516.245375,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 902.9926,
+        "display": "0.9 s"
+      },
+      "total-blocking-time": {
+        "value": 306.4999999999999,
+        "display": "310 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.0005360950360082305,
+        "display": "0.001"
+      },
+      "speed-index": {
+        "value": 2082.038297767566,
+        "display": "2.1 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "0.9 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "2.1 s"
+      },
+      {
+        "id": "total-blocking-time",
+        "title": "Total Blocking Time",
+        "value": "310 ms"
+      },
+      {
+        "id": "max-potential-fid",
+        "title": "Max Potential First Input Delay",
+        "value": "660 ms"
+      },
+      {
+        "id": "interactive",
+        "title": "Time to Interactive",
+        "value": "2.1 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 126 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "cache-insight",
+        "title": "Use efficient cache lifetimes",
+        "value": "Est savings of 1,259 KiB"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 1,465 KiB"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 40 ms"
+      }
+    ]
+  },
+  {
+    "name": "desktop-projects",
+    "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 503.35119999999995,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 590.3512,
+        "display": "0.6 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.0002331305191186557,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1383.592151619529,
+        "display": "1.4 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.4 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 128 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 80 ms"
+      }
+    ]
+  },
+  {
+    "name": "desktop-achievements",
+    "scores": {
+      "performance": 97,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 69
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 477.2067,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 917.2067,
+        "display": "0.9 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1606.7762988658912,
+        "display": "1.6 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "0.9 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.6 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "title": "Elements with visible text labels do not have matching accessible names."
+      },
+      {
+        "id": "total-byte-weight",
+        "title": "Avoid enormous network payloads",
+        "value": "Total size was 2,752 KiB"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 119 KiB"
+      },
+      {
+        "id": "is-crawlable",
+        "title": "Page is blocked from indexing"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "image-delivery-insight",
+        "title": "Improve image delivery",
+        "value": "Est savings of 2,036 KiB"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 40 ms"
+      }
+    ]
+  },
+  {
+    "name": "desktop-news",
+    "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 96,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 334.26685000000003,
+        "display": "0.3 s"
+      },
+      "largest-contentful-paint": {
+        "value": 414.26685000000003,
+        "display": "0.4 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.03835555555555555,
+        "display": "0.038"
+      },
+      "speed-index": {
+        "value": 1253.699529941164,
+        "display": "1.3 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.3 s"
+      },
+      {
+        "id": "errors-in-console",
+        "title": "Browser errors were logged to the console"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 120 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 140 ms"
+      }
+    ]
+  },
+  {
+    "name": "desktop-recruitment",
+    "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 465.9823,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 545.9823,
+        "display": "0.5 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "speed-index": {
+        "value": 1375.4403990936946,
+        "display": "1.4 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.4 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 126 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 40 ms"
+      }
+    ]
+  },
+  {
+    "name": "desktop-about",
+    "scores": {
+      "performance": 99,
+      "accessibility": 96,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 506.79200000000003,
+        "display": "0.5 s"
+      },
+      "largest-contentful-paint": {
+        "value": 626.792,
+        "display": "0.6 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.03215015552662037,
+        "display": "0.032"
+      },
+      "speed-index": {
+        "value": 1313.62659824423,
+        "display": "1.3 s"
+      }
+    },
+    "issues": [
+      {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "value": "0.6 s"
+      },
+      {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "value": "1.3 s"
+      },
+      {
+        "id": "valid-source-maps",
+        "title": "Missing source maps for large first-party JavaScript"
+      },
+      {
+        "id": "color-contrast",
+        "title": "Background and foreground colors do not have a sufficient contrast ratio."
+      },
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "value": "Est savings of 128 KiB"
+      },
+      {
+        "id": "bf-cache",
+        "title": "Page prevented back/forward cache restoration",
+        "value": "2 failure reasons"
+      },
+      {
+        "id": "forced-reflow-insight",
+        "title": "Forced reflow"
+      },
+      {
+        "id": "network-dependency-tree-insight",
+        "title": "Network dependency tree"
+      },
+      {
+        "id": "render-blocking-insight",
+        "title": "Render-blocking requests",
+        "value": "Est savings of 80 ms"
+      }
+    ]
+  }
+]

@@ -19,6 +19,8 @@ const links = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/events', label: 'Events', icon: CalendarDays },
   { to: '/team', label: 'Team Members', icon: UsersRound },
+  { to: '/news', label: 'Live News', icon: CalendarDays },
+  { to: '/achievements', label: 'Achievements', icon: ShieldCheck },
   { to: '/settings', label: 'Settings', icon: Settings2 },
 ]
 export function AdminLayout() {
