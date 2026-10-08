@@ -38,7 +38,7 @@
       "description": "Our March 2026 recruitment brought together students interested in learning, building, and contributing to Nucleus. Follow our recruitment updates for the next opportunity to join.",
       "startsAt": "2026-03-12T03:30:00.000Z",
       "endsAt": "2026-03-15T18:29:00.000Z",
-      "location": "Nucleus \u00b7 SJEC",
+      "location": "Nucleus · SJEC",
       "category": "Community",
       "registrationUrl": "",
       "published": true
@@ -62,105 +62,163 @@
       "name": "Poorvik Kuthyala",
       "role": "President",
       "initials": "PK",
-      "image": "/team_images/core/Poorvik.avif"
+      "image": "/team_images/core/Poorvik.avif",
+      "socials": {
+        "github": "https://github.com/poorvikkg",
+        "linkedin": "https://www.linkedin.com/in/poorvik-kuthyala"
+      }
     },
     {
       "id": "dinol",
       "name": "Dinol Castelino",
       "role": "Vice President",
       "initials": "DC",
-      "image": "/team_images/core/Dinol.avif"
+      "image": "/team_images/core/Dinol.avif",
+      "socials": {
+        "linkedin": "https://www.linkedin.com/in/dinol-castelino-57053631a"
+      }
     },
     {
       "id": "joylin",
       "name": "Joylin Mathias",
       "role": "Secretary",
       "initials": "JM",
-      "image": "/team_images/core/Joylin.avif"
+      "image": "/team_images/core/Joylin.avif",
+      "socials": {
+        "github": "https://github.com/joylinmhs",
+        "linkedin": "https://www.linkedin.com/in/joylin-mathias"
+      }
     },
     {
       "id": "nishanth",
       "name": "Nishanth Uday Naik",
       "role": "Plan & Strategy Lead",
       "initials": "NN",
-      "image": "/team_images/core/Nishanth1.avif"
+      "image": "/team_images/core/Nishanth1.avif",
+      "socials": {
+        "github": "https://github.com/Nishanthnaik21",
+        "linkedin": "https://www.linkedin.com/in/nishanth-naik21"
+      }
     },
     {
       "id": "karthik",
       "name": "Karthik",
       "role": "Treasurer",
       "initials": "K",
-      "image": "/team_images/core/Karthik.avif"
+      "image": "/team_images/core/Karthik.avif",
+      "socials": {
+        "github": "https://github.com/karthik17-hub",
+        "linkedin": "https://www.linkedin.com/in/karthik-ㅤ-4bab052a9"
+      }
     },
     {
       "id": "prajwal",
       "name": "Prajwal Gaonkar",
       "role": "Technical Lead",
       "initials": "PG",
-      "image": "/team_images/core/Prajwal.avif"
+      "image": "/team_images/core/Prajwal.avif",
+      "socials": {
+        "github": "https://github.com/OP-Prajwal",
+        "linkedin": "https://www.linkedin.com/in/prajwal-gaonkar-a57586195"
+      }
     },
     {
       "id": "mohit",
       "name": "Mohit",
       "role": "AI & ML Lead",
       "initials": "M",
-      "image": "/team_images/core/Mohit.avif"
+      "image": "/team_images/core/Mohit.avif",
+      "socials": {
+        "github": "https://github.com/mohit782005",
+        "linkedin": "https://www.linkedin.com/in/mohit---7838b631a"
+      }
     },
     {
       "id": "rakshith",
       "name": "Rakshith Dsouza",
       "role": "Development Lead",
       "initials": "RD",
-      "image": "/team_images/core/Rakshith.avif"
+      "image": "/team_images/core/Rakshith.avif",
+      "socials": {
+        "github": "https://github.com/Knight-eGithub",
+        "linkedin": "https://www.linkedin.com/in/rakshith-d-souza-575b34335"
+      }
     },
     {
       "id": "navya",
       "name": "Navya Suvarna",
       "role": "DSA Lead",
       "initials": "NS",
-      "image": "/team_images/core/Navya.avif"
+      "image": "/team_images/core/Navya.avif",
+      "socials": {
+        "github": "https://github.com/navya-y-suvarna",
+        "linkedin": "https://www.linkedin.com/in/navya-y-suvarna/"
+      }
     },
     {
       "id": "deona",
       "name": "Deona Rego",
       "role": "Event Lead",
       "initials": "DR",
-      "image": "/team_images/core/Deona.avif"
+      "image": "/team_images/core/Deona.avif",
+      "socials": {
+        "github": "https://github.com/deonahub",
+        "linkedin": "https://www.linkedin.com/in/deona-rego-0b2002323"
+      }
     },
     {
       "id": "sweedan",
       "name": "Sweedan Cardoza",
       "role": "Media Lead",
       "initials": "SC",
-      "image": "/team_images/core/Sweeden.avif"
+      "image": "/team_images/core/Sweeden.avif",
+      "socials": {
+        "linkedin": "https://www.linkedin.com/in/sweedan23"
+      }
     },
     {
       "id": "manvitha",
       "name": "Manvitha Lewis",
       "role": "Discipline Head",
       "initials": "ML",
-      "image": "/team_images/core/Manvitha.avif"
+      "image": "/team_images/core/Manvitha.avif",
+      "socials": {
+        "github": "https://github.com/manvithalewis",
+        "linkedin": "https://in.linkedin.com/in/manvitha-lewis"
+      }
     },
     {
       "id": "salim",
       "name": "Salim Pallikal",
       "role": "Member",
       "initials": "SP",
-      "image": "/team_images/core/Salim.avif"
+      "image": "/team_images/core/Salim.avif",
+      "socials": {
+        "github": "https://github.com/mahammad-salim7899",
+        "linkedin": "https://www.linkedin.com/in/mahammad-salim"
+      }
     },
     {
       "id": "nikhitha",
       "name": "Nikhitha Dsouza",
       "role": "Member",
       "initials": "ND",
-      "image": "/team_images/core/Nikhitha.avif"
+      "image": "/team_images/core/Nikhitha.avif",
+      "socials": {
+        "github": "https://github.com/nikhrd",
+        "linkedin": "https://www.linkedin.com/in/nikhitha-risha-dsouza"
+      }
     },
     {
       "id": "saniya",
       "name": "Aisahath Saniya",
       "role": "Member",
       "initials": "AS",
-      "image": "/team_images/core/Saniya.avif"
+      "image": "/team_images/core/Saniya.avif",
+      "socials": {
+        "github": "https://github.com/Ayeshasaniyaaaa",
+        "linkedin": "https://www.linkedin.com/in/ayesha-saniya-194b92294"
+      }
     }
   ]
 }
