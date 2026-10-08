@@ -114,3 +114,5 @@
   .laundroid-details__body { padding-inline: 18px; }
   .laundroid-details__dial { display: none; }
 }
+
+.laundroid-card__copy p, .laundroid-details__copy p { font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; font-weight: 500; letter-spacing: -0.015em; color: var(--laundry-ink); opacity: 0.9; max-width: 90%; margin-top: 10px; }
