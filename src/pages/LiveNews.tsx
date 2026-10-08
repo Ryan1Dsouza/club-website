@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { ArrowDownWideNarrow, ArrowUpWideNarrow, ArrowUpRight, Newspaper, RefreshCw } from 'lucide-react';
 import NewsCard from '../components/news/NewsCard';
 import { fetchLiveNews, type NewsItem } from '../lib/live-news';
@@ -81,8 +81,6 @@ export default function LiveNews() {
           <Newspaper size={30} aria-hidden="true" /><h3>No updates yet.</h3>
         </div>)}
       </section>
-
-      <footer className="live-news__footer"><a href="#live-news-title">Back to top<ArrowUpRight size={14} aria-hidden="true" /></a></footer>
     </div>
   </section>;
 }

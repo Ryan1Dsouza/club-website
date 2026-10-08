@@ -1,23 +1,31 @@
 import type { EventPhoto } from '../types';
 import manifest from './workshop-images.json';
 import { preloadImage } from '../lib/preload-image';
-import { storageImageAttributes } from '../lib/responsive-images';
 
 type DisplayPhoto = { images: { url: string; width: number }[]; preview: string };
 export type EventImageLayout = 'card' | 'mobile' | 'spread';
-const sizes = {
-  card: '(max-width: 620px) 100vw, (max-width: 900px) 50vw, 440px',
-  mobile: '100vw',
-  spread: '(max-width: 1540px) 50vw, 770px',
-};
 
 export function eventImageAttributes(photo: EventPhoto, layout: EventImageLayout) {
   const display = (manifest as Record<string, DisplayPhoto>)[photo.id];
-  if (!display) return { ...storageImageAttributes(photo.url, [320, 640, 960, 1440], sizes[layout]), style: undefined };
+  if (!display) {
+    return { srcSet: undefined, sizes: undefined, style: undefined };
+  }
+
+  const srcSet = display.images.map(img => `${img.url} ${img.width}w`).join(', ');
+  
+  let sizes;
+  if (layout === 'card') {
+    sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px';
+  } else if (layout === 'mobile') {
+    sizes = '100vw';
+  } else {
+    sizes = '(max-width: 800px) 100vw, 50vw';
+  }
+
   return {
-    srcSet: display?.images.map(image => `${image.url} ${image.width}w`).join(', '),
-    sizes: display ? sizes[layout] : undefined,
-    style: display ? { backgroundImage: `url("${display.preview}")` } : undefined,
+    srcSet,
+    sizes,
+    style: { backgroundImage: `url("${display.preview}")` },
   };
 }
 

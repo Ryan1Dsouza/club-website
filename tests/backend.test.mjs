@@ -224,7 +224,9 @@ test('production renders the animated home and club pages, escapes data, and hid
     const team = await fetch(`${base}/team`).then(r => r.text());
     for (const member of getSite(db).team) assert.ok(team.includes(member.name));
     const achievements = await fetch(`${base}/achievements`).then(r => r.text());
-    assert.match(achievements, /class="ach-record"/); assert.match(achievements, /SAMPLE RECORD/);
+    assert.match(achievements, /class="ach-page"/); assert.match(achievements, /Member achievements/);
+    assert.match(achievements, /No achievements yet\./);
+    assert.doesNotMatch(achievements, /SAMPLE RECORD/, 'server rendering must not invent achievements before the feed loads');
     for (const path of ['/', '/about', '/projects', '/team', '/events', '/recruitment', '/achievements']) {
       const response = await fetch(`${base}${path}?source=test`);
       const document = await response.text(), meta = pageMeta(path);

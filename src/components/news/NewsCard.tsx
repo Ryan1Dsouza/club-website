@@ -1,4 +1,4 @@
-﻿import { useId, useState } from 'react';
+import { useId, useState } from 'react';
 import { CalendarDays } from 'lucide-react';
 import { Logo } from '../shared/Logo';
 import Modal from '../shared/Modal';
@@ -30,6 +30,7 @@ export default function NewsCard({ item, priority = false }: NewsCardProps) {
             alt={item.title}
             width={800} height={600}
             loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
             decoding="async"
             onError={event => { if (!restoreOriginalImage(event.currentTarget)) setFailedImage(item.image_url); }}
           /> : <div className="news-card__placeholder" aria-hidden="true">
@@ -48,12 +49,17 @@ export default function NewsCard({ item, priority = false }: NewsCardProps) {
       {open && (
         <Modal title={item.title} onClose={() => setOpen(false)}>
           <div className="news-modal-content" style={{ padding: '0 8px 16px' }}>
-            {imageAvailable && (
+            {imageAvailable ? (
               <img 
                 src={item.image_url!} 
                 alt={item.title} 
+                loading="eager" decoding="async" fetchPriority="high"
                 style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain', borderRadius: '12px', marginBottom: '24px', background: 'var(--surface)' }} 
               />
+            ) : (
+              <div style={{ width: '100%', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', borderRadius: '12px', marginBottom: '24px', color: 'var(--mint)' }} aria-hidden="true">
+                <Logo />
+              </div>
             )}
             {date && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--muted)', fontFamily: 'var(--mono)', fontSize: '13px' }}>

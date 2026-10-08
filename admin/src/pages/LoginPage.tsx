@@ -52,6 +52,7 @@ export function LoginPage() {
       <section className="login-card" aria-labelledby="login-title">
         <Brand />
         <h1 id="login-title">Admin login</h1>
+        <p className="login-description">Sign in to manage the Nucleus website.</p>
         {!supabase && (
           <p className="notice error" role="alert">
             Login is not configured.

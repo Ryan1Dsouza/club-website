@@ -3,7 +3,7 @@ import { BLOCK_SIZE, LAYER_HEIGHT, towerSlots } from './people-tower-motion.ts';
 import type { TowerDetail } from './people-tower-quality.ts';
 
 export const PHYSICS_STEP = 1 / 120;
-export const PHYSICS_STEP_MOBILE = 1 / 60;
+export const PHYSICS_STEP_MOBILE = 1 / 45;
 type Point = { x: number; y: number; z: number };
 type Rotation = Point & { w: number };
 type Slots = ReturnType<typeof towerSlots>;
@@ -13,7 +13,7 @@ type Slots = ReturnType<typeof towerSlots>;
 export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDetail = false) {
   let detail: TowerDetail = typeof simplified === 'boolean' ? simplified ? 1 : 2 : simplified;
   let physicsStep = detail < 2 ? PHYSICS_STEP_MOBILE : PHYSICS_STEP;
-  let maxSubSteps = detail === 0 ? 2 : detail === 1 ? 3 : 6;
+  let maxSubSteps = detail === 0 ? 1 : detail === 1 ? 2 : 6;
   const floorY = -(Math.ceil(slots.length / 3) - 1) * LAYER_HEIGHT / 2 - BLOCK_SIZE[1] / 2;
   const world = new World({ gravity: new Vec3(0, -9.82, 0), allowSleep: true });
   world.broadphase = new SAPBroadphase(world);
@@ -42,14 +42,69 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
   const contactBounds = bodies.map(() => new AABB());
   const target = new Vec3(), pivot = new Vec3(), velocity = new Vec3(), pullStart = new Vec3(), pullEnd = new Vec3();
   let joint: PointToPointConstraint | undefined, held = -1, story = -1, pullTime = -1, accumulator = 0, disposed = false;
-  // Pending returns: blocks waiting for their layer-based delay before flying in.
-  // Kept OUT of the world during the wait so they are never rendered.
-  type PendingReturn = { delay: number; fromPos: Vec3; fromQuat: CannonQuat; toPos: Vec3; toQuat: CannonQuat };
-  const pendingReturns = new Map<number, PendingReturn>();
   const storyOrigins = new Map<number, { position: Vec3; quaternion: CannonQuat }>();
   // Manual placements belong to the visitor until an explicit rebuild. The
   // story may borrow a piece for its profile, then returns it to that placement.
   const manual = new Set<number>();
+  const layers = Array.from({ length: Math.ceil(slots.length / 3) }, (_, layer) =>
+    slots.flatMap((slot, index) => slot.layer === layer ? [index] : []));
+  let layerTarget = -1, nextLayer = 0, returningLayer = -1;
+
+  function cancelLayerReturns() {
+    if (layerTarget < 0) return;
+    layerTarget = -1; nextLayer = 0; returningLayer = -1;
+    bodies.forEach((body, index) => {
+      if (manual.has(index)) return;
+      (body as any).transition = null;
+      makeDynamic(body);
+      if (body.world) body.sleep();
+    });
+  }
+
+  function advanceLayerReturn() {
+    if (returningLayer >= 0) {
+      if (layers[returningLayer].some(index => (bodies[index] as any).transition)) return;
+      returningLayer = -1;
+    }
+    while (nextLayer <= layerTarget && nextLayer < layers.length) {
+      const layer = nextLayer++, indices = layers[layer].filter(index => !manual.has(index));
+      const settled = indices.every(index => {
+        const body = bodies[index], slot = slots[index];
+        const rotation = new CannonQuat(); rotation.setFromEuler(0, slot.yaw, 0);
+        const dot = Math.abs(body.interpolatedQuaternion.x * rotation.x + body.interpolatedQuaternion.y * rotation.y
+          + body.interpolatedQuaternion.z * rotation.z + body.interpolatedQuaternion.w * rotation.w);
+        return body.world && body.interpolatedPosition.distanceTo(new Vec3(...slot.position)) < .001 && dot > .99999;
+      });
+      if (settled) {
+        indices.forEach(index => { makeDynamic(bodies[index]); bodies[index].sleep(); });
+        continue;
+      }
+      returningLayer = layer;
+      indices.forEach(returnBody);
+      return;
+    }
+  }
+
+  /** Rebuild complete physical layers, finishing each before starting above it. */
+  function returnLayersThrough(layer: number) {
+    if (layerTarget < 0) {
+      if (story >= 0) restoreManual(story);
+      story = -1;
+      bodies.forEach((body, index) => {
+        if (manual.has(index)) return;
+        (body as any).transition = null;
+        if (body.shapes[0] !== shape) { body.removeShape(storyShape); body.addShape(shape); }
+        body.position.copy(body.interpolatedPosition); body.quaternion.copy(body.interpolatedQuaternion);
+        body.previousPosition.copy(body.position); body.previousQuaternion.copy(body.quaternion);
+        body.type = Body.KINEMATIC; body.mass = 0; body.collisionFilterMask = 0;
+        body.updateMassProperties(); body.velocity.setZero(); body.angularVelocity.setZero();
+        body.force.setZero(); body.torque.setZero(); body.sleep(); body.aabbNeedsUpdate = true;
+      });
+      world.broadphase.dirty = true;
+    }
+    layerTarget = Math.max(layerTarget, Math.min(layers.length - 1, layer));
+    advanceLayerReturn();
+  }
 
   function makeDynamic(body: Body) {
     body.type = Body.DYNAMIC; body.mass = .36; body.collisionFilterMask = -1;
@@ -107,9 +162,10 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
   }
   function grab(index: number, point: Point) {
     release();
+    cancelLayerReturns();
     const body = bodies[index];
     if (!body?.world) return false;
-    pendingReturns.delete(index); (body as any).transition = null;
+    (body as any).transition = null;
     body.position.copy(body.interpolatedPosition); body.quaternion.copy(body.interpolatedQuaternion);
     body.previousPosition.copy(body.position); body.previousQuaternion.copy(body.quaternion);
     if (story === index) story = -1;
@@ -142,7 +198,6 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     const wasStory = story === index;
     if (wasStory) story = -1;
     const body = bodies[index];
-    pendingReturns.delete(index);
     if (body) (body as any).transition = null;
     if (body?.world) { world.removeBody(body); if (!wasStory) wakeSupported(body); }
   }
@@ -150,20 +205,12 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     if (held === index) return;
     if (story >= 0 && story !== index) returnBody(story);
     const body = bodies[index];
-    if (!body) return;
-    const returning = pendingReturns.has(index) || (body as any).transition?.returning;
-    
-    // If the block was pending a staggered return, cancel it and force it back into the world immediately.
-    // This happens if we reverse scroll quickly and this block becomes the active UI block.
-    if (pendingReturns.has(index)) {
-      pendingReturns.delete(index);
-      if (!body.world) world.addBody(body);
-    }
-    
-    if (!body.world) return;
+    if (!body?.world) return;
+    const returning = (body as any).transition?.returning;
+    wakeSupported(body);
     if (returning) {
       // Re-enter the same flight when reversing across a member boundary.
-      // A queued tower return must not replace a flung block's starting pose.
+      // An interrupted tower return must not replace a flung block's starting pose.
       const origin = storyOrigins.get(index);
       if (origin) { body.position.copy(origin.position); body.quaternion.copy(origin.quaternion); }
       else {
@@ -247,7 +294,8 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     body.aabbNeedsUpdate = true; world.broadphase.dirty = true;
   }
   function reset(completed = 0) {
-    release(); story = -1; accumulator = 0; pendingReturns.clear(); storyOrigins.clear(); manual.clear();
+    cancelLayerReturns();
+    release(); story = -1; accumulator = 0; storyOrigins.clear(); manual.clear();
     bodies.forEach((body, index) => {
       const slot = slots[index];
       const oldPos = body.interpolatedPosition.clone();
@@ -275,8 +323,8 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     });
     world.broadphase.dirty = true;
   }
-  /** Restore a manual placement, or return an untouched piece to its tower
-   * slot along a deterministic arc, even after a skipped or reversed reveal. */
+  /** Restore a manual placement, or immediately animate an untouched piece
+   * from its visible pose to its tower slot after a skipped or reversed reveal. */
   function returnBody(index: number) {
     const body = bodies[index];
     if (!body) return;
@@ -285,68 +333,32 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
 
     if (story === index) story = -1;
     if (body.shapes[0] !== shape) { body.removeShape(storyShape); body.addShape(shape); }
-    // Remove from world so it is invisible during the delay period.
-    if (body.world) world.removeBody(body);
-    // Cancel any prior pending entry for this block.
-    pendingReturns.delete(index);
 
     const targetPos = new Vec3(...slot.position);
     const targetQuat = new CannonQuat();
     targetQuat.setFromEuler(0, slot.yaw, 0);
 
-    const dir = slot.direction;
-    const turned = slot.yaw !== 0;
-    const fromPos = new Vec3(...slot.position);
-    if (turned) { fromPos.x += dir * 5.5; fromPos.y += 1.2; }
-    else         { fromPos.z += dir * 5.5; fromPos.y += 1.2; }
+    const fromPos = body.interpolatedPosition.clone();
+    const fromQuat = body.interpolatedQuaternion.clone();
 
-    const fromQuat = new CannonQuat();
-    fromQuat.setFromEuler(0.6 * dir, slot.yaw + 0.5 * dir, 0.8 * dir);
-
-    // Layer 0 (foundation) starts immediately; each layer above waits 0.45 s.
-    // The block is NOT in the world yet, so it is invisible during the wait.
-    const delay = slot.layer * 0.45;
-    if (delay <= 0) {
-      // No delay — add to world and start arc right away.
-      body.type = Body.KINEMATIC; body.mass = 0; body.collisionFilterMask = 0;
-      body.position.copy(fromPos); body.quaternion.copy(fromQuat);
-      body.previousPosition.copy(fromPos); body.interpolatedPosition.copy(fromPos);
-      body.previousQuaternion.copy(fromQuat); body.interpolatedQuaternion.copy(fromQuat);
-      body.velocity.setZero(); body.angularVelocity.setZero(); body.force.setZero(); body.torque.setZero();
-      body.aabbNeedsUpdate = true;
-      world.addBody(body); body.sleep();
-      (body as any).transition = { time: 0, returning: true, fromPos, fromQuat, toPos: targetPos, toQuat: targetQuat };
-    } else {
-      // Delay — store in queue; body stays out of the world (invisible).
-      pendingReturns.set(index, { delay, fromPos, fromQuat, toPos: targetPos, toQuat: targetQuat });
-    }
+    // Keep the block visible and ghost through fallen pieces during its return.
+    body.type = Body.KINEMATIC; body.mass = 0; body.collisionFilterMask = 0;
+    body.updateMassProperties();
+    body.position.copy(fromPos); body.quaternion.copy(fromQuat);
+    body.previousPosition.copy(fromPos); body.interpolatedPosition.copy(fromPos);
+    body.previousQuaternion.copy(fromQuat); body.interpolatedQuaternion.copy(fromQuat);
+    body.velocity.setZero(); body.angularVelocity.setZero(); body.force.setZero(); body.torque.setZero();
+    body.aabbNeedsUpdate = true;
+    if (!body.world) world.addBody(body);
+    body.sleep();
+    (body as any).transition = { time: 0, returning: true, fromPos, fromQuat, toPos: targetPos, toQuat: targetQuat };
     world.broadphase.dirty = true;
   }
-  const moving = () => held >= 0 || pendingReturns.size > 0 || bodies.some(body => (body.world && body.type === Body.DYNAMIC && body.sleepState !== Body.SLEEPING) || (body as any).transition);
+  const moving = () => held >= 0 || returningLayer >= 0 || bodies.some(body => (body.world && body.type === Body.DYNAMIC && body.sleepState !== Body.SLEEPING) || (body as any).transition);
   function step(delta: number) {
     if (disposed || !moving()) return false;
-    // Tick pending-return queue: count down delays, launch arcs when ready.
-    if (pendingReturns.size > 0) {
-      pendingReturns.forEach((p, index) => {
-        p.delay -= delta;
-        if (p.delay <= 0) {
-          pendingReturns.delete(index);
-          const body = bodies[index];
-          if (!body) return;
-          body.type = Body.KINEMATIC; body.mass = 0; body.collisionFilterMask = 0;
-          body.position.copy(p.fromPos); body.quaternion.copy(p.fromQuat);
-          body.previousPosition.copy(p.fromPos); body.interpolatedPosition.copy(p.fromPos);
-          body.previousQuaternion.copy(p.fromQuat); body.interpolatedQuaternion.copy(p.fromQuat);
-          body.velocity.setZero(); body.angularVelocity.setZero(); body.force.setZero(); body.torque.setZero();
-          body.aabbNeedsUpdate = true;
-          if (!body.world) world.addBody(body); body.sleep();
-          (body as any).transition = { time: 0, returning: true, fromPos: p.fromPos, fromQuat: p.fromQuat, toPos: p.toPos, toQuat: p.toQuat };
-          world.broadphase.dirty = true;
-        }
-      });
-    }
-    // Returning blocks follow authored arcs. They do not need contact solving
-    // while every dynamic block is asleep, even during a staggered rebuild.
+    // Returning blocks animate without contact solving while every dynamic
+    // block is asleep.
     const simulating = held >= 0 || bodies.some(body => body.world && body.type === Body.DYNAMIC && body.sleepState !== Body.SLEEPING);
     if (simulating) accumulator = Math.min(physicsStep * maxSubSteps, accumulator + Math.max(0, delta));
     else accumulator = 0;
@@ -363,7 +375,15 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
         if (speed > maxSpeed) velocity.scale(maxSpeed / speed, velocity);
         anchor.velocity.copy(velocity);
       }
-      world.step(physicsStep); accumulator -= physicsStep; changed = true;
+      world.step(physicsStep);
+      // Bound separation impulses when a returned block overlaps fallen pieces.
+      for (const body of bodies) {
+        const speedSquared = body.velocity.lengthSquared();
+        if (speedSquared > 900) {
+          body.velocity.scale(30 / Math.sqrt(speedSquared), body.velocity);
+        }
+      }
+      accumulator -= physicsStep; changed = true;
       if (pullTime >= 1) release();
     }
     // Interpolate fixed steps for 60/90/120/144 Hz displays. Sleeping and story
@@ -382,25 +402,17 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
           const progress = Math.min(1, t.time / 0.35); // 350ms smooth return
           const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2; // ease-in-out
           if (t.returning) {
-            if (t.time < 0) {
-              // Still in delay period — body stays at fromPos, arc hasn't started.
-              body.interpolatedPosition.copy(t.fromPos); body.interpolatedQuaternion.copy(t.fromQuat);
-            } else {
-              // Active arc phase — fly from ejection point to slot.
-              const arcProgress = Math.min(1, t.time / 0.35);
-              const arcEase = arcProgress < 0.5 ? 2 * arcProgress * arcProgress : 1 - Math.pow(-2 * arcProgress + 2, 2) / 2;
-              t.fromPos.lerp(t.toPos, arcEase, body.position);
-              t.fromQuat.slerp(t.toQuat, arcEase, body.quaternion);
-              body.previousPosition.copy(body.position); body.interpolatedPosition.copy(body.position);
-              body.previousQuaternion.copy(body.quaternion); body.interpolatedQuaternion.copy(body.quaternion);
-              if (arcProgress >= 1) {
-                // Arrived — switch to DYNAMIC+sleep so Jenga play works normally.
-                body.type = Body.DYNAMIC; body.mass = .36; body.collisionFilterMask = -1;
-                body.updateMassProperties();
-                body.velocity.setZero(); body.angularVelocity.setZero(); body.force.setZero(); body.torque.setZero();
-                body.aabbNeedsUpdate = true; world.broadphase.dirty = true;
-                body.sleep(); (body as any).transition = null;
-              }
+            t.fromPos.lerp(t.toPos, ease, body.position);
+            t.fromQuat.slerp(t.toQuat, ease, body.quaternion);
+            body.previousPosition.copy(body.position); body.interpolatedPosition.copy(body.position);
+            body.previousQuaternion.copy(body.quaternion); body.interpolatedQuaternion.copy(body.quaternion);
+            if (progress >= 1) {
+              // Restore normal Jenga play once the block reaches its slot.
+              body.type = Body.DYNAMIC; body.mass = .36; body.collisionFilterMask = -1;
+              body.updateMassProperties();
+              body.velocity.setZero(); body.angularVelocity.setZero(); body.force.setZero(); body.torque.setZero();
+              body.aabbNeedsUpdate = true; world.broadphase.dirty = true;
+              body.sleep(); (body as any).transition = null;
             }
           } else {
             t.fromPos.lerp(body.position, ease, body.interpolatedPosition);
@@ -411,17 +423,19 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
         }
       }
     });
+    advanceLayerReturn();
     return changed || moving();
   }
   function dispose() {
     if (disposed) return;
-    release(); disposed = true; pendingReturns.clear(); storyOrigins.clear(); manual.clear();
+    release(); disposed = true; storyOrigins.clear(); manual.clear();
     [...world.bodies].forEach(body => world.removeBody(body));
     world.contacts.length = 0; world.frictionEquations.length = 0;
   }
-  const isPending = (index: number) => pendingReturns.has(index);
-  const isFlying = (index: number) => isPending(index) || !!(bodies[index] as any).transition;
+  // Retain the renderer API; immediate returns never wait in a hidden state.
+  const isPending = (_index: number) => false;
+  const isFlying = (index: number) => !!(bodies[index] as any).transition;
   const isManual = (index: number) => manual.has(index);
   const isStory = (index: number) => story === index;
-  return { world, bodies, floorY, step, moving, setDetail, isPending, isFlying, isManual, isStory, grab, move, release, pull, remove, beginStory, placeStory, reset, returnBody, dispose };
+  return { world, bodies, floorY, step, moving, setDetail, isPending, isFlying, isManual, isStory, grab, move, release, pull, remove, beginStory, placeStory, reset, returnBody, returnLayersThrough, cancelLayerReturns, dispose };
 }

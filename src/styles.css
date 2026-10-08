@@ -37,7 +37,7 @@ svg { flex-shrink: 0; }
 img, video { display: block; max-width: 100%; }
 ::selection { color: var(--bg); background: var(--mint); }
 :focus-visible { outline: 2px solid var(--mint); outline-offset: 5px; }
-#main-content { flex: 1; display: flex; flex-direction: column; }
+#main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 #main-content:focus { outline: none; }
 .site-shell--home, .site-shell--achievements, .site-shell--news {
   isolation: isolate;
@@ -62,7 +62,8 @@ img, video { display: block; max-width: 100%; }
 h1 { font-size: clamp(52px, 8vw, 112px); line-height: .99; font-weight: 450; letter-spacing: -.065em; }
 h2 { font-size: clamp(36px, 5vw, 66px); line-height: 1.08; font-weight: 450; letter-spacing: -.055em; }
 em { font-family: var(--serif); font-weight: 400; letter-spacing: -.065em; }
-.section-wrap { width: 100%; max-width: 1440px; margin-inline: auto; padding-inline: var(--gutter); }
+.section-wrap { width: 100%; min-width: 0; max-width: 1440px; margin-inline: auto; padding-left: max(var(--gutter), env(safe-area-inset-left)); padding-right: max(var(--gutter), env(safe-area-inset-right)); }
+.section-wrap :is(h1, h2, h3, p), .modal :is(h2, h3, p, a) { overflow-wrap: anywhere; }
 .section-space { padding-block: clamp(65px, 8vw, 110px); }
 .eyebrow { font: 10px/1.6 var(--mono); text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
 .muted { color: var(--muted); }
@@ -77,7 +78,7 @@ em { font-family: var(--serif); font-weight: 400; letter-spacing: -.065em; }
 .brand-mark { width: 37px; height: 37px; flex-shrink: 0; }
 .brand > span { font-size: 17px; font-weight: 500; letter-spacing: .16em; line-height: 1.2; }
 .brand small { display: block; margin-top: 6px; font: 7px/1 var(--mono); letter-spacing: .16em; color: var(--muted); }
-.button { display: inline-flex; align-items: center; justify-content: center; gap: 22px; min-height: 46px; border: 1px solid var(--line-strong); padding: 13px 20px; border-radius: 4px; background: transparent; color: var(--mint); font-size: 12px; font-weight: 500; line-height: 1.5; transition: background .2s, border-color .2s; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 22px; min-height: 46px; max-width: 100%; border: 1px solid var(--line-strong); padding: 13px 20px; border-radius: 4px; background: transparent; color: var(--mint); font-size: 12px; font-weight: 500; line-height: 1.5; transition: background .2s, border-color .2s; }
 .button.primary { background: var(--mint); color: var(--bg); border-color: var(--mint); }
 .button.primary:hover { background: rgb(var(--mint-rgb) / .88); }
 .button.outline:hover, .header-cta:hover { background: var(--wash); border-color: var(--mint); }
@@ -124,9 +125,10 @@ em { font-family: var(--serif); font-weight: 400; letter-spacing: -.065em; }
 .modal > .button { margin-top: 25px; margin-right: 14px; }
 .modal > .text-link { margin-top: 15px; }
 .application-form { margin-top: 24px; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.form-grid > * { min-width: 0; }
 .application-form label, .admin-form label { display: block; font-size: 12px; color: var(--mint); margin-bottom: 18px; line-height: 1.6; }
-input, textarea, select { display: block; width: 100%; background: var(--bg); border: 1px solid var(--line-strong); color: var(--mint); border-radius: 4px; padding: 12px 13px; margin-top: 7px; font-size: 16px; line-height: 1.5; transition: border-color .2s; }
+input, textarea, select { display: block; width: 100%; min-width: 0; background: var(--bg); border: 1px solid var(--line-strong); color: var(--mint); border-radius: 4px; padding: 12px 13px; margin-top: 7px; font-size: 16px; line-height: 1.5; transition: border-color .2s, background-color .2s; }
 input, textarea, select, [tabindex] { scroll-margin-top: calc(var(--header-height) + 16px); }
 input::placeholder, textarea::placeholder { color: var(--muted); opacity: .8; }
 input:hover, textarea:hover, select:hover { border-color: var(--mint); }
@@ -162,6 +164,10 @@ textarea { resize: vertical; min-height: 90px; }
   .modal { padding: 50px 23px 26px; } .modal h2 { font-size: 29px; }
   .form-grid { grid-template-columns: 1fr; gap: 0; }
   .eyebrow { font-size: 9px; }
+  .community-section--reveal { padding-block: 18svh 14svh; }
+  .community-section--reveal h2 { font-size: clamp(24px, 9vw, 54px); }
+  .community-section--reveal > .eyebrow { font-size: 12px; letter-spacing: .16em; }
+  .community-actions { width: 100%; gap: 12px; margin-top: 32px; }
 }
 @media (max-width: 380px) { .site-header .brand > span { font-size: 13px; letter-spacing: .1em; } .site-header .brand-mark { width: 25px; height: 25px; } .header-cta { padding-inline: 9px; } .header-cta svg { display: none; } }
 @media (prefers-reduced-motion: no-preference) {

@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Routes, Route, Link, useLocation, useNavigationType } from 'react-router-dom';
 import { ArrowUpRight, ArrowRight, BrainCircuit, Code2, Network, Github, Instagram, Linkedin, Mail } from 'lucide-react';
 import { MorphingNavbar } from './components/ui/morphing-navbar';
@@ -8,7 +8,6 @@ import PageBoundary from './components/shared/PageBoundary';
 import LoadingScreen from './components/shared/LoadingScreen';
 import { LOADER_MINIMUM_MS, LOADER_MAXIMUM_MS } from './components/shared/loading-frames';
 import { api } from './api';
-import RecruitmentApplication from './components/recruitment/RecruitmentApplication';
 import type { SiteData, SiteSettings } from './types';
 import seed from '../shared/public-data.json';
 import LogoLanding from './components/home/LogoLanding';
@@ -21,6 +20,8 @@ import { useReveal } from './components/ui/reveal';
 import { useCinematicScroll } from './lib/use-cinematic-scroll';
 import { pageMeta } from '../shared/page-meta';
 
+const RecruitmentApplication = lazy(() => import('./components/recruitment/RecruitmentApplication'));
+
 const domains = [
   { id: 'aiml', num: '01', title: 'Artificial Intelligence', subtitle: '& Machine Learning', icon: BrainCircuit, whatsappUrl: 'https://chat.whatsapp.com/F2sg6LBCwibIKWJu2nhnvI', tags: ['Intelligence', 'Research', 'Possibility'], description: 'Explore machine learning, build models, and turn new questions into experiments.', detail: 'Explore model building, machine learning foundations, research papers, and practical AI applications. Bring your curiosity; build your understanding through collaborative experiments.' },
   { id: 'web', num: '02', title: 'Web Development', subtitle: '& Digital Experiences', icon: Code2, whatsappUrl: 'https://chat.whatsapp.com/L97jBsJl7vJ6ol1k68Ue9L', tags: ['Design', 'Build', 'Ship'], description: 'Design thoughtful interfaces. Build useful applications. Put your ideas on the web.', detail: 'Work across frontend and backend development, UI design, APIs, and deployment. Learn by making useful applications and sharing feedback with other builders.' },
@@ -28,7 +29,7 @@ const domains = [
 ] as const;
 
 function ApplyForm({ settings, onClose }: { settings: SiteSettings; onClose: () => void }) {
-  return <Modal title="Recruitment" onClose={onClose}><RecruitmentApplication initialSettings={settings} /></Modal>;
+  return <Modal title="Recruitment" onClose={onClose}><PageBoundary><Suspense fallback={<p className="modal-lead" role="status">Opening recruitment…</p>}><RecruitmentApplication initialSettings={settings} /></Suspense></PageBoundary></Modal>;
 }
 
 function SiteFooter({ settings }: { settings: SiteSettings }) {
@@ -40,7 +41,6 @@ function SiteFooter({ settings }: { settings: SiteSettings }) {
       <div className="footer-socials">
         <a href={settings.instagramUrl} target="_blank" rel="noreferrer" aria-label="Nucleus Instagram"><Instagram size={18} /></a>
         <a href={settings.linkedinUrl} target="_blank" rel="noreferrer" aria-label="Nucleus LinkedIn"><Linkedin size={18} /></a>
-        <a href={settings.githubUrl} target="_blank" rel="noreferrer" aria-label="Nucleus GitHub"><Github size={18} /></a>
         <a href={`mailto:${settings.contactEmail}`} aria-label="Email Nucleus"><Mail size={18} /></a>
       </div>
     </div>
@@ -87,6 +87,12 @@ export default function App({ initialData = seed, serverRendered = false }: { in
       if (teamError) console.error('Failed to load team from Supabase', teamError);
       if (eventError) console.error('Failed to load events from Supabase', eventError);
       
+      const rolePriority = [
+        'president', 'vice president', 'secretary', 'treasurer', 'plan & strategy lead', 
+        'technical lead', 'ai & ml lead', 'development lead', 'dsa lead', 'event lead', 
+        'media lead', 'discipline head', 'member'
+      ];
+      
       const team = (teamData || []).map((member: any) => ({
         id: member.id,
         name: member.name,
@@ -94,7 +100,14 @@ export default function App({ initialData = seed, serverRendered = false }: { in
         image: member.photo_url ?? undefined,
         createdAt: member.created_at,
         initials: member.name.trim().split(/\s+/).slice(0, 2).map((part: string) => part[0]).join('').toUpperCase(),
-      }));
+      })).sort((a: any, b: any) => {
+        const rankA = rolePriority.indexOf((a.role || '').toLowerCase().trim());
+        const rankB = rolePriority.indexOf((b.role || '').toLowerCase().trim());
+        const finalRankA = rankA === -1 ? 999 : rankA;
+        const finalRankB = rankB === -1 ? 999 : rankB;
+        if (finalRankA !== finalRankB) return finalRankA - finalRankB;
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
 
       const events = (eventData || []).map((ev: any) => ({
         id: ev.id,

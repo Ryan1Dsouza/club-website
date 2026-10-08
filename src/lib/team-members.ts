@@ -12,5 +12,5 @@ export function sortTeamMembers<T extends { role: string; createdAt?: string }>(
     const key = role.trim().toLowerCase();
     return ROLE_RANK[key] ?? (/lead|head/.test(key) ? 50 : 100);
   };
-  return [...members].sort((a, b) => created(a) - created(b) || rank(a.role) - rank(b.role));
+  return [...members].sort((a, b) => rank(a.role) - rank(b.role) || created(a) - created(b));
 }

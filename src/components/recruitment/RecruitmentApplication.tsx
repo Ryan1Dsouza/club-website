@@ -65,7 +65,10 @@ export default function RecruitmentApplication({ initialSettings }: { initialSet
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/recruitment'
+          redirectTo: window.location.origin + '/recruitment',
+          queryParams: {
+            prompt: 'select_account consent',
+          }
         }
       });
       if (error) throw error;
@@ -75,7 +78,12 @@ export default function RecruitmentApplication({ initialSettings }: { initialSet
   }
 
   async function handleSignOut() {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      setSession(null);
+    } catch (err: any) {
+      setError(err.message);
+    }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -86,6 +94,17 @@ export default function RecruitmentApplication({ initialSettings }: { initialSet
     setBusy(true); setError('');
     
     try {
+      // Check existing applications limit
+      const { count, error: countError } = await supabase
+        .from('recruitment_forms')
+        .select('*', { count: 'exact', head: true })
+        .eq('email', session.user.email);
+        
+      if (countError) throw countError;
+      if (count !== null && count >= 2) {
+        throw new Error('You have already reached the maximum limit of 2 applications.');
+      }
+
       // Create record in Supabase database directly
       const { data, error: dbError } = await supabase
         .from('recruitment_forms')
@@ -177,9 +196,9 @@ export default function RecruitmentApplication({ initialSettings }: { initialSet
     )}
 
     {settings.recruitmentOpen && session && isSjecEmail && <form onSubmit={submit} className="application-form">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', padding: '12px 16px', background: 'var(--surface-raised)', borderRadius: '8px', fontSize: '14px' }}>
+      <div className="recruitment-session">
         <span>Signed in as <strong style={{ color: 'var(--mint)' }}>{session.user.email}</strong></span>
-        <button type="button" onClick={handleSignOut} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: '13px' }}>
+        <button type="button" onClick={handleSignOut}>
           <LogOut size={14} /> Sign out
         </button>
       </div>
@@ -240,7 +259,5 @@ export default function RecruitmentApplication({ initialSettings }: { initialSet
         {busy ? <><LoaderCircle className="spin" size={18} />Sending application…</> : <>Submit Application <ArrowUpRight size={18} /></>}
       </button>
     </form>}
-    
-    <a className="text-link recruitment-contact" href={`mailto:${settings.contactEmail}`}>Contact the team <ArrowUpRight size={16} /></a>
   </div>;
 }

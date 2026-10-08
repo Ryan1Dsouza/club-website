@@ -12,6 +12,7 @@
 
 .vm-header {
   text-align: center;
+  padding-inline: var(--gutter);
   margin-bottom: 40px;
 }
 
@@ -58,6 +59,14 @@
   animation-play-state: running;
 }
 
+.vm-marquee-wrapper[data-running='true']:focus-within .vm-marquee-content {
+  animation-play-state: paused;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .vm-marquee-wrapper[data-running='true']:hover .vm-marquee-content { animation-play-state: paused; }
+}
+
 .vm-marquee-wrapper.reverse .vm-marquee-content {
   animation-direction: reverse;
 }
@@ -74,7 +83,8 @@
 
 .vm-card {
   position: relative;
-  width: 320px;
+  width: min(320px, calc(100vw - 32px));
+  flex-shrink: 0;
   overflow: hidden;
   border: 1px solid var(--line);
   background: #060b0e;
@@ -125,6 +135,8 @@
 .vm-meta {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .vm-name {

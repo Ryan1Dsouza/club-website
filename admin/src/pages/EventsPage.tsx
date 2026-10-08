@@ -88,7 +88,7 @@ export function EventsPage() {
         </button>
       </div>
 
-      <div className="stats-grid">
+      <div className="stats-grid two-columns">
         <div className="stat-card">
           <span className="stat-icon">
             <CalendarDays size={19} />
@@ -173,7 +173,7 @@ export function EventsPage() {
         {error ? (
           <div className="empty-state">
             <CalendarDays size={30} />
-            <h3>We couldn’t load the events.</h3>
+            <h3>Unable to load events</h3>
             <p role="alert">{error}</p>
             <button className="button secondary" onClick={() => void refresh()}>
               Try again
@@ -210,19 +210,22 @@ export function EventsPage() {
             </button>
           </div>
         ) : (
-          <div className="table-scroll">
-            <table>
+          <div className="table-scroll" role="region" aria-label="Event list" tabIndex={0}>
+            <table className="events-table">
+              <caption className="sr-only">
+                Events, schedules, publication status, and actions
+              </caption>
               <thead>
                 <tr>
                   <th scope="col" className="index-cell">
                     #
                   </th>
-                  <th scope="col">EVENT</th>
-                  <th scope="col">CATEGORY</th>
-                  <th scope="col">DATE</th>
-                  <th scope="col">STATUS</th>
+                  <th scope="col">Event</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Status</th>
                   <th scope="col" className="actions-cell">
-                    ACTIONS
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -243,7 +246,7 @@ export function EventsPage() {
                     <td>
                       <span className="role-badge">{event.category}</span>
                     </td>
-                    <td>
+                    <td className="date-cell">
                       <span>{new Date(event.starts_at).toLocaleDateString()}</span>
                     </td>
                     <td>
@@ -257,6 +260,7 @@ export function EventsPage() {
                         <button
                           className="icon-button"
                           title="Edit event"
+                          aria-label={`Edit ${event.title}`}
                           onClick={() => setEditor({ event })}
                         >
                           <Pencil size={15} />
@@ -264,6 +268,7 @@ export function EventsPage() {
                         <button
                           className="icon-button danger-hover"
                           title="Delete event"
+                          aria-label={`Delete ${event.title}`}
                           onClick={() => {
                             setRemoving(event)
                             setDeleteError('')
@@ -293,6 +298,7 @@ export function EventsPage() {
             <div>
               <button
                 className="icon-button"
+                aria-label="Previous page"
                 disabled={currentPage <= 1}
                 onClick={() => setPage(currentPage - 1)}
               >
@@ -303,6 +309,7 @@ export function EventsPage() {
               </span>
               <button
                 className="icon-button"
+                aria-label="Next page"
                 disabled={currentPage >= totalPages}
                 onClick={() => setPage(currentPage + 1)}
               >
@@ -357,7 +364,7 @@ export function EventsPage() {
                 onClick={() => setRemoving(null)}
                 disabled={deleting}
               >
-                Keep event
+                Cancel
               </button>
               <button className="button danger" disabled={deleting} onClick={() => void remove()}>
                 <Trash2 size={16} />

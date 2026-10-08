@@ -215,6 +215,35 @@ test.describe('mobile artwork', () => {
     expect(new Set(requests.filter(url => /sequence\.mp4/.test(url))).size).toBe(1);
     expect(requests.filter(url => /desktop\/sequence/.test(url))).toHaveLength(0);
     expect(requests.filter(url => /frame-\d+/.test(url))).toHaveLength(0);
+    // Check the decoded artwork, not just the video element's fullscreen box.
+    // The old portrait clip baked blank bands above and below a small sketch.
+    const ink = await screen(page).locator('video').evaluate(async video => {
+      video.pause();
+      await new Promise(resolve => {
+        video.addEventListener('seeked', resolve, { once: true });
+        video.currentTime = .52;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0);
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+      const bandHeight = Math.floor(canvas.height * .2);
+      const countInk = start => {
+        let count = 0;
+        for (let y = start; y < start + bandHeight; y++) {
+          for (let x = 0; x < canvas.width; x++) {
+            if (pixels[(y * canvas.width + x) * 4 + 1] > 60) count++;
+          }
+        }
+        return count;
+      };
+      const ink = { top: countInk(0), bottom: countInk(canvas.height - bandHeight) };
+      await video.play();
+      return ink;
+    });
+    expect(ink.top).toBeGreaterThan(20);
+    expect(ink.bottom).toBeGreaterThan(20);
     // Native decoding advances even while the test has frozen all JS timers/RAF.
     const snapshots = [];
     for (let index = 0; index < 4; index++) {
@@ -229,16 +258,16 @@ test.describe('mobile artwork', () => {
       await page.setViewportSize(viewport);
       await expect(image).toHaveCSS('object-fit', 'cover');
       await expect(screen(page)).toHaveCSS('height', `${viewport.height}px`);
-      expect(await image.boundingBox()).toEqual({ x: 0, y: 0, ...viewport });
+      const artworkBox = await image.boundingBox();
+      // Overscan keeps the media's hard edges outside the visible viewport.
+      expect(artworkBox.x).toBeLessThan(0);
+      expect(artworkBox.y).toBeLessThan(0);
+      expect(artworkBox.x + artworkBox.width).toBeGreaterThan(viewport.width);
+      expect(artworkBox.y + artworkBox.height).toBeGreaterThan(viewport.height);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
       const portrait = viewport.height >= viewport.width;
       await expect.poll(() => image.evaluate(element => ({ width: element.naturalWidth, height: element.naturalHeight })))
         .toEqual(portrait ? { width: 480, height: 1040 } : { width: 1440, height: 810 });
-      if (portrait) {
-        const scale = Math.max(viewport.width / 480, viewport.height / 1040);
-        // The central subject stays inside the screen even on tall phones and tablets.
-        expect(400 * scale).toBeLessThanOrEqual(viewport.width);
-        expect(600 * scale).toBeLessThanOrEqual(viewport.height);
-      }
       await page.screenshot({ path: info.outputPath(`loader-fullscreen-${viewport.width}.png`) });
     }
     await page.emulateMedia({ reducedMotion: 'no-preference' });

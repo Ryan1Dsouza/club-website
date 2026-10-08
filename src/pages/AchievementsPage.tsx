@@ -47,7 +47,6 @@ export default function AchievementsPage({ members, settings }: Props) {
           </div>
           <div className="ach-search"><Search size={16} aria-hidden="true" /><input ref={search} aria-label="Search achievements or members" type="search" placeholder="Search members or achievements" value={query} onChange={event => setQuery(event.target.value)} />{query && <button type="button" aria-label="Clear search" onClick={() => { setQuery(''); search.current?.focus(); }}><X size={15} /></button>}</div>
         </div>
-        <div className="ach-results-note"><span aria-live="polite" aria-atomic="true">{visible.length === profiles.length ? `${number(profiles.length)} members` : `${number(visible.length)} of ${number(profiles.length)} members`}</span></div>
 
         <div className="ach-records">
           {visible.map(profile => (
@@ -70,14 +69,30 @@ export default function AchievementsPage({ members, settings }: Props) {
       </footer>
     </div>
 
-    {selected && <Modal title={selected.member.name} onClose={() => setSelected(null)}><div className="ach-detail">
-      <p className="ach-detail__role">{selected.member.role} · Nucleus SJEC</p>
-      {isPreview && <p className="ach-preview">SAMPLE ACHIEVEMENTS</p>}
-      <div className="ach-detail__records">{selected.achievements.map(record => <section key={record.id}>
-        <div className="ach-detail__meta"><span>{record.category}</span><span>{record.year}</span></div>
-        <h3>{record.title}</h3><span className="ach-detail__result">{record.result}</span>{record.description && <p>{record.description}</p>}
-        {record.href && /^https:\/\//.test(record.href) && <a className="ach-detail__link" href={record.href} target="_blank" rel="noreferrer">View the result <ArrowUpRight size={17} /></a>}
-      </section>)}</div>
-    </div></Modal>}
+    {selected && <Modal title={selected.member.name} onClose={() => setSelected(null)}>
+      <div className="ach-detail" style={{ marginTop: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
+          {selected.member.image && (
+            <img 
+              src={selected.member.image} 
+              alt={selected.member.name} 
+              width={80} height={80} loading="eager" decoding="async"
+              style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--line-strong)' }} 
+            />
+          )}
+          <div>
+            <p style={{ fontSize: '17px', color: 'var(--mint)', margin: 0, fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{selected.member.role}</p>
+            <p style={{ fontSize: '13px', color: 'var(--muted)', margin: '4px 0 0' }}>Nucleus SJEC</p>
+          </div>
+        </div>
+      
+        {isPreview && <p className="ach-preview">SAMPLE ACHIEVEMENTS</p>}
+        <div className="ach-detail__records">{selected.achievements.map(record => <section key={record.id}>
+          <div className="ach-detail__meta"><span>{record.category}</span><span>{record.year}</span></div>
+          <h3>{record.title}</h3><span className="ach-detail__result">{record.result}</span>{record.description && <p>{record.description}</p>}
+          {record.href && /^https:\/\//.test(record.href) && <a className="ach-detail__link" href={record.href} target="_blank" rel="noreferrer">View the result <ArrowUpRight size={17} /></a>}
+        </section>)}</div>
+      </div>
+    </Modal>}
   </div>;
 }

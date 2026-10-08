@@ -20,8 +20,7 @@ export function DashboardPage() {
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">DASHBOARD</span>
-          <h1>Dashboard</h1>
+          <h1>Dashboard Overview</h1>
           <p>Manage team profiles, events, news, and achievements.</p>
         </div>
         <span className="date-chip">
@@ -39,7 +38,7 @@ export function DashboardPage() {
           </span>
           <div>
             <span>Team members</span>
-            <strong>{loading || error ? '—' : members.length.toString().padStart(2, '0')}</strong>
+            <strong>{loading || error ? '—' : members.length}</strong>
           </div>
           <ArrowUpRight className="stat-arrow" size={17} />
         </Link>
@@ -49,7 +48,7 @@ export function DashboardPage() {
           </span>
           <div>
             <span>Profile photos</span>
-            <strong>{loading || error ? '—' : photos.toString().padStart(2, '0')}</strong>
+            <strong>{loading || error ? '—' : photos}</strong>
           </div>
           <ArrowUpRight className="stat-arrow" size={17} />
         </Link>
@@ -91,7 +90,7 @@ export function DashboardPage() {
           ) : loading ? (
             <div className="empty-state" role="status">
               <span className="spinner" />
-              Loading the team…
+              Loading team members…
             </div>
           ) : members.length ? (
             <div className="recent-members">
@@ -102,7 +101,6 @@ export function DashboardPage() {
                     <strong>{member.name}</strong>
                     <span>{member.role}</span>
                   </div>
-                  <ArrowUpRight size={15} />
                 </div>
               ))}
             </div>
@@ -119,20 +117,20 @@ export function DashboardPage() {
         <section className="panel quick-actions">
           <div className="panel-heading">
             <div>
-              <h2>Management</h2>
+              <h2>Content management</h2>
             </div>
           </div>
           <Link to="/team">
             <UsersRound size={20} />
             <div>
-              <strong>Team Profiles</strong>
+              <strong>Team profiles</strong>
             </div>
             <ArrowUpRight size={17} />
           </Link>
           <Link to="/events">
             <CalendarDays size={20} />
             <div>
-              <strong>Club Events</strong>
+              <strong>Events</strong>
             </div>
             <ArrowUpRight size={17} />
           </Link>

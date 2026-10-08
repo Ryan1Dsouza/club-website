@@ -27,12 +27,12 @@ export function RequireAuth() {
         <div className="access-card panel">
           <span className="large-icon">{status === 'denied' ? <ShieldX /> : <ShieldCheck />}</span>
           <h1>
-            {status === 'denied' ? 'An invitation is required.' : 'We couldn’t verify access.'}
+            {status === 'denied' ? 'Administrator access required' : 'Unable to verify access'}
           </h1>
           <p>
             {status === 'denied'
-              ? 'This account does not have administrator access. Ask the portal owner to add you to the admin list.'
-              : 'Check your connection and make sure the Supabase setup has been completed, then try again.'}
+              ? 'This account does not have administrator access. Contact the website administrator to request access.'
+              : 'Check your connection and try again. If the issue persists, contact the website administrator.'}
           </p>
           {error && (
             <p className="notice error" role="alert">

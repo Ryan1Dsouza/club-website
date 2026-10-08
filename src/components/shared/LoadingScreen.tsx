@@ -86,15 +86,17 @@ function LoadingOverlay({ message }: { message: string }) {
     initial={{ x: '0%' }} exit={{ x: reduced ? '0%' : '-100%' }}
     transition={{ type: 'tween', duration: reduced ? 0 : compact ? .35 : .45, ease: [.77, 0, .175, 1] }}>
     <div className="nucleus-loader__art" aria-hidden="true">
-      <picture className="nucleus-loader__poster">
-        <source media={portraitMedia} srcSet={mobilePoster} />
-        <img src={desktopPoster} alt="" width={1440} height={810} decoding="async" fetchPriority="high"
-          onError={() => setFailed(true)} onLoad={() => setFailed(false)} />
-      </picture>
-      <video ref={videoRef} className="nucleus-loader__video" autoPlay muted loop playsInline preload="auto"
-        disablePictureInPicture tabIndex={-1} onPlaying={() => setReady(true)} onError={() => setReady(false)} />
-      {failed && !ready && <span className="nucleus-loader__fallback">Nucleus</span>}
+      <div className="nucleus-loader__media">
+        <picture className="nucleus-loader__poster">
+          <source media={portraitMedia} srcSet={mobilePoster} />
+          <img src={desktopPoster} alt="" width={1440} height={810} decoding="async" fetchPriority="high"
+            onError={() => setFailed(true)} onLoad={() => setFailed(false)} />
+        </picture>
+        <video ref={videoRef} className="nucleus-loader__video" autoPlay muted loop playsInline preload="auto"
+          disablePictureInPicture tabIndex={-1} onPlaying={() => setReady(true)} onError={() => setReady(false)} />
+      </div>
     </div>
+    {failed && !ready && <span className="nucleus-loader__fallback" aria-hidden="true">Nucleus</span>}
     <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{message}</span>
   </motion.div>;
 }

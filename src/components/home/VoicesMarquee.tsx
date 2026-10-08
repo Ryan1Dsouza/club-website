@@ -59,7 +59,6 @@ const ReviewCard = ({ member, body, author }: Voice) => {
       </div>
       <blockquote className="vm-quote">
         <p className="vm-body">“{body}”</p>
-        <footer className="vm-author">— {author}</footer>
       </blockquote>
     </div>
   );

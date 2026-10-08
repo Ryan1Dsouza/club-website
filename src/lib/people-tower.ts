@@ -94,7 +94,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     let width = 1, height = 1, profileWidth = 1, profileHeight = 1, profileTop = 0;
     let bufferWidth = 0, bufferHeight = 0, viewportResizeTimer = 0;
     let start = 0, range = 1, target = 0, progress = 0, frame = 0, previousTime = 0;
-    let active = -2, storyRemoved = 0, visible = true, idleAngle = 0, lastInteraction = -Infinity;
+    let active = -2, storyRemoved = 0, visible = true, idleAngle = 0, lastInteraction = -Infinity, reversing = false;
     let matricesDirty = true, renderedProgress = -1, lastRenderTime = 0;
     let layoutDirty = true, scrollDirty = true, initialized = false;
     let previousUpdate = 0;
@@ -126,39 +126,45 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       delete host.dataset.dragging;
     }
 
-    function syncStory(state: ReturnType<typeof towerFrame>) {
+    function positionProfile(block: THREE.Object3D) {
+      faceOffset.set(0, 0, block.scale.z / 2 + .008).applyQuaternion(block.quaternion);
+      profileObject.position.copy(block.position).add(faceOffset);
+      profileObject.quaternion.copy(block.quaternion);
+      profileObject.scale.set(block.scale.x / profileWidth, block.scale.y / profileHeight, 1);
+    }
+
+    function syncStory(state: ReturnType<typeof towerFrame>, directionChanged: boolean) {
       const desiredRemoved = state.completed;
-      if (active === state.index && storyRemoved === desiredRemoved) return;
+      if (active === state.index && storyRemoved === desiredRemoved && !directionChanged) return;
       // Reverse only the story's removals. Manual placements and active pointer
       // constraints survive every seek, including a rewind all the way to zero.
-      if (active >= 0 && active !== state.index && active >= state.completed && !physics.isManual(active)) physics.returnBody(active);
-      if (state.completed < storyRemoved) {
-        for (let i = storyRemoved - 1; i >= state.completed; i--) {
-          if (!physics.isManual(i)) physics.returnBody(i);
+      if (reversing) {
+        // Profiles retain their order while the physical stack rebuilds in
+        // complete layers. Browsing a profile cannot pull out its new support.
+        const returnLayer = state.index >= 0 ? slots[state.index].layer : state.completed === 0 ? layers - 1 : 0;
+        physics.returnLayersThrough(returnLayer);
+      } else {
+        if (directionChanged) {
+          physics.cancelLayerReturns();
+          physics.bodies.forEach((body, index) => {
+            if (physics.isManual(index)) return;
+            if (index < desiredRemoved) physics.remove(index);
+            else if (!body.world) physics.returnBody(index);
+          });
         }
-        // At the finale the remaining pieces are playable again. Re-entering
-        // the story hides its completed pieces while retaining manual throws.
-        if (storyRemoved === members.length) {
-          for (let i = 0; i < state.completed; i++) {
-            if (!physics.isManual(i)) physics.remove(i);
-          }
+        for (let i = storyRemoved; i < desiredRemoved; i++) {
+          if (!physics.isManual(i)) physics.remove(i);
         }
-      }
-      for (let i = storyRemoved; i < state.completed; i++) {
-        if (!physics.isManual(i)) physics.remove(i);
       }
       storyRemoved = state.completed;
-      if (state.completed === members.length) {
-        for (let i = members.length - 1; i >= 0; i--) {
-          if (!physics.isManual(i)) physics.returnBody(i);
-        }
-      }
       active = state.index;
       if (active >= 0) {
         updateProfile(active);
-        physics.beginStory(active);
-        const body = physics.bodies[active];
-        activeSource.copy(body.position); activeQuaternion.copy(body.quaternion);
+        if (!reversing) {
+          physics.beginStory(active);
+          const body = physics.bodies[active];
+          activeSource.copy(body.position); activeQuaternion.copy(body.quaternion);
+        }
       }
       callbacks.onMember(active); matricesDirty = true;
     }
@@ -195,7 +201,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         .addScaledVector(up, (height / 2 - profileTop - profileHeight / 2) / height * viewHeight);
       const exitState = towerExit(state.local);
       const labelsChanged = matricesDirty || changedProgress || cameraMoved;
-      profile.style.opacity = state.index >= 0 && physics.isStory(state.index) ? String(exitState.opacity) : '0';
+      profile.style.opacity = state.index >= 0 && (reversing || physics.isStory(state.index)) ? String(exitState.opacity) : '0';
       if (transformsChanged || matricesDirty || changedProgress || (cameraMoved && state.index >= 0)) {
         const block = batch.pose;
         physics.bodies.forEach((body, index) => {
@@ -213,24 +219,32 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
           const storyBlock = index === state.index && physics.isStory(index);
           if (storyBlock) {
             source.copy(activeSource); block.position.copy(source); block.quaternion.copy(activeQuaternion);
-            const t = state.local, pull = smooth(t / .10), flight = smooth((t - .10) / .24), unfold = smooth((t - .2) / .23);
+            // Complete the flight and face the camera before unfolding. In
+            // reverse, the profile folds into a plank before it travels home.
+            const t = state.local, pull = smooth(t / .10), flight = smooth((t - .10) / .18), unfold = smooth((t - .28) / .15);
             direction.set(slot.direction, 0, 0).applyQuaternion(activeQuaternion);
             // Clear the whole plank before tumbling toward the profile.
             pulled.copy(source).addScaledVector(direction, BLOCK_SIZE[0] + .35); block.position.lerp(pulled, pull);
             if (t > .10) {
               control1.copy(pulled).addScaledVector(direction, 2);
-              // Flatten high-layer flight arcs toward the final profile height.
-              control1.y = THREE.MathUtils.lerp(control1.y, destination.y, 0.85);
               control2.copy(destination).addScaledVector(right, slot.direction * targetScale.x * .45).addScaledVector(up, -0.4);
+              // A fixed arc clears the tower in both directions. Contact-based
+              // lifts changed abruptly as the rotating plank crossed an AABB.
+              const clearance = Math.max(pulled.y, destination.y, (layers - 1) * LAYER_HEIGHT / 2 + BLOCK_SIZE[0]);
+              control1.y = clearance; control2.y = clearance;
               curve.v0.copy(pulled); curve.v1.copy(control1); curve.v2.copy(control2); curve.v3.copy(destination);
               curve.getPoint(flight, block.position);
 
               tumbleQuaternion.setFromEuler(euler.set(.85 * slot.spin, slot.yaw + .6 * slot.direction, 1.3 * slot.direction));
-              // Delay the tumble slightly so the block's tail clears the tower before rotating
-              block.quaternion.slerp(tumbleQuaternion, smooth(Math.max(0, t - .14) / .1));
-              block.quaternion.slerp(camera.quaternion, smooth((t - .23) / .2));
+              // The plank clears its slot before rotating and finishes rotating
+              // at the profile position while it is still at its original size.
+              block.quaternion.slerp(tumbleQuaternion, smooth((t - .12) / .08));
+              block.quaternion.slerp(camera.quaternion, smooth((t - .19) / .09));
             }
-            block.scale.lerp(targetScale, unfold);
+            // A full-size plank is wider than a phone near the camera. Fold to
+            // a proportional plank that fits, then regain its size on the flight home.
+            const plankFit = Math.min(1, targetScale.x / BLOCK_SIZE[0]);
+            block.scale.multiplyScalar(THREE.MathUtils.lerp(1, plankFit, flight)).lerp(targetScale, unfold);
 
             // A fallen plank can rest below the plinth. Lift its clearance as it
             // unfolds, without popping it upward on the first scroll frame.
@@ -245,19 +259,31 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
               block.quaternion.multiply(exitQuaternion);
             }
             block.scale.multiplyScalar(exitState.scale);
-            physics.placeStory(block.position, block.quaternion, block.scale, t > 0.10 && t < 0.35);
+            // The story body already ghosts through contacts. Keep its pose on
+            // the authored path instead of applying discontinuous solver lifts.
+            physics.placeStory(block.position, block.quaternion, block.scale, false);
 
             // Keep this transform updated even while transparent to avoid a
             // stale position flashing when a different member takes over.
-            faceOffset.set(0, 0, block.scale.z / 2 + .008).applyQuaternion(block.quaternion);
-            profileObject.position.copy(block.position).add(faceOffset);
-            profileObject.quaternion.copy(block.quaternion);
-            profileObject.scale.set(block.scale.x / profileWidth, block.scale.y / profileHeight, 1);
+            positionProfile(block);
           }
           // The open glass banner looks through to the environment, not an
           // enlarged wooden nameplate. Its plane remains directly grabbable.
           batch.update(index, !storyBlock || exitState.opacity < 1);
         });
+        if (reversing && state.index >= 0) {
+          // The banner remains browsable without borrowing a block from a
+          // completed layer. All three supporting planks stay in the tower.
+          const slot = slots[state.index], exit = exitState.progress;
+          block.position.copy(destination); block.quaternion.copy(camera.quaternion);
+          block.scale.copy(plankScale).multiplyScalar(Math.min(1, targetScale.x / BLOCK_SIZE[0]))
+            .lerp(targetScale, smooth((state.local - .28) / .15)).multiplyScalar(exitState.scale);
+          block.position.addScaledVector(right, slot.direction * targetScale.x * 1.55 * exit)
+            .addScaledVector(up, ((state.index % 3) - 1) * targetScale.y * .7 * exit).addScaledVector(forward, 2.7 * exit);
+          exitQuaternion.setFromEuler(euler.set(-.18 * exit, .4 * slot.direction * exit, -.45 * slot.direction * exit));
+          block.quaternion.multiply(exitQuaternion);
+          positionProfile(block);
+        }
         batch.commit(); renderer.shadowMap.needsUpdate = renderer.shadowMap.enabled; matricesDirty = false;
       }
       renderer.render(scene, camera);
@@ -286,13 +312,15 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         // speculative landing here gets undone by sampleScroll on the next
         // frame, briefly flashing the open profile during extraction.
         // Smooth native wheel/touch samples with a short, frame-independent response.
+        const previousProgress = progress, wasReversing = reversing;
         progress = advanceTowerScroll(scrollMotion, target, updateElapsed, 32);
+        if (progress !== previousProgress) reversing = progress < previousProgress;
         const state = towerFrame(progress, members.length);
         // The desktop intro orbits; readable profiles and settled mobile scenes rest.
         const idleOrbit = detail === 2 && state.index < 0 && state.completed === 0 && state.outro === 0;
-        const orbiting = idleOrbit && pointerId < 0 && time - lastInteraction > 1000;
+        const orbiting = idleOrbit && pointerId < 0 && !physics.moving() && progress === target && time - lastInteraction > 1000;
         if (orbiting) idleAngle = (idleAngle + dt * .16) % (Math.PI * 2);
-        syncStory(state);
+        syncStory(state, reversing !== wasReversing);
         const transformsChanged = physics.step(dt);
         // The decorative idle orbit needs only 30 paints/sec; scrolling and direct
         // interaction still render on every changed frame, including 120 Hz screens.
@@ -472,7 +500,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     }
     function rebuild() {
       if (disposed) return;
-      releasePointer(); physics.reset(); storyRemoved = 0; active = -2; progress = target = 0; idleAngle = 0;
+      releasePointer(); physics.reset(); storyRemoved = 0; active = -2; progress = target = 0; idleAngle = 0; reversing = false;
       scrollMotion.value = 0; scrollMotion.velocity = 0;
       matricesDirty = true; renderedProgress = -1; lastInteraction = performance.now();
       seek(0);

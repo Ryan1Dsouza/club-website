@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ArrowUpRight, Check, ImagePlus, Upload, X } from 'lucide-react'
+import { Check, ImagePlus, Upload, X } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { preparePhoto } from '../lib/photos'
 import { describeError, saveMember } from '../lib/members'
@@ -84,7 +84,9 @@ export function MemberEditor({
   return (
     <Modal
       title={member ? 'Edit team member' : 'Add team member'}
-      subtitle={member ? 'Keep their profile up to date.' : 'Add a profile to the website.'}
+      subtitle={
+        member ? 'Update the member profile on the website.' : 'Add a profile to the website.'
+      }
       onClose={onClose}
       busy={busy}
     >
@@ -137,7 +139,7 @@ export function MemberEditor({
                   <Upload size={21} />
                 </span>
                 <strong>
-                  {processing ? 'Preparing your photo…' : filename || 'Click to upload a photo'}
+                  {processing ? 'Processing photo…' : filename || 'Select a profile photo'}
                 </strong>
                 <span>JPG, PNG, WebP or AVIF · Up to 5 MB</span>
                 <input
@@ -176,9 +178,7 @@ export function MemberEditor({
             </p>
           </div>
           <aside className="profile-preview">
-            <span className="eyebrow">
-              PROFILE PREVIEW <ArrowUpRight size={12} />
-            </span>
+            <span className="eyebrow">Profile preview</span>
             <Avatar name={name || 'New member'} url={displayPhoto} large />
             <div>
               <h3>{name.trim() || 'Full name'}</h3>

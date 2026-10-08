@@ -44,7 +44,7 @@ export function createTowerScenery(scene: THREE.Scene, floorY: number, towerHeig
   const theme = getComputedStyle(document.documentElement);
   const mint = new THREE.Color(theme.getPropertyValue('--mint').trim() || '#c3e5c8');
   const sage = new THREE.Color(theme.getPropertyValue('--muted').trim() || '#93ac97');
-  const backdrop = new THREE.Color('#20261e');
+  const backdrop = new THREE.Color('#000000');
   group.add(new THREE.AmbientLight(0xfff1d7, .4));
   group.add(new THREE.HemisphereLight(mint.clone().lerp(new THREE.Color(0xffffff), .18), 0x183224, .85));
   const key = new THREE.DirectionalLight(0xfff2df, 2.4); key.position.set(-5, towerHeight + 5, 6);

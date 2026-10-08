@@ -25,8 +25,8 @@ export function SettingsPage() {
       <section className="panel settings-panel">
         <div className="panel-heading">
           <div>
-            <h2>Your account</h2>
-            <p>Your current administrator account.</p>
+            <h2>Account details</h2>
+            <p>Current administrator account and access information.</p>
           </div>
           <ShieldCheck size={21} />
         </div>
@@ -55,14 +55,13 @@ export function SettingsPage() {
         <div className="settings-note">
           <LockKeyhole size={18} />
           <p>
-            Access is managed by your club’s portal owner. Contact them to change your account
-            permissions or reset your password.
+            Contact the website administrator to update account permissions or reset your password.
           </p>
         </div>
         <div className="settings-signout">
           <div>
             <h3>Sign out</h3>
-            <p>Sign out of this browser to close your workspace.</p>
+            <p>End the current administrator session in this browser.</p>
           </div>
           <button
             className="button secondary"

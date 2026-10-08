@@ -6,7 +6,7 @@
 .page-heading h1 { font-size: clamp(60px, 8.5vw, 124px); }
 .page-heading > p { flex-shrink: 0; padding-bottom: 8px; color: var(--muted); font-size: 14px; line-height: 1.8; }
 .work-list { display: grid; gap: 32px; }
-.work-feature { display: grid; grid-template-columns: 1.15fr 1fr; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.work-feature { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
 .work-art { position: relative; display: grid; place-items: center; min-height: 470px; overflow: hidden; isolation: isolate; background: radial-gradient(ellipse at 50% 45%, rgb(var(--mint-rgb) / .12), transparent 65%), var(--surface); border-right: 1px solid var(--line); }
 .work-art-grid { position: absolute; inset: 0; z-index: -1; opacity: .32; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse, black, transparent 72%); }
 .work-art-index { position: absolute; top: 28px; left: 28px; font: 10px var(--mono); color: var(--muted); letter-spacing: .12em; }
@@ -25,7 +25,7 @@
 .laundry-blades > i:nth-child(3) { top: 34px; left: 53px; }
 .laundry-foot { position: absolute; right: 16px; bottom: 12px; width: 24px; height: 3px; border-radius: 2px; background: var(--line-strong); }
 .work-monogram { font: italic clamp(110px, 18vw, 220px) var(--serif); position: relative; }
-.work-art-caption { position: absolute; inset: auto 28px 26px; display: flex; justify-content: space-between; gap: 12px; font: 9px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.work-art-caption { position: absolute; inset: auto 28px 26px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font: 9px/1.5 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); overflow-wrap: anywhere; }
 .work-copy { padding: clamp(28px, 4vw, 56px); display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .work-meta { display: flex; flex-wrap: wrap; gap: 12px 20px; font: 9px/1.5 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
 .status-dot { display: inline-flex; align-items: center; gap: 6px; }
@@ -92,7 +92,7 @@
   .page-heading > p br { display: none; }
   .work-feature { grid-template-columns: 1fr; }
   .work-art { min-height: clamp(300px, 64vw, 460px); border-right: 0; border-bottom: 1px solid var(--line); }
-  .work-copy h2 { margin-top: 25px; font-size: 40px; }
+  .work-copy h2 { margin-top: 25px; font-size: clamp(30px, 7vw, 40px); }
   .people-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .person-featured { grid-column: 1 / -1; }
   .person-featured .person-card { display: grid; grid-template-columns: 1fr 1fr; }

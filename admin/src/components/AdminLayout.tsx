@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   ArrowUpRight,
   CalendarDays,
+  ClipboardList,
   Newspaper,
   Trophy,
   ChevronRight,
@@ -23,7 +24,7 @@ const links = [
   { to: '/team', label: 'Team Members', icon: UsersRound },
   { to: '/news', label: 'Live News', icon: Newspaper },
   { to: '/achievements', label: 'Achievements', icon: Trophy },
-  { to: '/recruitment', label: 'Recruitment', icon: Trophy },
+  { to: '/recruitment', label: 'Recruitment', icon: ClipboardList },
   { to: '/settings', label: 'Settings', icon: Settings2 },
 ]
 export function AdminLayout() {
@@ -83,7 +84,7 @@ export function AdminLayout() {
           </div>
           <ShieldCheck size={15} />
         </div>
-        <p className="nav-label">WORKSPACE</p>
+        <p className="nav-label">Workspace</p>
         <nav aria-label="Main navigation">
           {links.map(({ to, label, icon: Icon }) => (
             <NavLink
@@ -157,7 +158,7 @@ export function AdminLayout() {
         </main>
         <footer className="workspace-footer">
           <span>
-            NUCLEUS <span className="footer-divider">/</span> ADMINISTRATION
+            Nucleus <span className="footer-divider">/</span> Administration
           </span>
         </footer>
       </div>

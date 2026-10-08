@@ -1,10 +1,11 @@
 """Build native, compositor-played loader clips from the existing artwork.
 
-Requires Pillow and ffmpeg. Run after the desktop/mobile frame builders.
+Requires Pillow and ffmpeg. Run after build-loading-frames.py.
 The silent H.264 clips retain all 17 cuts at 20fps and work with playsInline on iOS.
 """
 from pathlib import Path
 from tempfile import TemporaryDirectory
+import argparse
 import subprocess
 import re
 from PIL import Image, ImageColor, ImageOps
@@ -35,25 +36,21 @@ def palette_color(token):
 
 ink = palette_color('mint')
 background = palette_color('page-backdrop')
-for compact in (False, True):
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--mobile-only', action='store_true', help='Rebuild only the portrait clip and poster')
+args = parser.parse_args()
+for compact in ((True,) if args.mobile_only else (False, True)):
     size = (480, 1040) if compact else (1440, 810)
     destination = root / ('mobile' if compact else 'desktop')
     destination.mkdir(exist_ok=True)
-    source = Image.open(root / 'mobile/sequence.webp') if compact else None
     with TemporaryDirectory(prefix='nucleus-loader-') as temporary:
         for index in range(17):
-            if source:
-                source.seek(index)
-                alpha = source.convert('RGBA').getchannel('A')
-                # A tall, full-bleed canvas replaces the old 4:5 video panel.
-                # Keep the subjects inside the crop shared by tall phones and
-                # 4:3 tablets; only the surrounding background is trimmed.
-                subject = ImageOps.contain(alpha.crop(alpha.getbbox()), (400, 600), Image.Resampling.LANCZOS)
-                alpha = Image.new('L', size)
-                alpha.paste(subject, ((size[0] - subject.width) // 2, (size[1] - subject.height) // 2))
-            else:
-                alpha = Image.open(root / f'frame-{index:02}.webp').getchannel('A')
-                alpha = ImageOps.fit(alpha, size, Image.Resampling.LANCZOS)
+            alpha = Image.open(root / f'frame-{index:02}.webp').getchannel('A')
+            # Crop the original full-height composition to the viewport ratio.
+            # Containing each sketch inside 400 x 600 and padding to 480 x 1040
+            # baked empty bands into the mobile video that CSS cover cannot fix.
+            # Peripheral strokes may bleed offscreen; the wordmark stays central.
+            alpha = ImageOps.fit(alpha, size, Image.Resampling.LANCZOS)
             frame = Image.new('RGB', size, background)
             frame.paste(ink, (0, 0, *size), alpha)
             frame.save(Path(temporary) / f'{index:02}.png')

@@ -1,4 +1,5 @@
 ﻿.nucleus-loader {
+  --loader-overscan: 1.02;
   position: fixed;
   inset: 0;
   height: 100%;
@@ -14,12 +15,21 @@
   will-change: transform;
 }
 .nucleus-loader__art {
-  /* H.264 decoding shifts the dark backdrop slightly below the CSS/poster
-     color. Blend the finished artwork group into the isolated loader so its
-     edges disappear, while the opaque video still covers the fallback poster. */
+  /* Blend and feather the finished group so the opaque video still covers its
+     poster. The mask also handles decoders that render the backdrop lighter. */
+  --loader-edge-mask:
+    linear-gradient(to right, transparent, #000 4%, #000 96%, transparent),
+    linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
   mix-blend-mode: lighten;
+  -webkit-mask-image: var(--loader-edge-mask);
+  mask-image: var(--loader-edge-mask);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 .nucleus-loader__art,
+.nucleus-loader__media,
 .nucleus-loader__poster,
 .nucleus-loader__poster img,
 .nucleus-loader__video {
@@ -30,8 +40,19 @@
   height: 100%;
   pointer-events: none;
 }
+.nucleus-loader__media {
+  /* Overscan both assets together, inside the stationary viewport-edge mask. */
+  transform: scale(var(--loader-overscan));
+  transform-origin: center;
+}
 .nucleus-loader__poster img,
-.nucleus-loader__video { object-fit: cover; }
+.nucleus-loader__video {
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: cover;
+  object-position: center;
+}
 .nucleus-loader__video { opacity: 0; }
 .nucleus-loader[data-frames-ready='true'] .nucleus-loader__video { opacity: 1; }
 .nucleus-loader[data-art-failed='true'] .nucleus-loader__poster { visibility: hidden; }
@@ -42,8 +63,9 @@
   text-align: center;
   font: italic 24px/1 var(--serif, Georgia, serif);
 }
-/* Both compositions bleed to the viewport edges. Their central artwork is
-   framed in the assets so cover never needs a padded video-sized container. */
+@media (max-width: 767px), (max-height: 500px) and (max-width: 1024px), (pointer: coarse) {
+  .nucleus-loader { --loader-overscan: 1.04; }
+}
 @media (prefers-reduced-motion: reduce) {
   .nucleus-loader { will-change: auto; }
   .nucleus-loader__video { display: none; }

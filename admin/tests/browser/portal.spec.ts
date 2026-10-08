@@ -40,7 +40,7 @@ test('authenticated non-admin and forged stored session cannot open the director
 }) => {
   const api = await mockSupabase(page, { admin: false })
   await page.goto('/team')
-  await expect(page.getByRole('heading', { name: 'An invitation is required.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Administrator access required' })).toBeVisible()
   expect(api.requests.filter((r) => r.path === '/rest/v1/team_members')).toHaveLength(0)
   api.authInvalid = true
   await page.getByRole('button', { name: 'Try again' }).click()
@@ -65,7 +65,7 @@ test('directory filters, pagination, accessible desktop layout and dashboard', a
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   await page.screenshot({ path: 'test-results/team-desktop.png', fullPage: true })
   await page.getByRole('link', { name: 'Dashboard', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Dashboard Overview', exact: true })).toBeVisible()
   await page.screenshot({ path: 'test-results/dashboard-desktop.png', fullPage: true })
 })
 
@@ -121,7 +121,7 @@ test('create with photo, preserve on edit, replace and remove, then delete', asy
   )
   expect(api.members[0].photo_url).toBeNull()
   await page.getByRole('button', { name: 'Delete New Test Member' }).click()
-  await expect(page.getByRole('button', { name: 'Keep member' })).toBeFocused()
+  await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeFocused()
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).not.toBeVisible()
   expect(api.members).toHaveLength(1)
@@ -235,6 +235,6 @@ test('access revocation closes protected content on focus', async ({ page }) => 
   await expect(page.getByText('Maya Rao', { exact: true })).toBeVisible()
   api.isAdmin = false
   await page.evaluate(() => window.dispatchEvent(new Event('focus')))
-  await expect(page.getByRole('heading', { name: 'An invitation is required.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Administrator access required' })).toBeVisible()
   await expect(page.getByText('Maya Rao', { exact: true })).not.toBeVisible()
 })

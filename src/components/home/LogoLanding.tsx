@@ -71,8 +71,7 @@ export default function LogoLanding({ active = true }: { active?: boolean }) {
       clearTimeout(timer);
       if (idle) cancelIdleCallback(idle);
       // Allow the page to paint before compiling the scene's shaders.
-      if (typeof window.requestIdleCallback === 'function') idle = requestIdleCallback(() => void start(), { timeout: 1200 });
-      else timer = window.setTimeout(() => void start(), 80);
+      timer = window.setTimeout(() => void start(), 10);
     };
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;

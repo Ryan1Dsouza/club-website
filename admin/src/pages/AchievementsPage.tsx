@@ -136,7 +136,7 @@ export function AchievementsPage() {
       <div className="page-heading">
         <div>
           <h1>Achievements</h1>
-          <p>Manage awards, results, and the team members behind them.</p>
+          <p>Manage awards, results, and associated team members.</p>
         </div>
         <button
           className="button primary"

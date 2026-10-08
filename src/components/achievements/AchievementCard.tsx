@@ -53,6 +53,7 @@ export function AchievementCard({ profile, index, totalProfiles, isPreview, acti
         rotateX,
         rotateY,
         transformStyle: "preserve-3d",
+        perspective: "1000px",
         cursor: "pointer",
         position: "relative"
       }}
@@ -67,11 +68,7 @@ export function AchievementCard({ profile, index, totalProfiles, isPreview, acti
           flexDirection: "column"
         }}
       >
-        <div className="ach-record__topline" style={{ transform: "translateZ(40px)" }}>
-          <span>No. {number(index + 1)}</span>
-          <span>{isPreview ? 'SAMPLE RECORD' : 'MEMBER RECORD'}</span>
-          <Asterisk size={15} aria-hidden="true" />
-        </div>
+
         
         <div className="ach-record__person" style={{ transform: "translateZ(50px)" }}>
           <span className="ach-portrait">
@@ -82,7 +79,7 @@ export function AchievementCard({ profile, index, totalProfiles, isPreview, acti
                 {...storageImageAttributes(portrait, [160, 320], '100px')} 
                 alt={profile.member.name} 
                 width="120" height="144" 
-                loading="lazy" decoding="async" 
+                loading={index < 3 ? "eager" : "lazy"} decoding="async" fetchPriority={index === 0 ? "high" : "auto"}
                 onError={event => { if (!restoreOriginalImage(event.currentTarget)) setFailedImage(portrait); }} 
               />
             )}
@@ -107,8 +104,7 @@ export function AchievementCard({ profile, index, totalProfiles, isPreview, acti
           ))}
         </ul>
         
-        <button type="button" className="ach-record__open" style={{ transform: "translateZ(60px)" }} aria-label={`View ${profile.member.name}'s achievements`} aria-haspopup="dialog">
-          <span>{number(profile.achievements.length)} {isPreview ? 'sample achievements' : 'achievements'}</span>
+        <button type="button" className="ach-record__open" style={{ transform: "translateZ(60px)", justifyContent: "flex-end" }} aria-label={`View ${profile.member.name}'s achievements`} aria-haspopup="dialog">
           <span className="ach-record__arrow" aria-hidden="true"><ArrowUpRight size={18} /></span>
         </button>
       </div>

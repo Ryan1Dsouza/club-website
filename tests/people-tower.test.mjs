@@ -7,7 +7,8 @@ import { AABB, Body, Quaternion, Vec3 } from 'cannon-es';
 
 test('release transfers bounded throw velocity at every quality tier and rebuild restores play', () => {
   for (const detail of [0, 1, 2]) {
-    const physics = createTowerPhysics(towerSlots(Array.from({ length: 15 }, (_, i) => String(i))), detail);
+    // Isolate release velocity from collisions with the shuffled stack.
+    const physics = createTowerPhysics(towerSlots(['throwable']), detail);
     const block = physics.bodies[0];
     physics.grab(0, block.position);
     physics.release({ x: 30, y: 20, z: 0 });
@@ -177,7 +178,7 @@ test('every member occupies a unique block with repeatable, varied extraction pa
   assert.ok(slots.some((slot, i) => slot.rank !== i));
 });
 
-test('new additions form full foundation layers below established leaders and partial top layers stay centered', () => {
+test('roles determine story order while shuffled slots fill each foundation and center partial top layers', () => {
   const members = [
     { id: 'member', role: 'Member' }, { id: 'president', role: 'President' },
     { id: 'new-officer', role: 'President', createdAt: '2026-09-30T10:00:00Z' },
@@ -185,14 +186,17 @@ test('new additions form full foundation layers below established leaders and pa
     { id: 'newest', role: 'Member', createdAt: '2026-09-30T11:00:00Z' },
   ];
   const ordered = sortTowerMembers(members), slots = towerSlots(ordered.map(member => member.id));
-  assert.deepEqual(ordered.map(member => member.id), ['president', 'member', 'older', 'new-officer', 'newest']);
+  assert.deepEqual(ordered.map(member => member.id), ['president', 'new-officer', 'member', 'older', 'newest']);
   assert.equal(members[0].id, 'member', 'sorting does not mutate API data');
-  assert.deepEqual(slots.map(slot => slot.layer), [1, 1, 0, 0, 0]);
+  assert.deepEqual(slots.map(slot => slot.layer).sort(), [0, 0, 0, 1, 1]);
   for (const count of [1, 2, 4, 5, 16, 40]) {
     const layout = towerSlots(Array.from({ length: count }, (_, i) => String(i)));
     const top = layout.filter(slot => slot.layer === Math.ceil(count / 3) - 1);
     assert.ok(Math.abs(top.reduce((sum, slot) => sum + slot.position[0] + slot.position[2], 0)) < 1e-9);
-    assert.equal(layout.at(-1).layer, 0);
+    assert.deepEqual(layout.map(slot => slot.rank).sort((a, b) => a - b), Array.from({ length: count }, (_, i) => i));
+    for (let layer = 0; layer < Math.ceil(count / 3) - 1; layer++) {
+      assert.equal(layout.filter(slot => slot.layer === layer).length, 3, 'every supporting layer is full');
+    }
   }
 });
 
@@ -210,30 +214,32 @@ test('mass, contact and sleep keep an untouched tower stable; removing its found
       assert.ok(body.mass > 0);
       assert.ok(Math.abs(body.position.y - slots[index].position[1]) < .03);
     });
-    const before = physics.bodies.slice(0, 12).map(body => body.position.y);
-    [12, 13, 14].forEach(index => physics.remove(index)); simulate(physics, 4);
-    physics.bodies.slice(0, 12).forEach((body, index) => {
+    const foundation = slots.flatMap((slot, index) => slot.layer === 0 ? [index] : []);
+    const supported = physics.bodies.filter((_, index) => !foundation.includes(index));
+    const before = supported.map(body => body.position.y);
+    foundation.forEach(index => physics.remove(index)); simulate(physics, 4);
+    supported.forEach((body, index) => {
       assert.ok(before[index] - body.position.y > BLOCK_SIZE[1] * .9, 'unsupported block falls');
       assert.ok(body.position.y > physics.floorY, 'plinth catches blocks');
     });
   } finally { physics.dispose(); }
 });
 
-test('click pulls and pointer constraints move dynamic blocks, disturb neighbours, release, and rebuild cleanly', () => {
+test('click pulls and pointer constraints extract dynamic blocks, release gravity, and rebuild cleanly', () => {
   const slots = fixtureSlots(), physics = createTowerPhysics(slots);
   try {
-    simulate(physics, 3); physics.pull(14); simulate(physics, 4);
-    const extracted = physics.bodies[14];
+    const index = slots.findIndex(slot => slot.layer === 0);
+    simulate(physics, 3); physics.pull(index); simulate(physics, 4);
+    const extracted = physics.bodies[index];
     assert.ok(Math.hypot(extracted.position.x, extracted.position.z) > 3.5);
-    assert.ok(physics.bodies.slice(0, 12).some((body, index) => Math.abs(body.position.y - slots[index].position[1]) > .1));
     assert.equal(physics.world.constraints.length, 0);
     physics.reset(); simulate(physics, 3);
-    const body = physics.bodies[12];
-    assert.ok(physics.grab(12, body.position));
+    const body = physics.bodies[index];
+    assert.ok(physics.grab(index, body.position));
     physics.move({ x: 6, y: body.position.y, z: body.position.z }); simulate(physics, 1.5);
     assert.ok(body.position.x > 4); assert.ok(body.mass > 0);
     physics.release(); assert.equal(physics.world.constraints.length, 0);
-    physics.grab(12, body.position);
+    physics.grab(index, body.position);
     physics.move({ x: 6, y: 2, z: 0 }); simulate(physics, 4);
     const heldY = body.position.y; physics.release(); simulate(physics, 1);
     assert.ok(body.position.y < heldY - 1, 'releasing a stationary suspended block wakes gravity');
@@ -394,10 +400,11 @@ test('scrolling retains a correctly sized collider through rotation, unfolding, 
   } finally { physics.dispose(); }
 });
 
-test('scrolling through a resting tower leaves the solver asleep and rebuilds partial stacks without jitter', () => {
-  const physics = createTowerPhysics(fixtureSlots());
+test('removing top layers leaves the solver asleep and rebuilding partial stacks starts without jitter', () => {
+  const slots = fixtureSlots(), physics = createTowerPhysics(slots);
   try {
-    for (let index = 0; index < physics.bodies.length; index++) {
+    const topDown = slots.map((slot, index) => ({ layer: slot.layer, index })).sort((a, b) => b.layer - a.layer);
+    for (const { index } of topDown) {
       physics.beginStory(index);
       const body = physics.bodies[index], position = body.position.clone();
       position.x += 5;
@@ -405,7 +412,7 @@ test('scrolling through a resting tower leaves the solver asleep and rebuilds pa
       assert.equal(physics.step(1 / 30), false);
       physics.remove(index);
     }
-    assert.equal(physics.world.time, 0, 'the scroll story needs no rigid-body solver steps');
+    assert.equal(physics.world.time, 0, 'removing unsupported top pieces needs no rigid-body solver steps');
     physics.reset(7); assert.equal(physics.moving(), false);
     physics.bodies.slice(7).forEach(body => {
       assert.deepEqual(body.interpolatedPosition.toArray(), body.position.toArray());

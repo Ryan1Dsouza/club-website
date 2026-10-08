@@ -74,7 +74,6 @@ export function TeamMembersPage() {
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">TEAM DIRECTORY</span>
           <h1>Team Members</h1>
           <p>Manage the team members displayed on the public website.</p>
         </div>
@@ -210,7 +209,7 @@ export function TeamMembersPage() {
         {error ? (
           <div className="empty-state">
             <UsersRound size={30} />
-            <h3>We couldn’t load the team.</h3>
+            <h3>Unable to load team members</h3>
             <p role="alert">{error}</p>
             <button
               className="button secondary"
@@ -237,7 +236,7 @@ export function TeamMembersPage() {
             <span className="large-icon">
               <UsersRound size={28} />
             </span>
-            <h3>{members.length ? 'No members found.' : 'No team members yet.'}</h3>
+            <h3>{members.length ? 'No matching members' : 'No team members'}</h3>
             <p>
               {members.length
                 ? 'Try another name or adjust your role filter.'
@@ -249,12 +248,12 @@ export function TeamMembersPage() {
                 members.length ? (setSearch(''), setRole('all')) : setEditor({ member: null })
               }
             >
-              {members.length ? 'Clear filters' : 'Add your first member'}
+              {members.length ? 'Clear filters' : 'Add team member'}
               <Plus size={15} />
             </button>
           </div>
         ) : (
-          <div className="table-scroll">
+          <div className="table-scroll" role="region" aria-label="Team member list" tabIndex={0}>
             <table>
               <caption className="sr-only">Nucleus team members and profile actions</caption>
               <thead>
@@ -262,11 +261,11 @@ export function TeamMembersPage() {
                   <th scope="col" className="index-cell">
                     #
                   </th>
-                  <th scope="col">MEMBER</th>
-                  <th scope="col">ROLE</th>
-                  <th scope="col">PHOTO</th>
+                  <th scope="col">Member</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Photo</th>
                   <th scope="col" className="actions-cell">
-                    ACTIONS
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -374,7 +373,7 @@ export function TeamMembersPage() {
       {removing && (
         <Modal
           compact
-          title="Remove this connection?"
+          title="Delete team member?"
           subtitle="This action cannot be undone."
           onClose={() => setRemoving(null)}
           busy={deleting}
@@ -388,8 +387,7 @@ export function TeamMembersPage() {
               </div>
             </div>
             <p>
-              This will delete their team profile and its uploaded photo. They will no longer be
-              included in the team data.
+              This will permanently delete the team profile and its uploaded photo from the website.
             </p>
             {deleteError && (
               <p className="notice error" role="alert">
@@ -405,7 +403,7 @@ export function TeamMembersPage() {
                 onClick={() => setRemoving(null)}
                 disabled={deleting}
               >
-                Keep member
+                Cancel
               </button>
               <button
                 className="button danger"

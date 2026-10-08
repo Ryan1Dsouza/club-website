@@ -77,7 +77,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
   }, [cursor, count, onClose]);
   useEffect(() => {
     // Current and upcoming images get first priority; keep a decoded window
-    // behind them for reversal, using the same responsive files as the page.
+    // behind them for reversal, using the same originals as the page.
     const first = isMobile ? Math.max(0, page - 1) : Math.max(0, page * 2 - 1);
     const ahead = isMobile ? 4 : 6;
     const photos = [...imageList.slice(first, first + ahead), ...imageList.slice(Math.max(0, first - 2), first)];

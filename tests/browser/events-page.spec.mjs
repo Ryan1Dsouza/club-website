@@ -10,6 +10,10 @@ const counts = workshops.map(workshop => workshop.photos);
 
 async function open(page, data = site) {
   await page.route('**/api/site', route => route.fulfill({ json: data }));
+  // Keep the archive fixture stable when App refreshes connected content.
+  await page.route('**/rest/v1/events?*', route => route.fulfill({ json: [] }));
+  await page.route('**/rest/v1/team_members?*', route => route.fulfill({ json: data.team.map(member => ({ ...member, photo_url: member.image })) }));
+  await page.route('**/rest/v1/site_settings?*', route => route.fulfill({ json: { recruitment_open: data.settings.recruitmentOpen } }));
   await page.goto('/events');
   await expect(page.locator('.site-shell')).toHaveAttribute('data-loading-stage', 'done', { timeout:15000 });
   await expect(page.locator('[data-loading-screen]')).toHaveCount(0, { timeout: 15000 });
