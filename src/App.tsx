@@ -81,7 +81,7 @@ export default function App({ initialData = seed, serverRendered = false }: { in
       import('./lib/supabase').then(({ supabase }) => Promise.all([
         supabase.from('team_members').select('id, name, role, photo_url, created_at').order('created_at', { ascending: true }),
         supabase.from('events').select('*, event_photos (id, name, photo_url, position)').order('starts_at', { ascending: true }),
-        supabase.from('site_settings').select('recruitment_open').eq('id', 1).single(),
+        supabase.from('site_settings').select('recruitment_open').eq('id', 1).maybeSingle(),
       ])),
     ]).then(([site, [{ data: teamData, error: teamError }, { data: eventData, error: eventError }, { data: settingsData, error: settingsError }]]) => {
       if (teamError) console.error('Failed to load team from Supabase', teamError);

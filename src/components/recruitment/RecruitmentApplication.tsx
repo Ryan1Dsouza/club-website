@@ -23,19 +23,22 @@ export default function RecruitmentApplication({ initialSettings }: { initialSet
       if (request.current === controller) { setAvailability('error'); controller.abort(); }
     }, 10_000);
     try {
-      const site = await api<SiteData>('/site', { signal: controller.signal });
-      const { data: settingsData } = await supabase.from('site_settings').select('recruitment_open').eq('id', 1).single();
+      const site = await api<SiteData>('/site', { signal: controller.signal }).catch(() => ({ settings: initialSettings }));
+      const { data: settingsData, error } = await supabase.from('site_settings').select('recruitment_open').eq('id', 1).maybeSingle();
       
       if (!controller.signal.aborted) { 
         const finalSettings = { ...site.settings };
-        if (settingsData) {
+        if (settingsData && !error) {
           finalSettings.recruitmentOpen = settingsData.recruitment_open;
         }
         setSettings(finalSettings); 
         setAvailability('ready'); 
       }
     } catch {
-      if (!controller.signal.aborted) setAvailability('error');
+      if (!controller.signal.aborted) {
+        setSettings(initialSettings);
+        setAvailability('ready');
+      }
     } finally { window.clearTimeout(timeout); }
   }, []);
 
