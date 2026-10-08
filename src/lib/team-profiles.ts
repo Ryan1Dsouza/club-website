@@ -47,7 +47,7 @@ export function createTeamProfiles(members: Member[]): TeamProfile[] {
       avatarImage: metadata?.avatar ?? metadata?.small ?? member.image,
       thumbnailImage: metadata?.thumbnail ?? metadata?.small ?? member.image,
       tagline: member.tagline?.trim() || metadata?.tagline?.trim() || 'turning coffee into algorithms',
-      socials: socials.length ? socials : (['linkedin', 'github', 'leetcode'] as const).map(platform => ({ platform, label: labels[platform], url: '#' })),
+      socials: socials,
     };
   });
 }

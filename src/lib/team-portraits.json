@@ -6,9 +6,11 @@
     "avatar": "/team_images/thumbnails/Poorvik-144.webp",
     "thumbnail": "/team_images/thumbnails/Poorvik-320.webp",
     "socials": {
+      "linkedin": "https://www.linkedin.com/in/poorvik-kuthyala",
       "github": "https://github.com/poorvikkg",
-      "linkedin": "https://www.linkedin.com/in/poorvik-kuthyala"
-    }
+      "leetcode": "https://leetcode.com/u/Poorvikkg/"
+    },
+    "tagline": "turning coffee into algorithms"
   },
   "/team_images/core/Dinol.avif": {
     "small": "/team_images/banner/Dinol-480.webp",
@@ -17,8 +19,10 @@
     "avatar": "/team_images/thumbnails/Dinol-144.webp",
     "thumbnail": "/team_images/thumbnails/Dinol-320.webp",
     "socials": {
-      "linkedin": "https://www.linkedin.com/in/dinol-castelino-57053631a"
-    }
+      "linkedin": "https://www.linkedin.com/in/dinol-castelino-57053631a",
+      "github": "https://github.com/Dinol-ino"
+    },
+    "tagline": "Running on caffeine, GPUs, and La Pasión."
   },
   "/team_images/core/Joylin.avif": {
     "small": "/team_images/banner/Joylin-480.webp",
@@ -27,9 +31,10 @@
     "avatar": "/team_images/thumbnails/Joylin-144.webp",
     "thumbnail": "/team_images/thumbnails/Joylin-320.webp",
     "socials": {
-      "github": "https://github.com/joylinmhs",
-      "linkedin": "https://www.linkedin.com/in/joylin-mathias"
-    }
+      "linkedin": "https://www.linkedin.com/in/joylin-mathias",
+      "github": "https://github.com/joylinmhs"
+    },
+    "tagline": "Keeping the team in sync while ideas find their rhythm"
   },
   "/team_images/core/Nishanth1.avif": {
     "small": "/team_images/banner/Nishanth1-480.webp",
@@ -45,9 +50,10 @@
     "avatar": "/team_images/thumbnails/Karthik-144.webp",
     "thumbnail": "/team_images/thumbnails/Karthik-320.webp",
     "socials": {
-      "github": "https://github.com/karthik17-hub",
-      "linkedin": "https://www.linkedin.com/in/karthik-ㅤ-4bab052a9"
-    }
+      "linkedin": "https://www.linkedin.com/in/karthik-%E3%85%A4-4bab052a9",
+      "github": "https://github.com/karthik17-hub"
+    },
+    "tagline": "Trusted To Execute, No Cap"
   },
   "/team_images/core/Prajwal.avif": {
     "small": "/team_images/banner/Prajwal-480.webp",
@@ -56,9 +62,11 @@
     "avatar": "/team_images/thumbnails/Prajwal-144.webp",
     "thumbnail": "/team_images/thumbnails/Prajwal-320.webp",
     "socials": {
+      "linkedin": "https://www.linkedin.com/in/prajwal-gaonkar-a57586195",
       "github": "https://github.com/OP-Prajwal",
-      "linkedin": "https://www.linkedin.com/in/prajwal-gaonkar-a57586195"
-    }
+      "leetcode": "https://leetcode.com/u/Prajwal_S_07/"
+    },
+    "tagline": "Exploring questionable decisions with epsilon=1"
   },
   "/team_images/core/Mohit.avif": {
     "small": "/team_images/banner/Mohit-480.webp",
@@ -67,9 +75,10 @@
     "avatar": "/team_images/thumbnails/Mohit-144.webp",
     "thumbnail": "/team_images/thumbnails/Mohit-320.webp",
     "socials": {
-      "github": "https://github.com/mohit782005",
-      "linkedin": "https://www.linkedin.com/in/mohit---7838b631a"
-    }
+      "linkedin": "https://www.linkedin.com/in/mohit---7838b631a",
+      "github": "https://github.com/mohit782005"
+    },
+    "tagline": "May your gradients never vanish"
   },
   "/team_images/core/Rakshith.avif": {
     "small": "/team_images/banner/Rakshith-480.webp",
@@ -78,9 +87,11 @@
     "avatar": "/team_images/thumbnails/Rakshith-144.webp",
     "thumbnail": "/team_images/thumbnails/Rakshith-320.webp",
     "socials": {
+      "linkedin": "https://www.linkedin.com/in/rakshith-d-souza-575b34335",
       "github": "https://github.com/Knight-eGithub",
-      "linkedin": "https://www.linkedin.com/in/rakshith-d-souza-575b34335"
-    }
+      "leetcode": "https://leetcode.com/u/Knight-eLeetCode"
+    },
+    "tagline": "Nothing really..."
   },
   "/team_images/core/Navya.avif": {
     "small": "/team_images/banner/Navya-480.webp",
@@ -89,9 +100,11 @@
     "avatar": "/team_images/thumbnails/Navya-144.webp",
     "thumbnail": "/team_images/thumbnails/Navya-320.webp",
     "socials": {
+      "linkedin": "https://www.linkedin.com/in/navya-y-suvarna/",
       "github": "https://github.com/navya-y-suvarna",
-      "linkedin": "https://www.linkedin.com/in/navya-y-suvarna/"
-    }
+      "leetcode": "https://leetcode.com/u/Navya_Suvarna/"
+    },
+    "tagline": "Outrunning time limits daily."
   },
   "/team_images/core/Deona.avif": {
     "small": "/team_images/banner/Deona-480.webp",
@@ -100,9 +113,10 @@
     "avatar": "/team_images/thumbnails/Deona-144.webp",
     "thumbnail": "/team_images/thumbnails/Deona-320.webp",
     "socials": {
-      "github": "https://github.com/deonahub",
-      "linkedin": "https://www.linkedin.com/in/deona-rego-0b2002323"
-    }
+      "linkedin": "https://www.linkedin.com/in/deona-rego-0b2002323",
+      "github": "https://github.com/deonahub"
+    },
+    "tagline": "Give me a crowd, a mic and a little chaos- I'll turn it into an event"
   },
   "/team_images/core/Sweeden.avif": {
     "small": "/team_images/banner/Sweeden-480.webp",
@@ -112,7 +126,8 @@
     "thumbnail": "/team_images/thumbnails/Sweeden-320.webp",
     "socials": {
       "linkedin": "https://www.linkedin.com/in/sweedan23"
-    }
+    },
+    "tagline": "Ballin in and off the field"
   },
   "/team_images/core/Manvitha.avif": {
     "small": "/team_images/banner/Manvitha-480.webp",
@@ -121,9 +136,10 @@
     "avatar": "/team_images/thumbnails/Manvitha-144.webp",
     "thumbnail": "/team_images/thumbnails/Manvitha-320.webp",
     "socials": {
-      "github": "https://github.com/manvithalewis",
-      "linkedin": "https://in.linkedin.com/in/manvitha-lewis"
-    }
+      "linkedin": "https://in.linkedin.com/in/manvitha-lewis",
+      "github": "https://github.com/manvithalewis"
+    },
+    "tagline": "Thinking like a user, designing like a creator."
   },
   "/team_images/core/Salim.avif": {
     "small": "/team_images/banner/Salim-480.webp",
@@ -132,9 +148,10 @@
     "avatar": "/team_images/thumbnails/Salim-144.webp",
     "thumbnail": "/team_images/thumbnails/Salim-320.webp",
     "socials": {
-      "github": "https://github.com/mahammad-salim7899",
-      "linkedin": "https://www.linkedin.com/in/mahammad-salim"
-    }
+      "linkedin": "https://www.linkedin.com/in/mahammad-salim",
+      "github": "https://github.com/mahammad-salim7899"
+    },
+    "tagline": "inspired to innovate"
   },
   "/team_images/core/Nikhitha.avif": {
     "small": "/team_images/banner/Nikhitha-480.webp",
@@ -143,9 +160,10 @@
     "avatar": "/team_images/thumbnails/Nikhitha-144.webp",
     "thumbnail": "/team_images/thumbnails/Nikhitha-320.webp",
     "socials": {
-      "github": "https://github.com/nikhrd",
-      "linkedin": "https://www.linkedin.com/in/nikhitha-risha-dsouza"
-    }
+      "linkedin": "https://www.linkedin.com/in/nikhitha-risha-dsouza",
+      "github": "https://github.com/nikhrd"
+    },
+    "tagline": "Debugging, one existential crisis at a time."
   },
   "/team_images/core/Saniya.avif": {
     "small": "/team_images/banner/Saniya-480.webp",
@@ -154,8 +172,9 @@
     "avatar": "/team_images/thumbnails/Saniya-144.webp",
     "thumbnail": "/team_images/thumbnails/Saniya-320.webp",
     "socials": {
-      "github": "https://github.com/Ayeshasaniyaaaa",
-      "linkedin": "https://www.linkedin.com/in/ayesha-saniya-194b92294"
-    }
+      "linkedin": "https://www.linkedin.com/in/ayesha-saniya-194b92294",
+      "github": "https://github.com/Ayeshasaniyaaaa"
+    },
+    "tagline": "90% coffee, 10% code."
   }
 }
