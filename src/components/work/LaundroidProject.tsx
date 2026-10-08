@@ -139,7 +139,7 @@ function LaundroidDetails({ project, trigger, onClose }: {
       <div className="laundroid-details__copy">
         <span className="laundroid-details__category">{project.domain} / {project.status}</span>
         <h2 id={`${id}-title`}>{project.title}</h2>
-        <p>A comprehensive, centralized web-based laundry management system engineered for 'Laundroid'. Designed to streamline and automate laundry operations across multiple residential college campuses, optimizing booking, tracking, and delivery logistics for both students and administration.</p>
+        <p>A centralized platform engineered to modernize campus laundry operations. Laundroid streamlines booking, tracking, and delivery logistics, creating a seamless experience for students and administrators alike.</p>
         {(project.url || project.repositoryUrl) && <div className="laundroid-details__links">
           {project.url && <a href={project.url} target="_blank" rel="noreferrer">Explore project <ArrowUpRight size={16} /></a>}
           {project.repositoryUrl && <a href={project.repositoryUrl} target="_blank" rel="noreferrer">Source code <Github size={16} /></a>}
@@ -162,7 +162,7 @@ export default function LaundroidProject({ project }: { project: Project }) {
       </div>
       <div className="laundroid-card__copy">
         <h2 id={`project-${project.id}`}>{project.title}</h2>
-        <p>A comprehensive, centralized web-based laundry management system engineered for 'Laundroid'. Designed to streamline and automate laundry operations across multiple residential college campuses, optimizing booking, tracking, and delivery logistics for both students and administration.</p>
+        <p>A centralized platform engineered to modernize campus laundry operations. Laundroid streamlines booking, tracking, and delivery logistics, creating a seamless experience for students and administrators alike.</p>
       </div>
       <div className="laundroid-card__footer"><span>{project.domain}<i />{project.status}</span></div>
       <button ref={trigger} type="button" className="laundroid-card__open" aria-label={`Explore ${project.title}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>
