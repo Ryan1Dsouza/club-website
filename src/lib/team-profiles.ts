@@ -28,7 +28,14 @@ const labels: Record<SocialPlatform, string> = {
 
 export function createTeamProfiles(members: Member[]): TeamProfile[] {
   return sortTeamMembers(members).map(member => {
-    const metadata = (portraits as Record<string, PortraitMetadata>)[member.image ?? ''];
+    let metadataKey = member.image ?? '';
+    if (!(portraits as Record<string, PortraitMetadata>)[metadataKey]) {
+      const firstName = member.name.trim().split(' ')[0].toLowerCase();
+      const searchName = firstName === 'sweedan' ? 'sweeden' : firstName;
+      const match = Object.keys(portraits).find(k => k.toLowerCase().includes(`/${searchName}.avif`));
+      if (match) metadataKey = match;
+    }
+    const metadata = (portraits as Record<string, PortraitMetadata>)[metadataKey];
     const socials: TeamSocial[] = [];
     for (const platform of Object.keys(labels) as SocialPlatform[]) {
       const value = member.socials?.[platform] ?? metadata?.socials?.[platform];
