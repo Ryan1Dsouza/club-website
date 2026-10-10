@@ -5,13 +5,13 @@
   .people-page[data-view='tower'] { height: 100dvh; min-height: 0; margin-top: 0; }
 }
 .people-page[data-view='grid'] {
-  padding: 120px 0 60px;
+  padding: 72px 0 60px;
 }
 .people-toolbar, .people-directory { width: min(1280px, 100%); margin-inline: auto; padding-inline: var(--gutter); }
 .people-view-toggle { display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-height: 44px; padding: 11px 16px; border: 1px solid var(--line-strong); border-radius: 30px; background: var(--surface); color: var(--mint); font: 11px/1.5 var(--mono); cursor: pointer; }
 .people-view-toggle:hover { background: var(--surface-raised); border-color: var(--mint); }
 .people-page[data-view='tower'] > .people-toolbar { position: fixed; top: calc(17px + env(safe-area-inset-top, 0px)); right: var(--gutter); width: auto; padding: 0; z-index: 20; }
-.people-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; padding-block: 30px 42px; }
+.people-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; padding-block: 16px 28px; }
 .people-intro h1 { font-size: clamp(48px, 6.4vw, 88px); line-height: .98; letter-spacing: -.055em; }
 .people-intro h1:focus, .people-directory__roster:focus { outline: none; }
 .people-intro p { margin-top: 22px; color: var(--muted); font: 13px/1.7 Inter, sans-serif; }
@@ -62,8 +62,8 @@
 @media (max-width: 900px) { .people-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) {
   .people-page[data-view='tower'] > .people-toolbar { top: calc(var(--header-height) + 12px); }
-  .people-page[data-view='grid'] { padding-top: 100px; }
-  .people-intro { align-items: flex-start; flex-direction: column; gap: 24px; padding-block: 26px 32px; }
+  .people-page[data-view='grid'] { padding-top: 60px; }
+  .people-intro { align-items: flex-start; flex-direction: column; gap: 16px; padding-block: 12px 20px; }
   .people-intro h1 { font-size: clamp(44px, 11vw, 66px); }
   .people-intro p { font-size: 12px; margin-top: 18px; }
   .people-meet-button { gap: 18px; }
