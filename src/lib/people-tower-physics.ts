@@ -10,7 +10,7 @@ type Slots = ReturnType<typeof towerSlots>;
 
 /** Fixed-step rigid bodies for play, with one collidable kinematic story block.
  * Scroll poses resolve contacts before rendering, including large/reverse seeks. */
-export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDetail = false) {
+export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDetail = false, sounds: { onImpact?: (speed: number) => void; onReturn?: () => void } = {}) {
   let detail: TowerDetail = typeof simplified === 'boolean' ? simplified ? 1 : 2 : simplified;
   let physicsStep = detail < 2 ? PHYSICS_STEP_MOBILE : PHYSICS_STEP;
   let maxSubSteps = detail === 0 ? 1 : detail === 1 ? 2 : 6;
@@ -37,6 +37,11 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     // or a visitor interacts, avoiding hundreds of invisible startup steps.
     body.sleep(); return body;
   });
+  const impact = (event: { contact: { getImpactVelocityAlongNormal: () => number } }) => {
+    const speed = Math.abs(event.contact.getImpactVelocityAlongNormal());
+    if (Number.isFinite(speed) && speed > .6) sounds.onImpact?.(speed);
+  };
+  if (sounds.onImpact) bodies.forEach(body => body.addEventListener('collide', impact));
   const anchor = new Body({ type: Body.KINEMATIC, collisionFilterGroup: 0, collisionFilterMask: 0 });
   const storyShape = new Box(new Vec3(...BLOCK_SIZE).scale(.5));
   const contactBounds = bodies.map(() => new AABB());
@@ -55,6 +60,10 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     layerTarget = -1; nextLayer = 0; returningLayer = -1;
     bodies.forEach((body, index) => {
       if (manual.has(index)) return;
+      // Stop scheduling more layers, but let visible planks finish landing.
+      // Forward story/grab/remove can take over an individual return below.
+      // Clearing these transitions left sleeping pieces suspended midair.
+      if ((body as any).transition?.returning) return;
       (body as any).transition = null;
       makeDynamic(body);
       if (body.world) body.sleep();
@@ -207,7 +216,6 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     const body = bodies[index];
     if (!body?.world) return;
     const returning = (body as any).transition?.returning;
-    wakeSupported(body);
     if (returning) {
       // Re-enter the same flight when reversing across a member boundary.
       // An interrupted tower return must not replace a flung block's starting pose.
@@ -223,6 +231,9 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
       body.position.copy(body.interpolatedPosition); body.quaternion.copy(body.interpolatedQuaternion);
       storyOrigins.set(index, { position: body.position.clone(), quaternion: body.quaternion.clone() });
     }
+    // A returning banner may still be far below its tower slot. Determine its
+    // supported neighbours from the restored source, not that old screen pose.
+    wakeSupported(body);
     (body as any).transition = null;
     body.previousPosition.copy(body.position); body.interpolatedPosition.copy(body.position);
     body.previousQuaternion.copy(body.quaternion); body.interpolatedQuaternion.copy(body.quaternion);
@@ -331,6 +342,7 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     if (restoreManual(index)) return;
     const slot = slots[index];
 
+    if ((body as any).transition?.returning) return;
     if (story === index) story = -1;
     if (body.shapes[0] !== shape) { body.removeShape(storyShape); body.addShape(shape); }
 
@@ -412,7 +424,7 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
               body.updateMassProperties();
               body.velocity.setZero(); body.angularVelocity.setZero(); body.force.setZero(); body.torque.setZero();
               body.aabbNeedsUpdate = true; world.broadphase.dirty = true;
-              body.sleep(); (body as any).transition = null;
+              body.sleep(); (body as any).transition = null; sounds.onReturn?.();
             }
           } else {
             t.fromPos.lerp(body.position, ease, body.interpolatedPosition);
@@ -427,6 +439,7 @@ export function createTowerPhysics(slots: Slots, simplified: boolean | TowerDeta
     return changed || moving();
   }
   function dispose() {
+    if (sounds.onImpact) bodies.forEach(body => body.removeEventListener('collide', impact));
     if (disposed) return;
     release(); disposed = true; storyOrigins.clear(); manual.clear();
     [...world.bodies].forEach(body => world.removeBody(body));

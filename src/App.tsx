@@ -19,6 +19,8 @@ import CommunityCTA from './components/home/CommunityCTA';
 import { useReveal } from './components/ui/reveal';
 import { useCinematicScroll } from './lib/use-cinematic-scroll';
 import { pageMeta } from '../shared/page-meta';
+import { installInteractionSounds } from './lib/interaction-sounds';
+import { useVisualReadiness } from './lib/use-visual-readiness';
 
 const RecruitmentApplication = lazy(() => import('./components/recruitment/RecruitmentApplication'));
 
@@ -49,22 +51,30 @@ function SiteFooter({ settings }: { settings: SiteSettings }) {
 }
 
 export default function App({ initialData = seed, serverRendered = false }: { initialData?: SiteData; serverRendered?: boolean }) {
+  useEffect(installInteractionSounds, []);
   const [data, setData] = useState<SiteData>(initialData);
   const [applyOpen, setApplyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [domain, setDomain] = useState<number | null>(null);
   // The static curtain renders with SSR; interactivity is locked after hydration.
   const [loadingStage, setLoadingStage] = useState<'idle' | 'loading' | 'exiting' | 'done'>('idle');
-  const loading = loadingStage === 'loading' || loadingStage === 'exiting';
   const location = useLocation();
   const pagePath = location.pathname.replace(/\/+$/, '') || '/';
+  const imagesPending = useVisualReadiness(pagePath);
+  const [imageCurtain, setImageCurtain] = useState(false);
+  useEffect(() => { if (imagesPending) setImageCurtain(true); }, [imagesPending]);
+  const loading = loadingStage === 'loading' || loadingStage === 'exiting' || imagesPending || imageCurtain;
+  const visibleLoadingStage = loadingStage !== 'done'
+    ? imagesPending && loadingStage === 'exiting' ? 'loading' : loadingStage
+    : imagesPending ? 'loading' : imageCurtain ? 'exiting' : 'done';
   const navigationType = useNavigationType();
   useCinematicScroll(location.pathname === '/' && !loading && !applyOpen && !menuOpen && domain === null);
 
   useEffect(() => {
     const abort = new AbortController();
-    let disposed = false, finished = false, finishTimer = 0;
-    const started = performance.now();
+    let disposed = false, finished = false, finishTimer = 0, deadline = 0, startFrame = 0;
+    let refreshing: Promise<void> | undefined;
+    let started = performance.now();
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const minimum = reduced ? 0 : LOADER_MINIMUM_MS;
     // Play the same opening on hydrated production pages and client-only pages.
@@ -75,13 +85,12 @@ export default function App({ initialData = seed, serverRendered = false }: { in
       setLoadingStage('exiting');
     };
     // The existing seed/SSR data stays available if startup requests stall.
-    const deadline = window.setTimeout(dismiss, LOADER_MAXIMUM_MS);
-    const refresh = () => Promise.all([
+    const refresh = () => refreshing ??= Promise.all([
       api<SiteData>('/site', { signal: abort.signal }).catch(() => initialData),
       import('./lib/supabase').then(({ supabase }) => Promise.all([
-        supabase.from('team_members').select('id, name, role, photo_url, created_at').order('created_at', { ascending: true }),
-        supabase.from('events').select('*, event_photos (id, name, photo_url, position)').order('starts_at', { ascending: true }),
-        supabase.from('site_settings').select('recruitment_open').eq('id', 1).maybeSingle(),
+        supabase.from('team_members').select('id, name, role, photo_url, created_at').order('created_at', { ascending: true }).abortSignal(abort.signal),
+        supabase.from('events').select('*, event_photos (id, name, photo_url, position)').order('starts_at', { ascending: true }).abortSignal(abort.signal),
+        supabase.from('site_settings').select('recruitment_open').eq('id', 1).abortSignal(abort.signal).maybeSingle(),
       ])),
     ]).then(([site, [{ data: teamData, error: teamError }, { data: eventData, error: eventError }, { data: settingsData, error: settingsError }]]) => {
       if (teamError) console.error('Failed to load team from Supabase', teamError);
@@ -131,16 +140,23 @@ export default function App({ initialData = seed, serverRendered = false }: { in
         finalSettings.recruitmentOpen = settingsData.recruitment_open;
       }
 
-      if (!disposed) { setData({ ...site, settings: finalSettings, team, events: events.length > 0 ? events : site.events }); }
-    }).catch(() => { /* Recruitment verifies availability before accepting input. */ });
+      if (!disposed) { setData({ ...site, settings: finalSettings, team: teamError ? site.team : team, events: events.length > 0 ? events : site.events }); }
+    }).catch(() => { /* Recruitment verifies availability before accepting input. */ }).finally(() => { refreshing = undefined; });
     const firstRequest = refresh();
     // Fonts and decorative frames load independently. SSR already has usable data.
-    void (serverRendered ? Promise.resolve() : firstRequest).then(() => {
-      if (!disposed && !finished) finishTimer = window.setTimeout(dismiss, Math.max(0, minimum - (performance.now() - started)));
+    // Measure the visible intro after React has committed the loading state.
+    // Startup work must not consume its minimum playback time before first paint.
+    startFrame = requestAnimationFrame(() => {
+      started = performance.now();
+      deadline = window.setTimeout(dismiss, LOADER_MAXIMUM_MS);
+      void (serverRendered ? Promise.resolve() : firstRequest).then(() => {
+        if (!disposed && !finished) finishTimer = window.setTimeout(dismiss, Math.max(0, minimum - (performance.now() - started)));
+      });
     });
     window.addEventListener('focus', refresh);
     return () => {
       disposed = true; abort.abort(); window.clearTimeout(deadline); window.clearTimeout(finishTimer);
+      cancelAnimationFrame(startFrame);
       window.removeEventListener('focus', refresh);
     };
   }, [serverRendered]);
@@ -185,8 +201,8 @@ export default function App({ initialData = seed, serverRendered = false }: { in
 
 
   return <>
-    <LoadingScreen active={loadingStage === 'idle' || loadingStage === 'loading'} onExitComplete={() => setLoadingStage('done')} />
-    <div className={`site-shell${['/', '/team', '/recruitment'].includes(pagePath) ? ' site-shell--home' : pagePath === '/projects' ? ' site-shell--work' : pagePath === '/achievements' ? ' site-shell--achievements' : ['/news', '/live-news'].includes(pagePath) ? ' site-shell--news' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={loadingStage}>
+    <LoadingScreen active={loadingStage === 'idle' || loadingStage === 'loading' || imagesPending} onExitComplete={() => { if (!imagesPending) { setLoadingStage('done'); setImageCurtain(false); } }} />
+    <div className={`site-shell${['/', '/team', '/recruitment'].includes(pagePath) ? ' site-shell--home' : pagePath === '/projects' ? ' site-shell--work' : pagePath === '/achievements' ? ' site-shell--achievements' : ['/news', '/live-news'].includes(pagePath) ? ' site-shell--news' : ''}`} inert={loading} aria-busy={loading} data-loading-stage={visibleLoadingStage}>
     {['/', '/achievements', '/news', '/live-news', '/recruitment'].includes(pagePath) && <BackgroundRippleEffect className="background-ripple-effect--page" />}
     <a href="#main-content" className="skip-link">Skip to content</a>
     <header className={`site-header${pagePath === '/events' ? ' site-header--events' : ['/', '/team', '/recruitment'].includes(pagePath) ? ' site-header--home' : ''}`}>

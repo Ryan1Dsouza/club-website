@@ -5,6 +5,7 @@ import { motion, useAnimationControls, useReducedMotion } from 'framer-motion';
 import type { SiteSettings } from '../../types';
 import { preloadPage } from '../../route-pages';
 import { useLightweightGraphics } from '../../lib/graphics-preference';
+import SoundToggle from '../shared/SoundToggle';
 import './morphing-navbar.css';
 
 type NavigationItem = { title: string; href: string };
@@ -114,6 +115,7 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
     <div className="morph-nav__dialog" role={open ? 'dialog' : undefined} aria-modal={open ? true : undefined} aria-label={open ? 'Navigation menu' : undefined}>
       <div className="morph-nav__pill">
         <Link className="morph-nav__brand" to="/" aria-label="Nucleus home" onClick={event => closeForNavigation(event, '/')}>Nucleus</Link>
+        <SoundToggle />
         <button
           type="button"
           className="morph-nav__toggle"
@@ -177,7 +179,7 @@ export function MorphingNavbar({ items, settings, open, onOpenChange, onApply }:
                 animate={{ opacity: open ? 1 : 0, x: open ? 0 : 160 }}
                 transition={sequenceTransition(.5 + index * .1)}
               >
-                <NavLink className="morph-nav__link" to={item.href} end aria-label={item.title} onPointerEnter={() => { if (open && !useLightweightGraphics()) warmPage(item.href); }} onFocus={() => { if (open) void preloadPage(item.href).catch(() => {}); }} onClick={event => closeForNavigation(event, item.href)}>
+                <NavLink className="morph-nav__link" to={item.href} end aria-label={item.title} onPointerEnter={() => { if (open && !useLightweightGraphics()) warmPage(item.href); }} onFocus={() => { if (open) void preloadPage(item.href).catch(() => {}); }} onClick={event => { closeForNavigation(event, item.href); }}>
                   <span className="morph-nav__active-dot" aria-hidden="true" />
                   <span className="morph-nav__title" aria-hidden="true">
                     {Array.from(item.title).map((letter, letterIndex) => <span

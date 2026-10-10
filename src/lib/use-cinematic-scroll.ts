@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type Lenis from '@studio-freight/lenis';
 import { createCinematicLenis } from './cinematic-lenis';
+import { VISUAL_LOADING_EVENT } from './visual-readiness';
 
 /** Smooth wheel input while keeping touch scrolling on the browser compositor. */
 export function useCinematicScroll(enabled: boolean, syncScenes = false, onScroll?: (scroll: number, limit: number) => void) {
@@ -91,6 +92,11 @@ export function useCinematicScroll(enabled: boolean, syncScenes = false, onScrol
       if (document.hidden) settle();
       else wake();
     };
+    const onVisualLoading = (event: Event) => {
+      if ((event as CustomEvent<boolean>).detail) {
+        settle(); lenis?.stop(); cancelAnimationFrame(frame); frame = 0; lastTick = 0;
+      } else { lenis?.start(); wake(); }
+    };
     sync();
     measure();
     window.addEventListener('scroll', nativeScroll, { passive: true });
@@ -101,6 +107,7 @@ export function useCinematicScroll(enabled: boolean, syncScenes = false, onScrol
     window.addEventListener('focusin', settle);
     window.addEventListener('wheel', wake, { passive: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener(VISUAL_LOADING_EVENT, onVisualLoading);
     return () => {
       disposed = true;
       stopTracking?.();
@@ -115,6 +122,7 @@ export function useCinematicScroll(enabled: boolean, syncScenes = false, onScrol
       window.removeEventListener('focusin', settle);
       window.removeEventListener('wheel', wake);
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener(VISUAL_LOADING_EVENT, onVisualLoading);
     };
   }, [enabled, syncScenes]);
 }

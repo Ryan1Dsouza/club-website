@@ -2,6 +2,7 @@ import { useCallback, useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowLeft, ArrowUpRight, Code2, Github, Globe, Instagram, Linkedin, X } from 'lucide-react';
 import gsap from 'gsap';
+import { sfx } from '../../lib/sound-effects';
 import type { TeamProfile, SocialPlatform } from '../../lib/team-profiles';
 import './team-profile-overlay.css';
 
@@ -10,10 +11,12 @@ const icons = { linkedin: Linkedin, github: Github, leetcode: Code2, instagram: 
 export default function TeamProfileOverlay({ person, onClose }: { person: TeamProfile; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const closing = useRef(false);
+  const opened = useRef(false);
   const animation = useRef<gsap.core.Timeline | gsap.core.Tween | null>(null);
   const close = useCallback(() => {
     if (closing.current) return;
     closing.current = true;
+    sfx.bookClose();
     animation.current?.kill();
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) { onClose(); return; }
     animation.current = gsap.to(dialog.current, { opacity: 0, duration: .2, ease: 'power2.in', onComplete: onClose });
@@ -29,6 +32,7 @@ export default function TeamProfileOverlay({ person, onClose }: { person: TeamPr
     document.documentElement.style.overflow = 'hidden';
     closing.current = false;
     element.showModal();
+    if (!opened.current) { opened.current = true; sfx.bookOpen(); }
     element.querySelector<HTMLButtonElement>('button')?.focus({ preventScroll: true });
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
       animation.current = gsap.timeline()
@@ -57,7 +61,7 @@ export default function TeamProfileOverlay({ person, onClose }: { person: TeamPr
         event.preventDefault(); first?.focus();
       }
     }}>
-    <button type="button" className="team-profile__back" onClick={close}><ArrowLeft size={16} /><span>Back to the team</span><X size={16} /></button>
+    <button type="button" className="team-profile__back" data-sound="none" onClick={close}><ArrowLeft size={16} /><span>Back to the team</span><X size={16} /></button>
     <div className="team-profile__layout">
       <div className="team-profile__details">
         <div className="team-profile__copy">

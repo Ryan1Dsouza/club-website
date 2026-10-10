@@ -1,0 +1,674 @@
+[
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "media": {
+      "size": [
+        480,
+        1040
+      ],
+      "decodedCorner": [
+        14,
+        27,
+        17,
+        255
+      ]
+    },
+    "layout": {
+      "background": "color(srgb 0.0585882 0.111373 0.0676078)",
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "top": 0,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "video": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "top": 0,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "poster": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "top": 0,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "mask": "none",
+      "composite": "add",
+      "scrollWidth": 390
+    },
+    "samples": [
+      {
+        "y": 0,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 1,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 5,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 20,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 84,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 842,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 843,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 320,
+      "height": 568
+    },
+    "media": {
+      "size": [
+        480,
+        1040
+      ],
+      "decodedCorner": [
+        14,
+        27,
+        17,
+        255
+      ]
+    },
+    "layout": {
+      "background": "color(srgb 0.0585882 0.111373 0.0676078)",
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "top": 0,
+        "right": 320,
+        "bottom": 568,
+        "left": 0
+      },
+      "video": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "top": 0,
+        "right": 320,
+        "bottom": 568,
+        "left": 0
+      },
+      "poster": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "top": 0,
+        "right": 320,
+        "bottom": 568,
+        "left": 0
+      },
+      "mask": "none",
+      "composite": "add",
+      "scrollWidth": 320
+    },
+    "samples": [
+      {
+        "y": 0,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 1,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 5,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 20,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 56,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 566,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 567,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 360,
+      "height": 800
+    },
+    "media": {
+      "size": [
+        480,
+        1040
+      ],
+      "decodedCorner": [
+        14,
+        27,
+        17,
+        255
+      ]
+    },
+    "layout": {
+      "background": "color(srgb 0.0585882 0.111373 0.0676078)",
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 360,
+        "height": 800,
+        "top": 0,
+        "right": 360,
+        "bottom": 800,
+        "left": 0
+      },
+      "video": {
+        "x": 0,
+        "y": 0,
+        "width": 360,
+        "height": 800,
+        "top": 0,
+        "right": 360,
+        "bottom": 800,
+        "left": 0
+      },
+      "poster": {
+        "x": 0,
+        "y": 0,
+        "width": 360,
+        "height": 800,
+        "top": 0,
+        "right": 360,
+        "bottom": 800,
+        "left": 0
+      },
+      "mask": "none",
+      "composite": "add",
+      "scrollWidth": 360
+    },
+    "samples": [
+      {
+        "y": 0,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 1,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 5,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 20,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 80,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 798,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 799,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 768,
+      "height": 1024
+    },
+    "media": {
+      "size": [
+        480,
+        1040
+      ],
+      "decodedCorner": [
+        14,
+        27,
+        17,
+        255
+      ]
+    },
+    "layout": {
+      "background": "color(srgb 0.0585882 0.111373 0.0676078)",
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 768,
+        "height": 1024,
+        "top": 0,
+        "right": 768,
+        "bottom": 1024,
+        "left": 0
+      },
+      "video": {
+        "x": 0,
+        "y": 0,
+        "width": 768,
+        "height": 1024,
+        "top": 0,
+        "right": 768,
+        "bottom": 1024,
+        "left": 0
+      },
+      "poster": {
+        "x": 0,
+        "y": 0,
+        "width": 768,
+        "height": 1024,
+        "top": 0,
+        "right": 768,
+        "bottom": 1024,
+        "left": 0
+      },
+      "mask": "none",
+      "composite": "add",
+      "scrollWidth": 768
+    },
+    "samples": [
+      {
+        "y": 0,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 1,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 5,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 20,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 102,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 1022,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 1023,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "media": {
+      "size": [
+        1440,
+        810
+      ],
+      "decodedCorner": [
+        14,
+        27,
+        17,
+        255
+      ]
+    },
+    "layout": {
+      "background": "color(srgb 0.0585882 0.111373 0.0676078)",
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "top": 0,
+        "right": 844,
+        "bottom": 390,
+        "left": 0
+      },
+      "video": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "top": 0,
+        "right": 844,
+        "bottom": 390,
+        "left": 0
+      },
+      "poster": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "top": 0,
+        "right": 844,
+        "bottom": 390,
+        "left": 0
+      },
+      "mask": "none",
+      "composite": "add",
+      "scrollWidth": 844
+    },
+    "samples": [
+      {
+        "y": 0,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 1,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 5,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 20,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 39,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 388,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 389,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "media": {
+      "size": [
+        1440,
+        810
+      ],
+      "decodedCorner": [
+        14,
+        27,
+        17,
+        255
+      ]
+    },
+    "layout": {
+      "background": "color(srgb 0.0585882 0.111373 0.0676078)",
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "video": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "poster": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mask": "none",
+      "composite": "add",
+      "scrollWidth": 1440
+    },
+    "samples": [
+      {
+        "y": 0,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 1,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 5,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 20,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 90,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 898,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      },
+      {
+        "y": 899,
+        "rgb": [
+          15,
+          28,
+          17
+        ]
+      }
+    ]
+  }
+]

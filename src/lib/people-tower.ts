@@ -7,6 +7,7 @@ import { createTowerScenery } from './people-tower-scenery';
 import { createTowerBlocks, TOWER_PALETTES } from './people-tower-blocks';
 import { createTowerPhysics } from './people-tower-physics';
 import type { TowerPortraits } from './people-tower-portraits';
+import { sfx } from './sound-effects';
 
 type Callbacks = { onMember: (index: number) => void; onError: () => void };
 
@@ -53,7 +54,11 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     const scene = new THREE.Scene(), labels = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, 1, .1, 150);
     const slots = towerSlots(members.map(member => member.id)), layers = Math.ceil(members.length / 3);
-    const physics = createTowerPhysics(slots, detail);
+    let impactSpeed = 0;
+    const physics = createTowerPhysics(slots, detail, {
+      onImpact: speed => { impactSpeed = Math.max(impactSpeed, speed); },
+      onReturn: () => sfx.woodPlace(),
+    });
     cleanups.push(physics.dispose);
     const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const batch = createTowerBlocks(scene, members, Math.min(quality.maxTextureSize, renderer.capabilities.maxTextureSize), detail, anisotropy);
@@ -94,7 +99,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     let width = 1, height = 1, profileWidth = 1, profileHeight = 1, profileTop = 0;
     let bufferWidth = 0, bufferHeight = 0, viewportResizeTimer = 0;
     let start = 0, range = 1, target = 0, progress = 0, frame = 0, previousTime = 0;
-    let active = -2, storyRemoved = 0, visible = true, idleAngle = 0, lastInteraction = -Infinity, reversing = false;
+    let active = -2, storyRemoved = 0, visible = true, idleAngle = 0, lastInteraction = -Infinity;
     let matricesDirty = true, renderedProgress = -1, lastRenderTime = 0;
     let layoutDirty = true, scrollDirty = true, initialized = false;
     let previousUpdate = 0;
@@ -133,38 +138,27 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       profileObject.scale.set(block.scale.x / profileWidth, block.scale.y / profileHeight, 1);
     }
 
-    function syncStory(state: ReturnType<typeof towerFrame>, directionChanged: boolean) {
+    function syncStory(state: ReturnType<typeof towerFrame>) {
       const desiredRemoved = state.completed;
-      if (active === state.index && storyRemoved === desiredRemoved && !directionChanged) return;
-      // Reverse only the story's removals. Manual placements and active pointer
-      // constraints survive every seek, including a rewind all the way to zero.
-      if (reversing) {
-        // Profiles retain their order while the physical stack rebuilds in
-        // complete layers. Browsing a profile cannot pull out its new support.
-        const returnLayer = state.index >= 0 ? slots[state.index].layer : state.completed === 0 ? layers - 1 : 0;
-        physics.returnLayersThrough(returnLayer);
+      // Keep the same source pose when direction changes within a member.
+      // The banner, fold and flight then retrace exactly the same scroll path.
+      if (active === state.index && storyRemoved === desiredRemoved) return;
+      if (active >= 0 && active >= desiredRemoved && active !== state.index) physics.returnBody(active);
+      if (desiredRemoved < storyRemoved) {
+        // Only members already passed in reverse return to their slots. The
+        // current member still owns its plank until its banner has folded home.
+        for (let i = physics.bodies.length - 1; i >= desiredRemoved; i--) physics.returnBody(i);
       } else {
-        if (directionChanged) {
-          physics.cancelLayerReturns();
-          physics.bodies.forEach((body, index) => {
-            if (physics.isManual(index)) return;
-            if (index < desiredRemoved) physics.remove(index);
-            else if (!body.world) physics.returnBody(index);
-          });
-        }
-        for (let i = storyRemoved; i < desiredRemoved; i++) {
-          if (!physics.isManual(i)) physics.remove(i);
-        }
+        for (let i = storyRemoved; i < desiredRemoved; i++) physics.remove(i);
       }
       storyRemoved = state.completed;
       active = state.index;
       if (active >= 0) {
         updateProfile(active);
-        if (!reversing) {
-          physics.beginStory(active);
-          const body = physics.bodies[active];
-          activeSource.copy(body.position); activeQuaternion.copy(body.quaternion);
-        }
+        physics.beginStory(active);
+        sfx.woodRemove();
+        const body = physics.bodies[active];
+        activeSource.copy(body.position); activeQuaternion.copy(body.quaternion);
       }
       callbacks.onMember(active); matricesDirty = true;
     }
@@ -201,7 +195,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         .addScaledVector(up, (height / 2 - profileTop - profileHeight / 2) / height * viewHeight);
       const exitState = towerExit(state.local);
       const labelsChanged = matricesDirty || changedProgress || cameraMoved;
-      profile.style.opacity = state.index >= 0 && (reversing || physics.isStory(state.index)) ? String(exitState.opacity) : '0';
+      profile.style.opacity = state.index >= 0 && physics.isStory(state.index) ? String(exitState.opacity) : '0';
       if (transformsChanged || matricesDirty || changedProgress || (cameraMoved && state.index >= 0)) {
         const block = batch.pose;
         physics.bodies.forEach((body, index) => {
@@ -271,19 +265,6 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
           // enlarged wooden nameplate. Its plane remains directly grabbable.
           batch.update(index, !storyBlock || exitState.opacity < 1);
         });
-        if (reversing && state.index >= 0) {
-          // The banner remains browsable without borrowing a block from a
-          // completed layer. All three supporting planks stay in the tower.
-          const slot = slots[state.index], exit = exitState.progress;
-          block.position.copy(destination); block.quaternion.copy(camera.quaternion);
-          block.scale.copy(plankScale).multiplyScalar(Math.min(1, targetScale.x / BLOCK_SIZE[0]))
-            .lerp(targetScale, smooth((state.local - .28) / .15)).multiplyScalar(exitState.scale);
-          block.position.addScaledVector(right, slot.direction * targetScale.x * 1.55 * exit)
-            .addScaledVector(up, ((state.index % 3) - 1) * targetScale.y * .7 * exit).addScaledVector(forward, 2.7 * exit);
-          exitQuaternion.setFromEuler(euler.set(-.18 * exit, .4 * slot.direction * exit, -.45 * slot.direction * exit));
-          block.quaternion.multiply(exitQuaternion);
-          positionProfile(block);
-        }
         batch.commit(); renderer.shadowMap.needsUpdate = renderer.shadowMap.enabled; matricesDirty = false;
       }
       renderer.render(scene, camera);
@@ -312,16 +293,15 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         // speculative landing here gets undone by sampleScroll on the next
         // frame, briefly flashing the open profile during extraction.
         // Smooth native wheel/touch samples with a short, frame-independent response.
-        const previousProgress = progress, wasReversing = reversing;
         progress = advanceTowerScroll(scrollMotion, target, updateElapsed, 32);
-        if (progress !== previousProgress) reversing = progress < previousProgress;
         const state = towerFrame(progress, members.length);
         // The desktop intro orbits; readable profiles and settled mobile scenes rest.
         const idleOrbit = detail === 2 && state.index < 0 && state.completed === 0 && state.outro === 0;
         const orbiting = idleOrbit && pointerId < 0 && !physics.moving() && progress === target && time - lastInteraction > 1000;
         if (orbiting) idleAngle = (idleAngle + dt * .16) % (Math.PI * 2);
-        syncStory(state, reversing !== wasReversing);
+        syncStory(state);
         const transformsChanged = physics.step(dt);
+        if (impactSpeed > 0) { sfx.woodImpact(Math.min(1, impactSpeed / 8)); impactSpeed = 0; }
         // The decorative idle orbit needs only 30 paints/sec; scrolling and direct
         // interaction still render on every changed frame, including 120 Hz screens.
         if (transformsChanged || matricesDirty || progress !== renderedProgress || (orbiting && time - lastRenderTime >= 1000 / 30)) {
@@ -437,6 +417,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         return;
       }
       pointerId = event.pointerId; draggedIndex = index; downX = event.clientX; downY = event.clientY; travelled = 0;
+      sfx.woodGrab();
       lastDragPoint.copy(point); throwVelocity.set(0, 0, 0); lastDragTime = performance.now();
       camera.getWorldDirection(forward); dragPlane.setFromNormalAndCoplanarPoint(forward, point);
       renderer.domElement.setPointerCapture(pointerId); host.dataset.dragging = 'true';
@@ -449,7 +430,9 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         return;
       }
       if (event.pointerId !== pointerId) return;
+      const wasMoving = travelled >= 6;
       travelled = Math.max(travelled, Math.hypot(event.clientX - downX, event.clientY - downY));
+      if (!wasMoving && travelled >= 6) sfx.woodRemove();
       cast(event);
       if (raycaster.ray.intersectPlane(dragPlane, dragPoint)) {
         const now = performance.now(), elapsed = Math.max(.008, (now - lastDragTime) / 1000);
@@ -468,7 +451,9 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       if (event.pointerId !== pointerId) return;
       const index = draggedIndex, click = travelled < 6 && event.type === 'pointerup';
       const throwing = !click && event.type === 'pointerup' && performance.now() - lastDragTime < 120;
-      releasePointer(throwing ? throwVelocity : undefined); if (click) physics.pull(index);
+      releasePointer(throwing ? throwVelocity : undefined);
+      if (click) { physics.pull(index); sfx.woodRemove(); }
+      else if (throwing && throwVelocity.length() > 1) sfx.woodThrow(Math.min(1, throwVelocity.length() / 12));
       lastInteraction = performance.now(); wake();
     }
     function seek(next: number) {
@@ -500,7 +485,8 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
     }
     function rebuild() {
       if (disposed) return;
-      releasePointer(); physics.reset(); storyRemoved = 0; active = -2; progress = target = 0; idleAngle = 0; reversing = false;
+      sfx.rebuild();
+      releasePointer(); physics.reset(); storyRemoved = 0; active = -2; progress = target = 0; idleAngle = 0;
       scrollMotion.value = 0; scrollMotion.velocity = 0;
       matricesDirty = true; renderedProgress = -1; lastInteraction = performance.now();
       seek(0);

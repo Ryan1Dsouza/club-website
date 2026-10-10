@@ -25,7 +25,7 @@ html::-webkit-scrollbar { display: none; }
 html.lenis, html.lenis body { height: auto; }
 html.cinematic-page, html.lenis-smooth { scroll-behavior: auto !important; }
 dialog.modal { overscroll-behavior: contain; }
-body { margin: 0; min-width: 280px; -webkit-font-smoothing: antialiased; }
+body { margin: 0; min-width: 280px; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 body, button, input, textarea, select { font-family: Inter, Arial, sans-serif; }
 h1, h2, h3, p { margin: 0; }
 button, input, textarea, select { font-size: inherit; }
@@ -167,7 +167,8 @@ textarea { resize: vertical; min-height: 90px; }
   .community-section--reveal { padding-block: 18svh 14svh; }
   .community-section--reveal h2 { font-size: clamp(24px, 9vw, 54px); }
   .community-section--reveal > .eyebrow { font-size: 12px; letter-spacing: .16em; }
-  .community-actions { width: 100%; gap: 12px; margin-top: 32px; }
+  .community-actions { width: 100%; gap: 12px; margin-top: 32px; flex-direction: column; }
+  .community-actions .button { width: 100%; max-width: none; }
 }
 @media (max-width: 380px) { .site-header .brand > span { font-size: 13px; letter-spacing: .1em; } .site-header .brand-mark { width: 25px; height: 25px; } .header-cta { padding-inline: 9px; } .header-cta svg { display: none; } }
 @media (prefers-reduced-motion: no-preference) {

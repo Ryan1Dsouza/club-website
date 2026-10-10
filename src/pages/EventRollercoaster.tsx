@@ -1,5 +1,5 @@
 import { Component, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode, type RefObject } from 'react';
-import { ArrowDown, ArrowRight, ArrowUp, Layers3, Plus, Route, Volume2, VolumeX, X, Zap } from 'lucide-react';
+import { ArrowDown, ArrowRight, ArrowUp, Layers3, Plus, Route, X, Zap } from 'lucide-react';
 import { type MoveInput, type WorldMode } from '../lib/event-navigation';
 import type { LogoWorldProps } from '../components/shared/LogoWorld';
 import type { RideMapLayout } from '../lib/event-minimap';
@@ -11,6 +11,8 @@ import { createRideAudio, type RideAudio } from '../lib/event-audio';
 import type { ClubEvent } from '../types';
 import RideGlimpses, { type RideGlimpsesHandle } from '../components/shared/RideGlimpses';
 import RideMap, { type RideMapHandle } from '../components/shared/RideMap';
+import SoundToggle from '../components/shared/SoundToggle';
+import { sfx } from '../lib/sound-effects';
 import './event-explorer.css';
 
 const LogoWorld = lazy(() => import('../components/shared/LogoWorld'));
@@ -24,15 +26,17 @@ class WorldBoundary extends Component<{ children: ReactNode; onError: () => void
 }
 
 function EventDialog({ children, label, onClose, busy = false }: { children: ReactNode; label: string; onClose: () => void; busy?: boolean }) {
-  const ref = useRef<HTMLDialogElement>(null);
+  const close = () => { sfx.bookClose(); onClose(); };
+  const ref = useRef<HTMLDialogElement>(null), opened = useRef(false);
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     const dialog = ref.current!;
     dialog.showModal();
+    if (!opened.current) { opened.current = true; sfx.bookOpen(); }
     return () => { dialog.close(); if (previous?.isConnected) previous.focus({ preventScroll: true }); };
   }, []);
-  return <dialog ref={ref} className="nx-dialog" aria-label={label} aria-busy={busy} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
-    <button className="nx-close" disabled={busy} onClick={onClose} aria-label="Close event"><X size={18} /></button>
+  return <dialog ref={ref} className="nx-dialog" aria-label={label} aria-busy={busy} onCancel={event => { event.preventDefault(); if (!busy) close(); }}>
+    <button className="nx-close" data-sound="none" disabled={busy} onClick={close} aria-label="Close event"><X size={18} /></button>
     {children}
   </dialog>;
 }
@@ -58,7 +62,7 @@ function Joystick({ input, disabled, onFocus }: { input: RefObject<MoveInput>; d
     input.current = { x: distance < 5 ? 0 : x / radius, y: distance < 5 ? 0 : -y / radius };
     if (knob.current) knob.current.style.transform = `translate(${x}px, ${y}px)`;
   }
-  return <button className="nx-joystick" disabled={disabled} aria-label="Ride joystick. Drag up or right to accelerate; down or left to brake and reverse. You can also use W D and S A."
+  return <button className="nx-joystick" data-sound="none" disabled={disabled} aria-label="Ride joystick. Drag up or right to accelerate; down or left to brake and reverse. You can also use W D and S A."
     aria-describedby="nx-control-summary" title="W / D to accelerate · S / A to brake and reverse"
     onPointerDown={event => { if (active.current !== null) return; event.preventDefault(); onFocus(); active.current = event.pointerId; event.currentTarget.setPointerCapture(event.pointerId); update(event); }}
     onPointerMove={update} onPointerUp={reset} onPointerCancel={reset} onLostPointerCapture={reset}>
@@ -75,7 +79,7 @@ function BoostControl({ input, active, disabled, touch, onFocus }: { input: RefO
     return () => { reset(); window.removeEventListener('blur', reset); document.removeEventListener('visibilitychange', reset); };
   }, [reset]);
   useEffect(() => { if (disabled) reset(); }, [disabled, reset]);
-  return <button className="nx-boost-button" type="button" disabled={disabled} aria-pressed={active} aria-label="Hold to boost. Keyboard shortcut: Shift."
+  return <button className="nx-boost-button" data-sound="none" type="button" disabled={disabled} aria-pressed={active} aria-label="Hold to boost. Keyboard shortcut: Shift."
     onPointerDown={event => { if (event.button !== 0 || pointer.current !== null) return; event.preventDefault(); onFocus(); pointer.current = event.pointerId; event.currentTarget.setPointerCapture(event.pointerId); input.current = true; }}
     onPointerUp={event => { if (event.pointerId === pointer.current) reset(); }} onPointerCancel={reset} onLostPointerCapture={reset} onBlur={reset}
     onKeyDown={event => { if (event.code === 'Space' || event.code === 'Enter') { event.preventDefault(); input.current = true; } }}
@@ -95,7 +99,6 @@ export default function EventRollercoaster({ events, onPublished, onReady }: { e
   const input = useRef<MoveInput>({ x: 0, y: 0 });
   const boostInput = useRef(false);
   const audio = useRef<RideAudio | null>(null);
-  const [soundOn, setSoundOn] = useState(false), [soundBusy, setSoundBusy] = useState(false);
   const glimpses = useRef<RideGlimpsesHandle>(null);
   const minimap = useRef<RideMapHandle>(null);
   const [boosting, setBoosting] = useState(false);
@@ -112,7 +115,10 @@ export default function EventRollercoaster({ events, onPublished, onReady }: { e
   const paused = selected !== null || adding || listing;
   const [command, setCommand] = useState<LogoWorldProps['command']>({ serial: 0, station: null });
   const station = selected === null ? null : stations[selected];
-  useEffect(() => () => { audio.current?.dispose(); audio.current = null; }, []);
+  useEffect(() => {
+    audio.current = createRideAudio();
+    return () => { audio.current?.dispose(); audio.current = null; };
+  }, []);
   useEffect(() => { if (paused || failed || mode === 'overview') audio.current?.quiet(); }, [paused, failed, mode]);
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -131,15 +137,6 @@ export default function EventRollercoaster({ events, onPublished, onReady }: { e
     return () => { pointer.removeEventListener('change', update); window.removeEventListener('resize', update); };
   }, []);
   const focusWorld = () => wrapper.current?.querySelector<HTMLElement>('.nx-world')?.focus({ preventScroll: true });
-  async function toggleSound() {
-    setSoundBusy(true);
-    try {
-      const sound = audio.current ??= createRideAudio();
-      await sound.setEnabled(!soundOn); setSoundOn(!soundOn);
-      if (mode === 'explore') focusWorld();
-    } catch { setSoundOn(false); setNotice('Sound is unavailable in this browser.'); }
-    finally { setSoundBusy(false); }
-  }
   const selectStation = (index: number) => { input.current = { x: 0, y: 0 }; setSelected(index); };
   const toggleMap = () => { input.current = { x: 0, y: 0 }; setSelected(null); setMode(value => value === 'explore' ? 'overview' : 'explore'); };
   const boardStation = (index: number) => {
@@ -178,9 +175,7 @@ export default function EventRollercoaster({ events, onPublished, onReady }: { e
     {!compactView && <RideGlimpses ref={glimpses} />}
     <div className="nx-topbar"><div className="nx-ride-caption"><span>THE LOGO LOOP</span><small>Six passages. One endless journey.</small></div>
     <div className="nx-event-actions"><button onClick={() => { input.current = { x: 0, y: 0 }; setListing(true); }}>Events <span>{stations.length}</span></button><button onClick={() => { input.current = { x: 0, y: 0 }; setAdding(true); }}><Plus size={15} />Add Event</button>
-      {!failed && <button className="nx-sound-button" type="button" aria-label="Wind sound" aria-pressed={soundOn} title={soundOn ? 'Mute wind sound' : 'Enable wind sound'} disabled={!ready || soundBusy} onClick={toggleSound}>
-        {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}<span>Sound</span>
-      </button>}
+      {!failed && <SoundToggle className="nx-sound-button" label />}
     </div>
     </div>
     {!failed && !compactView && <RideMap ref={minimap} layout={mapLayout} stations={stations} ready={ready} traveling={traveling} onTravel={travelToStation} />}

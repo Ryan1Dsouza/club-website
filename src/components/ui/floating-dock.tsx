@@ -1,4 +1,4 @@
-﻿import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion, type MotionValue } from 'motion/react';
@@ -57,8 +57,8 @@ export function FloatingDock({ items }: { items: Item[] }) {
       {items.map(item => <DockIcon key={item.href} item={item} mouseX={mouseX} />)}
     </div>
     <div className="fd-mobile">
-      <button className="fd-mobile-toggle icon-button" ref={toggle} aria-label={open ? 'Close menu' : 'Open menu'} aria-controls={id} aria-expanded={open} onClick={() => setOpen(value => !value)}>{open ? <X size={22} /> : <Menu size={22} />}</button>
-      {open && <div id={id} className="fd-mobile-nav">{items.map((item, index) => <NavLink key={item.href} className="fd-mobile-link" to={item.href} end onClick={() => setOpen(false)} style={{ animationDelay: `${index * 35}ms` }}><span>{item.title}</span><span className="fd-mobile-icon" aria-hidden="true">{item.icon}</span></NavLink>)}</div>}
+      <button className="fd-mobile-toggle icon-button" ref={toggle} aria-label={open ? 'Close menu' : 'Open menu'} aria-controls={id} aria-expanded={open} onClick={() => { setOpen(value => !value); }}>{open ? <X size={22} /> : <Menu size={22} />}</button>
+      {open && <div id={id} className="fd-mobile-nav">{items.map((item, index) => <NavLink key={item.href} className="fd-mobile-link" to={item.href} end onClick={() => { setOpen(false); }} style={{ animationDelay: `${index * 35}ms` }}><span>{item.title}</span><span className="fd-mobile-icon" aria-hidden="true">{item.icon}</span></NavLink>)}</div>}
     </div>
   </nav>;
 }

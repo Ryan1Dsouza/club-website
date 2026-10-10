@@ -4,12 +4,14 @@ import { ArrowDown, ArrowLeft, ArrowRight, CalendarDays, MapPin, Scan, X } from 
 import type { ClubEvent, EventPhoto } from '../../types';
 import { bookSpreads } from '../../events/photo-order';
 import { eventImageAttributes, preloadEventPhotos } from '../../events/event-images';
+import { sfx } from '../../lib/sound-effects';
 import { restoreOriginalImage } from '../../lib/responsive-images';
 import { BOOK_SCROLL_STEP, useBookScroll } from '../../events/use-book-scroll';
 import { WORKSHOP_STATIONS, workshopStory } from '../../events/stations';
 import { eventDate } from './EventFlipCard';
 import EventArtwork from './EventArtwork';
 import RailwayTrack from './RailwayTrack';
+import SoundToggle from '../shared/SoundToggle';
 import './station-book.css';
 
 type Props = { workshopFolder: string; imageList: EventPhoto[]; event?: ClubEvent | null; title?: string; stationNumber?: string; onClose: () => void; continueLabel?: string; galleryOnly?: boolean };
@@ -27,7 +29,8 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
   }, []);
   const spreads = useMemo(() => bookSpreads(imageList), [imageList]);
   const count = isMobile ? imageList.length + 1 : spreads.length;
-  const dialog = useRef<HTMLDialogElement>(null), closed = useRef(false);
+  const dialog = useRef<HTMLDialogElement>(null), closed = useRef(false), opened = useRef(false);
+  const closeBook = () => { if (!closed.current) { closed.current = true; sfx.bookClose(); onClose(); } };
   const instructions = useId();
   const wrapper = useRef<HTMLDivElement>(null), content = useRef<HTMLDivElement>(null);
   const book = useRef<HTMLDivElement>(null), surface = useRef<HTMLDivElement>(null);
@@ -43,6 +46,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
     const overflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     element.showModal(); element.querySelector<HTMLElement>('.station-book__surface')?.focus({ preventScroll:true });
+    if (!opened.current) { opened.current = true; sfx.bookOpen(); }
     return () => { element.close(); document.body.style.overflow = overflow; if (previous?.isConnected) previous.focus({ preventScroll:true }); };
   }, []);
   function paint(value: number) {
@@ -51,7 +55,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
     const shade = Math.sin(progress * Math.PI);
     if (book.current) book.current.dataset.bookProgress = value.toFixed(3);
     if (leaf.current) {
-      leaf.current.style.setProperty('--book-turn', `${(isMobile ? 180 : -180) * progress}deg`);
+      leaf.current.style.transform = `rotate${isMobile ? 'X' : 'Y'}(${(isMobile ? 180 : -180) * progress}deg)`;
       const bend = `rotate${isMobile ? 'X' : 'Y'}(${shade * (isMobile ? 2.8 : -1.4)}deg)`;
       // Transform/opacity updates stay on composited layers instead of cascading
       // inherited CSS variables through every copy of the page content.
@@ -73,7 +77,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
   const showNext = turning && !reduced;
 
   useEffect(() => {
-    if (cursor >= count - .0001 && !closed.current) { closed.current = true; onClose(); }
+    if (cursor >= count - .0001 && !closed.current) { closeBook(); }
   }, [cursor, count, onClose]);
   useEffect(() => {
     // Current and upcoming images get first priority; keep a decoded window
@@ -125,8 +129,9 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
   }, [page, count, isMobile, strips, imageList, event, name, stationNumber]);
   const links = [{ url: event?.albumUrl, label: 'View photo album' }, { url: event?.registrationUrl, label: 'Register for event' }].filter(link => link.url && /^https?:\/\//i.test(link.url));
 
-  return createPortal(<dialog ref={dialog} className="nx-dialog nx-book-dialog" aria-label={name} data-lenis-prevent onCancel={event => { event.preventDefault(); onClose(); }}>
-    <button className="nx-close" aria-label="Close event" onClick={onClose}><X size={18} /></button>
+  return createPortal(<dialog ref={dialog} className="nx-dialog nx-book-dialog" aria-label={name} data-lenis-prevent onCancel={event => { event.preventDefault(); closeBook(); }}>
+    <button className="nx-close" aria-label="Close event" data-sound="none" onClick={closeBook}><X size={18} /></button>
+    <SoundToggle className="station-book__sound" />
     <div className="station-book" ref={book} style={{ '--book-strips': strips } as CSSProperties} data-layout={isMobile ? 'mobile' : 'spread'} data-photo-fit={fitPhoto ? 'contain' : 'cover'} data-workshop={workshopFolder} data-station-number={stationNumber} data-book-page={page + 1} data-book-turning={turning} data-book-closing={closing} data-scroll-engine="lenis" onKeyDown={event => {
       if (event.altKey || event.ctrlKey || event.metaKey) return;
       const story = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-book-scroll]') : null;
@@ -136,7 +141,7 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
     }}>
       <header className="station-book__masthead">
         <span>NUCLEUS <b>FIELD NOTES</b></span>
-        {isMobile && page > 0 ? <button type="button" className="station-book__fit" onClick={() => setFitPhoto(value => !value)} aria-pressed={fitPhoto}>
+        {isMobile && page > 0 ? <button type="button" className="station-book__fit" aria-label="Fit full photo" onClick={() => setFitPhoto(value => !value)} aria-pressed={fitPhoto}>
           <Scan size={18} /><span>Fit full photo</span>
         </button> : <span>STATION / {stationNumber}</span>}
       </header>
@@ -152,12 +157,12 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
       <footer className="station-book__footer">
         <div className="station-book__progress" ref={progressBar} aria-hidden="true"><RailwayTrack className="railway-track--horizontal" /></div>
         <div className="station-book__navigation">
-          <button type="button" onClick={() => turn(-1)} disabled={cursor <= .0001} aria-label="Previous book page"><ArrowLeft size={18} /></button>
+          <button type="button" data-sound="none" onClick={() => turn(-1)} disabled={cursor <= .0001} aria-label="Previous book page"><ArrowLeft size={18} /></button>
           <span role="status" aria-live="polite">Page {page + 1} / {count}</span>
-          <button type="button" onClick={() => turn(1)} aria-label={page === count - 1 ? 'Close book after last page' : 'Next book page'}><ArrowRight size={18} /></button>
+          <button type="button" data-sound="none" onClick={() => turn(1)} aria-label={page === count - 1 ? 'Close book after last page' : 'Next book page'}><ArrowRight size={18} /></button>
           <p id={instructions}><ArrowDown size={13} />{page === count - 1 ? 'Scroll to close this chapter' : isMobile ? 'Pull up to turn. Pull down to return.' : 'Scroll to turn · arrow keys work too'}</p>
         </div>
-        <div className="station-book__actions"><div className="station-book__links">{links.map(link => <a key={link.label} href={link.url} target="_blank" rel="noreferrer">{link.label}<ArrowRight size={12} /></a>)}</div><button className="nx-continue" onClick={onClose}>{continueLabel}<ArrowRight size={16} /></button></div>
+        <div className="station-book__actions"><div className="station-book__links">{links.map(link => <a key={link.label} href={link.url} target="_blank" rel="noreferrer">{link.label}<ArrowRight size={12} /></a>)}</div><button className="nx-continue" data-sound="none" onClick={closeBook}>{continueLabel}<ArrowRight size={16} /></button></div>
         {galleryOnly && <p className="station-book__capacity">This event is available in the book; the track is at capacity.</p>}
       </footer>
     </div>

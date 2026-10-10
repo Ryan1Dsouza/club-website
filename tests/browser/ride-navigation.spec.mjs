@@ -69,35 +69,40 @@ test('boost widens and pulls back the camera and opening events fades the existi
   expect(errors).toEqual([]);
 });
 
-test('wind is opt-in, follows motion, suspends for dialogs, and closes on navigation', async ({ page }) => {
+test('ride audio follows shared sound settings, quiets for dialogs, and releases loops on navigation', async ({ page }) => {
   await page.addInitScript(() => {
     const Original = window.AudioContext;
     window.rideAudioContexts = [];
+    window.rideAudioSources = [];
     window.AudioContext = class extends Original {
       constructor(...args) { super(...args); window.rideAudioContexts.push(this); }
+      createBufferSource() {
+        const node = super.createBufferSource(), record = { node, ended: false };
+        node.addEventListener('ended', () => { record.ended = true; }); window.rideAudioSources.push(record); return node;
+      }
     };
   });
   await page.setViewportSize({ width: 1440, height: 900 });
   await connect(page); await ready(page);
-  const sound = page.getByRole('button', { name: 'Wind sound' }), world = page.locator('.nx-world');
-  await expect(sound).toHaveAttribute('aria-pressed', 'false');
-  expect(await page.evaluate(() => window.rideAudioContexts.length)).toBe(0);
+  const sound = page.locator('.nx-topbar').getByRole('button', { name: 'Website sound' }), world = page.locator('.nx-world');
+  await expect(sound).toHaveAttribute('aria-pressed', 'true');
+  expect(await page.evaluate(() => window.rideAudioContexts.length)).toBe(1);
   await expect(page.locator('.nx-minimap')).toHaveCSS('backdrop-filter', 'blur(10px)');
   await page.getByRole('button', { name: 'Return to ride' }).click();
   await expect(world).toHaveAttribute('data-drive-ready', 'true');
-  await sound.click();
-  await expect(sound).toHaveAttribute('aria-pressed', 'true');
   await world.focus(); await page.keyboard.down('w');
   await expect.poll(() => world.getAttribute('data-audio-gain').then(Number)).toBeGreaterThan(.002);
   await page.keyboard.up('w');
-  await page.getByRole('button', { name: 'Events 7', exact: true }).click();
-  await expect.poll(() => page.evaluate(() => window.rideAudioContexts[0].state)).toBe('suspended');
+  await page.getByRole('button', { name: /^Events \d+$/ }).click();
+  await expect.poll(() => page.evaluate(() => window.rideAudioSources.filter(source => source.node.loop && !source.ended).length)).toBe(0);
   await page.getByRole('button', { name: 'Close event', exact: true }).click();
   await sound.click(); await expect(sound).toHaveAttribute('aria-pressed', 'false');
   await expect.poll(() => world.getAttribute('data-audio-gain').then(Number)).toBe(0);
   await page.getByRole('button', { name: 'Open menu' }).click();
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Home', exact: true }).click();
-  await expect.poll(() => page.evaluate(() => window.rideAudioContexts[0].state)).toBe('closed');
+  await expect(page).toHaveURL(/\/$/);
+  await expect.poll(() => page.evaluate(() => window.rideAudioSources.filter(source => source.node.loop && !source.ended).length)).toBe(0);
+  expect(await page.evaluate(() => window.rideAudioContexts.length)).toBe(1);
 });
 
 test('station-only travel repeats event photos, departs Station 01, and rides to another checkpoint', async ({ page }, info) => {

@@ -194,6 +194,7 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     return { index, distance };
   }
   function openStation(index: number) {
+    get().audio.current?.arrive();
     notified = index; journey = { ...journey, phase: 'stopped', station: index, motion: { ...motion, speed: 0, acceleration: 0 } }; motion = journey.motion;
     resetInput(); panStation = index; panProgress = 0; panStarted = false; bookRevealed = false;
     const cover = worldStations[index].event?.photos?.[0];
@@ -306,7 +307,6 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     if (revealStation !== null && arrival.focus > 0) focusStation = revealStation;
     stationFocus = props.reduced ? 0 : THREE.MathUtils.damp(stationFocus, revealStation === null ? 0 : arrival.focus, 6, dt);
     const visualSpeed = motion.speed * dilation;
-    props.audio.current?.update(visualSpeed / COASTER_SPEED, active && document.hasFocus() && Math.abs(visualSpeed) > .1);
     boostFocus = props.reduced ? 0 : THREE.MathUtils.damp(boostFocus, boosting ? 1 : 0, boosting ? 3.8 : 4.5, dt);
     const nextBoostStyle = boostFocus.toFixed(3);
     if (boostStyle !== nextBoostStyle) { boostStyle = nextBoostStyle; controlsRoot.style.setProperty('--nx-boost-focus', boostStyle); }
@@ -314,6 +314,9 @@ export function createEventWorld(host: HTMLDivElement, get: () => LogoWorldProps
     const showGlimpse = active && !props.reduced && Math.abs(motion.speed) > .1 && journey.phase !== 'stopped' && nextEvent.remaining > Math.max(GLIMPSE_EXIT, nextEvent.index === null ? 0 : stopDefinitions[nextEvent.index].radius);
     props.glimpses.current?.update(showGlimpse && nextEvent.index !== null ? worldStations[nextEvent.index] : null, nextEvent.remaining, dt);
     const f = sampleTrack(track, motion.distance, length, rideFrame);
+    props.audio.current?.update(visualSpeed / COASTER_SPEED, active && document.hasFocus(), {
+      boost: boosting, braking: journey.phase === 'braking' || throttle * motion.speed < -.1, slope: f.tangent.y,
+    });
     props.minimap.current?.update(minimap.project(f.point));
     const compactCamera = coarse || width <= 768 || height <= 500;
     const cinematic = cinematicCamera(visualSpeed, motion.acceleration * dilation, f.tangent.y, COASTER_SPEED, compactCamera, props.reduced, boostFocus);

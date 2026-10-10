@@ -75,10 +75,12 @@ const particleFragment = /* glsl */ `
 `;
 
 type Contour = { segments: number[]; lengths: number[]; totalLength: number };
+let savedContour: { url: string; value: Contour } | undefined;
 
 // Marching squares traces the PNG's alpha, including the holes between the
 // neural paths. No approximation of the brain or external logo model is used.
-function traceLogo(image: HTMLImageElement): Contour {
+async function traceLogo(image: HTMLImageElement): Promise<Contour> {
+  let lastYield = performance.now();
   const canvas = document.createElement('canvas');
   const scale = Math.min(1, 1024 / image.naturalWidth);
   canvas.width = Math.round(image.naturalWidth * scale);
@@ -92,6 +94,7 @@ function traceLogo(image: HTMLImageElement): Contour {
   // Find the exact bounding box using direct Uint8ClampedArray access
   let left = canvas.width, right = 0, top = canvas.height, bottom = 0;
   for (let y = 0; y < canvas.height; y++) {
+    if ((y & 31) === 0 && performance.now() - lastYield > 8) { await yieldToBrowser(); lastYield = performance.now(); }
     const rowOffset = y * canvas.width * 4;
     for (let x = 0; x < canvas.width; x++) {
       if (data[rowOffset + x * 4 + 3] < 128) continue;
@@ -109,6 +112,7 @@ function traceLogo(image: HTMLImageElement): Contour {
 
   const width4 = canvas.width * 4;
   for (let y = Math.max(0, top - 1); y <= Math.min(bottom, canvas.height - 2); y++) {
+    if ((y & 31) === 0 && performance.now() - lastYield > 8) { await yieldToBrowser(); lastYield = performance.now(); }
     const row0 = y * width4;
     const row1 = (y + 1) * width4;
     for (let x = Math.max(0, left - 1); x <= Math.min(right, canvas.width - 2); x++) {
@@ -149,7 +153,8 @@ export async function createLogoScene(host: HTMLDivElement, url: string, onError
   const source = new Image();
   source.src = url;
   await source.decode();
-  const contour = traceLogo(source);
+  const contour = savedContour?.url === url ? savedContour.value : await traceLogo(source);
+  savedContour = { url, value: contour };
   await yieldToBrowser();
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
   const geometries: THREE.BufferGeometry[] = [];

@@ -24,6 +24,15 @@
 .nx-dialog.nx-book-dialog::backdrop { background:#020905ed; backdrop-filter:none; }
 .nx-book-dialog .nx-close { position:absolute; z-index:5; display:grid; place-items:center; top:13px; right:15px; width:34px; height:34px; border-radius:50%; color:var(--book-ink); background:var(--book-paper); border:1px solid #17281f55; }
 .nx-book-dialog button { font:inherit; cursor:pointer; }
+.nx-book-dialog .station-book__sound { position:absolute; z-index:5; display:grid; place-items:center; top:8px; right:56px; width:44px; height:44px; padding:0; border:1px solid #17281f55; border-radius:50%; color:var(--book-ink); background:var(--book-paper); }
+.nx-book-dialog .station-book__masthead { padding-right:112px; }
+@media (max-width:620px), (max-height:500px) and (pointer:coarse) {
+  .nx-book-dialog:has([data-layout=mobile]) .station-book__sound { top:calc(8px + env(safe-area-inset-top)); right:calc(max(8px,env(safe-area-inset-right)) + 50px); }
+  .nx-book-dialog .station-book[data-layout=mobile] .station-book__masthead { padding-right:110px; }
+}
+@media (max-width:380px) {
+  .station-book__masthead .station-book__fit span { display:none; }
+}
 .nx-book-dialog :is(button,a,[tabindex]):focus-visible { outline:2px solid #285b3f; outline-offset:3px; }
 .station-book { height:100%; display:grid; grid-template-rows:auto minmax(0,1fr) auto; font-family:'Space Grotesk',Inter,sans-serif; }
 .station-book__masthead { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:23px 68px 20px 29px; border-bottom:2px solid var(--book-ink); font:10px var(--mono); letter-spacing:.1em; }

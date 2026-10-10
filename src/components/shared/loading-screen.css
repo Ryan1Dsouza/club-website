@@ -1,6 +1,12 @@
 ﻿.nucleus-loader {
   --loader-overscan: 1.02;
   position: fixed;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 100%;
+  max-width: none;
+  max-height: none;
   inset: 0;
   height: 100%;
   height: 100dvh;

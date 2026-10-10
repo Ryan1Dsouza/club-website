@@ -9,6 +9,7 @@ import Book from '../components/events/Book';
 import RailwayTrack from '../components/events/RailwayTrack';
 import { useCinematicScroll } from '../lib/use-cinematic-scroll';
 import './events-page.css';
+import { sfx } from '../lib/sound-effects';
 
 const loadRide = () => import('./EventRollercoaster');
 const EventRollercoaster = lazy(loadRide);
@@ -55,11 +56,12 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
     const element = dialog.current!;
     const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden'; element.showModal();
+    document.body.style.overflow = 'hidden'; element.showModal(); sfx.bookOpen();
     return () => { element.close(); document.body.style.overflow = overflow; previous?.focus({ preventScroll: true }); };
   }, [portal]);
 
   const enterRide = () => {
+    sfx.depart();
     const bounds = portalButtons.current[portal!]?.getBoundingClientRect();
     if (bounds) setOrigin({ x: (bounds.left + bounds.width / 2) / window.innerWidth * 100, y: Math.max(10, Math.min(90, (bounds.top + bounds.height / 2) / window.innerHeight * 100)) });
     lastPortal.current = portal!;

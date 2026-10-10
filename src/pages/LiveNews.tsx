@@ -63,6 +63,7 @@ export default function LiveNews() {
           <h2 id="news-feed-title">Latest updates</h2>
           <div className="live-news__filter">
             {sortOrder === 'newest' ? <ArrowDownWideNarrow size={14} aria-hidden="true" /> : <ArrowUpWideNarrow size={14} aria-hidden="true" />}
+            <span>{sortOrder === 'newest' ? 'Newest first' : 'Oldest first'}</span>
             <select value={sortOrder} onChange={e => setSortOrder(e.target.value as 'newest' | 'oldest')} aria-label="Sort order">
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>

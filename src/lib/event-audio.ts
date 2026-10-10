@@ -1,68 +1,90 @@
-/** A bounded wind bed; speed is measured as a fraction of the normal cruise speed. */
+import { audioAllowed, onAudioQuiet, prepareAudio, unlockAudio } from './audio-engine.ts';
+import { sfx } from './sound-effects.ts';
+
+/** Bounded speed envelope shared by every device and travel direction. */
 export function windEnvelope(speed: number, active: boolean) {
   const pace = Math.min(1.6, Math.abs(Number.isFinite(speed) ? speed : 0));
   return { gain: active ? .045 * Math.pow(pace / 1.6, 1.5) : 0, frequency: 220 + pace * 420 };
 }
+export type RideSoundState = { boost?: boolean; braking?: boolean; slope?: number };
 
-/** Created only by the Sound button: no downloads, microphone, or autoplay. */
+/** Shares the website output and preference; owns only the ride's continuous layers. */
 export function createRideAudio() {
-  const context = new AudioContext({ latencyHint: 'playback' });
-  const source = context.createBufferSource();
-  const buffer = context.createBuffer(1, context.sampleRate * 2, context.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-  source.buffer = buffer; source.loop = true;
-  const highpass = context.createBiquadFilter(); highpass.type = 'highpass'; highpass.frequency.value = 70;
-  const lowpass = context.createBiquadFilter(); lowpass.type = 'lowpass'; lowpass.frequency.value = 220; lowpass.Q.value = .5;
-  const volume = context.createGain(); volume.gain.value = 0;
-  source.connect(highpass).connect(lowpass).connect(volume).connect(context.destination);
-  source.start();
-  let enabled = false, disposed = false, quieting = false, lastUpdate = -1, lastGain = 0;
-  let suspension: ReturnType<typeof setTimeout> | undefined;
-  let resuming: Promise<void> | undefined;
-  const cancelSuspension = () => { clearTimeout(suspension); suspension = undefined; };
-  const resume = () => {
-    if (context.state === 'running') return Promise.resolve();
-    return resuming ??= context.resume().finally(() => { resuming = undefined; });
-  };
-  function quiet() {
-    if (disposed || quieting) return;
-    quieting = true; lastGain = 0; lastUpdate = -1;
-    volume.gain.setTargetAtTime(0, context.currentTime, .06);
-    if (suspension === undefined) suspension = setTimeout(() => {
-      suspension = undefined;
-      if (!disposed) void context.suspend().catch(() => {});
-    }, 300);
+  let enabled = true, disposed = false, lastGain = 0, lastUpdate = -Infinity;
+  let boosting = false, braking = false, moving = false;
+  let layers: ReturnType<typeof createLayers> | null = null;
+
+  function createLayers() {
+    const graph = prepareAudio();
+    if (!graph || graph.context.state !== 'running') return null;
+    const { context, output, noise } = graph;
+    const source = context.createBufferSource(); source.buffer = noise; source.loop = true;
+    const highpass = context.createBiquadFilter(); highpass.type = 'highpass'; highpass.frequency.value = 100;
+    const windFilter = context.createBiquadFilter(); windFilter.type = 'lowpass'; windFilter.Q.value = .6;
+    const wind = context.createGain(); wind.gain.value = 0;
+    source.connect(highpass).connect(windFilter).connect(wind).connect(output);
+    const railFilter = context.createBiquadFilter(); railFilter.type = 'bandpass'; railFilter.frequency.value = 95; railFilter.Q.value = .8;
+    const rail = context.createGain(); rail.gain.value = 0;
+    source.connect(railFilter).connect(rail).connect(output);
+    const boostFilter = context.createBiquadFilter(); boostFilter.type = 'bandpass'; boostFilter.Q.value = .5;
+    const boost = context.createGain(); boost.gain.value = 0;
+    source.connect(boostFilter).connect(boost).connect(output);
+    const nodes = [source, highpass, windFilter, wind, railFilter, rail, boostFilter, boost];
+    source.onended = () => nodes.forEach(node => node.disconnect());
+    source.start();
+    return { context, source, windFilter, wind, railFilter, rail, boostFilter, boost };
   }
+
+  function quiet() {
+    lastGain = 0; lastUpdate = -Infinity; boosting = braking = moving = false;
+    if (!layers) return;
+    const { context, source, wind, rail, boost } = layers;
+    for (const gain of [wind, rail, boost]) {
+      gain.gain.cancelScheduledValues(context.currentTime);
+      gain.gain.setTargetAtTime(0, context.currentTime, .02);
+    }
+    source.stop(context.currentTime + .12); layers = null;
+  }
+  const unsubscribe = onAudioQuiet(quiet);
   return {
-    get running() { return context.state === 'running'; },
+    get running() { return !!layers && layers.context.state === 'running' && audioAllowed(); },
     get gain() { return lastGain; },
     async setEnabled(value: boolean) {
       if (disposed) return;
       enabled = value;
       if (!value) { quiet(); return; }
-      quieting = false; cancelSuspension();
-      try { await resume(); } catch (error) { enabled = false; throw error; }
+      await unlockAudio();
     },
-    update(speed: number, active: boolean) {
+    update(speed: number, active: boolean, state: RideSoundState = {}) {
       if (disposed) return;
-      if (!enabled || !active) { quiet(); return; }
-      quieting = false; cancelSuspension();
-      if (context.state !== 'running') { void resume().catch(() => { enabled = false; }); return; }
+      if (!enabled || !active || !audioAllowed()) { quiet(); return; }
+      const pace = Math.min(2.6, Math.abs(Number.isFinite(speed) ? speed : 0));
+      if (state.boost && !boosting) sfx.boost();
+      if (state.braking && !braking && pace > .12) sfx.brake();
+      if (pace > .06 && !moving && !state.boost) sfx.depart();
+      const changed = boosting !== !!state.boost || braking !== !!state.braking;
+      boosting = !!state.boost; braking = !!state.braking; moving = pace > .06;
+      if (pace < .015 && !boosting) { if (layers) quiet(); return; }
+      layers ??= createLayers();
+      if (!layers) return;
+      const { context, wind, windFilter, rail, railFilter, boost, boostFilter } = layers;
       const now = context.currentTime;
-      if (now - lastUpdate < .1) return; // Ten audio updates per second, independent of frame rate.
+      if (!changed && now - lastUpdate < 1 / 30) return;
       lastUpdate = now;
-      const envelope = windEnvelope(speed, true); lastGain = envelope.gain;
-      volume.gain.setTargetAtTime(envelope.gain, now, .22);
-      lowpass.frequency.setTargetAtTime(envelope.frequency, now, .3);
+      const envelope = windEnvelope(pace, true);
+      const slope = Number.isFinite(state.slope) ? Math.max(-1, Math.min(1, state.slope!)) : 0;
+      lastGain = envelope.gain;
+      // Continuous interpolation follows acceleration without audible stepping.
+      wind.gain.setTargetAtTime(envelope.gain * 3, now, .045);
+      windFilter.frequency.setTargetAtTime(450 + pace * 1050 + Math.max(0, -slope) * 350, now, .06);
+      rail.gain.setTargetAtTime(Math.min(.1, pace * .055), now, .04);
+      railFilter.frequency.setTargetAtTime(75 + pace * 95, now, .05);
+      boost.gain.setTargetAtTime(boosting ? Math.min(.11, .03 + pace * .035) : 0, now, .04);
+      boostFilter.frequency.setTargetAtTime(1100 + pace * 850, now, .05);
     },
+    arrive() { if (enabled && !disposed) { quiet(); sfx.arrival(); } },
     quiet,
-    dispose() {
-      if (disposed) return;
-      disposed = true; cancelSuspension(); source.stop();
-      source.disconnect(); highpass.disconnect(); lowpass.disconnect(); volume.disconnect();
-      void context.close().catch(() => {});
-    },
+    dispose() { if (disposed) return; quiet(); disposed = true; unsubscribe(); },
   };
 }
 

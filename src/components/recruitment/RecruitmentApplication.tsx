@@ -3,6 +3,7 @@ import { ArrowUpRight, Check, LoaderCircle, LogOut, Lock } from 'lucide-react';
 import { api, ApiError } from '../../api';
 import type { SiteData, SiteSettings } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { sfx } from '../../lib/sound-effects';
 import './recruitment.css';
 
 export default function RecruitmentApplication({ initialSettings }: { initialSettings: SiteSettings }) {
@@ -126,9 +127,9 @@ export default function RecruitmentApplication({ initialSettings }: { initialSet
         .single();
         
       if (dbError) throw dbError;
-      setReference(data.id);
+      setReference(data.id); sfx.success();
     } catch (failure: any) {
-      setError(failure.message || 'Failed to submit application');
+      setError(failure.message || 'Failed to submit application'); sfx.error();
     } finally { setBusy(false); }
   }
 

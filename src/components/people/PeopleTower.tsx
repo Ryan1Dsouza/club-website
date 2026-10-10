@@ -93,7 +93,7 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
         </p>
         <div className="people-tower__hud" hidden={status !== 'ready'}>
           <label className="people-tower__picker"><span className="sr-only">Jump to a member</span><select value={active < 0 ? '' : active} onChange={event => revealMember(Number(event.target.value))}><option value="" disabled>Meet the members</option>{sorted.map((member, index) => <option key={member.id} value={index}>{member.name}</option>)}</select></label>
-          <button type="button" className="people-tower__rebuild" aria-label="Rebuild tower" onClick={() => controller.current?.rebuild()}><RotateCcw size={14} /><span>Rebuild tower</span></button>
+          <button type="button" className="people-tower__rebuild" data-sound="none" aria-label="Rebuild tower" onClick={() => controller.current?.rebuild()}><RotateCcw size={14} /><span>Rebuild tower</span></button>
         </div>
       </div>
     </div>

@@ -61,6 +61,14 @@
   transition: background .25s, border-color .35s;
 }
 
+.site-sound-toggle {
+  display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px;
+  padding: 0; border: 1px solid currentColor; border-radius: 50%; background: transparent; color: inherit;
+  opacity: .8; touch-action: manipulation;
+}
+.site-sound-toggle:hover { opacity: 1; background: rgb(0 0 0 / .08); }
+.site-sound-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
 .morph-nav__toggle:hover {
   background: rgb(0 0 0 / .08);
 }
@@ -345,7 +353,7 @@
   }
 
   .morph-nav__links {
-    font-size: min(10vw, calc((100vw - var(--menu-gutter) * 2) / 7.25), 8dvh, 64px);
+    font-size: min(11vw, calc((100vw - var(--menu-gutter) * 2) / 10), 8dvh, 64px);
     gap: .14em;
   }
 

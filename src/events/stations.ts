@@ -1,9 +1,9 @@
 /** Archive order; chapters beyond the seven fixed platforms receive another safe stop. */
 export const WORKSHOP_STATIONS = [
   { id: 'inauguration', title: 'Inauguration', folders: ['inauguration'] },
+  { id: 'linkedin', title: 'LinkedIn', folders: ['linkedin'] },
   { id: 'dev', title: 'Dev', folders: ['dev'] },
   { id: 'khoj', title: 'Khoj', folders: ['khoj'] },
-  { id: 'linkedin', title: 'LinkedIn', folders: ['linkedin'] },
   { id: 'n8n', title: 'n8n', folders: ['n8n'] },
   { id: 'noesis', title: 'Noesis', folders: ['noesis'] },
   { id: 'unlocked', title: 'Unlocked', folders: ['unlocked'] },

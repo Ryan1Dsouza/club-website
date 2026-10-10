@@ -2,6 +2,7 @@ import { useCallback, useLayoutEffect, useRef, useState, type RefObject } from '
 import { useReducedMotion } from 'framer-motion';
 import { flushSync } from 'react-dom';
 import { createCinematicLenis } from '../lib/cinematic-lenis';
+import { createPageTurnSound } from '../lib/interaction-sounds';
 
 export const BOOK_SCROLL_STEP = 420;
 export const BOOK_TURN_DURATION = .52;
@@ -43,10 +44,12 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
     let touchY = 0, touchStartY = 0, touchId: number | null = null, pulled = false;
     let touchStory: HTMLElement | null = null;
     let reading = false, storyVelocity = 0, touchTime = 0;
+    const soundTurn = createPageTurnSound(current.current);
     const update = () => {
       const raw = clamp(Number(lenis.scroll) / BOOK_SCROLL_STEP);
       // Keep the leaf and its underlying photo on the same side of a boundary.
       const value = Math.abs(raw - Math.round(raw)) < .0001 ? Math.round(raw) : raw;
+      soundTurn(value);
       current.current = value;
       const next = phase(value);
       // Commit the photo, leaf visibility and angle in the SAME animation frame.
@@ -65,7 +68,9 @@ export function useBookScroll(wrapper: RefObject<HTMLDivElement | null>, content
     };
     const tick = (time: number) => {
       frame = 0;
-      const elapsed = last ? Math.min(64, time - last) : 1000 / 60;
+      // Lenis integrates elapsed time analytically. Dropping time on a busy
+      // frame stretched a half-second turn into slow motion on mobile.
+      const elapsed = last ? Math.min(250, time - last) : 1000 / 60;
       clock += elapsed; last = time;
       if (touchPending) flushTouch();
       lenis.raf(clock);

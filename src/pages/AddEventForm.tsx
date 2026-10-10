@@ -3,6 +3,7 @@ import { ArrowRight, FolderPlus } from 'lucide-react';
 import { api } from '../api';
 import { isEventPhoto, prepareEventPhotos } from '../lib/event-photos';
 import type { ClubEvent } from '../types';
+import { sfx } from '../lib/sound-effects';
 
 type Session = { email: string; csrf: string };
 export default function AddEventForm({ onPublished, onBusy, stationNumber }: { onPublished: (event: ClubEvent) => void; onBusy: (busy: boolean) => void; stationNumber: string }) {
@@ -27,9 +28,9 @@ export default function AddEventForm({ onPublished, onBusy, stationNumber }: { o
         category: String(fields.get('category')).trim(), location: String(fields.get('location')).trim(), albumUrl: String(fields.get('albumUrl') || '').trim(), registrationUrl: String(fields.get('registrationUrl') || '').trim(), published: true };
       setProgress('Publishing event and placing its station…');
       const saved = await api<ClubEvent>(`/admin/experience-events/${id.current}`, { method: 'PUT', headers: { 'X-CSRF-Token': session.csrf }, body: JSON.stringify({ event: details, photos }) });
-      onPublished(saved);
+      sfx.success(); onPublished(saved);
     } catch (error) {
-      const message = (error as Error).message; setError(message);
+      const message = (error as Error).message; setError(message); sfx.error();
       if (/sign in|session/i.test(message)) setSession(null);
     } finally { working(false); setProgress(''); }
   }

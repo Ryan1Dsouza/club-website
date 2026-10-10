@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo, type CSSProperties } from 'react';
 import gsap from 'gsap';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { sfx } from '../../lib/sound-effects';
 import './card-fan-carousel.css';
 
 export interface CardItem {
@@ -83,6 +84,7 @@ export default function SocialCards({ cards, activeIndex, onActiveIndexChange, o
   const cycle = useCallback((direction: 'left' | 'right', automatic = false) => {
     // A deliberate selection can interrupt autoplay, including a frozen frame.
     if (totalCards < 2 || (isAnimating.current && (automatic || motion.current?.kind !== 'auto'))) return;
+    if (!automatic) sfx.cardFan();
     directionRef.current = direction;
     const next = (centerIndex + (direction === 'right' ? 1 : -1) + totalCards) % totalCards;
     requestedMotion.current = { index: next, kind: automatic ? 'auto' : 'manual' };
@@ -219,9 +221,9 @@ export default function SocialCards({ cards, activeIndex, onActiveIndexChange, o
       </div>
     </div>
     <div className="fan-controls">
-      <button className="fan-arrow" onClick={() => cycle('left')} disabled={totalCards < 2} aria-label="Previous team member"><ArrowLeft size={18} /></button>
+      <button className="fan-arrow" data-sound="none" onClick={() => cycle('left')} disabled={totalCards < 2} aria-label="Previous team member"><ArrowLeft size={18} /></button>
       <span className="fan-counter" aria-live={playing ? 'off' : 'polite'}><strong>{String(centerIndex + 1).padStart(2, '0')}</strong><span>/ {String(totalCards).padStart(2, '0')}</span></span>
-      <button className="fan-arrow" onClick={() => cycle('right')} disabled={totalCards < 2} aria-label="Next team member"><ArrowRight size={18} /></button>
+      <button className="fan-arrow" data-sound="none" onClick={() => cycle('right')} disabled={totalCards < 2} aria-label="Next team member"><ArrowRight size={18} /></button>
     </div>
     <p className="fan-hint">Choose a card to meet the person behind it.</p>
   </section>;
