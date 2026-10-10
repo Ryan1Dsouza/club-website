@@ -5,9 +5,9 @@ import { createCinematicLenis } from '../lib/cinematic-lenis';
 import { createPageTurnSound } from '../lib/interaction-sounds';
 
 export const BOOK_SCROLL_STEP = 420;
-export const BOOK_TURN_DURATION = .52;
-const turnEasing = (t: number) => 1 - Math.pow(1 - t, 3);
-const WHEEL_LERP = .14;
+export const BOOK_TURN_DURATION = .85;
+const turnEasing = (t: number) => 1 - Math.pow(1 - t, 4);
+const WHEEL_LERP = .08;
 const WHEEL_IDLE_MS = 140;
 // React only needs a new tree at a leaf boundary or when a turn starts/ends.
 const phase = (value: number) => `${Math.floor(value)}:${value !== Math.floor(value)}`;
