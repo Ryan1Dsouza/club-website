@@ -81,7 +81,8 @@ export function createPageTurnSound(initial = 0, play = sfx.pageTurn) {
     distance = direction === travelDirection ? distance + Math.abs(delta) : Math.abs(delta);
     travelDirection = direction;
     const leaf = String(direction > 0 ? Math.floor(previous + .0001) : Math.ceil(previous - .0001) - 1);
-    if (distance >= .012 && (leaf !== lastLeaf || direction !== lastDirection)) {
+    if (Math.abs(value - Math.round(value)) < .0001) lastLeaf = '';
+    if (distance >= .012 && leaf !== lastLeaf) {
       play(direction); lastLeaf = leaf; lastDirection = direction;
     }
     previous = value;

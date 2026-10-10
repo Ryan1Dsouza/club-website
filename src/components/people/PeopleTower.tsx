@@ -82,7 +82,7 @@ export default function PeopleTower({ members, onStatusChange }: { members: Memb
       {status === 'loading' ? 'Building the interactive tower...' : status === 'still' ? 'The tower is paused for reduced motion. Go back to the team to meet everyone.' : 'The tower could not start on this device. Go back to the team to meet everyone.'}
     </p>}
     <div className="people-tower" ref={story} style={{
-      '--tower-length': `${sorted.length * 55 + 120}svh`,
+      '--tower-length': `${sorted.length * 85 + 120}svh`,
     } as CSSProperties}>
       <div className="people-tower__stage">
         <div className="people-tower__world" ref={host} aria-hidden="true" />

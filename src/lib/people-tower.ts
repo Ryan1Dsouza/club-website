@@ -293,7 +293,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
         // speculative landing here gets undone by sampleScroll on the next
         // frame, briefly flashing the open profile during extraction.
         // Smooth native wheel/touch samples with a short, frame-independent response.
-        progress = advanceTowerScroll(scrollMotion, target, updateElapsed, 32);
+        progress = advanceTowerScroll(scrollMotion, target, updateElapsed, 12);
         const state = towerFrame(progress, members.length);
         // The desktop intro orbits; readable profiles and settled mobile scenes rest.
         const idleOrbit = detail === 2 && state.index < 0 && state.completed === 0 && state.outro === 0;
@@ -344,7 +344,7 @@ export async function createPeopleTower(host: HTMLElement, section: HTMLElement,
       const nextWidth = Math.max(1, host.clientWidth), nextHeight = Math.max(1, host.clientHeight);
       const header = parseFloat(getComputedStyle(stage).top) || 0;
       start = pinnedViewport.matches ? 0 : section.getBoundingClientRect().top + getScrollPosition() - header;
-      range = pinnedViewport.matches ? nextHeight * (members.length * .55 + .2) : Math.max(1, section.offsetHeight - stage.offsetHeight);
+      range = pinnedViewport.matches ? nextHeight * (members.length * .85 + .2) : Math.max(1, section.offsetHeight - stage.offsetHeight);
       device.coarsePointer = coarsePointer.matches;
       quality = towerQuality(nextWidth, nextHeight, window.devicePixelRatio, device);
       detail = Math.min(detail, quality.detail, adaptive.detail) as TowerDetail;
