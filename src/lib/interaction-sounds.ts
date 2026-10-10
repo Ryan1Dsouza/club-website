@@ -70,20 +70,16 @@ export function installInteractionSounds() {
   };
 }
 
-/** One rustle when a leaf starts moving, including reversals, without wheel-packet spam. */
 export function createPageTurnSound(initial = 0, play = sfx.pageTurn) {
-  let previous = initial, lastLeaf = '', lastDirection = 0, travelDirection = 0, distance = 0;
-  return (value: number) => {
-    const delta = value - previous;
-    if (Math.abs(delta) < .0001) return;
-    const direction = Math.sign(delta);
-    distance = direction === travelDirection ? distance + Math.abs(delta) : Math.abs(delta);
-    travelDirection = direction;
-    const leaf = String(direction > 0 ? Math.floor(previous + .0001) : Math.ceil(previous - .0001) - 1);
-    if (Math.abs(value - Math.round(value)) < .0001) lastLeaf = '';
-    if (distance >= .012 && leaf !== lastLeaf) {
-      play(direction); lastLeaf = leaf; lastDirection = direction;
+  let lastLeaf = Math.round(initial);
+  return (current: number) => {
+    const leaf = Math.round(current);
+    const fraction = Math.abs(current - leaf);
+    if (fraction < 0.02 && leaf !== lastLeaf) {
+      play(current > lastLeaf ? 1 : -1);
+      lastLeaf = leaf;
+    } else if (fraction > 0.15) {
+      lastLeaf = -1;
     }
-    previous = value;
   };
 }
