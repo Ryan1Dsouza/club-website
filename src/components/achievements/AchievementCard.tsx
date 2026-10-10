@@ -47,6 +47,9 @@ export function AchievementCard({ profile, index, totalProfiles, isPreview, acti
     <motion.article 
       className="ach-record 3d-card-wrapper" 
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
