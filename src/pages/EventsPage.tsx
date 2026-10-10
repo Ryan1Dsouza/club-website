@@ -56,7 +56,7 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
     const element = dialog.current!;
     const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden'; element.showModal(); sfx.bookOpen();
+    document.body.style.overflow = 'hidden'; element.showModal();
     return () => { element.close(); document.body.style.overflow = overflow; previous?.focus({ preventScroll: true }); };
   }, [portal]);
 

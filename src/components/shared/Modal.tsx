@@ -4,14 +4,14 @@ import { X } from 'lucide-react';
 import { sfx } from '../../lib/sound-effects';
 
 export default function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
-  const close = () => { sfx.bookClose(); onClose(); };
+  const close = () => { onClose(); };
   const dialog = useRef<HTMLDialogElement>(null), opened = useRef(false);
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     const element = dialog.current!;
     const overflow = document.body.style.overflow;
     element.showModal(); document.body.style.overflow = 'hidden';
-    if (!opened.current) { opened.current = true; sfx.bookOpen(); }
+    if (!opened.current) { opened.current = true; }
     const keepFocus = (event: KeyboardEvent) => {
       if (event.key !== 'Tab') return;
       const controls = Array.from(element.querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'))
