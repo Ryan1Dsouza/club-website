@@ -1,4 +1,4 @@
-﻿import type { Member } from '../types';
+import type { Member } from '../types';
 
 export const achievementCategories = ['All', 'Hackathons', 'Open source', 'Competitive programming', 'Research'] as const;
 export type AchievementCategory = Exclude<typeof achievementCategories[number], 'All'>;
@@ -13,6 +13,7 @@ export interface Achievement {
   memberIds: string[];
   href?: string;
   sample?: boolean;
+  photos?: string[];
 }
 
 export interface AchievementProfile { member: Member; achievements: Achievement[]; }

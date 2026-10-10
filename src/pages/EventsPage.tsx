@@ -100,18 +100,22 @@ export default function EventsPage({ events, onPublished }: { events: ClubEvent[
           </button>
         </div>
       </div>
-      <footer className="events-footer"><span>Open a story. Relive a moment.</span><span>Made of many minds.</span></footer>
+      <footer className="events-footer"></footer>
     </div> : <>
       <button className="events-return" onClick={returnToEvents}><ArrowLeft size={15} />Back to Events</button>
       <Suspense fallback={<div className="events-opening" role="status">Opening the Nucleus Ride<span /></div>}><EventRollercoaster events={events} onPublished={onPublished} onReady={() => setRideReady(true)} /></Suspense>
     </>}
     {station && <Book key={station.id} workshopFolder={station.workshop ?? station.id} imageList={station.event?.photos ?? []} event={station.event} title={station.name} stationNumber={station.number} onClose={() => setSelected(null)} />}
     {portal !== null && <dialog ref={dialog} className="events-portal-dialog" aria-labelledby="portal-title" onCancel={event => { event.preventDefault(); setPortal(null); }}>
-      <button className="events-portal-dialog__close" aria-label="Close ride invitation" onClick={() => setPortal(null)}><X size={18} /></button>
-      <Orbit size={38} aria-hidden="true" /><p className="events-eyebrow">A different perspective</p>
-      <h2 id="portal-title">Do you want to hop into the Nucleus Ride?</h2>
-      <p>Seven stations. One journey through Nucleus.</p>
-      <div className="events-portal-dialog__actions"><button onClick={enterRide}>Yes, Let's Go<ArrowUpRight size={16} /></button><button onClick={() => setPortal(null)}>Maybe Later</button></div>
+      <div className="container-inner">
+        <div className="content">
+          <h2 id="portal-title">Do you want to hop into the Nucleus Ride?</h2>
+        </div>
+        <div className="buttons">
+          <button className="confirm" type="button" onClick={enterRide}>Yes, Let's Go<ArrowUpRight size={16} /></button>
+          <button className="cancel" type="button" onClick={() => setPortal(null)}>Maybe Later</button>
+        </div>
+      </div>
     </dialog>}
     {flying && <div className={`events-flight${rideReady && flightElapsed ? ' events-flight--ready' : ''}`} role="status" aria-label="Entering the Nucleus Ride" style={{ '--portal-x': `${origin.x}%`, '--portal-y': `${origin.y}%` } as CSSProperties}>
       <div className="events-flight__flash" />

@@ -1,17 +1,18 @@
 import { useState, useEffect, useCallback, type FormEvent } from 'react'
-import { Plus, Pencil, Trash2, Trophy, Search, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, Trophy, Search, X, UploadCloud } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { ContentDeleteDialog } from '../components/ContentDeleteDialog'
 import {
   listAchievements,
   createAchievement,
   updateAchievement,
-  deleteAchievement,
+  deleteAchievement, uploadAchievementPhoto,
   type Achievement,
 } from '../lib/achievements'
 import { describeError } from '../lib/news'
 import { listMembers } from '../lib/members'
 import type { TeamMember } from '../lib/database.types'
+import { useAuth } from '../auth/AuthContext'
 
 type AchievementInput = Omit<Achievement, 'id' | 'created_at'>
 type AchievementEditor = { achievement: AchievementInput & { id?: string }; members: string[] }
@@ -28,6 +29,8 @@ export function AchievementsPage() {
   const [actionError, setActionError] = useState('')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const { user } = useAuth()
+  const [newPhotos, setNewPhotos] = useState<File[]>([])
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -52,6 +55,7 @@ export function AchievementsPage() {
 
   const openEditor = (item?: AchievementEditor) => {
     setActionError('')
+    setNewPhotos([])
     setEditor(
       item ?? {
         achievement: {
@@ -61,6 +65,7 @@ export function AchievementsPage() {
           year: String(new Date().getFullYear()),
           description: '',
           href: '',
+          photos: [],
         },
         members: [],
       },
@@ -81,9 +86,17 @@ export function AchievementsPage() {
         year: achievement.year.trim(),
         description: achievement.description.trim(),
         href: achievement.href?.trim() || null,
+        photos: achievement.photos || [],
       }
       if (!input.title || !input.result || !input.year)
         throw new Error('Enter a title, result, and year.')
+      
+      const uploadedUrls: string[] = []
+      for (const file of newPhotos) {
+        const url = await uploadAchievementPhoto(file, user!.id)
+        uploadedUrls.push(url)
+      }
+      input.photos = [...(input.photos || []), ...uploadedUrls]
       if (achievement.id) await updateAchievement(achievement.id, input, members)
       else await createAchievement(input, members)
       setEditor(null)
@@ -403,6 +416,52 @@ export function AchievementsPage() {
                   }
                 />
               </div>
+                            <fieldset className="member-picker">
+                <legend>Photos</legend>
+                <div className="event-photo-grid">
+                  {editor.achievement.photos?.map((url, i) => (
+                    <div key={url} className="event-photo-thumb">
+                      <img src={url} alt="Achievement" />
+                      <button
+                        type="button"
+                        aria-label="Remove photo"
+                        onClick={() => {
+                          const p = [...editor.achievement.photos!];
+                          p.splice(i, 1);
+                          setEditor({ ...editor, achievement: { ...editor.achievement, photos: p }});
+                        }}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {newPhotos.map((f, i) => (
+                    <div key={f.name + i} className="event-photo-thumb">
+                      <img src={URL.createObjectURL(f)} alt="New upload" />
+                      <button
+                        type="button"
+                        aria-label="Remove new photo"
+                        onClick={() => setNewPhotos(newPhotos.filter((_, index) => index !== i))}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="upload-zone event-photo-upload" style={{ minHeight: '80px', flex: 1, padding: '10px' }}>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/png, image/webp, image/avif, image/jpeg"
+                      onChange={e => {
+                        if (e.target.files) setNewPhotos([...newPhotos, ...Array.from(e.target.files)]);
+                      }}
+                      disabled={saving}
+                    />
+                    <UploadCloud size={20} style={{margin: '0 auto'}} />
+                    <span style={{fontSize: '12px'}}>Add photos</span>
+                  </label>
+                </div>
+              </fieldset>
               <fieldset className="member-picker">
                 <legend>
                   Team members <span>{editor.members.length} selected</span>

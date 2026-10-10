@@ -91,14 +91,14 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
   // Reuse the same content nodes throughout a gesture. Only leaf transforms change per frame.
   const pages = useMemo(() => {
     const story = (duplicate = false) => <section className="station-book__story" data-book-scroll ref={element => { if (element) element.scrollTop = storyOffset.current; }} onScroll={duplicate ? undefined : event => { storyOffset.current = event.currentTarget.scrollTop; }} tabIndex={duplicate ? -1 : 0} role={duplicate ? undefined : 'region'} aria-label={duplicate ? undefined : 'Event story'}>
-      <span className="station-book__eyebrow">{event?.category || 'Workshop'} / Issue {stationNumber}</span>
+      <span className="station-book__eyebrow" style={{ display: 'none' }}></span>
       <div className="station-book__title" aria-hidden="true">{name}</div>
       <div className="station-book__copy">
         <p>{event?.description || workshopStory(name)}</p>
         <div className="station-book__details"><span><CalendarDays size={14} />{eventDate(event?.startsAt)}</span>{event?.location && <span><MapPin size={14} />{event.location}</span>}</div>
         {!isMobile && <p className="station-book__highlights"><b>Key highlights</b><br />Ideas shared. Skills explored. Connections made.</p>}
       </div>
-      <span className="station-book__byline">Made of many minds. / SJEC</span>
+
     </section>;
     const photo = (index: number, duplicate = false) => {
       const item = imageList[index];
@@ -140,10 +140,10 @@ export default function Book({ workshopFolder, imageList, event, title, stationN
       if (delta) { event.preventDefault(); event.stopPropagation(); turn(delta); }
     }}>
       <header className="station-book__masthead">
-        <span>NUCLEUS <b>FIELD NOTES</b></span>
+        <span></span>
         {isMobile && page > 0 ? <button type="button" className="station-book__fit" aria-label="Fit full photo" onClick={() => setFitPhoto(value => !value)} aria-pressed={fitPhoto}>
           <Scan size={18} /><span>Fit full photo</span>
-        </button> : <span>STATION / {stationNumber}</span>}
+        </button> : <span></span>}
       </header>
       <h2 className="sr-only">{name}</h2>
       <div className="station-book__scroller" ref={wrapper}>

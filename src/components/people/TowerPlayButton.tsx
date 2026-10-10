@@ -31,13 +31,13 @@ export default function TowerPlayButton({ disabled, paused, onClick }: { disable
     aria-labelledby="people-tower-button-title" aria-describedby="people-tower-button-description"
     data-animating={visible && !hidden && !paused && !disabled}>
     <span className="people-tower-button__copy">
-      <span className="people-tower-button__eyebrow"><span /> Meet the team. Make your move.</span>
+
       <span className="people-tower-button__title">Your <em>move.</em></span>
       <span id="people-tower-button-description" className="people-tower-button__description">Pull a block. Meet a mind.<br />Get to know the team, one piece at a time.</span>
       <span className="people-tower-button__cta"><span id="people-tower-button-title">Play Interactive Tower</span><span className="people-tower-button__arrow"><ArrowUpRight size={18} strokeWidth={1.8} /></span></span>
     </span>
     <span className="jenga-preview" aria-hidden="true">
-      <span className="jenga-preview__caption">THE NUCLEUS TOWER <span>PULL / PLAY</span></span>
+
       <span className="jenga-preview__ground" />
       <span className="jenga-preview__stack">
         <span className="jenga-preview__upper">
@@ -45,7 +45,7 @@ export default function TowerPlayButton({ disabled, paused, onClick }: { disable
         </span>
         {[0, 1, 2].map(level => row(level))}
       </span>
-      <span className="jenga-preview__hint">ONE BLOCK. YOUR NEXT CONNECTION.</span>
+
     </span>
   </button>;
 }

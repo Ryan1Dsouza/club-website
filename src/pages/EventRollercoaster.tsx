@@ -173,8 +173,8 @@ export default function EventRollercoaster({ events, onPublished, onReady }: { e
     <div className="nx-vignette" aria-hidden="true" />
     <div className="nx-boost-focus" aria-hidden="true"><svg viewBox="0 0 1000 700" preserveAspectRatio="none"><path d="M-80 10 280 240 M60-40 330 220 M-70 220 250 290 M-60 540 280 420 M70 740 330 450 M250 760 400 480 M1080 10 720 240 M940-40 670 220 M1070 220 750 290 M1060 540 720 420 M930 740 670 450 M750 760 600 480" /></svg></div>
     {!compactView && <RideGlimpses ref={glimpses} />}
-    <div className="nx-topbar"><div className="nx-ride-caption"><span>THE LOGO LOOP</span><small>Six passages. One endless journey.</small></div>
-    <div className="nx-event-actions"><button onClick={() => { input.current = { x: 0, y: 0 }; setListing(true); }}>Events <span>{stations.length}</span></button><button onClick={() => { input.current = { x: 0, y: 0 }; setAdding(true); }}><Plus size={15} />Add Event</button>
+    <div className="nx-topbar">
+    <div className="nx-event-actions"><button onClick={() => { input.current = { x: 0, y: 0 }; setListing(true); }}>Events <span>{stations.length}</span></button>
       {!failed && <SoundToggle className="nx-sound-button" label />}
     </div>
     </div>
@@ -185,7 +185,7 @@ export default function EventRollercoaster({ events, onPublished, onReady }: { e
     {recovering && <div className="nx-loading" role="status"><span /><span className="nx-sr-only">Reconnecting the ride. Your place is saved.</span></div>}
     {!failed && <div className="nx-controls" aria-label="Ride controls">
       {touchControls && mode === 'explore' && <Joystick input={input} disabled={!ready || paused} onFocus={focusWorld} />}
-      {!touchControls && <p className="nx-keyboard-hint">{mode === 'overview' ? 'Your journey starts at any checkpoint' : 'W / D forward · S / A reverse'}<br /><span>{mode === 'overview' ? 'Select a station, then drive at your own pace' : 'Drag to look · Release to coast'}</span></p>}
+      {!touchControls && mode !== 'overview' && <p className="nx-keyboard-hint">{'W / D forward · S / A reverse'}<br /><span>{'Drag to look · Release to coast'}</span></p>}
       <div className="nx-ride-actions">{mode === 'explore' && <BoostControl input={boostInput} active={boosting} disabled={!ready || paused} touch={touchControls} onFocus={focusWorld} />}
       <button className="nx-map-button" onClick={toggleMap} disabled={!ready} aria-pressed={mode === 'overview'} aria-label={mode === 'overview' ? 'Return to ride' : 'Open holographic map'}>
         {mode === 'overview' ? <Route size={17} /> : <Layers3 size={17} />}<span>{mode === 'overview' ? 'Ride' : 'Map'}</span>

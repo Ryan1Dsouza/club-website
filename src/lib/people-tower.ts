@@ -15,7 +15,7 @@ function makeProfile() {
   const element = document.createElement('div');
   element.className = 'tower-profile';
   // Member values are always assigned with textContent.
-  element.innerHTML = '<div class="tower-profile__meta"><span>NUCLEUS / SJEC</span><span data-profile-index></span></div><div class="tower-profile__monogram"></div><div class="tower-profile__photo-fade"></div><span class="tower-profile__cross">+</span><div class="tower-profile__copy"><p class="tower-profile__role"></p><div class="tower-profile__name"><span></span><span></span></div></div><div class="tower-profile__footer"><span>The people / Nucleus</span><span>Keep scrolling ↗</span></div>';
+  element.innerHTML = '<div class="tower-profile__meta"><span></span><span data-profile-index></span></div><div class="tower-profile__monogram"></div><div class="tower-profile__photo-fade"></div><span class="tower-profile__cross">+</span><div class="tower-profile__copy"><p class="tower-profile__role"></p><div class="tower-profile__name"><span></span><span></span></div></div><div class="tower-profile__footer"><span></span><span></span></div>';
   return element;
 }
 

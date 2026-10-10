@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback, type FormEvent } from 'react'
-import { Plus, Pencil, Trash2, Newspaper, Search, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, Newspaper, Search, X, UploadCloud } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { ContentDeleteDialog } from '../components/ContentDeleteDialog'
+import { useAuth } from '../auth/AuthContext'
 import {
   listNews,
   createNews,
   updateNews,
   deleteNews,
   describeError,
+  uploadNewsPhoto,
   type LiveNews,
 } from '../lib/news'
 
@@ -24,6 +26,11 @@ export function LiveNewsPage() {
   const [actionError, setActionError] = useState('')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const { user } = useAuth()
+  
+  const [newPhotos, setNewPhotos] = useState<{ file: File; preview: string }[]>([])
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([])
+  const [photosToDelete, setPhotosToDelete] = useState<string[]>([])
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -44,19 +51,47 @@ export function LiveNewsPage() {
   const openEditor = (item?: LiveNews) => {
     setActionError('')
     setEditor(item ?? { title: '', description: '', image_url: '', date: '' })
+    
+    let urls: string[] = []
+    if (item?.image_url) {
+      try {
+        const parsed = JSON.parse(item.image_url)
+        if (Array.isArray(parsed)) urls = parsed
+        else urls = [item.image_url]
+      } catch {
+        urls = [item.image_url]
+      }
+    }
+    setExistingPhotos(urls)
+    setNewPhotos([])
+    setPhotosToDelete([])
+  }
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    const incoming = Array.from(e.target.files).map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }))
+    setNewPhotos((prev) => [...prev, ...incoming])
   }
 
   const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!editor || saving) return
+    if (!editor || saving || !user) return
     setSaving(true)
     setActionError('')
     try {
+      const finalUrls = existingPhotos.filter((p) => !photosToDelete.includes(p))
+      for (const { file } of newPhotos) {
+        finalUrls.push(await uploadNewsPhoto(file, user.id))
+      }
+
       const input: NewsInput = {
         title: editor.title.trim(),
         description: editor.description.trim(),
         date: editor.date?.trim() || null,
-        image_url: editor.image_url?.trim() || null,
+        image_url: finalUrls.length > 0 ? JSON.stringify(finalUrls) : null,
       }
       if (!input.title || !input.description) throw new Error('Enter a title and description.')
       if (editor.id) await updateNews(editor.id, input)
@@ -283,18 +318,54 @@ export function LiveNewsPage() {
                   Shown as entered on the website.
                 </p>
               </div>
-              <div className="form-group">
-                <label htmlFor="news-image">
-                  Image URL <span>Optional</span>
-                </label>
-                <input
-                  id="news-image"
-                  name="image_url"
-                  type="url"
-                  value={editor.image_url || ''}
-                  onChange={(e) => setEditor({ ...editor, image_url: e.target.value })}
-                />
-              </div>
+              <fieldset className="event-photo-field">
+                <legend>
+                  News photos <span className="optional">Optional</span>
+                </legend>
+                <div className="event-photo-grid">
+                  {existingPhotos
+                    .filter((p) => !photosToDelete.includes(p))
+                    .map((photoUrl, i) => (
+                      <div key={'ext' + i} className="event-photo">
+                        <img src={photoUrl} alt="" />
+                        <button
+                          type="button"
+                          onClick={() => setPhotosToDelete((prev) => [...prev, photoUrl])}
+                          className="icon-button danger-hover"
+                          aria-label="Remove photo"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  {newPhotos.map((photo, i) => (
+                    <div key={'new' + i} className="event-photo">
+                      <img src={photo.preview} alt="" />
+                      <button
+                        type="button"
+                        onClick={() => setNewPhotos((prev) => prev.filter((_, idx) => idx !== i))}
+                        className="icon-button danger-hover"
+                        aria-label="Remove photo"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+
+                  <label className="upload-zone event-photo-upload">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/png, image/webp, image/avif"
+                      onChange={handlePhotoSelect}
+                      aria-label="Upload photos"
+                      disabled={saving}
+                    />
+                    <UploadCloud size={24} />
+                    <span>Upload photos</span>
+                  </label>
+                </div>
+              </fieldset>
             </fieldset>
             <div className="form-actions">
               <button

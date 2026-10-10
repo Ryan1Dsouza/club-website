@@ -60,7 +60,7 @@ export default function LiveNews() {
 
       <section className="live-news__feed" aria-labelledby="news-feed-title" aria-busy={state.status === 'loading'}>
         <div className="live-news__feed-heading">
-          <h2 id="news-feed-title">Latest updates</h2>
+          <h2 id="news-feed-title">{sortOrder === 'newest' ? 'Latest updates' : 'Oldest updates'}</h2>
           <div className="live-news__filter">
             {sortOrder === 'newest' ? <ArrowDownWideNarrow size={14} aria-hidden="true" /> : <ArrowUpWideNarrow size={14} aria-hidden="true" />}
             <span>{sortOrder === 'newest' ? 'Newest first' : 'Oldest first'}</span>

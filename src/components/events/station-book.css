@@ -51,9 +51,9 @@
 .station-book__eyebrow { align-self:flex-start; padding:6px 9px; background:#d7e9b2; border:1px solid var(--book-ink); font:10px var(--mono); text-transform:uppercase; transform:rotate(-2deg); }
 .station-book__title { margin:27px 0 20px; font:400 clamp(32px,4.6vw,66px)/.95 'Bebas Neue',Impact,sans-serif; text-transform:uppercase; letter-spacing:-.02em; overflow-wrap:anywhere; }
 .station-book__copy { padding:1px 6px 6px 1px; }
-.nx-book-dialog .station-book__copy p { margin:0; color:#35463a; font-size:13px; line-height:1.8; }
-.nx-book-dialog .station-book__copy .station-book__highlights { margin-top:22px; font-size:11px; }
-.station-book__details { display:grid; gap:10px; margin-top:24px; font-size:10px; line-height:1.6; }
+.nx-book-dialog .station-book__copy p { margin:0; color:#35463a; font-size:16px; line-height:1.8; }
+.nx-book-dialog .station-book__copy .station-book__highlights { margin-top:22px; font-size:14px; }
+.station-book__details { display:grid; gap:10px; margin-top:24px; font-size:13px; line-height:1.6; }
 .station-book__details>span { display:flex; gap:9px; align-items:flex-start; }
 .station-book__details svg { flex:none; margin-top:1px; }
 .station-book__byline { margin-top:auto; padding-top:22px; font:9px var(--mono); letter-spacing:.06em; text-transform:uppercase; }

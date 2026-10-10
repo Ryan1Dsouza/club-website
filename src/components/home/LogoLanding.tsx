@@ -17,10 +17,10 @@ export default function LogoLanding({ active = true }: { active?: boolean }) {
     let previous = -1;
     return observeScroll(section, ({ top, height, reduced }) => {
       const progress = reduced ? 0 : clampProgress(-top / Math.max(1, height));
-      if (progress === previous) return;
+      if (progress === previous || !host.current || !text) return;
       previous = progress;
-      host.current!.style.transform = `translateY(${progress * 12}%) scale(${1 - progress * .06})`;
-      host.current!.style.opacity = String(1 - progress * .88);
+      host.current.style.transform = `translateY(${progress * 12}%) scale(${1 - progress * .06})`;
+      host.current.style.opacity = String(1 - progress * .88);
       text.style.transform = `translateY(${-progress * 28}%)`;
       text.style.opacity = String(1 - progress);
     });

@@ -63,7 +63,7 @@ export function createTowerBlocks(scene: THREE.Scene, members: Member[], maxText
     ctx.fillStyle = palette.paper; ctx.fillRect(0, 0, 1024, 192);
     // Hairline brass frame, larger names, and a quiet role line.
     ctx.strokeStyle = '#c4b28a80'; ctx.lineWidth = 1.5; ctx.strokeRect(16, 32, 736, 128);
-    ctx.fillStyle = '#b9bd9d'; ctx.font = '14px monospace'; ctx.fillText('NUCLEUS / SJEC', 38, 56);
+    ctx.fillStyle = '#b9bd9d'; ctx.font = '14px monospace'; 
     ctx.textAlign = 'right'; ctx.font = '17px monospace'; ctx.fillText(number, 729, 57); ctx.textAlign = 'left';
     let size = 44; ctx.font = `500 ${size}px Arial`;
     while (size > 16 && ctx.measureText(member.name).width > 686) ctx.font = `500 ${size -= 1}px Arial`;

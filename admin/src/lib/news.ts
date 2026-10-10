@@ -40,3 +40,17 @@ export function describeError(e: unknown): string {
   if (typeof e === 'object' && e !== null && 'message' in e) return String((e as any).message)
   return String(e)
 }
+
+export async function uploadNewsPhoto(file: Blob, userId: string): Promise<string> {
+  const client = getSupabase()
+  const extension = file.type === 'image/webp' ? 'webp' : file.type === 'image/avif' ? 'avif' : 'png'
+  const path = `${userId}/${crypto.randomUUID()}.${extension}`
+  
+  const { error: uploadError } = await client.storage
+    .from('event-photos')
+    .upload(path, file, { contentType: file.type, cacheControl: '31536000', upsert: false })
+    
+  if (uploadError) throw new Error(`The photo could not be uploaded: ${uploadError.message}`)
+  
+  return client.storage.from('event-photos').getPublicUrl(path).data.publicUrl
+}

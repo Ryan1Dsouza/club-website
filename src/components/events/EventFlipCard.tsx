@@ -22,11 +22,11 @@ export default function EventFlipCard({ event, photo, workshopFolder, number = '
     <button type="button" className="event-card" data-sound="none" data-workshop={workshopFolder} onPointerEnter={prepare} onFocus={prepare} onTouchStart={prepare} onClick={onClick} aria-label={`Open ${event.title} event book`}>
       <span className="event-card__image-container">
         {cover ? <img className="event-card__photo" {...eventImageAttributes(cover, 'card')} src={cover.url} alt="" loading={Number(number) === 1 ? 'eager' : 'lazy'} fetchPriority={Number(number) === 1 ? 'high' : 'auto'} decoding="async" onError={event => { restoreOriginalImage(event.currentTarget); }} /> : <EventArtwork variant={Number(number) % 3} />}
-        <span className="event-card__issue">FIELD NOTES / {number}</span>
+
         <span className="event-card__view">Open the story <ArrowUpRight size={15} /></span>
       </span>
       <span className="event-card__text-content">
-        <span className="event-card__category">{event.category || 'Workshop'}<span>{String(event.photos?.length ?? 0).padStart(2, '0')} photographs</span></span>
+
         <span className="event-card__title">{event.title}<ArrowUpRight size={23} /></span>
         <span className="event-card__footer">
           <span className="event-card__meta">{hasDate ? eventDate(event.startsAt) : 'From the Nucleus archive'}</span>

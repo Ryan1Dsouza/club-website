@@ -64,9 +64,7 @@ export default function AchievementsPage({ members, settings }: Props) {
         {!visible.length && <div className="ach-empty"><h3>{profiles.length ? 'No matching achievements.' : 'No achievements yet.'}</h3>{profiles.length > 0 && <><p>Try another name or category.</p><button type="button" onClick={resetFilters}>Clear filters <ArrowUpRight size={16} /></button></>}</div>}
       </section>
 
-      <footer className="ach-footer">
-        <Link to="/team">Our team <ArrowUpRight size={15} /></Link>
-      </footer>
+
     </div>
 
     {selected && <Modal title={selected.member.name} onClose={() => setSelected(null)}>
@@ -81,8 +79,8 @@ export default function AchievementsPage({ members, settings }: Props) {
             />
           )}
           <div>
-            <p style={{ fontSize: '17px', color: 'var(--mint)', margin: 0, fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{selected.member.role}</p>
-            <p style={{ fontSize: '13px', color: 'var(--muted)', margin: '4px 0 0' }}>Nucleus SJEC</p>
+            <p style={{ fontSize: '20px', color: 'var(--mint)', margin: 0, fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{selected.member.role}</p>
+            <p style={{ fontSize: '15px', color: 'var(--muted)', margin: '4px 0 0' }}>Nucleus SJEC</p>
           </div>
         </div>
       
@@ -91,7 +89,14 @@ export default function AchievementsPage({ members, settings }: Props) {
           <div className="ach-detail__meta"><span>{record.category}</span><span>{record.year}</span></div>
           <h3>{record.title}</h3><span className="ach-detail__result">{record.result}</span>{record.description && <p>{record.description}</p>}
           {record.href && /^https:\/\//.test(record.href) && <a className="ach-detail__link" href={record.href} target="_blank" rel="noreferrer">View the result <ArrowUpRight size={17} /></a>}
-        </section>)}</div>
+                    {record.photos && record.photos.length > 0 && (
+              <div className="ach-detail__photos" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '16px', marginBottom: '16px' }}>
+                {record.photos.map(photoUrl => (
+                  <img key={photoUrl} src={photoUrl} alt="Achievement highlight" style={{ width: '100%', maxWidth: '300px', borderRadius: '8px', border: '1px solid var(--line-strong)', objectFit: 'cover' }} />
+                ))}
+              </div>
+            )}
+          </section>)}</div>
       </div>
     </Modal>}
   </div>;

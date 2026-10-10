@@ -27,7 +27,7 @@ function MemberCard({ person, index, onSelect }: { person: TeamProfile; index: n
         {/* Main portraits bypass the resize service; only download timing changes. */}
         {person.cardImage && <img src={person.cardImage} alt="" loading={index === 0 ? 'eager' : 'lazy'} decoding="async" fetchPriority={index === 0 ? 'high' : 'auto'} style={person.previewImage ? { backgroundImage: `url("${person.previewImage}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
           width="400" height="500" onError={event => { event.currentTarget.style.visibility = 'hidden'; }} />}
-        <span className="people-card__number" aria-hidden="true">{String(index + 1).padStart(2, '0')} / NUCLEUS</span>
+
         <span className="people-card__open" aria-hidden="true"><ArrowUpRight size={20} /></span>
       </span>
       <span className="people-card__copy"><span className="people-card__role">{person.role}</span><span className="people-card__name">{person.name}</span></span>
@@ -90,7 +90,7 @@ export default function PeoplePage({ members }: { members: Member[] }) {
       <section ref={roster} id="people-roster" className="people-directory__roster" aria-labelledby="people-roster-title" tabIndex={-1}>
         <div className="people-directory__heading">
           <h2 id="people-roster-title">{group === 'member' ? 'The minds behind it.' : 'Always part of the nucleus.'}</h2>
-          <p aria-live="polite">{String(visibleProfiles.length).padStart(2, '0')} {group === 'member' ? 'members' : 'alumni'}<span>Choose a card. Get to know us.</span></p>
+
         </div>
         {visibleProfiles.length ? <ul className="people-grid" aria-label={group === 'member' ? 'Members' : 'Alumni'}>
           {visibleProfiles.map((person, index) => <MemberCard key={`${group}-${person.id}`} person={person} index={index} onSelect={setSelected} />)}
