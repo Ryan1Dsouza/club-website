@@ -11,8 +11,7 @@ function playControl(element: HTMLElement) {
   const cue = element.closest<HTMLElement>('[data-sound]')?.dataset.sound;
   if (cue === 'none') return;
   if (cue && cue !== 'dispose' && Object.hasOwn(sfx, cue) && typeof sfx[cue as keyof typeof sfx] === 'function') { playSound(cue as SoundCue); return; }
-  if (element.matches('a[href]')) sfx.swoosh();
-  else if (element.matches('summary, [aria-expanded], [aria-pressed], [role="switch"], [role="tab"]')) sfx.toggle();
+  if (element.matches('summary, [aria-expanded], [aria-pressed], [role="switch"], [role="tab"]')) sfx.toggle();
   else if (!element.matches('select, input[type="checkbox"], input[type="radio"]')) sfx.click();
 }
 
