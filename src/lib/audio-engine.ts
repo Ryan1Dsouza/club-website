@@ -82,7 +82,7 @@ export function withAudio(play: (value: AudioGraph) => void) {
   if (ready.context.state === 'running') { play(ready); return; }
   const requested = performance.now();
   void (resuming ?? unlockAudio()).then(() => {
-    if (graph === ready && ready.context.state === 'running' && audioAllowed() && performance.now() - requested < 120) play(ready);
+    if (graph === ready && ready.context.state === 'running' && audioAllowed() && performance.now() - requested < 400) play(ready);
   });
 }
 
