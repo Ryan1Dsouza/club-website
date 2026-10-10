@@ -21,7 +21,7 @@ function MemberCard({ person, index, onSelect }: { person: TeamProfile; index: n
   const card = useRef<HTMLLIElement>(null);
   useReveal(card, { delay: (index % 3) * 60, enabled: index > 5 });
   return <li ref={card} className="people-card">
-    <button type="button" data-sound="none" onClick={() => onSelect(person)} aria-label={`Meet ${person.name}, ${person.role}`}>
+    <button type="button" onClick={() => onSelect(person)} aria-label={`Meet ${person.name}, ${person.role}`}>
       <span className="people-card__portrait">
         <span className="people-card__initials" aria-hidden="true">{person.initials}</span>
         {/* Main portraits bypass the resize service; only download timing changes. */}

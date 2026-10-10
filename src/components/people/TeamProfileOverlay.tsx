@@ -16,7 +16,7 @@ export default function TeamProfileOverlay({ person, onClose }: { person: TeamPr
   const close = useCallback(() => {
     if (closing.current) return;
     closing.current = true;
-    sfx.bookClose();
+
     animation.current?.kill();
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) { onClose(); return; }
     animation.current = gsap.to(dialog.current, { opacity: 0, duration: .2, ease: 'power2.in', onComplete: onClose });
@@ -32,7 +32,7 @@ export default function TeamProfileOverlay({ person, onClose }: { person: TeamPr
     document.documentElement.style.overflow = 'hidden';
     closing.current = false;
     element.showModal();
-    if (!opened.current) { opened.current = true; sfx.bookOpen(); }
+    if (!opened.current) { opened.current = true; }
     element.querySelector<HTMLButtonElement>('button')?.focus({ preventScroll: true });
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
       animation.current = gsap.timeline()
